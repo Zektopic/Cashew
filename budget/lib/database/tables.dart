@@ -7401,11 +7401,11 @@ class FinanceDatabase extends _$FinanceDatabase {
     List<Transaction> wanderingTransactions = await (select(transactions)
           ..where((t) => t.categoryFk.isNotIn(categoryPks)))
         .get();
-    for (Transaction transaction in wanderingTransactions) {
-      await deleteTransaction(transaction.transactionPk,
-          updateSharedEntry: true);
-    }
     if (wanderingTransactions.isNotEmpty) {
+      await deleteTransactions(
+        wanderingTransactions.map((t) => t.transactionPk).toList(),
+        updateSharedEntry: true,
+      );
       print(
           "Deleted wandering transactions (transactions without an existing category)");
     }
