@@ -2764,44 +2764,6 @@ class _SelectTitleState extends State<SelectTitle> {
   }
 }
 
-// class SelectTag extends StatefulWidget {
-//   SelectTag({Key? key, this.setSelectedCategory}) : super(key: key);
-//   final Function(TransactionCategoryOld)? setSelectedCategory;
-
-//   @override
-//   _SelectTagState createState() => _SelectTagState();
-// }
-
-// class _SelectTagState extends State<SelectTag> {
-//   int selectedIndex = 0;
-//   @override
-//   Widget build(BuildContext context) {
-//     return Padding(
-//       padding: const EdgeInsetsDirectional.only(bottom: 8.0),
-//       child: Center(
-//         child: Wrap(
-//           alignment: WrapAlignment.center,
-//           spacing: 10,
-//           children: listTag()
-//               .asMap()
-//               .map(
-//                 (index, tag) => MapEntry(
-//                   index,
-//                   TagIcon(
-//                     tag: tag,
-//                     size: 17,
-//                     onTap: () {},
-//                   ),
-//                 ),
-//               )
-//               .values
-//               .toList(),
-//         ),
-//       ),
-//     );
-//   }
-// }
-
 class SelectText extends StatefulWidget {
   SelectText({
     Key? key,
