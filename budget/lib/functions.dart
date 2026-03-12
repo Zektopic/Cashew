@@ -184,6 +184,11 @@ String convertToMoney(AllWallets allWallets, double amount,
     bool forceAbsoluteZero = true,
     NumberFormat Function(int? decimalDigits, String? locale, String? symbol)?
         getCustomNumberFormat}) {
+
+  if (appStateSettings["obscureAmounts"] == true) {
+    return "•••";
+  }
+
   int numberDecimals = decimals ??
       allWallets.indexedByPk[appStateSettings["selectedWalletPk"]]?.decimals ??
       2;

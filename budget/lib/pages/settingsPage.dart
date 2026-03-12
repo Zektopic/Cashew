@@ -831,6 +831,18 @@ class _BiometricsSettingToggleState extends State<BiometricsSettingToggle> {
   Widget build(BuildContext context) {
     return Column(
       children: [
+        SettingsContainerSwitch(
+          title: "Hide Balances",
+          description: "Obscure financial amounts across the app",
+          onSwitched: (value) async {
+            await updateSettings("obscureAmounts", value,
+                pagesNeedingRefresh: [0, 1, 2], updateGlobalState: true);
+          },
+          initialValue: appStateSettings["obscureAmounts"],
+          icon: appStateSettings["outlinedIcons"]
+              ? Icons.visibility_off_outlined
+              : Icons.visibility_off_rounded,
+        ),
         authAvailable || isLocked
             ? SettingsContainerSwitch(
                 title: "biometric-lock".tr(),
