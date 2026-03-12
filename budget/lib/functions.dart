@@ -1178,9 +1178,14 @@ String cleanupNoteStringWithURLs(String text) {
 }
 
 Future<bool> openUrl(String link) async {
-  if (await canLaunchUrl(Uri.parse(link)))
+  Uri? uri = Uri.tryParse(link);
+  if (uri == null) return false;
+  if (uri.scheme == 'http') {
+    uri = uri.replace(scheme: 'https');
+  }
+  if (await canLaunchUrl(uri))
     return await launchUrl(
-      Uri.parse(link),
+      uri,
       mode: LaunchMode.externalApplication,
     );
   return false;
