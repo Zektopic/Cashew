@@ -14,7 +14,10 @@ jobs:
           channel: 'stable'
       - run: cd budget && flutter pub get && flutter build web
       - uses: FirebaseExtended/action-hosting-deploy@v0
+        env:
+          FIREBASE_CLI_EXPERIMENTS: webframeworks
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_BUDGET_APP_FLUTTER }}'
           projectId: budget-app-flutter
+          target: budget-app-flutter
