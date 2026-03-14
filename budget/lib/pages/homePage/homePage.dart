@@ -26,6 +26,8 @@ import 'package:budget/widgets/openBottomSheet.dart';
 import 'package:budget/widgets/ratingPopup.dart';
 import 'package:budget/widgets/selectedTransactionsAppBar.dart';
 import 'package:budget/widgets/util/keepAliveClientMixin.dart';
+import 'package:budget/widgets/globalSnackbar.dart';
+import 'package:budget/widgets/openSnackbar.dart';
 import 'package:budget/widgets/textWidgets.dart';
 import 'package:budget/widgets/transactionEntry/swipeToSelectTransactions.dart';
 import 'package:budget/widgets/viewAllTransactionsButton.dart';
@@ -360,6 +362,13 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                           pagesNeedingRefresh: [0, 1, 2],
                                           updateGlobalState: true,
                                         );
+                                        openSnackbar(SnackbarMessage(
+                                            title: (appStateSettings["obscureAmounts"] ?? false)
+                                                ? "Amounts hidden"
+                                                : "Amounts shown",
+                                            icon: (appStateSettings["obscureAmounts"] ?? false)
+                                                ? Icons.visibility_off
+                                                : Icons.visibility));
                                       },
                                       icon: Icon(
                                         appStateSettings["obscureAmounts"] ==
