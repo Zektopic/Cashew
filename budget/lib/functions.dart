@@ -186,7 +186,8 @@ String convertToMoney(AllWallets allWallets, double amount,
         getCustomNumberFormat}) {
 
   if (appStateSettings["obscureAmounts"] == true) {
-    return "•••";
+    String char = appStateSettings["obscureAmountsCharacter"] ?? "•";
+    return char * 3;
   }
 
   int numberDecimals = decimals ??

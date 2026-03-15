@@ -843,6 +843,19 @@ class _BiometricsSettingToggleState extends State<BiometricsSettingToggle> {
               ? Icons.visibility_off_outlined
               : Icons.visibility_off_rounded,
         ),
+        SettingsContainerDropdown(
+          title: "Hide Balances Character",
+          icon: appStateSettings["outlinedIcons"]
+              ? Icons.password_outlined
+              : Icons.password_rounded,
+          initial: appStateSettings["obscureAmountsCharacter"]?.toString() ?? "•",
+          items: ["•", "*", "-", "~", "x"],
+          onChanged: (value) async {
+            await updateSettings("obscureAmountsCharacter", value,
+                pagesNeedingRefresh: [0, 1, 2], updateGlobalState: true);
+          },
+          getLabel: (item) => item,
+        ),
         authAvailable || isLocked
             ? SettingsContainerSwitch(
                 title: "biometric-lock".tr(),
