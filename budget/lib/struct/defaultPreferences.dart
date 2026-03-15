@@ -155,6 +155,7 @@ Future<Map<String, dynamic>> getDefaultPreferences() async {
     "materialYou": supportsSystemColor(),
     "colorTintCategoryIcon": false,
     "obscureAmounts": false,
+    "obscureAmountsCharacter": "•",
     "sendTransactionsToServerQueue": {},
     "currentUserEmail": "",
     "usersNicknames": {},

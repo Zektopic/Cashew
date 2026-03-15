@@ -7,7 +7,8 @@
 - 2024-03-24: Implementing initial base: added `obscureAmounts` setting and tied it to the `convertToMoney` core formatting function so that global balances and amounts display as "•••". Added a basic toggle in the settings.
 - 2024-05-14: Iterative Enhancement - Added an eye-icon quick-toggle button on the main dashboard. This allows users to quickly obscure balances in public spaces without opening settings, reducing the window of exposure.
 - 2024-05-15: Iterative Enhancement - Added a toast notification (Snackbar) when the privacy mode is toggled from the dashboard to improve user feedback.
-**Next Planned Step:** Refine the obscure text symbol depending on user locale, or allow users to customize the character used for obscure amounts.
+- 2024-05-24: Iterative Enhancement - Allowed users to customize the character used for obscure amounts via a dropdown in the settings menu, creating a personalized experience.
+**Next Planned Step:** Add an option to apply obfuscation partially (e.g., show only the first/last digit or scale with amount magnitude) or add a long-press temporary reveal function directly on obscured amounts in the UI.
 
 ## 🚨 Critical Security Learnings
 *Only add entries here for unique, repo-specific security gaps, unexpected side effects, or reusable patterns.*
