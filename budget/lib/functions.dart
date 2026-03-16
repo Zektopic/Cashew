@@ -187,7 +187,21 @@ String convertToMoney(AllWallets allWallets, double amount,
 
   if (appStateSettings["obscureAmounts"] == true) {
     String char = appStateSettings["obscureAmountsCharacter"] ?? "•";
-    return char * 3;
+    if (char.isNotEmpty) {
+      char = char.substring(0, 1);
+    } else {
+      char = "•";
+    }
+
+    int displayLength = 3;
+    if (amount != double.infinity &&
+        amount != double.negativeInfinity &&
+        !amount.isNaN) {
+      int magnitudeLength = amount.abs().toStringAsFixed(0).length;
+      displayLength = magnitudeLength.clamp(3, 8).toInt();
+    }
+
+    return char * displayLength;
   }
 
   int numberDecimals = decimals ??

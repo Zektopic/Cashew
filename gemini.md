@@ -8,7 +8,8 @@
 - 2024-05-14: Iterative Enhancement - Added an eye-icon quick-toggle button on the main dashboard. This allows users to quickly obscure balances in public spaces without opening settings, reducing the window of exposure.
 - 2024-05-15: Iterative Enhancement - Added a toast notification (Snackbar) when the privacy mode is toggled from the dashboard to improve user feedback.
 - 2024-05-24: Iterative Enhancement - Allowed users to customize the character used for obscure amounts via a dropdown in the settings menu, creating a personalized experience.
-**Next Planned Step:** Add an option to apply obfuscation partially (e.g., show only the first/last digit or scale with amount magnitude) or add a long-press temporary reveal function directly on obscured amounts in the UI.
+- 2024-05-25: Iterative Enhancement - Updated `convertToMoney` to scale the length of the obfuscated string based on the magnitude of the actual amount (clamped between 3 and 8 characters). This provides better context of the transaction size without revealing the exact balance.
+**Next Planned Step:** Add a long-press temporary reveal function directly on obscured amounts in the UI to allow quick peek access.
 
 ## 🚨 Critical Security Learnings
 *Only add entries here for unique, repo-specific security gaps, unexpected side effects, or reusable patterns.*
