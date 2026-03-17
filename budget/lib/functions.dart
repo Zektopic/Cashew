@@ -184,9 +184,15 @@ String convertToMoney(AllWallets allWallets, double amount,
     bool forceAbsoluteZero = true,
     NumberFormat Function(int? decimalDigits, String? locale, String? symbol)?
         getCustomNumberFormat}) {
-
   if (appStateSettings["obscureAmounts"] == true) {
     String char = appStateSettings["obscureAmountsCharacter"] ?? "•";
+    if (appStateSettings["obscureAmountsMagnitude"] == true) {
+      double valueToScale = finalNumber != null ? finalNumber : amount;
+      int numDigits = valueToScale == 0
+          ? 1
+          : valueToScale.abs().truncate().toString().length;
+      return char * numDigits;
+    }
     return char * 3;
   }
 
