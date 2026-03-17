@@ -848,13 +848,26 @@ class _BiometricsSettingToggleState extends State<BiometricsSettingToggle> {
           icon: appStateSettings["outlinedIcons"]
               ? Icons.password_outlined
               : Icons.password_rounded,
-          initial: appStateSettings["obscureAmountsCharacter"]?.toString() ?? "•",
+          initial:
+              appStateSettings["obscureAmountsCharacter"]?.toString() ?? "•",
           items: ["•", "*", "-", "~", "x"],
           onChanged: (value) async {
             await updateSettings("obscureAmountsCharacter", value,
                 pagesNeedingRefresh: [0, 1, 2], updateGlobalState: true);
           },
           getLabel: (item) => item,
+        ),
+        SettingsContainerSwitch(
+          title: "Scale With Magnitude",
+          description: "Scale hidden character length to amount magnitude",
+          onSwitched: (value) async {
+            await updateSettings("obscureAmountsMagnitude", value,
+                pagesNeedingRefresh: [0, 1, 2], updateGlobalState: true);
+          },
+          initialValue: appStateSettings["obscureAmountsMagnitude"] ?? false,
+          icon: appStateSettings["outlinedIcons"]
+              ? Icons.linear_scale_outlined
+              : Icons.linear_scale_rounded,
         ),
         authAvailable || isLocked
             ? SettingsContainerSwitch(
