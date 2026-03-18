@@ -41,10 +41,7 @@ dependencies:
   googleapis: ^13.1.0
   universal_html: ^2.2.4
   flutter_charset_detector: ^2.0.0
-  file_picker:
-    git:
-      # This fork implements https://github.com/miguelpruivo/flutter_file_picker/issues/1404
-      url: https://github.com/melWiss/flutter_file_picker.git
+  file_picker: ^8.0.0
   auto_size_text: ^3.0.0
   shared_preferences: ^2.2.3
   csv: ^6.0.0
