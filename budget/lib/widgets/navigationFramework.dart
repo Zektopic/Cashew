@@ -1,4 +1,4 @@
-import 'package:animations/animations.dart';
+// Animations package used to be used here
 import 'package:budget/colors.dart';
 import 'package:budget/database/initializeDefaultDatabase.dart';
 import 'package:budget/database/tables.dart';
@@ -222,11 +222,13 @@ class HandleWillPopScope extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      child: child,
-      onWillPop: () async {
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (bool didPop, dynamic result) async {
+        if (didPop) return;
+
         bool popResult = await maybePopRoute(navigatorKey.currentContext);
-        if (popResult == true) return false;
+        if (popResult == true) return;
 
         // Deselect selected transactions
         int notEmpty = 0;
@@ -239,18 +241,20 @@ class HandleWillPopScope extends StatelessWidget {
         // Allow the back button to exit the app when on home
         if (notEmpty <= 0) {
           if (pageNavigationFrameworkKey.currentState?.currentPage == 0) {
-            return true;
+            Navigator.of(context).maybePop();
+            return;
           } else {
             // Allow back button deselect a selected category first on All Spending page
             if (pageNavigationFrameworkKey.currentState?.currentPage == 7 &&
                 categoryIsSelectedOnAllSpending) {
-              return true;
+              Navigator.of(context).maybePop();
+              return;
             }
             pageNavigationFrameworkKey.currentState?.changePage(0);
           }
         }
-        return false;
       },
+      child: child,
     );
   }
 }

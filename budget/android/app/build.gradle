@@ -31,7 +31,7 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     namespace "com.budget.tracker_app"
-    compileSdk 34
+    compileSdk 35
 
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
@@ -39,16 +39,16 @@ android {
 
     defaultConfig {
         applicationId "com.budget.tracker_app"
-        minSdk 23
-        targetSdk 34
+        minSdkVersion flutter.minSdkVersion
+        targetSdk 35
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
         multiDexEnabled true
     }
 
-    lintOptions {
+    lint {
         disable 'InvalidPackage'
-        disable "Instantiatable"
+        disable 'Instantiatable'
         checkReleaseBuilds false
         abortOnError false
     }
@@ -81,7 +81,7 @@ flutter {
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.9.10"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:2.1.0"
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.0.4'
     implementation platform('com.google.firebase:firebase-bom:31.1.1')
     implementation 'com.google.firebase:firebase-auth'
