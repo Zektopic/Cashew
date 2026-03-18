@@ -6,8 +6,26 @@ allprojects {
 }
 
 rootProject.buildDir = '../build'
+
 subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"
+
+    project.plugins.whenPluginAdded { plugin ->
+        if (plugin.class.name == "com.android.build.gradle.LibraryPlugin") {
+            project.android {
+                if (namespace == null || namespace == "") {
+                    def manifest = project.file("src/main/AndroidManifest.xml")
+                    if (manifest.exists()) {
+                        def parsed = new XmlParser().parse(manifest)
+                        if (parsed.@package) {
+                            namespace = parsed.@package
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     project.evaluationDependsOn(':app')
 }
 
