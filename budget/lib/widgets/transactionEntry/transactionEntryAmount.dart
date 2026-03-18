@@ -11,7 +11,7 @@ import 'package:provider/src/provider.dart';
 
 import 'incomeAmountArrow.dart';
 
-class TransactionEntryAmount extends StatelessWidget {
+class TransactionEntryAmount extends StatefulWidget {
   const TransactionEntryAmount({
     required this.transaction,
     required this.showOtherCurrency,
@@ -23,11 +23,40 @@ class TransactionEntryAmount extends StatelessWidget {
   final bool unsetCustomCurrency;
 
   @override
+  State<TransactionEntryAmount> createState() => _TransactionEntryAmountState();
+}
+
+class _TransactionEntryAmountState extends State<TransactionEntryAmount> {
+  bool _isRevealed = false;
+
+  @override
   Widget build(BuildContext context) {
-    double count = transaction.amount.abs() *
+    double count = widget.transaction.amount.abs() *
         (amountRatioToPrimaryCurrencyGivenPk(
-            Provider.of<AllWallets>(context), transaction.walletFk));
-    return Column(
+            Provider.of<AllWallets>(context), widget.transaction.walletFk));
+    return GestureDetector(
+      onLongPress: () {
+        setState(() {
+          _isRevealed = true;
+        });
+      },
+      onLongPressUp: () {
+        setState(() {
+          _isRevealed = false;
+        });
+      },
+      onLongPressCancel: () {
+        setState(() {
+          _isRevealed = false;
+        });
+      },
+      onLongPressEnd: (_) {
+        setState(() {
+          _isRevealed = false;
+        });
+      },
+      behavior: HitTestBehavior.opaque,
+      child: Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -42,16 +71,16 @@ class TransactionEntryAmount extends StatelessWidget {
                   children: [
                     AnimatedSizeSwitcher(
                       child:
-                          ((transaction.type == TransactionSpecialType.credit ||
-                                      transaction.type ==
+                          ((widget.transaction.type == TransactionSpecialType.credit ||
+                                      widget.transaction.type ==
                                           TransactionSpecialType.debt) &&
-                                  transaction.paid == false)
+                                  widget.transaction.paid == false)
                               ? SizedBox.shrink()
                               : IncomeOutcomeArrow(
-                                  isIncome: transaction.income,
+                                  isIncome: widget.transaction.income,
                                   color: getTransactionAmountColor(
                                     context,
-                                    transaction,
+                                    widget.transaction,
                                   ),
                                   width: 15,
                                   iconSize: 24,
@@ -62,11 +91,12 @@ class TransactionEntryAmount extends StatelessWidget {
                         Provider.of<AllWallets>(context),
                         number,
                         finalNumber: count,
+                        forceReveal: _isRevealed,
                       ),
-                      fontSize: 19 - (showOtherCurrency ? 1 : 0),
+                      fontSize: 19 - (widget.showOtherCurrency ? 1 : 0),
                       fontWeight: FontWeight.bold,
                       textColor:
-                          getTransactionAmountColor(context, transaction),
+                          getTransactionAmountColor(context, widget.transaction),
                     ),
                   ],
                 );
@@ -76,29 +106,31 @@ class TransactionEntryAmount extends StatelessWidget {
         ),
         // Original amount:
         AnimatedSizeSwitcher(
-          child: showOtherCurrency
+          child: widget.showOtherCurrency
               ? TextFont(
                   key: ValueKey(1),
                   text: convertToMoney(
                     Provider.of<AllWallets>(context),
-                    transaction.amount.abs(),
+                    widget.transaction.amount.abs(),
                     decimals: Provider.of<AllWallets>(context)
-                            .indexedByPk[transaction.walletFk]
+                            .indexedByPk[widget.transaction.walletFk]
                             ?.decimals ??
                         2,
                     currencyKey: Provider.of<AllWallets>(context)
-                        .indexedByPk[transaction.walletFk]
+                        .indexedByPk[widget.transaction.walletFk]
                         ?.currency,
                     addCurrencyName: true,
+                    forceReveal: _isRevealed,
                   ),
                   fontSize: 12,
-                  textColor: getTransactionAmountColor(context, transaction),
+                  textColor: getTransactionAmountColor(context, widget.transaction),
                 )
               : Container(
                   key: ValueKey(0),
                 ),
         ),
       ],
+    ),
     );
   }
 }
