@@ -9,7 +9,8 @@
 - 2024-05-15: Iterative Enhancement - Added a toast notification (Snackbar) when the privacy mode is toggled from the dashboard to improve user feedback.
 - 2024-05-24: Iterative Enhancement - Allowed users to customize the character used for obscure amounts via a dropdown in the settings menu, creating a personalized experience.
 - 2025-03-17: Iterative Enhancement - Added an option to scale the length of the obfuscated character sequence with the magnitude (number of integer digits) of the amount.
-**Next Planned Step:** Add a long-press temporary reveal function directly on obscured amounts in the UI.
+- 2025-03-24: Iterative Enhancement - Added a long-press temporary reveal function directly to individual transaction amounts in the main UI list (`TransactionEntryAmount`), bypassing obfuscation by passing a local state flag `forceReveal` down to `convertToMoney`.
+**Next Planned Step:** Add the same long-press temporary reveal function directly to other major amount displays (like top App Bar totals, Budget amounts, and Wallet entries) and consider refactoring `CountNumber` to handle this state natively to avoid repeating local UI logic.
 
 ## 🚨 Critical Security Learnings
 *Only add entries here for unique, repo-specific security gaps, unexpected side effects, or reusable patterns.*
