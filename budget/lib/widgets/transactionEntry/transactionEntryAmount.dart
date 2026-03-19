@@ -11,7 +11,7 @@ import 'package:provider/src/provider.dart';
 
 import 'incomeAmountArrow.dart';
 
-class TransactionEntryAmount extends StatelessWidget {
+class TransactionEntryAmount extends StatefulWidget {
   const TransactionEntryAmount({
     required this.transaction,
     required this.showOtherCurrency,
@@ -23,82 +23,97 @@ class TransactionEntryAmount extends StatelessWidget {
   final bool unsetCustomCurrency;
 
   @override
+  State<TransactionEntryAmount> createState() => _TransactionEntryAmountState();
+}
+
+class _TransactionEntryAmountState extends State<TransactionEntryAmount> {
+  bool _isRevealed = false;
+
+  @override
   Widget build(BuildContext context) {
-    double count = transaction.amount.abs() *
+    double count = widget.transaction.amount.abs() *
         (amountRatioToPrimaryCurrencyGivenPk(
-            Provider.of<AllWallets>(context), transaction.walletFk));
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Row(
-          children: [
-            CountNumber(
-              count: count,
+            Provider.of<AllWallets>(context), widget.transaction.walletFk));
+    return GestureDetector(
+      onLongPressStart: (_) => setState(() => _isRevealed = true),
+      onLongPressEnd: (_) => setState(() => _isRevealed = false),
+      onLongPressCancel: () => setState(() => _isRevealed = false),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Row(
+            children: [
+              CountNumber(
+                count: count,
               duration: Duration(milliseconds: 1000),
               initialCount: count,
               textBuilder: (number) {
                 return Row(
                   children: [
                     AnimatedSizeSwitcher(
-                      child:
-                          ((transaction.type == TransactionSpecialType.credit ||
-                                      transaction.type ==
-                                          TransactionSpecialType.debt) &&
-                                  transaction.paid == false)
-                              ? SizedBox.shrink()
-                              : IncomeOutcomeArrow(
-                                  isIncome: transaction.income,
-                                  color: getTransactionAmountColor(
-                                    context,
-                                    transaction,
-                                  ),
-                                  width: 15,
-                                  iconSize: 24,
+                        child: ((widget.transaction.type ==
+                                        TransactionSpecialType.credit ||
+                                    widget.transaction.type ==
+                                        TransactionSpecialType.debt) &&
+                                widget.transaction.paid == false)
+                            ? SizedBox.shrink()
+                            : IncomeOutcomeArrow(
+                                isIncome: widget.transaction.income,
+                                color: getTransactionAmountColor(
+                                  context,
+                                  widget.transaction,
                                 ),
-                    ),
-                    TextFont(
-                      text: convertToMoney(
-                        Provider.of<AllWallets>(context),
-                        number,
-                        finalNumber: count,
+                                width: 15,
+                                iconSize: 24,
+                              ),
                       ),
-                      fontSize: 19 - (showOtherCurrency ? 1 : 0),
-                      fontWeight: FontWeight.bold,
-                      textColor:
-                          getTransactionAmountColor(context, transaction),
-                    ),
+                      TextFont(
+                        text: convertToMoney(
+                          Provider.of<AllWallets>(context),
+                          number,
+                          finalNumber: count,
+                          forceReveal: _isRevealed,
+                        ),
+                        fontSize: 19 - (widget.showOtherCurrency ? 1 : 0),
+                        fontWeight: FontWeight.bold,
+                        textColor: getTransactionAmountColor(
+                            context, widget.transaction),
+                      ),
                   ],
                 );
               },
             ),
           ],
         ),
-        // Original amount:
-        AnimatedSizeSwitcher(
-          child: showOtherCurrency
-              ? TextFont(
-                  key: ValueKey(1),
-                  text: convertToMoney(
-                    Provider.of<AllWallets>(context),
-                    transaction.amount.abs(),
-                    decimals: Provider.of<AllWallets>(context)
-                            .indexedByPk[transaction.walletFk]
-                            ?.decimals ??
-                        2,
-                    currencyKey: Provider.of<AllWallets>(context)
-                        .indexedByPk[transaction.walletFk]
-                        ?.currency,
-                    addCurrencyName: true,
+          // Original amount:
+          AnimatedSizeSwitcher(
+            child: widget.showOtherCurrency
+                ? TextFont(
+                    key: ValueKey(1),
+                    text: convertToMoney(
+                      Provider.of<AllWallets>(context),
+                      widget.transaction.amount.abs(),
+                      decimals: Provider.of<AllWallets>(context)
+                              .indexedByPk[widget.transaction.walletFk]
+                              ?.decimals ??
+                          2,
+                      currencyKey: Provider.of<AllWallets>(context)
+                          .indexedByPk[widget.transaction.walletFk]
+                          ?.currency,
+                      addCurrencyName: true,
+                      forceReveal: _isRevealed,
+                    ),
+                    fontSize: 12,
+                    textColor: getTransactionAmountColor(
+                        context, widget.transaction),
+                  )
+                : Container(
+                    key: ValueKey(0),
                   ),
-                  fontSize: 12,
-                  textColor: getTransactionAmountColor(context, transaction),
-                )
-              : Container(
-                  key: ValueKey(0),
-                ),
-        ),
-      ],
+          ),
+        ],
+      ),
     );
   }
 }

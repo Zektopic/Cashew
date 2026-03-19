@@ -182,9 +182,10 @@ String convertToMoney(AllWallets allWallets, double amount,
     bool forceCompactNumberFormatter = false,
     bool forceDefaultNumberFormatter = false,
     bool forceAbsoluteZero = true,
+    bool forceReveal = false,
     NumberFormat Function(int? decimalDigits, String? locale, String? symbol)?
         getCustomNumberFormat}) {
-  if (appStateSettings["obscureAmounts"] == true) {
+  if (forceReveal == false && appStateSettings["obscureAmounts"] == true) {
     String char = appStateSettings["obscureAmountsCharacter"] ?? "•";
     if (appStateSettings["obscureAmountsMagnitude"] == true) {
       double valueToScale = finalNumber != null ? finalNumber : amount;
