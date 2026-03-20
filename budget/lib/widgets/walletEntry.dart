@@ -315,7 +315,7 @@ class WalletEntryRow extends StatelessWidget {
   }
 }
 
-class AmountAccount extends StatelessWidget {
+class AmountAccount extends StatefulWidget {
   const AmountAccount({
     required this.walletWithDetails,
     required this.textAlign,
@@ -328,65 +328,78 @@ class AmountAccount extends StatelessWidget {
   final double fontSize;
 
   @override
+  State<AmountAccount> createState() => _AmountAccountState();
+}
+
+class _AmountAccountState extends State<AmountAccount> {
+  bool _isRevealed = false;
+
+  @override
   Widget build(BuildContext context) {
     double? roundedWalletWithTotal = (double.tryParse(
-        absoluteZero(walletWithDetails.totalSpent ?? 0)
-            .toStringAsFixed(walletWithDetails.wallet.decimals)));
+        absoluteZero(widget.walletWithDetails.totalSpent ?? 0)
+            .toStringAsFixed(widget.walletWithDetails.wallet.decimals)));
     Color textColor =
         appStateSettings["accountColorfulAmountsWithArrows"] == true
             ? roundedWalletWithTotal == 0
                 ? getColor(context, "black")
-                : (walletWithDetails.totalSpent ?? 0) > 0
+                : (widget.walletWithDetails.totalSpent ?? 0) > 0
                     ? getColor(context, "incomeAmount")
                     : getColor(context, "expenseAmount")
             : getColor(context, "black");
     double finalTotal =
         appStateSettings["accountColorfulAmountsWithArrows"] == true
-            ? (walletWithDetails.totalSpent ?? 0).abs()
-            : (absoluteZero(walletWithDetails.totalSpent ?? 0));
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        if (appStateSettings["accountColorfulAmountsWithArrows"] == true)
-          AnimatedSizeSwitcher(
-            child: roundedWalletWithTotal == 0
-                ? Container(
-                    key: ValueKey(1),
-                  )
-                : IncomeOutcomeArrow(
-                    key: ValueKey(2),
-                    isIncome: (walletWithDetails.totalSpent ?? 0) > 0,
-                    iconSize: 24,
-                    width: 14,
-                    height: 10,
-                  ),
+            ? (widget.walletWithDetails.totalSpent ?? 0).abs()
+            : (absoluteZero(widget.walletWithDetails.totalSpent ?? 0));
+    return Listener(
+      onPointerDown: (_) => setState(() => _isRevealed = true),
+      onPointerUp: (_) => setState(() => _isRevealed = false),
+      onPointerCancel: (_) => setState(() => _isRevealed = false),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (appStateSettings["accountColorfulAmountsWithArrows"] == true)
+            AnimatedSizeSwitcher(
+              child: roundedWalletWithTotal == 0
+                  ? Container(
+                      key: ValueKey(1),
+                    )
+                  : IncomeOutcomeArrow(
+                      key: ValueKey(2),
+                      isIncome: (widget.walletWithDetails.totalSpent ?? 0) > 0,
+                      iconSize: 24,
+                      width: 14,
+                      height: 10,
+                    ),
+            ),
+          CountNumber(
+            lazyFirstRender: false,
+            count: finalTotal,
+            duration: Duration(milliseconds: 1000),
+            decimals: widget.walletWithDetails.wallet.decimals,
+            initialCount: 0,
+            textBuilder: (number) {
+              return TextFont(
+                textAlign: widget.textAlign,
+                text: convertToMoney(
+                  Provider.of<AllWallets>(context),
+                  number,
+                  finalNumber: finalTotal,
+                  currencyKey: widget.walletWithDetails.wallet.currency,
+                  decimals: widget.walletWithDetails.wallet.decimals,
+                  addCurrencyName:
+                      Provider.of<AllWallets>(context).allContainSameCurrency() ==
+                          false,
+                  forceReveal: _isRevealed,
+                ),
+                textColor: textColor,
+                fontSize: widget.fontSize,
+                fontWeight: FontWeight.bold,
+              );
+            },
           ),
-        CountNumber(
-          lazyFirstRender: false,
-          count: finalTotal,
-          duration: Duration(milliseconds: 1000),
-          decimals: walletWithDetails.wallet.decimals,
-          initialCount: 0,
-          textBuilder: (number) {
-            return TextFont(
-              textAlign: textAlign,
-              text: convertToMoney(
-                Provider.of<AllWallets>(context),
-                number,
-                finalNumber: finalTotal,
-                currencyKey: walletWithDetails.wallet.currency,
-                decimals: walletWithDetails.wallet.decimals,
-                addCurrencyName:
-                    Provider.of<AllWallets>(context).allContainSameCurrency() ==
-                        false,
-              ),
-              textColor: textColor,
-              fontSize: fontSize,
-              fontWeight: FontWeight.bold,
-            );
-          },
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
