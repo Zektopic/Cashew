@@ -78,7 +78,7 @@ class _CategoryLimitsState extends State<CategoryLimits> {
                     count: snapshot.data ?? 0,
                     duration: Duration(milliseconds: 700),
                     initialCount: 0,
-                    textBuilder: (number) {
+                    textBuilder: (number, {isRevealed = false}) {
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
@@ -401,7 +401,7 @@ class CategoryLimitEntry extends StatelessWidget {
                         count: snapshot.data ?? 0,
                         duration: Duration(milliseconds: 700),
                         initialCount: (0),
-                        textBuilder: (number) {
+                        textBuilder: (number, {isRevealed = false}) {
                           return TextFont(
                             fontSize: 15,
                             textColor: isOver

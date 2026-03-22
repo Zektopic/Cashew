@@ -2971,13 +2971,14 @@ class AmountSpentEntryRow extends StatelessWidget {
                             count: totalSpent,
                             duration: Duration(milliseconds: 1000),
                             initialCount: 0,
-                            textBuilder: (number) {
+                            textBuilder: (number, {isRevealed = false}) {
                               return TextFont(
                                 textAlign: TextAlign.end,
                                 text: convertToMoney(
                                   Provider.of<AllWallets>(context),
                                   number,
                                   finalNumber: totalSpent.abs(),
+                                  forceReveal: isRevealed ?? false,
                                 ),
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,

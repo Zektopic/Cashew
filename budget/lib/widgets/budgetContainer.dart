@@ -50,8 +50,6 @@ class BudgetContainer extends StatefulWidget {
 }
 
 class _BudgetContainerState extends State<BudgetContainer> {
-  bool _isRevealed = false;
-
   @override
   Widget build(BuildContext context) {
     double budgetAmount = budgetAmountToPrimaryCurrency(
@@ -133,7 +131,7 @@ class _BudgetContainerState extends State<BudgetContainer> {
                                               : budgetAmount - totalSpent,
                                           duration: Duration(milliseconds: 700),
                                           initialCount: (0),
-                                          textBuilder: (number) {
+                                          textBuilder: (number, {isRevealed = false}) {
                                             return TextFont(
                                               text: convertToMoney(
                                                 Provider.of<AllWallets>(
@@ -143,7 +141,7 @@ class _BudgetContainerState extends State<BudgetContainer> {
                                                         "showTotalSpentForBudget"]
                                                     ? totalSpent
                                                     : budgetAmount - totalSpent,
-                                                forceReveal: _isRevealed,
+                                                forceReveal: isRevealed ?? false,
                                               ),
                                               fontSize: 18,
                                               textAlign: TextAlign.start,
@@ -165,7 +163,6 @@ class _BudgetContainerState extends State<BudgetContainer> {
                                                       Provider.of<AllWallets>(
                                                           context),
                                                       budgetAmount,
-                                                      forceReveal: _isRevealed,
                                                   ),
                                               fontSize: 13,
                                               textAlign: TextAlign.start,
@@ -187,7 +184,7 @@ class _BudgetContainerState extends State<BudgetContainer> {
                                               : totalSpent - budgetAmount,
                                           duration: Duration(milliseconds: 700),
                                           initialCount: (0),
-                                          textBuilder: (number) {
+                                          textBuilder: (number, {isRevealed = false}) {
                                             return TextFont(
                                               text: convertToMoney(
                                                   Provider.of<AllWallets>(
@@ -198,7 +195,7 @@ class _BudgetContainerState extends State<BudgetContainer> {
                                                       ? totalSpent
                                                       : totalSpent -
                                                           budgetAmount,
-                                                  forceReveal: _isRevealed,
+                                                  forceReveal: isRevealed ?? false,
                                               ),
                                               fontSize: 18,
                                               textAlign: TextAlign.start,
@@ -219,7 +216,6 @@ class _BudgetContainerState extends State<BudgetContainer> {
                                                     Provider.of<AllWallets>(
                                                         context),
                                                     budgetAmount,
-                                                    forceReveal: _isRevealed,
                                                 ),
                                             fontSize: 13,
                                             textAlign: TextAlign.start,
@@ -384,38 +380,33 @@ class _BudgetContainerState extends State<BudgetContainer> {
       decoration: BoxDecoration(
         boxShadow: boxShadowCheck(boxShadowGeneral(context)),
       ),
-      child: Listener(
-        onPointerDown: (_) => setState(() => _isRevealed = true),
-        onPointerUp: (_) => setState(() => _isRevealed = false),
-        onPointerCancel: (_) => setState(() => _isRevealed = false),
-        child: OpenContainerNavigation(
-          borderRadius: 20,
-          closedColor: backgroundColor,
-          button: (openContainer) {
-            return Tappable(
-              onTap: () {
-                openContainer();
-              },
-              onLongPress: widget.longPressToEdit
-                  ? () {
-                      pushRoute(
-                        context,
-                        AddBudgetPage(
-                          budget: widget.budget,
-                          routesToPopAfterDelete: RoutesToPopAfterDelete.One,
-                        ),
-                      );
-                    }
-                  : null,
-              borderRadius: 20,
-              child: innerWidget,
-              color: backgroundColor,
-            );
-          },
-          openPage: BudgetPage(
-            budgetPk: widget.budget.budgetPk,
-            dateForRange: dateForRangeLocal,
-          ),
+      child: OpenContainerNavigation(
+        borderRadius: 20,
+        closedColor: backgroundColor,
+        button: (openContainer) {
+          return Tappable(
+            onTap: () {
+              openContainer();
+            },
+            onLongPress: widget.longPressToEdit
+                ? () {
+                    pushRoute(
+                      context,
+                      AddBudgetPage(
+                        budget: widget.budget,
+                        routesToPopAfterDelete: RoutesToPopAfterDelete.One,
+                      ),
+                    );
+                  }
+                : null,
+            borderRadius: 20,
+            child: innerWidget,
+            color: backgroundColor,
+          );
+        },
+        openPage: BudgetPage(
+          budgetPk: widget.budget.budgetPk,
+          dateForRange: dateForRangeLocal,
         ),
       ),
     );

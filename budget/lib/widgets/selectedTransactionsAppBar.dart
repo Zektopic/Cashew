@@ -184,7 +184,7 @@ class SelectedTransactionsAppBar extends StatelessWidget {
                                   count: snapshot.hasData ? snapshot.data! : 0,
                                   duration: Duration(milliseconds: 250),
                                   initialCount: (0),
-                                  textBuilder: (number) {
+                                  textBuilder: (number, {isRevealed = false}) {
                                     return Transform.translate(
                                       offset: Offset(10, 0)
                                           .withDirectionality(context),

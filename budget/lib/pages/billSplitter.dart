@@ -309,13 +309,14 @@ class _BillSplitterState extends State<BillSplitter> {
                     count: totalAccountedFor,
                     duration: Duration(milliseconds: 700),
                     initialCount: (0),
-                    textBuilder: (number) {
+                    textBuilder: (number, {isRevealed = false}) {
                       return TextFont(
                         textAlign: TextAlign.center,
                         text: convertToMoney(
                           Provider.of<AllWallets>(context),
                           number,
                           finalNumber: number.abs(),
+                          forceReveal: isRevealed ?? false,
                         ),
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
@@ -329,7 +330,7 @@ class _BillSplitterState extends State<BillSplitter> {
                       count: totalCost,
                       duration: Duration(milliseconds: 700),
                       initialCount: (0),
-                      textBuilder: (number) {
+                      textBuilder: (number, {isRevealed = false}) {
                         return TextFont(
                           textAlign: TextAlign.center,
                           text: " / " +
@@ -337,6 +338,7 @@ class _BillSplitterState extends State<BillSplitter> {
                                 Provider.of<AllWallets>(context),
                                 number,
                                 finalNumber: number.abs(),
+                                forceReveal: isRevealed ?? false,
                               ),
                           fontSize: 16,
                           textColor: getColor(context, "textLight"),
@@ -1091,7 +1093,7 @@ class _AddBillItemPageState extends State<AddBillItemPage> {
                 customTitleBuilder: (titleBuilder) {
                   return CountNumber(
                     count: percent,
-                    textBuilder: (amount) {
+                    textBuilder: (amount, {isRevealed = false}) {
                       return titleBuilder(convertToPercent(amount));
                     },
                     duration: Duration(milliseconds: 400),

@@ -356,7 +356,7 @@ class _ObjectivePageContentState extends State<_ObjectivePageContent> {
                                           duration:
                                               Duration(milliseconds: 1000),
                                           initialCount: (0),
-                                          textBuilder: (value) {
+                                          textBuilder: (value, {isRevealed = false}) {
                                             return TextFont(
                                               text: convertToPercent(
                                                 value,

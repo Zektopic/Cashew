@@ -1344,13 +1344,14 @@ class _TotalSpentState extends State<TotalSpent> {
                             : budgetAmount - widget.totalSpent,
                         duration: Duration(milliseconds: 400),
                         initialCount: (0),
-                        textBuilder: (number) {
+                        textBuilder: (number, {isRevealed = false}) {
                           return TextFont(
                             text: convertToMoney(
                                 Provider.of<AllWallets>(context), number,
                                 finalNumber: showTotalSpent
                                     ? widget.totalSpent
-                                    : budgetAmount - widget.totalSpent),
+                                    : budgetAmount - widget.totalSpent,
+                                forceReveal: isRevealed ?? false),
                             fontSize: 22,
                             textAlign: TextAlign.start,
                             fontWeight: FontWeight.bold,
@@ -1386,13 +1387,14 @@ class _TotalSpentState extends State<TotalSpent> {
                             : widget.totalSpent - budgetAmount,
                         duration: Duration(milliseconds: 400),
                         initialCount: (0),
-                        textBuilder: (number) {
+                        textBuilder: (number, {isRevealed = false}) {
                           return TextFont(
                             text: convertToMoney(
                                 Provider.of<AllWallets>(context), number,
                                 finalNumber: showTotalSpent
                                     ? widget.totalSpent
-                                    : widget.totalSpent - budgetAmount),
+                                    : widget.totalSpent - budgetAmount,
+                                forceReveal: isRevealed ?? false),
                             fontSize: 22,
                             textAlign: TextAlign.start,
                             fontWeight: FontWeight.bold,
