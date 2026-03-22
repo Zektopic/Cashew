@@ -11,7 +11,8 @@
 - 2025-03-17: Iterative Enhancement - Added an option to scale the length of the obfuscated character sequence with the magnitude (number of integer digits) of the amount.
 - 2025-03-24: Iterative Enhancement - Added a long-press temporary reveal function directly to individual transaction amounts in the main UI list (`TransactionEntryAmount`), bypassing obfuscation by passing a local state flag `forceReveal` down to `convertToMoney`.
 - 2025-03-25: Iterative Enhancement - Extended the long-press temporary reveal function to major amount displays (`WalletEntry`, `TransactionsAmountBox`, and `BudgetContainer`). Each component was refactored into a `StatefulWidget` to maintain a local boolean `_isRevealed` tied to gesture detectors, which gets passed as the `forceReveal` flag to `convertToMoney` for dynamic de-obfuscation.
-**Next Planned Step:** Consider refactoring `CountNumber` to handle this state natively to avoid repeating local UI logic, or expand this behavior to the top App Bar totals and nested analytics screens.
+- 2025-03-26: Iterative Enhancement - Analyzed expanding the long-press temporary reveal state into the core `CountNumber` widget. Determined that moving the gesture `Listener` down into `CountNumber` degrades UX by drastically shrinking the touch target to just the text bounding box, compared to the larger parent UI cards. Abandoned native `CountNumber` state management in favor of maintaining the gesture listeners on the outer parent widgets.
+**Next Planned Step:** Expand the temporary reveal behavior (via `forceReveal` and external gesture listeners) to the top App Bar totals and nested analytics screens, ensuring large touch targets are maintained.
 
 ## 🚨 Critical Security Learnings
 *Only add entries here for unique, repo-specific security gaps, unexpected side effects, or reusable patterns.*
