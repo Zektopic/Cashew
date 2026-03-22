@@ -332,6 +332,8 @@ class AmountAccount extends StatefulWidget {
 }
 
 class _AmountAccountState extends State<AmountAccount> {
+  bool _isRevealed = false;
+
   @override
   Widget build(BuildContext context) {
     double? roundedWalletWithTotal = (double.tryParse(
@@ -349,50 +351,55 @@ class _AmountAccountState extends State<AmountAccount> {
         appStateSettings["accountColorfulAmountsWithArrows"] == true
             ? (widget.walletWithDetails.totalSpent ?? 0).abs()
             : (absoluteZero(widget.walletWithDetails.totalSpent ?? 0));
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        if (appStateSettings["accountColorfulAmountsWithArrows"] == true)
-          AnimatedSizeSwitcher(
-            child: roundedWalletWithTotal == 0
-                ? Container(
-                    key: ValueKey(1),
-                  )
-                : IncomeOutcomeArrow(
-                    key: ValueKey(2),
-                    isIncome: (widget.walletWithDetails.totalSpent ?? 0) > 0,
-                    iconSize: 24,
-                    width: 14,
-                    height: 10,
-                  ),
+    return Listener(
+      onPointerDown: (_) => setState(() => _isRevealed = true),
+      onPointerUp: (_) => setState(() => _isRevealed = false),
+      onPointerCancel: (_) => setState(() => _isRevealed = false),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (appStateSettings["accountColorfulAmountsWithArrows"] == true)
+            AnimatedSizeSwitcher(
+              child: roundedWalletWithTotal == 0
+                  ? Container(
+                      key: ValueKey(1),
+                    )
+                  : IncomeOutcomeArrow(
+                      key: ValueKey(2),
+                      isIncome: (widget.walletWithDetails.totalSpent ?? 0) > 0,
+                      iconSize: 24,
+                      width: 14,
+                      height: 10,
+                    ),
+            ),
+          CountNumber(
+            lazyFirstRender: false,
+            count: finalTotal,
+            duration: Duration(milliseconds: 1000),
+            decimals: widget.walletWithDetails.wallet.decimals,
+            initialCount: 0,
+            textBuilder: (number) {
+              return TextFont(
+                textAlign: widget.textAlign,
+                text: convertToMoney(
+                  Provider.of<AllWallets>(context),
+                  number,
+                  finalNumber: finalTotal,
+                  currencyKey: widget.walletWithDetails.wallet.currency,
+                  decimals: widget.walletWithDetails.wallet.decimals,
+                  addCurrencyName:
+                      Provider.of<AllWallets>(context).allContainSameCurrency() ==
+                          false,
+                  forceReveal: _isRevealed,
+                ),
+                textColor: textColor,
+                fontSize: widget.fontSize,
+                fontWeight: FontWeight.bold,
+              );
+            },
           ),
-        CountNumber(
-          lazyFirstRender: false,
-          count: finalTotal,
-          duration: Duration(milliseconds: 1000),
-          decimals: widget.walletWithDetails.wallet.decimals,
-          initialCount: 0,
-          textBuilder: (number, {isRevealed = false}) {
-            return TextFont(
-              textAlign: widget.textAlign,
-              text: convertToMoney(
-                Provider.of<AllWallets>(context),
-                number,
-                finalNumber: finalTotal,
-                currencyKey: widget.walletWithDetails.wallet.currency,
-                decimals: widget.walletWithDetails.wallet.decimals,
-                addCurrencyName:
-                    Provider.of<AllWallets>(context).allContainSameCurrency() ==
-                        false,
-                forceReveal: isRevealed ?? false,
-              ),
-              textColor: textColor,
-              fontSize: widget.fontSize,
-              fontWeight: FontWeight.bold,
-            );
-          },
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

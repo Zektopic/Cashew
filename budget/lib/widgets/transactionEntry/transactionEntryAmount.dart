@@ -27,67 +27,67 @@ class TransactionEntryAmount extends StatefulWidget {
 }
 
 class _TransactionEntryAmountState extends State<TransactionEntryAmount> {
-  bool _isRevealedOtherCurrency = false;
+  bool _isRevealed = false;
 
   @override
   Widget build(BuildContext context) {
     double count = widget.transaction.amount.abs() *
         (amountRatioToPrimaryCurrencyGivenPk(
             Provider.of<AllWallets>(context), widget.transaction.walletFk));
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Row(
-          children: [
-            CountNumber(
-              count: count,
-            duration: Duration(milliseconds: 1000),
-            initialCount: count,
-            textBuilder: (number, {isRevealed = false}) {
-              return Row(
-                children: [
-                  AnimatedSizeSwitcher(
-                      child: ((widget.transaction.type ==
-                                      TransactionSpecialType.credit ||
-                                  widget.transaction.type ==
-                                      TransactionSpecialType.debt) &&
-                              widget.transaction.paid == false)
-                          ? SizedBox.shrink()
-                          : IncomeOutcomeArrow(
-                              isIncome: widget.transaction.income,
-                              color: getTransactionAmountColor(
-                                context,
-                                widget.transaction,
+    return GestureDetector(
+      onLongPressStart: (_) => setState(() => _isRevealed = true),
+      onLongPressEnd: (_) => setState(() => _isRevealed = false),
+      onLongPressCancel: () => setState(() => _isRevealed = false),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Row(
+            children: [
+              CountNumber(
+                count: count,
+              duration: Duration(milliseconds: 1000),
+              initialCount: count,
+              textBuilder: (number) {
+                return Row(
+                  children: [
+                    AnimatedSizeSwitcher(
+                        child: ((widget.transaction.type ==
+                                        TransactionSpecialType.credit ||
+                                    widget.transaction.type ==
+                                        TransactionSpecialType.debt) &&
+                                widget.transaction.paid == false)
+                            ? SizedBox.shrink()
+                            : IncomeOutcomeArrow(
+                                isIncome: widget.transaction.income,
+                                color: getTransactionAmountColor(
+                                  context,
+                                  widget.transaction,
+                                ),
+                                width: 15,
+                                iconSize: 24,
                               ),
-                              width: 15,
-                              iconSize: 24,
-                            ),
-                    ),
-                    TextFont(
-                      text: convertToMoney(
-                        Provider.of<AllWallets>(context),
-                        number,
-                        finalNumber: count,
-                        forceReveal: isRevealed ?? false,
                       ),
-                      fontSize: 19 - (widget.showOtherCurrency ? 1 : 0),
-                      fontWeight: FontWeight.bold,
-                      textColor: getTransactionAmountColor(
-                          context, widget.transaction),
-                    ),
-                ],
-              );
-            },
-          ),
-        ],
-      ),
-        // Original amount:
-        Listener(
-          onPointerDown: (_) => setState(() => _isRevealedOtherCurrency = true),
-          onPointerUp: (_) => setState(() => _isRevealedOtherCurrency = false),
-          onPointerCancel: (_) => setState(() => _isRevealedOtherCurrency = false),
-          child: AnimatedSizeSwitcher(
+                      TextFont(
+                        text: convertToMoney(
+                          Provider.of<AllWallets>(context),
+                          number,
+                          finalNumber: count,
+                          forceReveal: _isRevealed,
+                        ),
+                        fontSize: 19 - (widget.showOtherCurrency ? 1 : 0),
+                        fontWeight: FontWeight.bold,
+                        textColor: getTransactionAmountColor(
+                            context, widget.transaction),
+                      ),
+                  ],
+                );
+              },
+            ),
+          ],
+        ),
+          // Original amount:
+          AnimatedSizeSwitcher(
             child: widget.showOtherCurrency
                 ? TextFont(
                     key: ValueKey(1),
@@ -102,7 +102,7 @@ class _TransactionEntryAmountState extends State<TransactionEntryAmount> {
                           .indexedByPk[widget.transaction.walletFk]
                           ?.currency,
                       addCurrencyName: true,
-                      forceReveal: _isRevealedOtherCurrency,
+                      forceReveal: _isRevealed,
                     ),
                     fontSize: 12,
                     textColor: getTransactionAmountColor(
@@ -112,8 +112,8 @@ class _TransactionEntryAmountState extends State<TransactionEntryAmount> {
                     key: ValueKey(0),
                   ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

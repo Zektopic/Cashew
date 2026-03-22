@@ -1050,7 +1050,7 @@ class PastBudgetContainer extends StatelessWidget {
                                               : budgetAmount - totalSpent,
                                           duration: Duration(milliseconds: 700),
                                           initialCount: (0),
-                                          textBuilder: (number, {isRevealed = false}) {
+                                          textBuilder: (number) {
                                             return TextFont(
                                               text: convertToMoney(
                                                   Provider.of<AllWallets>(
@@ -1060,8 +1060,7 @@ class PastBudgetContainer extends StatelessWidget {
                                                           "showTotalSpentForBudget"]
                                                       ? totalSpent
                                                       : budgetAmount -
-                                                          totalSpent,
-                                                  forceReveal: isRevealed ?? false),
+                                                          totalSpent),
                                               fontSize: 16,
                                               textAlign: TextAlign.start,
                                               fontWeight: FontWeight.bold,
@@ -1101,7 +1100,7 @@ class PastBudgetContainer extends StatelessWidget {
                                           : totalSpent - budgetAmount,
                                       duration: Duration(milliseconds: 700),
                                       initialCount: (0),
-                                      textBuilder: (number, {isRevealed = false}) {
+                                      textBuilder: (number) {
                                         return TextFont(
                                           text: convertToMoney(
                                               Provider.of<AllWallets>(context),
@@ -1109,8 +1108,7 @@ class PastBudgetContainer extends StatelessWidget {
                                               finalNumber: appStateSettings[
                                                       "showTotalSpentForBudget"]
                                                   ? totalSpent
-                                                  : totalSpent - budgetAmount,
-                                              forceReveal: isRevealed ?? false),
+                                                  : totalSpent - budgetAmount),
                                           fontSize: 16,
                                           textAlign: TextAlign.start,
                                           fontWeight: FontWeight.bold,
@@ -1154,7 +1152,7 @@ class PastBudgetContainer extends StatelessWidget {
                               : (totalSpent / budgetAmount * 100),
                           duration: Duration(milliseconds: 1000),
                           initialCount: (0),
-                          textBuilder: (value, {isRevealed = false}) {
+                          textBuilder: (value) {
                             return TextFont(
                               autoSizeText: true,
                               text: convertToPercent(value,
@@ -1314,7 +1312,7 @@ class CategoryAverageSpent extends StatelessWidget {
                               initialCount: amountPeriods == 0
                                   ? 0
                                   : (amountSpent / amountPeriods).abs(),
-                              textBuilder: (number, {isRevealed = false}) {
+                              textBuilder: (number) {
                                 return TextFont(
                                   text: convertToMoney(
                                           Provider.of<AllWallets>(context),
@@ -1322,8 +1320,7 @@ class CategoryAverageSpent extends StatelessWidget {
                                           finalNumber: amountPeriods == 0
                                               ? 0
                                               : (amountSpent / amountPeriods)
-                                                  .abs(),
-                                          forceReveal: isRevealed ?? false) +
+                                                  .abs()) +
                                       " " +
                                       (isSavingsBudget
                                           ? "average-saved".tr().toLowerCase()
@@ -1356,13 +1353,12 @@ class CategoryAverageSpent extends StatelessWidget {
                 count: amountSpent.abs(),
                 duration: Duration(milliseconds: 400),
                 initialCount: amountSpent.abs(),
-                textBuilder: (number, {isRevealed = false}) {
+                textBuilder: (number) {
                   return TextFont(
                     fontWeight: FontWeight.bold,
                     text: convertToMoney(
                         Provider.of<AllWallets>(context), number,
-                        finalNumber: amountSpent.abs(),
-                        forceReveal: isRevealed ?? false),
+                        finalNumber: amountSpent.abs()),
                     fontSize: 20,
                     textColor: getColor(context, "black"),
                   );

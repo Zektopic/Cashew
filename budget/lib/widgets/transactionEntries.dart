@@ -1047,12 +1047,11 @@ class TransactionsEntriesSpendingSummary extends StatelessWidget {
                               count: expense.abs(),
                               duration: Duration(milliseconds: 450),
                               initialCount: (0),
-                              textBuilder: (number, {isRevealed = false}) {
+                              textBuilder: (number) {
                                 return TextFont(
                                   text: convertToMoney(
                                       Provider.of<AllWallets>(context), number,
-                                      finalNumber: expense.abs(),
-                                      forceReveal: isRevealed ?? false),
+                                      finalNumber: expense.abs()),
                                   fontSize: 15,
                                   textColor: getColor(context, "expenseAmount"),
                                   autoSizeText: true,
@@ -1081,12 +1080,11 @@ class TransactionsEntriesSpendingSummary extends StatelessWidget {
                               count: income.abs(),
                               duration: Duration(milliseconds: 450),
                               initialCount: (0),
-                              textBuilder: (number, {isRevealed = false}) {
+                              textBuilder: (number) {
                                 return TextFont(
                                   text: convertToMoney(
                                       Provider.of<AllWallets>(context), number,
-                                      finalNumber: income.abs(),
-                                      forceReveal: isRevealed ?? false),
+                                      finalNumber: income.abs()),
                                   fontSize: 15,
                                   textColor: getColor(context, "incomeAmount"),
                                   autoSizeText: true,
@@ -1109,15 +1107,14 @@ class TransactionsEntriesSpendingSummary extends StatelessWidget {
                               count: netSpending,
                               duration: Duration(milliseconds: 450),
                               initialCount: (0),
-                              textBuilder: (number, {isRevealed = false}) {
+                              textBuilder: (number) {
                                 return TextFont(
                                   text: "=" +
                                       " " +
                                       convertToMoney(
                                           Provider.of<AllWallets>(context),
                                           number,
-                                          finalNumber: netSpending.abs(),
-                                          forceReveal: isRevealed ?? false),
+                                          finalNumber: netSpending.abs()),
                                   fontSize: 15,
                                   textColor: getColor(context, "black"),
                                   autoSizeText: true,

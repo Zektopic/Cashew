@@ -101,7 +101,7 @@ class CountNumber extends StatefulWidget {
   }) : super(key: key);
 
   final double count;
-  final Widget Function(double amount, {bool? isRevealed}) textBuilder;
+  final Widget Function(double amount) textBuilder;
   final double fontSize;
   final Duration duration;
   final Curve curve;
@@ -116,21 +116,13 @@ class CountNumber extends StatefulWidget {
 class _CountNumberState extends State<CountNumber> {
   late double previousAmount = widget.initialCount;
   late bool lazyFirstRender = widget.lazyFirstRender;
-  bool _isRevealed = false;
 
   @override
   Widget build(BuildContext context) {
-    Widget wrapped(Widget child) => Listener(
-          onPointerDown: (_) => setState(() => _isRevealed = true),
-          onPointerUp: (_) => setState(() => _isRevealed = false),
-          onPointerCancel: (_) => setState(() => _isRevealed = false),
-          child: child,
-        );
-
     if (appStateSettings["numberCountUpAnimation"] == false ||
         appStateSettings["batterySaver"] == true) {
       previousAmount = widget.count;
-      return wrapped(widget.textBuilder(widget.count, isRevealed: _isRevealed));
+      return widget.textBuilder(widget.count);
     }
 
     int decimals = 0;
@@ -161,10 +153,9 @@ class _CountNumberState extends State<CountNumber> {
 
     if (lazyFirstRender && widget.initialCount == widget.count) {
       lazyFirstRender = false;
-      return wrapped(widget.textBuilder(
+      return widget.textBuilder(
         double.parse((widget.count).toStringAsFixed(decimals)),
-        isRevealed: _isRevealed,
-      ));
+      );
     }
 
     Widget builtWidget = TweenAnimationBuilder<int>(
@@ -181,12 +172,11 @@ class _CountNumberState extends State<CountNumber> {
       builder: (BuildContext context, int animatedCount, Widget? child) {
         return widget.textBuilder(
           animatedCount / pow(10, decimals).toDouble(),
-          isRevealed: _isRevealed,
         );
       },
     );
 
     previousAmount = widget.count;
-    return wrapped(builtWidget);
+    return builtWidget;
   }
 }

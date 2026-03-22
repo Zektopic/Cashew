@@ -145,7 +145,7 @@ class AmountWithColorAndArrow extends StatelessWidget {
                 count: finalNumber,
                 duration: countNumberDuration,
                 initialCount: (0),
-                textBuilder: (number, {isRevealed = false}) {
+                textBuilder: (number) {
                   return textBuilder(number);
                 },
               )
