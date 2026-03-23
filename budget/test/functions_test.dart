@@ -85,4 +85,53 @@ void main() {
       expect(daysBetween(from, to), 1);
     });
   });
+
+  group('isNumber', () {
+    test('returns true for int', () {
+      expect(isNumber(42), isTrue);
+      expect(isNumber(0), isTrue);
+      expect(isNumber(-10), isTrue);
+    });
+
+    test('returns true for double', () {
+      expect(isNumber(3.14), isTrue);
+      expect(isNumber(0.0), isTrue);
+      expect(isNumber(-2.5), isTrue);
+    });
+
+    test('returns true for numeric strings', () {
+      expect(isNumber('100'), isTrue);
+      expect(isNumber('10.5'), isTrue);
+      expect(isNumber('-5'), isTrue);
+      expect(isNumber('-2.5'), isTrue);
+      expect(isNumber('0'), isTrue);
+    });
+
+    test('returns true for scientific notation strings', () {
+      expect(isNumber('1e3'), isTrue);
+      expect(isNumber('2.5e-2'), isTrue);
+    });
+
+    test('returns false for null', () {
+      expect(isNumber(null), isFalse);
+    });
+
+    test('returns false for empty or whitespace strings', () {
+      expect(isNumber(''), isFalse);
+      expect(isNumber('   '), isFalse);
+    });
+
+    test('returns false for non-numeric strings', () {
+      expect(isNumber('abc'), isFalse);
+      expect(isNumber('12abc'), isFalse);
+      expect(isNumber('1.2.3'), isFalse);
+    });
+
+    test('returns false for other types', () {
+      expect(isNumber(true), isFalse);
+      expect(isNumber(false), isFalse);
+      expect(isNumber([]), isFalse);
+      expect(isNumber({}), isFalse);
+    });
+  });
 }
