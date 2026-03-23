@@ -1307,6 +1307,7 @@ class TotalSpent extends StatefulWidget {
 
 class _TotalSpentState extends State<TotalSpent> {
   bool showTotalSpent = appStateSettings["showTotalSpentForBudget"];
+  bool _isRevealed = false;
 
   _swapTotalSpentDisplay() {
     setState(() {
@@ -1332,91 +1333,100 @@ class _TotalSpentState extends State<TotalSpent> {
       child: AnimatedSwitcher(
         duration: Duration(milliseconds: 200),
         child: IntrinsicWidth(
-          child: budgetAmount - widget.totalSpent >= 0
-              ? Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Container(
-                      child: CountNumber(
-                        count: showTotalSpent
-                            ? widget.totalSpent
-                            : budgetAmount - widget.totalSpent,
-                        duration: Duration(milliseconds: 400),
-                        initialCount: (0),
-                        textBuilder: (number) {
-                          return TextFont(
-                            text: convertToMoney(
-                                Provider.of<AllWallets>(context), number,
-                                finalNumber: showTotalSpent
-                                    ? widget.totalSpent
-                                    : budgetAmount - widget.totalSpent),
-                            fontSize: 22,
-                            textAlign: TextAlign.start,
-                            fontWeight: FontWeight.bold,
-                            textColor: Theme.of(context)
-                                .colorScheme
-                                .onSecondaryContainer,
-                          );
-                        },
+          child: Listener(
+            onPointerDown: (_) => setState(() => _isRevealed = true),
+            onPointerUp: (_) => setState(() => _isRevealed = false),
+            onPointerCancel: (_) => setState(() => _isRevealed = false),
+            child: budgetAmount - widget.totalSpent >= 0
+                ? Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Container(
+                        child: CountNumber(
+                          count: showTotalSpent
+                              ? widget.totalSpent
+                              : budgetAmount - widget.totalSpent,
+                          duration: Duration(milliseconds: 400),
+                          initialCount: (0),
+                          textBuilder: (number) {
+                            return TextFont(
+                              text: convertToMoney(
+                                  Provider.of<AllWallets>(context), number,
+                                  finalNumber: showTotalSpent
+                                      ? widget.totalSpent
+                                      : budgetAmount - widget.totalSpent,
+                                  forceReveal: _isRevealed),
+                              fontSize: 22,
+                              textAlign: TextAlign.start,
+                              fontWeight: FontWeight.bold,
+                              textColor: Theme.of(context)
+                                  .colorScheme
+                                  .onSecondaryContainer,
+                            );
+                          },
+                        ),
                       ),
-                    ),
-                    Container(
-                      padding: const EdgeInsetsDirectional.only(bottom: 1.5),
-                      child: TextFont(
-                        text: getBudgetSpentText(widget.budget.income) +
-                            convertToMoney(
-                                Provider.of<AllWallets>(context), budgetAmount),
-                        fontSize: 15,
-                        textAlign: TextAlign.start,
-                        textColor:
-                            Theme.of(context).colorScheme.onSecondaryContainer,
+                      Container(
+                        padding: const EdgeInsetsDirectional.only(bottom: 1.5),
+                        child: TextFont(
+                          text: getBudgetSpentText(widget.budget.income) +
+                              convertToMoney(
+                                  Provider.of<AllWallets>(context), budgetAmount,
+                                  forceReveal: _isRevealed),
+                          fontSize: 15,
+                          textAlign: TextAlign.start,
+                          textColor:
+                              Theme.of(context).colorScheme.onSecondaryContainer,
+                        ),
                       ),
-                    ),
-                  ],
-                )
-              : Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Container(
-                      child: CountNumber(
-                        count: showTotalSpent
-                            ? widget.totalSpent
-                            : widget.totalSpent - budgetAmount,
-                        duration: Duration(milliseconds: 400),
-                        initialCount: (0),
-                        textBuilder: (number) {
-                          return TextFont(
-                            text: convertToMoney(
-                                Provider.of<AllWallets>(context), number,
-                                finalNumber: showTotalSpent
-                                    ? widget.totalSpent
-                                    : widget.totalSpent - budgetAmount),
-                            fontSize: 22,
-                            textAlign: TextAlign.start,
-                            fontWeight: FontWeight.bold,
-                            textColor: Theme.of(context)
-                                .colorScheme
-                                .onSecondaryContainer,
-                          );
-                        },
+                    ],
+                  )
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Container(
+                        child: CountNumber(
+                          count: showTotalSpent
+                              ? widget.totalSpent
+                              : widget.totalSpent - budgetAmount,
+                          duration: Duration(milliseconds: 400),
+                          initialCount: (0),
+                          textBuilder: (number) {
+                            return TextFont(
+                              text: convertToMoney(
+                                  Provider.of<AllWallets>(context), number,
+                                  finalNumber: showTotalSpent
+                                      ? widget.totalSpent
+                                      : widget.totalSpent - budgetAmount,
+                                  forceReveal: _isRevealed),
+                              fontSize: 22,
+                              textAlign: TextAlign.start,
+                              fontWeight: FontWeight.bold,
+                              textColor: Theme.of(context)
+                                  .colorScheme
+                                  .onSecondaryContainer,
+                            );
+                          },
+                        ),
                       ),
-                    ),
-                    Container(
-                      padding: const EdgeInsetsDirectional.only(bottom: 1.5),
-                      child: TextFont(
-                        text: getBudgetOverSpentText(widget.budget.income) +
-                            convertToMoney(
-                                Provider.of<AllWallets>(context), budgetAmount),
-                        fontSize: 15,
-                        textAlign: TextAlign.start,
-                        textColor:
-                            Theme.of(context).colorScheme.onSecondaryContainer,
+                      Container(
+                        padding: const EdgeInsetsDirectional.only(bottom: 1.5),
+                        child: TextFont(
+                          text: getBudgetOverSpentText(widget.budget.income) +
+                              convertToMoney(
+                                  Provider.of<AllWallets>(context), budgetAmount,
+                                  forceReveal: _isRevealed),
+                          fontSize: 15,
+                          textAlign: TextAlign.start,
+                          textColor:
+                              Theme.of(context).colorScheme.onSecondaryContainer,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
+                    ],
+                  ),
+          ),
         ),
       ),
     );
