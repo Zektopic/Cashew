@@ -5462,9 +5462,25 @@ class FinanceDatabase extends _$FinanceDatabase {
         await (select(categoryBudgetLimits)
               ..where((t) => t.walletFk.isNotIn(allWallets.indexedByPk.keys)))
             .get();
+
+    List<CategoryBudgetLimit> limitsInserting = [];
+    double maxAmount = 999999999999;
     for (CategoryBudgetLimit limit in wanderingLimits) {
-      await createOrUpdateCategoryLimit(
-          limit.copyWith(walletFk: appStateSettings["selectedWalletPk"]));
+      double amount = limit.amount;
+      if (amount >= maxAmount) {
+        amount = maxAmount;
+      } else if (amount <= -maxAmount) {
+        amount = -maxAmount;
+      }
+      limitsInserting.add(limit.copyWith(
+        amount: amount,
+        dateTimeModified: Value(DateTime.now()),
+        walletFk: appStateSettings["selectedWalletPk"],
+      ));
+    }
+
+    if (limitsInserting.isNotEmpty) {
+      await updateBatchCategoryLimitsOnly(limitsInserting);
     }
 
     //Remove limits not belonging to a category
