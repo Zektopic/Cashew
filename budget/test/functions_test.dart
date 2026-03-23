@@ -85,4 +85,34 @@ void main() {
       expect(daysBetween(from, to), 1);
     });
   });
+
+  group('absoluteZeroString', () {
+    test('removes minus from basic zeros', () {
+      expect(absoluteZeroString("-0"), "0");
+      expect(absoluteZeroString("-0.0"), "0.0");
+      expect(absoluteZeroString("-0.00"), "0.00");
+      expect(absoluteZeroString("-0.000"), "0.000");
+      expect(absoluteZeroString("-0.0000"), "0.0000");
+    });
+
+    test('leaves non-zero negative numbers untouched', () {
+      expect(absoluteZeroString("-1"), "-1");
+      expect(absoluteZeroString("-0.1"), "-0.1");
+      expect(absoluteZeroString("-0.0001"), "-0.0001");
+      expect(absoluteZeroString("-1.0"), "-1.0");
+    });
+
+    test('leaves positive numbers untouched', () {
+      expect(absoluteZeroString("0"), "0");
+      expect(absoluteZeroString("0.0"), "0.0");
+      expect(absoluteZeroString("1"), "1");
+      expect(absoluteZeroString("0.1"), "0.1");
+    });
+
+    test('handles empty or non-numeric strings safely', () {
+      expect(absoluteZeroString(""), "");
+      expect(absoluteZeroString("abc"), "abc");
+      expect(absoluteZeroString("-"), "-");
+    });
+  });
 }

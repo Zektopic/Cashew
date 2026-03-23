@@ -1426,7 +1426,13 @@ double removeNaNAndInfinity(double number) {
 }
 
 String absoluteZeroString(String number) {
-  if (number == "-0") return "0";
+  if (number == "-0" ||
+      number == "-0.0" ||
+      number == "-0.00" ||
+      number == "-0.000" ||
+      number == "-0.0000") {
+    return number.replaceAll("-", "");
+  }
   return number;
 }
 
