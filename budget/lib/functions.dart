@@ -1174,7 +1174,7 @@ String getDomainNameFromURL(String text) {
 }
 
 String cleanupNoteStringWithURLs(String text) {
-  RegExp regExp = RegExp(r'https?:\/\/(?:www\.)?\S+(?=\s)',
+  RegExp regExp = RegExp(r'https?:\/\/(?:www\.)?\S+',
       multiLine: true, caseSensitive: false);
 
   Iterable<Match> matches = regExp.allMatches(text);
