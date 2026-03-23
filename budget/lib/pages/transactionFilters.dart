@@ -1277,6 +1277,25 @@ class AppliedFilterChips extends StatelessWidget {
   Future<List<Widget>> getSearchFilterWidgets(BuildContext context) async {
     AllWallets allWallets = Provider.of<AllWallets>(context);
     List<Widget> out = [];
+
+    final results = await Future.wait([
+      database.getAllCategories(
+          categoryFks: searchFilters.categoryPks, allCategories: false),
+      database.getAllCategories(
+          categoryFks: searchFilters.subcategoryPks,
+          allCategories: false,
+          includeSubCategories: true),
+      database.getAllBudgets(),
+      database.getAllObjectives(objectiveType: ObjectiveType.goal),
+      database.getAllObjectives(objectiveType: ObjectiveType.loan),
+    ]);
+
+    final categories = results[0] as List<TransactionCategory>;
+    final subCategories = results[1] as List<TransactionCategory>;
+    final allBudgets = results[2] as List<Budget>;
+    final goals = results[3] as List<Objective>;
+    final loans = results[4] as List<Objective>;
+
     // Title contains
     if (searchFilters.titleContains != null) {
       out.add(AppliedFilterChip(
@@ -1293,8 +1312,7 @@ class AppliedFilterChips extends StatelessWidget {
       ));
     }
     // Categories
-    for (TransactionCategory category in await database.getAllCategories(
-        categoryFks: searchFilters.categoryPks, allCategories: false)) {
+    for (TransactionCategory category in categories) {
       out.add(AppliedFilterChip(
         label: category.name,
         customBorderColor: HexColor(
@@ -1304,10 +1322,7 @@ class AppliedFilterChips extends StatelessWidget {
         openFiltersSelection: openFiltersSelection,
       ));
     }
-    for (TransactionCategory category in await database.getAllCategories(
-        categoryFks: searchFilters.subcategoryPks,
-        allCategories: false,
-        includeSubCategories: true)) {
+    for (TransactionCategory category in subCategories) {
       out.add(AppliedFilterChip(
         label: category.name,
         customBorderColor: HexColor(
@@ -1433,7 +1448,7 @@ class AppliedFilterChips extends StatelessWidget {
       ));
     }
     // Budgets
-    for (Budget budget in await database.getAllBudgets()) {
+    for (Budget budget in allBudgets) {
       if (searchFilters.budgetPks.contains(budget.budgetPk))
         out.add(AppliedFilterChip(
           label: budget.name,
@@ -1445,7 +1460,7 @@ class AppliedFilterChips extends StatelessWidget {
         ));
     }
     // Excluded Budgets
-    for (Budget budget in await database.getAllBudgets()) {
+    for (Budget budget in allBudgets) {
       if (searchFilters.excludedBudgetPks.contains(budget.budgetPk))
         out.add(AppliedFilterChip(
           label: "excluded-from".tr() + ": " + budget.name,
@@ -1463,8 +1478,7 @@ class AppliedFilterChips extends StatelessWidget {
       ));
     }
     // Objectives
-    for (Objective objective
-        in await database.getAllObjectives(objectiveType: ObjectiveType.goal)) {
+    for (Objective objective in goals) {
       if (searchFilters.objectivePks.contains(objective.objectivePk))
         out.add(AppliedFilterChip(
           label: objective.name,
@@ -1482,8 +1496,7 @@ class AppliedFilterChips extends StatelessWidget {
       ));
     }
     // Loan Objectives
-    for (Objective objective
-        in await database.getAllObjectives(objectiveType: ObjectiveType.loan)) {
+    for (Objective objective in loans) {
       if (searchFilters.objectiveLoanPks.contains(objective.objectivePk))
         out.add(AppliedFilterChip(
           label: objective.name,

@@ -86,6 +86,53 @@ void main() {
     });
   });
 
+  group('cleanupNoteStringWithURLs', () {
+    test('removes standard http URL', () {
+      final input = "Check out this link: http://example.com/page";
+      final expected = "Check out this link: example.com";
+      expect(cleanupNoteStringWithURLs(input), expected);
+    });
+
+    test('removes standard https URL', () {
+      final input = "Here is a secure link https://www.google.com/?q=flutter";
+      final expected = "Here is a secure link google.com";
+      expect(cleanupNoteStringWithURLs(input), expected);
+    });
+
+    test('removes multiple URLs', () {
+      final input = "Read this https://example.com/ first, then go to http://test.org/page";
+      final expected = "Read this example.com first, then go to test.org";
+      expect(cleanupNoteStringWithURLs(input), expected);
+    });
+
+    test('does nothing to string without URLs', () {
+      final input = "This is a normal note without any links.";
+      expect(cleanupNoteStringWithURLs(input), input);
+    });
+
+    test('handles empty string', () {
+      final input = "";
+      expect(cleanupNoteStringWithURLs(input), "");
+    });
+
+    test('handles string containing only a URL', () {
+      final input = "https://example.com";
+      expect(cleanupNoteStringWithURLs(input), "example.com");
+    });
+
+    test('handles URL with trailing slash', () {
+      final input = "Link: https://example.com/ ";
+      final expected = "Link: example.com";
+      expect(cleanupNoteStringWithURLs(input), expected);
+    });
+
+    test('handles URL with query parameters', () {
+      final input = "Search here: https://example.com/search?q=dart&lang=en";
+      final expected = "Search here: example.com";
+      expect(cleanupNoteStringWithURLs(input), expected);
+    });
+  });
+
   group('isNumber', () {
     test('returns true for int', () {
       expect(isNumber(42), isTrue);
