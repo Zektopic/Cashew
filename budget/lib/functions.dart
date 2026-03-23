@@ -923,18 +923,6 @@ String pluralString(bool condition, String string) {
     return string + "s";
 }
 
-// String? getOSInsideWeb() {
-//   if (kIsWeb) {
-//     final userAgent = window.navigator.userAgent.toString().toLowerCase();
-//     if (userAgent.contains("(macintosh")) return "iOS";
-//     if (userAgent.contains("(iphone")) return "iOS";
-//     if (userAgent.contains("(linux")) return "Android";
-//     return "web";
-//   } else {
-//     return null;
-//   }
-// }
-
 bool lockAppWaitForRestart = false;
 void restartAppPopup(context,
     {String? subtitle, String? description, String? codeBlock}) async {
@@ -1174,7 +1162,7 @@ String getDomainNameFromURL(String text) {
 }
 
 String cleanupNoteStringWithURLs(String text) {
-  RegExp regExp = RegExp(r'https?:\/\/(?:www\.)?\S+(?=\s)',
+  RegExp regExp = RegExp(r'https?:\/\/(?:www\.)?\S+',
       multiLine: true, caseSensitive: false);
 
   Iterable<Match> matches = regExp.allMatches(text);

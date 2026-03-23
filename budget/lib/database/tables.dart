@@ -4699,10 +4699,11 @@ class FinanceDatabase extends _$FinanceDatabase {
   }
 
   Future<int> getAmountOfSubCategories(String mainCategoryPk) async {
-    return (await (select(categories)
-              ..where((c) => c.mainCategoryPk.equals(mainCategoryPk)))
-            .get())
-        .length;
+    final totalCount = categories.categoryPk.count();
+    final query = selectOnly(categories)
+      ..addColumns([totalCount])
+      ..where(categories.mainCategoryPk.equals(mainCategoryPk));
+    return (await query.map((row) => row.read(totalCount)).get()).first ?? 0;
   }
 
   Future<int> getAmountOfAssociatedTitles() async {
@@ -5401,7 +5402,7 @@ class FinanceDatabase extends _$FinanceDatabase {
         .getAllSubCategoriesOfMainCategory(categoryFrom.categoryPk);
     List<TransactionCategory> categoriesEdited = [];
     int order =
-        await database.getAmountOfSubCategories(categoryFrom.categoryPk);
+        await database.getAmountOfSubCategories(categoryTo.categoryPk);
     for (TransactionCategory category in allSubCategories) {
       categoriesEdited.add(
         category.copyWith(
@@ -5475,12 +5476,12 @@ class FinanceDatabase extends _$FinanceDatabase {
               ..where((t) => t.categoryFk.isNotIn(categoryKeys)))
             .get();
     if (wanderingCategoryLimits.isNotEmpty) {
-      List<String> pksToDelete = wanderingCategoryLimits
-          .map((limit) => limit.categoryLimitPk)
-          .toList();
-      await createDeleteLogs(DeleteLogType.CategoryBudgetLimit, pksToDelete);
+      List<String> wanderingCategoryLimitsKeys =
+          wanderingCategoryLimits.map((e) => e.categoryLimitPk).toList();
+      await createDeleteLogs(
+          DeleteLogType.CategoryBudgetLimit, wanderingCategoryLimitsKeys);
       await (delete(categoryBudgetLimits)
-            ..where((t) => t.categoryLimitPk.isIn(pksToDelete)))
+            ..where((t) => t.categoryLimitPk.isIn(wanderingCategoryLimitsKeys)))
           .go();
       print("Deleted wandering spending limits with no category");
     }
@@ -5493,11 +5494,12 @@ class FinanceDatabase extends _$FinanceDatabase {
               ..where((t) => t.budgetFk.isNotIn(budgetKeys)))
             .get();
     if (wanderingBudgetLimits.isNotEmpty) {
-      List<String> pksToDelete =
-          wanderingBudgetLimits.map((limit) => limit.categoryLimitPk).toList();
-      await createDeleteLogs(DeleteLogType.CategoryBudgetLimit, pksToDelete);
+      List<String> wanderingBudgetLimitsKeys =
+          wanderingBudgetLimits.map((e) => e.categoryLimitPk).toList();
+      await createDeleteLogs(
+          DeleteLogType.CategoryBudgetLimit, wanderingBudgetLimitsKeys);
       await (delete(categoryBudgetLimits)
-            ..where((t) => t.categoryLimitPk.isIn(pksToDelete)))
+            ..where((t) => t.categoryLimitPk.isIn(wanderingBudgetLimitsKeys)))
           .go();
       print("Deleted wandering spending limits with no budget");
     }

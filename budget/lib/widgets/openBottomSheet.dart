@@ -112,7 +112,6 @@ Future openBottomSheet(
     context,
     useRootNavigator: false,
     resizeToAvoidBottomInset: resizeForKeyboard,
-    // getOSInsideWeb() == "iOS" ? false : resizeForKeyboard,
     builder: (context) {
       if (checkIfDefaultThemeData(themeContext)) themeContext = null;
 
