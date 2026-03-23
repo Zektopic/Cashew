@@ -85,4 +85,38 @@ void main() {
       expect(daysBetween(from, to), 1);
     });
   });
+
+  group('absoluteZero', () {
+    test('converts -0.0 to 0.0', () {
+      final result = absoluteZero(-0.0);
+      expect(result, 0.0);
+      expect(result.isNegative, false);
+      expect(identical(result, -0.0), false);
+    });
+
+    test('keeps 0.0 as 0.0', () {
+      final result = absoluteZero(0.0);
+      expect(result, 0.0);
+      expect(result.isNegative, false);
+    });
+
+    test('keeps positive numbers unchanged', () {
+      expect(absoluteZero(1.5), 1.5);
+      expect(absoluteZero(42.0), 42.0);
+    });
+
+    test('keeps negative numbers unchanged', () {
+      expect(absoluteZero(-1.5), -1.5);
+      expect(absoluteZero(-42.0), -42.0);
+    });
+
+    test('handles NaN', () {
+      expect(absoluteZero(double.nan).isNaN, true);
+    });
+
+    test('handles infinity', () {
+      expect(absoluteZero(double.infinity), double.infinity);
+      expect(absoluteZero(double.negativeInfinity), double.negativeInfinity);
+    });
+  });
 }
