@@ -345,7 +345,6 @@ Future<String?> getAccentColorSystemString() async {
       // A default cyan color returned from an unsupported accent color Samsung device
       return null;
     }
-    print("System color loaded");
     return toHexString(accentColor);
   } else {
     return null;
