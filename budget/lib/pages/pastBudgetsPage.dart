@@ -936,7 +936,7 @@ class _PastBudgetContainerListState extends State<PastBudgetContainerList> {
   }
 }
 
-class PastBudgetContainer extends StatelessWidget {
+class PastBudgetContainer extends StatefulWidget {
   PastBudgetContainer({
     Key? key,
     required this.budget,
@@ -955,6 +955,13 @@ class PastBudgetContainer extends StatelessWidget {
   final int dateForRangeIndex;
 
   @override
+  State<PastBudgetContainer> createState() => _PastBudgetContainerState();
+}
+
+class _PastBudgetContainerState extends State<PastBudgetContainer> {
+  bool _isRevealed = false;
+
+  @override
   Widget build(BuildContext context) {
     Color progressForegroundColor = dynamicPastel(
         context, Theme.of(context).colorScheme.primary,
@@ -963,24 +970,24 @@ class PastBudgetContainer extends StatelessWidget {
         Theme.of(context).colorScheme.secondaryContainer;
     Color progressOverageColor = Theme.of(context).colorScheme.tertiary;
     double budgetAmount = budgetAmountToPrimaryCurrency(
-        Provider.of<AllWallets>(context, listen: true), budget);
+        Provider.of<AllWallets>(context, listen: true), widget.budget);
     DateTime dateForRangeLocal =
-        dateForRange == null ? DateTime.now() : dateForRange!;
-    DateTimeRange budgetRange = getBudgetDate(budget, dateForRangeLocal);
-    var widget = StreamBuilder<List<CategoryWithTotal>>(
+        widget.dateForRange == null ? DateTime.now() : widget.dateForRange!;
+    DateTimeRange budgetRange = getBudgetDate(widget.budget, dateForRangeLocal);
+    var streamWidget = StreamBuilder<List<CategoryWithTotal>>(
       stream: database.watchTotalSpentInEachCategoryInTimeRangeFromCategories(
         allWallets: Provider.of<AllWallets>(context),
         start: budgetRange.start,
         end: budgetRange.end,
-        categoryFks: budget.categoryFks,
-        categoryFksExclude: budget.categoryFksExclude,
-        budgetTransactionFilters: budget.budgetTransactionFilters,
-        memberTransactionFilters: budget.memberTransactionFilters,
+        categoryFks: widget.budget.categoryFks,
+        categoryFksExclude: widget.budget.categoryFksExclude,
+        budgetTransactionFilters: widget.budget.budgetTransactionFilters,
+        memberTransactionFilters: widget.budget.memberTransactionFilters,
         onlyShowTransactionsBelongingToBudgetPk:
-            budget.sharedKey != null || budget.addedTransactionsOnly == true
-                ? budget.budgetPk
+            widget.budget.sharedKey != null || widget.budget.addedTransactionsOnly == true
+                ? widget.budget.budgetPk
                 : null,
-        budget: budget,
+        budget: widget.budget,
       ),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
@@ -988,7 +995,7 @@ class PastBudgetContainer extends StatelessWidget {
           snapshot.data!.forEach((category) {
             totalSpent = totalSpent + category.total;
           });
-          totalSpent = totalSpent * determineBudgetPolarity(budget);
+          totalSpent = totalSpent * determineBudgetPolarity(widget.budget);
           totalSpent = absoluteZero(totalSpent);
 
           return Padding(
@@ -1060,7 +1067,7 @@ class PastBudgetContainer extends StatelessWidget {
                                                           "showTotalSpentForBudget"]
                                                       ? totalSpent
                                                       : budgetAmount -
-                                                          totalSpent),
+                                                          totalSpent, forceReveal: _isRevealed),
                                               fontSize: 16,
                                               textAlign: TextAlign.start,
                                               fontWeight: FontWeight.bold,
@@ -1075,11 +1082,11 @@ class PastBudgetContainer extends StatelessWidget {
                                         child: Container(
                                           child: TextFont(
                                             text: getBudgetSpentText(
-                                                    budget.income) +
+                                                    widget.budget.income) +
                                                 convertToMoney(
                                                     Provider.of<AllWallets>(
                                                         context),
-                                                    budgetAmount),
+                                                    budgetAmount, forceReveal: _isRevealed),
                                             fontSize: 12,
                                             textAlign: TextAlign.start,
                                           ),
@@ -1108,7 +1115,7 @@ class PastBudgetContainer extends StatelessWidget {
                                               finalNumber: appStateSettings[
                                                       "showTotalSpentForBudget"]
                                                   ? totalSpent
-                                                  : totalSpent - budgetAmount),
+                                                  : totalSpent - budgetAmount, forceReveal: _isRevealed),
                                           fontSize: 16,
                                           textAlign: TextAlign.start,
                                           fontWeight: FontWeight.bold,
@@ -1122,7 +1129,7 @@ class PastBudgetContainer extends StatelessWidget {
                                           bottom: 0),
                                       child: TextFont(
                                         text: getBudgetOverSpentText(
-                                                budget.income) +
+                                                widget.budget.income) +
                                             convertToMoney(
                                                 Provider.of<AllWallets>(
                                                     context),
@@ -1193,7 +1200,7 @@ class PastBudgetContainer extends StatelessWidget {
       child: OpenContainerNavigation(
         borderRadius: getPlatform() == PlatformOS.isIOS ? 0 : 18,
         closedColor: getPlatform() == PlatformOS.isIOS
-            ? backgroundColor
+            ? widget.backgroundColor
             : appStateSettings["materialYou"]
                 ? dynamicPastel(
                     context,
@@ -1202,36 +1209,41 @@ class PastBudgetContainer extends StatelessWidget {
                   )
                 : getColor(context, "lightDarkAccentHeavyLight"),
         button: (openContainer) {
-          return Tappable(
-            onTap: () {
-              openContainer();
-            },
-            onLongPress: () {
-              pushRoute(
-                context,
-                AddBudgetPage(
-                  budget: budget,
-                  routesToPopAfterDelete: RoutesToPopAfterDelete.All,
-                ),
-              );
-            },
-            borderRadius: getPlatform() == PlatformOS.isIOS ? 0 : 15,
-            child: widget,
-            color: getPlatform() == PlatformOS.isIOS
-                ? backgroundColor
-                : appStateSettings["materialYou"]
-                    ? dynamicPastel(
-                        context,
-                        Theme.of(context).colorScheme.secondaryContainer,
-                        amount: 0.3,
-                      )
-                    : getColor(context, "lightDarkAccentHeavyLight"),
+          return Listener(
+            onPointerDown: (_) => setState(() => _isRevealed = true),
+            onPointerUp: (_) => setState(() => _isRevealed = false),
+            onPointerCancel: (_) => setState(() => _isRevealed = false),
+            child: Tappable(
+              onTap: () {
+                openContainer();
+              },
+              onLongPress: () {
+                pushRoute(
+                  context,
+                  AddBudgetPage(
+                    budget: widget.budget,
+                    routesToPopAfterDelete: RoutesToPopAfterDelete.All,
+                  ),
+                );
+              },
+              borderRadius: getPlatform() == PlatformOS.isIOS ? 0 : 15,
+              child: streamWidget,
+              color: getPlatform() == PlatformOS.isIOS
+                  ? widget.backgroundColor
+                  : appStateSettings["materialYou"]
+                      ? dynamicPastel(
+                          context,
+                          Theme.of(context).colorScheme.secondaryContainer,
+                          amount: 0.3,
+                        )
+                      : getColor(context, "lightDarkAccentHeavyLight"),
+            ),
           );
         },
         openPage: BudgetPage(
-          budgetPk: budget.budgetPk,
+          budgetPk: widget.budget.budgetPk,
           dateForRange: dateForRangeLocal,
-          dateForRangeIndex: dateForRangeIndex,
+          dateForRangeIndex: widget.dateForRangeIndex,
           openedFromHistory: true,
         ),
       ),
@@ -1239,7 +1251,7 @@ class PastBudgetContainer extends StatelessWidget {
   }
 }
 
-class CategoryAverageSpent extends StatelessWidget {
+class CategoryAverageSpent extends StatefulWidget {
   const CategoryAverageSpent({
     required this.category,
     required this.amountPeriods,
@@ -1255,18 +1267,29 @@ class CategoryAverageSpent extends StatelessWidget {
   final bool isSavingsBudget;
 
   @override
+  State<CategoryAverageSpent> createState() => _CategoryAverageSpentState();
+}
+
+class _CategoryAverageSpentState extends State<CategoryAverageSpent> {
+  bool _isRevealed = false;
+
+  @override
   Widget build(BuildContext context) {
-    return Tappable(
-      onLongPress: () {
-        pushRoute(
-          context,
-          AddCategoryPage(
-            category: category,
-            routesToPopAfterDelete: RoutesToPopAfterDelete.One,
-          ),
-        );
-      },
-      onTap: onTap,
+    return Listener(
+      onPointerDown: (_) => setState(() => _isRevealed = true),
+      onPointerUp: (_) => setState(() => _isRevealed = false),
+      onPointerCancel: (_) => setState(() => _isRevealed = false),
+      child: Tappable(
+        onLongPress: () {
+          pushRoute(
+            context,
+            AddCategoryPage(
+              category: widget.category,
+              routesToPopAfterDelete: RoutesToPopAfterDelete.One,
+            ),
+          );
+        },
+        onTap: widget.onTap,
       color: Colors.transparent,
       child: Padding(
         padding: EdgeInsetsDirectional.symmetric(
@@ -1278,7 +1301,7 @@ class CategoryAverageSpent extends StatelessWidget {
           child: Row(
             children: [
               CategoryIcon(
-                category: category,
+                category: widget.category,
                 size: 30,
                 margin: EdgeInsetsDirectional.zero,
                 borderRadius: 1000,
@@ -1293,7 +1316,7 @@ class CategoryAverageSpent extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       TextFont(
-                        text: category.name,
+                        text: widget.category.name,
                         fontSize: 17,
                         maxLines: 1,
                       ),
@@ -1305,24 +1328,24 @@ class CategoryAverageSpent extends StatelessWidget {
                         children: [
                           Expanded(
                             child: CountNumber(
-                              count: amountPeriods == 0
+                              count: widget.amountPeriods == 0
                                   ? 0
-                                  : (amountSpent / amountPeriods).abs(),
+                                  : (widget.amountSpent / widget.amountPeriods).abs(),
                               duration: Duration(milliseconds: 400),
-                              initialCount: amountPeriods == 0
+                              initialCount: widget.amountPeriods == 0
                                   ? 0
-                                  : (amountSpent / amountPeriods).abs(),
+                                  : (widget.amountSpent / widget.amountPeriods).abs(),
                               textBuilder: (number) {
                                 return TextFont(
                                   text: convertToMoney(
                                           Provider.of<AllWallets>(context),
                                           number,
-                                          finalNumber: amountPeriods == 0
+                                          finalNumber: widget.amountPeriods == 0
                                               ? 0
-                                              : (amountSpent / amountPeriods)
-                                                  .abs()) +
+                                              : (widget.amountSpent / widget.amountPeriods)
+                                                  .abs(), forceReveal: _isRevealed) +
                                       " " +
-                                      (isSavingsBudget
+                                      (widget.isSavingsBudget
                                           ? "average-saved".tr().toLowerCase()
                                           : "average-spent".tr().toLowerCase()),
                                   fontSize: 14,
@@ -1350,15 +1373,15 @@ class CategoryAverageSpent extends StatelessWidget {
               ),
               SizedBox(width: 10),
               CountNumber(
-                count: amountSpent.abs(),
+                count: widget.amountSpent.abs(),
                 duration: Duration(milliseconds: 400),
-                initialCount: amountSpent.abs(),
+                initialCount: widget.amountSpent.abs(),
                 textBuilder: (number) {
                   return TextFont(
                     fontWeight: FontWeight.bold,
                     text: convertToMoney(
                         Provider.of<AllWallets>(context), number,
-                        finalNumber: amountSpent.abs()),
+                        finalNumber: widget.amountSpent.abs(), forceReveal: _isRevealed),
                     fontSize: 20,
                     textColor: getColor(context, "black"),
                   );
@@ -1367,6 +1390,7 @@ class CategoryAverageSpent extends StatelessWidget {
             ],
           ),
         ),
+      ),
       ),
     );
   }
