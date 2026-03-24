@@ -34,10 +34,10 @@ class _TransactionEntryAmountState extends State<TransactionEntryAmount> {
     double count = widget.transaction.amount.abs() *
         (amountRatioToPrimaryCurrencyGivenPk(
             Provider.of<AllWallets>(context), widget.transaction.walletFk));
-    return GestureDetector(
-      onLongPressStart: (_) => setState(() => _isRevealed = true),
-      onLongPressEnd: (_) => setState(() => _isRevealed = false),
-      onLongPressCancel: () => setState(() => _isRevealed = false),
+    return Listener(
+      onPointerDown: (_) => setState(() => _isRevealed = true),
+      onPointerUp: (_) => setState(() => _isRevealed = false),
+      onPointerCancel: (_) => setState(() => _isRevealed = false),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         mainAxisAlignment: MainAxisAlignment.center,
@@ -46,12 +46,12 @@ class _TransactionEntryAmountState extends State<TransactionEntryAmount> {
             children: [
               CountNumber(
                 count: count,
-              duration: Duration(milliseconds: 1000),
-              initialCount: count,
-              textBuilder: (number) {
-                return Row(
-                  children: [
-                    AnimatedSizeSwitcher(
+                duration: Duration(milliseconds: 1000),
+                initialCount: count,
+                textBuilder: (number) {
+                  return Row(
+                    children: [
+                      AnimatedSizeSwitcher(
                         child: ((widget.transaction.type ==
                                         TransactionSpecialType.credit ||
                                     widget.transaction.type ==
@@ -80,12 +80,12 @@ class _TransactionEntryAmountState extends State<TransactionEntryAmount> {
                         textColor: getTransactionAmountColor(
                             context, widget.transaction),
                       ),
-                  ],
-                );
-              },
-            ),
-          ],
-        ),
+                    ],
+                  );
+                },
+              ),
+            ],
+          ),
           // Original amount:
           AnimatedSizeSwitcher(
             child: widget.showOtherCurrency
@@ -105,8 +105,8 @@ class _TransactionEntryAmountState extends State<TransactionEntryAmount> {
                       forceReveal: _isRevealed,
                     ),
                     fontSize: 12,
-                    textColor: getTransactionAmountColor(
-                        context, widget.transaction),
+                    textColor:
+                        getTransactionAmountColor(context, widget.transaction),
                   )
                 : Container(
                     key: ValueKey(0),

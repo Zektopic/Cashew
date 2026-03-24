@@ -1322,21 +1322,21 @@ class _TotalSpentState extends State<TotalSpent> {
     double budgetAmount = budgetAmountToPrimaryCurrency(
         Provider.of<AllWallets>(context, listen: true), widget.budget);
 
-    return GestureDetector(
-      onTap: () {
-        _swapTotalSpentDisplay();
-      },
-      onLongPress: () {
-        HapticFeedback.heavyImpact();
-        _swapTotalSpentDisplay();
-      },
-      child: AnimatedSwitcher(
-        duration: Duration(milliseconds: 200),
-        child: IntrinsicWidth(
-          child: Listener(
-            onPointerDown: (_) => setState(() => _isRevealed = true),
-            onPointerUp: (_) => setState(() => _isRevealed = false),
-            onPointerCancel: (_) => setState(() => _isRevealed = false),
+    return Listener(
+      onPointerDown: (_) => setState(() => _isRevealed = true),
+      onPointerUp: (_) => setState(() => _isRevealed = false),
+      onPointerCancel: (_) => setState(() => _isRevealed = false),
+      child: GestureDetector(
+        onTap: () {
+          _swapTotalSpentDisplay();
+        },
+        onLongPress: () {
+          HapticFeedback.heavyImpact();
+          _swapTotalSpentDisplay();
+        },
+        child: AnimatedSwitcher(
+          duration: Duration(milliseconds: 200),
+          child: IntrinsicWidth(
             child: budgetAmount - widget.totalSpent >= 0
                 ? Row(
                     mainAxisAlignment: MainAxisAlignment.start,
@@ -1371,13 +1371,14 @@ class _TotalSpentState extends State<TotalSpent> {
                         padding: const EdgeInsetsDirectional.only(bottom: 1.5),
                         child: TextFont(
                           text: getBudgetSpentText(widget.budget.income) +
-                              convertToMoney(
-                                  Provider.of<AllWallets>(context), budgetAmount,
+                              convertToMoney(Provider.of<AllWallets>(context),
+                                  budgetAmount,
                                   forceReveal: _isRevealed),
                           fontSize: 15,
                           textAlign: TextAlign.start,
-                          textColor:
-                              Theme.of(context).colorScheme.onSecondaryContainer,
+                          textColor: Theme.of(context)
+                              .colorScheme
+                              .onSecondaryContainer,
                         ),
                       ),
                     ],
@@ -1415,13 +1416,14 @@ class _TotalSpentState extends State<TotalSpent> {
                         padding: const EdgeInsetsDirectional.only(bottom: 1.5),
                         child: TextFont(
                           text: getBudgetOverSpentText(widget.budget.income) +
-                              convertToMoney(
-                                  Provider.of<AllWallets>(context), budgetAmount,
+                              convertToMoney(Provider.of<AllWallets>(context),
+                                  budgetAmount,
                                   forceReveal: _isRevealed),
                           fontSize: 15,
                           textAlign: TextAlign.start,
-                          textColor:
-                              Theme.of(context).colorScheme.onSecondaryContainer,
+                          textColor: Theme.of(context)
+                              .colorScheme
+                              .onSecondaryContainer,
                         ),
                       ),
                     ],
