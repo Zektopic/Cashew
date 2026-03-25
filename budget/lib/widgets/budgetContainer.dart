@@ -22,6 +22,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sa3_liquid/sa3_liquid.dart';
+import 'dart:async';
 import 'package:budget/colors.dart';
 import 'package:budget/functions.dart';
 import 'package:async/async.dart' show StreamZip;
@@ -51,6 +52,13 @@ class BudgetContainer extends StatefulWidget {
 
 class _BudgetContainerState extends State<BudgetContainer> {
   bool _isRevealed = false;
+  Timer? _revealTimer;
+
+  @override
+  void dispose() {
+    _revealTimer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -385,9 +393,21 @@ class _BudgetContainerState extends State<BudgetContainer> {
         boxShadow: boxShadowCheck(boxShadowGeneral(context)),
       ),
       child: Listener(
-        onPointerDown: (_) => setState(() => _isRevealed = true),
-        onPointerUp: (_) => setState(() => _isRevealed = false),
-        onPointerCancel: (_) => setState(() => _isRevealed = false),
+        onPointerDown: (_) {
+          setState(() => _isRevealed = true);
+          _revealTimer?.cancel();
+          _revealTimer = Timer(Duration(seconds: 2), () {
+            if (mounted) setState(() => _isRevealed = false);
+          });
+        },
+        onPointerUp: (_) {
+          _revealTimer?.cancel();
+          setState(() => _isRevealed = false);
+        },
+        onPointerCancel: (_) {
+          _revealTimer?.cancel();
+          setState(() => _isRevealed = false);
+        },
         child: OpenContainerNavigation(
           borderRadius: 20,
           closedColor: backgroundColor,

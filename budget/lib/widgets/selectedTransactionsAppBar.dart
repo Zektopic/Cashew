@@ -7,6 +7,7 @@ import 'package:budget/pages/editWalletsPage.dart';
 import 'package:budget/struct/currencyFunctions.dart';
 import 'package:budget/struct/databaseGlobal.dart';
 import 'package:budget/struct/listenableSelector.dart';
+import 'dart:async';
 import 'package:budget/struct/settings.dart';
 import 'package:budget/widgets/button.dart';
 import 'package:budget/widgets/dropdownSelect.dart';
@@ -45,6 +46,13 @@ class SelectedTransactionsAppBar extends StatefulWidget {
 
 class _SelectedTransactionsAppBarState extends State<SelectedTransactionsAppBar> {
   bool _isRevealed = false;
+  Timer? _revealTimer;
+
+  @override
+  void dispose() {
+    _revealTimer?.cancel();
+    super.dispose();
+  }
 
   Future shareSelectedTransactions(
       {required BuildContext context,
@@ -189,9 +197,21 @@ class _SelectedTransactionsAppBarState extends State<SelectedTransactionsAppBar>
                                   ),
                                 ),
                                 Listener(
-                                  onPointerDown: (_) => setState(() => _isRevealed = true),
-                                  onPointerUp: (_) => setState(() => _isRevealed = false),
-                                  onPointerCancel: (_) => setState(() => _isRevealed = false),
+                                  onPointerDown: (_) {
+                                    setState(() => _isRevealed = true);
+                                    _revealTimer?.cancel();
+                                    _revealTimer = Timer(Duration(seconds: 2), () {
+                                      if (mounted) setState(() => _isRevealed = false);
+                                    });
+                                  },
+                                  onPointerUp: (_) {
+                                    _revealTimer?.cancel();
+                                    setState(() => _isRevealed = false);
+                                  },
+                                  onPointerCancel: (_) {
+                                    _revealTimer?.cancel();
+                                    setState(() => _isRevealed = false);
+                                  },
                                   child: CountNumber(
                                     count: snapshot.hasData ? snapshot.data! : 0,
                                     duration: Duration(milliseconds: 250),

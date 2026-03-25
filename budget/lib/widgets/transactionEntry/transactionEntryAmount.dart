@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:budget/colors.dart';
 import 'package:budget/database/tables.dart';
 import 'package:budget/functions.dart';
@@ -28,6 +29,13 @@ class TransactionEntryAmount extends StatefulWidget {
 
 class _TransactionEntryAmountState extends State<TransactionEntryAmount> {
   bool _isRevealed = false;
+  Timer? _revealTimer;
+
+  @override
+  void dispose() {
+    _revealTimer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,9 +43,21 @@ class _TransactionEntryAmountState extends State<TransactionEntryAmount> {
         (amountRatioToPrimaryCurrencyGivenPk(
             Provider.of<AllWallets>(context), widget.transaction.walletFk));
     return Listener(
-      onPointerDown: (_) => setState(() => _isRevealed = true),
-      onPointerUp: (_) => setState(() => _isRevealed = false),
-      onPointerCancel: (_) => setState(() => _isRevealed = false),
+      onPointerDown: (_) {
+        setState(() => _isRevealed = true);
+        _revealTimer?.cancel();
+        _revealTimer = Timer(Duration(seconds: 2), () {
+          if (mounted) setState(() => _isRevealed = false);
+        });
+      },
+      onPointerUp: (_) {
+        _revealTimer?.cancel();
+        setState(() => _isRevealed = false);
+      },
+      onPointerCancel: (_) {
+        _revealTimer?.cancel();
+        setState(() => _isRevealed = false);
+      },
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         mainAxisAlignment: MainAxisAlignment.center,
