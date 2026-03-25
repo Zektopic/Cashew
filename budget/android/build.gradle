@@ -26,9 +26,13 @@ subprojects {
         }
     }
 
+    if (project.name == 'app') {
+        return
+    }
+
     project.evaluationDependsOn(':app')
 
-    afterEvaluate {
+    project.afterEvaluate {
         if (project.hasProperty('android')) {
             project.android {
                 compileOptions {
