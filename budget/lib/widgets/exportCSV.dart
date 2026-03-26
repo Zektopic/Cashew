@@ -33,6 +33,23 @@ Future saveCSV(
   );
 }
 
+String sanitizeCsvEntry(String input) {
+  if (input.isEmpty) return input;
+  // Prevent CSV Injection (Formula Injection)
+  // If the cell starts with a formula character or tab/newline,
+  // prepend a single quote to force it to be treated as text.
+  if (input.startsWith('=') ||
+      input.startsWith('+') ||
+      input.startsWith('-') ||
+      input.startsWith('@') ||
+      input.startsWith('\t') ||
+      input.startsWith('\r') ||
+      input.startsWith('\n')) {
+    return "'" + input;
+  }
+  return input;
+}
+
 Map<String, String> createRowOutput(
   TransactionWithCategory transactionWithCategory,
   Map<String, String Function(TransactionWithCategory)> lookups,
@@ -40,7 +57,7 @@ Map<String, String> createRowOutput(
   Map<String, String> output = {};
   for (String key in lookups.keys) {
     String entry = lookups[key]!(transactionWithCategory);
-    output[key] = entry;
+    output[key] = sanitizeCsvEntry(entry);
   }
   return output;
 }
