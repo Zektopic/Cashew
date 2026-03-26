@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:async';
 import 'package:budget/database/tables.dart';
 import 'package:budget/functions.dart';
 import 'package:budget/pages/addBudgetPage.dart';
@@ -1308,6 +1309,13 @@ class TotalSpent extends StatefulWidget {
 class _TotalSpentState extends State<TotalSpent> {
   bool showTotalSpent = appStateSettings["showTotalSpentForBudget"];
   bool _isRevealed = false;
+  Timer? _revealTimer;
+
+  @override
+  void dispose() {
+    _revealTimer?.cancel();
+    super.dispose();
+  }
 
   _swapTotalSpentDisplay() {
     setState(() {
@@ -1323,9 +1331,21 @@ class _TotalSpentState extends State<TotalSpent> {
         Provider.of<AllWallets>(context, listen: true), widget.budget);
 
     return Listener(
-      onPointerDown: (_) => setState(() => _isRevealed = true),
-      onPointerUp: (_) => setState(() => _isRevealed = false),
-      onPointerCancel: (_) => setState(() => _isRevealed = false),
+      onPointerDown: (_) {
+        setState(() => _isRevealed = true);
+        _revealTimer?.cancel();
+        _revealTimer = Timer(Duration(seconds: 2), () {
+          if (mounted) setState(() => _isRevealed = false);
+        });
+      },
+      onPointerUp: (_) {
+        _revealTimer?.cancel();
+        setState(() => _isRevealed = false);
+      },
+      onPointerCancel: (_) {
+        _revealTimer?.cancel();
+        setState(() => _isRevealed = false);
+      },
       child: GestureDetector(
         onTap: () {
           _swapTotalSpentDisplay();

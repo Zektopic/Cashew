@@ -4,6 +4,7 @@ import 'package:budget/functions.dart';
 import 'package:budget/pages/upcomingOverdueTransactionsPage.dart';
 import 'package:budget/widgets/openContainerNavigation.dart';
 import 'package:budget/widgets/tappable.dart';
+import 'dart:async';
 import 'package:budget/widgets/textWidgets.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -45,6 +46,13 @@ class TransactionsAmountBox extends StatefulWidget {
 
 class _TransactionsAmountBoxState extends State<TransactionsAmountBox> {
   bool _isRevealed = false;
+  Timer? _revealTimer;
+
+  @override
+  void dispose() {
+    _revealTimer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,9 +65,21 @@ class _TransactionsAmountBoxState extends State<TransactionsAmountBox> {
         borderRadius: 15,
         button: (openContainer) {
           return Listener(
-            onPointerDown: (_) => setState(() => _isRevealed = true),
-            onPointerUp: (_) => setState(() => _isRevealed = false),
-            onPointerCancel: (_) => setState(() => _isRevealed = false),
+            onPointerDown: (_) {
+              setState(() => _isRevealed = true);
+              _revealTimer?.cancel();
+              _revealTimer = Timer(Duration(seconds: 2), () {
+                if (mounted) setState(() => _isRevealed = false);
+              });
+            },
+            onPointerUp: (_) {
+              _revealTimer?.cancel();
+              setState(() => _isRevealed = false);
+            },
+            onPointerCancel: (_) {
+              _revealTimer?.cancel();
+              setState(() => _isRevealed = false);
+            },
             child: Tappable(
               color: getColor(context, "lightDarkAccentHeavyLight"),
               onTap: () {

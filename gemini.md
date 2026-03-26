@@ -14,7 +14,8 @@
 - 2025-03-26: Iterative Enhancement - Analyzed expanding the long-press temporary reveal state into the core `CountNumber` widget. Determined that moving the gesture `Listener` down into `CountNumber` degrades UX by drastically shrinking the touch target to just the text bounding box, compared to the larger parent UI cards. Abandoned native `CountNumber` state management in favor of maintaining the gesture listeners on the outer parent widgets.
 - 2026-03-23: Iterative Enhancement - Converted `SelectedTransactionsAppBar` to a `StatefulWidget` and modified `TotalSpent` to expand the temporary reveal behavior to the top App Bar totals and nested analytics screens using `forceReveal` and external gesture listeners (`Listener`).
 - 2025-03-27: Iterative Enhancement - Replaced `GestureDetector` with `Listener` on `TransactionEntryAmount` and `BudgetPage`'s `TotalSpent` widget. The `GestureDetector`'s gesture arena was capturing and absorbing long-press events, preventing parent widgets (like lists or swipe-to-delete handlers) from functioning correctly. Using raw `Listener` (`onPointerDown`, `onPointerUp`) allows the temporary reveal functionality to coexist with other gestures without conflicts, improving overall app responsiveness and usability.
-**Next Planned Step:** Further verify security mechanisms by evaluating any potential timing side-channel leaks when temporarily displaying balances and investigate rate-limiting or auto-collapse behaviors on long-press release.
+- 2025-03-28: Iterative Enhancement - Implemented an auto-collapse timeout (2 seconds) across all major UI components that support the temporary reveal feature (`TransactionEntryAmount`, `WalletEntry`, `TransactionsAmountBox`, `BudgetContainer`, `SelectedTransactionsAppBar`, and `TotalSpent`). This defense-in-depth measure automatically resets the `_isRevealed` state to `false`, mitigating the risk of prolonged exposure if a user becomes distracted or accidentally holds the reveal button in a public setting.
+**Next Planned Step:** Consider adding an animation for the auto-collapse transition to provide visual feedback before the balance hides, or audit the obfuscation logic across exported PDF/CSV reports.
 
 ## 🚨 Critical Security Learnings
 *Only add entries here for unique, repo-specific security gaps, unexpected side effects, or reusable patterns.*
@@ -22,3 +23,7 @@
   - **Vulnerability/Gap:** Checked for standard client-side issues (SQLi, exposed secrets, insecure webviews). Codebase relies on `drift` ORM and safe HTTP practices.
   - **Learning:** The architecture safely separates raw API secrets (Firebase config files) which are intended for public client distribution, from backend administrative roles.
   - **Prevention:** Continue to use parameterized inputs via ORM (`drift`) and avoid dynamic `eval` or insecure `WebView` integrations.
+- **2025-03-28 - Prolonged Data Exposure Risk:**
+  - **Vulnerability/Gap:** Sensitive data temporarily revealed by user action (like holding a button) could remain exposed if the action is sustained indefinitely.
+  - **Learning:** Time-bounding the display of sensitive information, even when initiated securely, limits the window of opportunity for shoulder surfing or unauthorized capture.
+  - **Prevention:** Implement strict auto-collapse or TTL (Time-To-Live) timers on temporary UI state reveals to ensure sensitive data reverts to a secure/obfuscated state automatically.

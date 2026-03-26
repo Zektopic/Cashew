@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:budget/database/tables.dart';
 import 'package:budget/functions.dart';
 import 'package:budget/pages/addWalletPage.dart';
@@ -333,6 +334,13 @@ class AmountAccount extends StatefulWidget {
 
 class _AmountAccountState extends State<AmountAccount> {
   bool _isRevealed = false;
+  Timer? _revealTimer;
+
+  @override
+  void dispose() {
+    _revealTimer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -352,9 +360,21 @@ class _AmountAccountState extends State<AmountAccount> {
             ? (widget.walletWithDetails.totalSpent ?? 0).abs()
             : (absoluteZero(widget.walletWithDetails.totalSpent ?? 0));
     return Listener(
-      onPointerDown: (_) => setState(() => _isRevealed = true),
-      onPointerUp: (_) => setState(() => _isRevealed = false),
-      onPointerCancel: (_) => setState(() => _isRevealed = false),
+      onPointerDown: (_) {
+        setState(() => _isRevealed = true);
+        _revealTimer?.cancel();
+        _revealTimer = Timer(Duration(seconds: 2), () {
+          if (mounted) setState(() => _isRevealed = false);
+        });
+      },
+      onPointerUp: (_) {
+        _revealTimer?.cancel();
+        setState(() => _isRevealed = false);
+      },
+      onPointerCancel: (_) {
+        _revealTimer?.cancel();
+        setState(() => _isRevealed = false);
+      },
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
