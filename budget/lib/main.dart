@@ -44,9 +44,15 @@ bool allowDangerousDebugFlags = kDebugMode;
 void main() async {
   captureLogs(() async {
     WidgetsFlutterBinding.ensureInitialized();
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
+    try {
+      if (Firebase.apps.isEmpty) {
+        await Firebase.initializeApp(
+          options: DefaultFirebaseOptions.currentPlatform,
+        );
+      }
+    } catch (e) {
+      print("[Firebase init ERROR] $e");
+    }
     await EasyLocalization.ensureInitialized();
     sharedPreferences = await SharedPreferences.getInstance();
     database = await constructDb('db');
@@ -56,11 +62,14 @@ void main() async {
     await loadLanguageNamesJSON();
     await initializeSettings();
     tz.initializeTimeZones();
-    String? locationName;
     try {
-      locationName = (await FlutterTimezone.getLocalTimezone()).identifier;
-    } catch (e) {}
-    tz.setLocalLocation(tz.getLocation(locationName ?? "America/New_York"));
+      final locationName =
+          (await FlutterTimezone.getLocalTimezone()).identifier;
+      tz.setLocalLocation(tz.getLocation(locationName));
+    } catch (e) {
+      print("Timezone error: $e");
+      tz.setLocalLocation(tz.getLocation("America/New_York"));
+    }
     iconObjects.sort((a, b) => (a.mostLikelyCategoryName ?? a.icon)
         .compareTo((b.mostLikelyCategoryName ?? b.icon)));
     setHighRefreshRate();
