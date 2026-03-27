@@ -40,6 +40,15 @@ Map<String, String> createRowOutput(
   Map<String, String> output = {};
   for (String key in lookups.keys) {
     String entry = lookups[key]!(transactionWithCategory);
+    if (entry.startsWith('=') ||
+        entry.startsWith('+') ||
+        entry.startsWith('-') ||
+        entry.startsWith('@') ||
+        entry.startsWith('\t') ||
+        entry.startsWith('\r') ||
+        entry.startsWith('\n')) {
+      entry = "'" + entry;
+    }
     output[key] = entry;
   }
   return output;
