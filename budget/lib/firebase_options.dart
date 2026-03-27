@@ -70,6 +70,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '444620404094',
     projectId: 'cashew-budget-app-23736',
     storageBucket: 'cashew-budget-app-23736.firebasestorage.app',
+    androidClientId: '444620404094-ff71svihsbdqtgglvipgdvca69mpkso3.apps.googleusercontent.com',
+    iosClientId: '444620404094-ct2ekv0l1vjituav0r01uccdkdir9tah.apps.googleusercontent.com',
     iosBundleId: 'com.budget.tracker-app',
   );
 
