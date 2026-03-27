@@ -1,18 +1,1 @@
-{
-  "hosting": {
-    "public": "build/web",
-    "predeploy": "flutter build web --release --web-renderer canvaskit --no-tree-shake-icons",
-    "site":"budget-track",
-    "ignore": [
-      "firebase.json",
-      "**/.*",
-      "**/node_modules/**"
-    ],
-    "rewrites": [
-      {
-        "source": "**",
-        "destination": "/index.html"
-      }
-    ]
-  }
-}
+{"hosting":{"public":"build/web","predeploy":"flutter build web --release --web-renderer canvaskit --no-tree-shake-icons","site":"cashew-budget-app-23736","ignore":["firebase.json","**/.*","**/node_modules/**"],"rewrites":[{"source":"**","destination":"/index.html"}]},"flutter":{"platforms":{"android":{"default":{"projectId":"cashew-budget-app-23736","appId":"1:444620404094:android:4d3936a8ae7b8693fa6f2f","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"cashew-budget-app-23736","configurations":{"android":"1:444620404094:android:4d3936a8ae7b8693fa6f2f"}}}}}}

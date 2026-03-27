@@ -1,0 +1,337 @@
+﻿Running Gradle task 'assembleDebug'...                          
+flutter : lib/pages/addTransac
+tionPage.dart:4107:45: Error: 
+The getter 'authHeaders' 
+isn't defined for the type 
+'GoogleSignInAccount'.
+At line:1 char:1
++ flutter build apk --debug > 
+build_out3.txt 2>&1 ; 
+Get-Content build_o ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : 
+    NotSpecified: (lib/pages  
+  /addTr...SignInAccount'.:   
+ String) [], RemoteExcepti    
+on
+    + FullyQualifiedErrorId : 
+    NativeCommandError
+ 
+ - 'GoogleSignInAccount' is 
+from 'package:google_sign_in/g
+oogle_sign_in.dart' ('../../..
+/../../AppData/Local/Pub/Cache
+/hosted/pub.dev/google_sign_in
+-7.2.0/lib/google_sign_in.dart
+').
+Try correcting the name to 
+the name of an existing 
+getter, or defining a getter 
+or field named 'authHeaders'.
+      final authHeaders = 
+await googleUser!.authHeaders;
+                              
+              ^^^^^^^^^^^
+lib/struct/firebaseAuthGlobal.
+dart:50:34: Error: The getter 
+'accessToken' isn't defined 
+for the type 
+'GoogleSignInAuthentication'.
+ - 
+'GoogleSignInAuthentication' 
+is from 'package:google_sign_i
+n/src/token_types.dart' ('../.
+./../../../AppData/Local/Pub/C
+ache/hosted/pub.dev/google_sig
+n_in-7.2.0/lib/src/token_types
+.dart').
+Try correcting the name to 
+the name of an existing 
+getter, or defining a getter 
+or field named 'accessToken'.
+        accessToken: 
+googleAuth?.accessToken,
+                              
+   ^^^^^^^^^^^
+lib/widgets/accountAndBackup.d
+art:133:20: Error: Couldn't 
+find constructor 
+'GoogleSignIn'.
+          ? 
+signIn.GoogleSignIn(
+                   
+^^^^^^^^^^^^
+lib/widgets/accountAndBackup.d
+art:136:33: Error: Member not 
+found: 
+'GoogleSignIn.standard'.
+          : signIn.GoogleSignI
+n.standard(scopes: scopes);
+                              
+  ^^^^^^^^
+lib/widgets/accountAndBackup.d
+art:151:37: Error: The method 
+'signIn' isn't defined for 
+the type 'GoogleSignIn'.
+ - 'GoogleSignIn' is from 'pac
+kage:google_sign_in/google_sig
+n_in.dart' ('../../../../../Ap
+pData/Local/Pub/Cache/hosted/p
+ub.dev/google_sign_in-7.2.0/li
+b/google_sign_in.dart').
+Try correcting the name to 
+the name of an existing 
+method, or defining a method 
+named 'signIn'.
+              ? await 
+googleSignIn?.signIn()
+                              
+      ^^^^^^
+lib/widgets/accountAndBackup.d
+art:152:37: Error: The method 
+'signInSilently' isn't 
+defined for the type 
+'GoogleSignIn'.
+ - 'GoogleSignIn' is from 'pac
+kage:google_sign_in/google_sig
+n_in.dart' ('../../../../../Ap
+pData/Local/Pub/Cache/hosted/p
+ub.dev/google_sign_in-7.2.0/li
+b/google_sign_in.dart').
+Try correcting the name to 
+the name of an existing 
+method, or defining a method 
+named 'signInSilently'.
+              : await 
+googleSignIn?.signInSilently()
+                              
+      ^^^^^^^^^^^^^^
+lib/widgets/accountAndBackup.d
+art:153:33: Error: The method 
+'signIn' isn't defined for 
+the type 'GoogleSignIn'.
+ - 'GoogleSignIn' is from 'pac
+kage:google_sign_in/google_sig
+n_in.dart' ('../../../../../Ap
+pData/Local/Pub/Cache/hosted/p
+ub.dev/google_sign_in-7.2.0/li
+b/google_sign_in.dart').
+Try correcting the name to 
+the name of an existing 
+method, or defining a method 
+named 'signIn'.
+          : await 
+googleSignIn?.signIn();
+                              
+  ^^^^^^
+lib/widgets/accountAndBackup.d
+art:216:43: Error: The getter 
+'authHeaders' isn't defined 
+for the type 
+'GoogleSignInAccount'.
+ - 'GoogleSignInAccount' is 
+from 'package:google_sign_in/g
+oogle_sign_in.dart' ('../../..
+/../../AppData/Local/Pub/Cache
+/hosted/pub.dev/google_sign_in
+-7.2.0/lib/google_sign_in.dart
+').
+Try correcting the name to 
+the name of an existing 
+getter, or defining a getter 
+or field named 'authHeaders'.
+    final authHeaders = await 
+googleUser!.authHeaders;
+                              
+            ^^^^^^^^^^^
+lib/widgets/accountAndBackup.d
+art:421:43: Error: The getter 
+'authHeaders' isn't defined 
+for the type 
+'GoogleSignInAccount'.
+ - 'GoogleSignInAccount' is 
+from 'package:google_sign_in/g
+oogle_sign_in.dart' ('../../..
+/../../AppData/Local/Pub/Cache
+/hosted/pub.dev/google_sign_in
+-7.2.0/lib/google_sign_in.dart
+').
+Try correcting the name to 
+the name of an existing 
+getter, or defining a getter 
+or field named 'authHeaders'.
+    final authHeaders = await 
+googleUser!.authHeaders;
+                              
+            ^^^^^^^^^^^
+lib/widgets/accountAndBackup.d
+art:486:43: Error: The getter 
+'authHeaders' isn't defined 
+for the type 
+'GoogleSignInAccount'.
+ - 'GoogleSignInAccount' is 
+from 'package:google_sign_in/g
+oogle_sign_in.dart' ('../../..
+/../../AppData/Local/Pub/Cache
+/hosted/pub.dev/google_sign_in
+-7.2.0/lib/google_sign_in.dart
+').
+Try correcting the name to 
+the name of an existing 
+getter, or defining a getter 
+or field named 'authHeaders'.
+    final authHeaders = await 
+googleUser!.authHeaders;
+                              
+            ^^^^^^^^^^^
+lib/widgets/accountAndBackup.d
+art:767:43: Error: The getter 
+'authHeaders' isn't defined 
+for the type 
+'GoogleSignInAccount'.
+ - 'GoogleSignInAccount' is 
+from 'package:google_sign_in/g
+oogle_sign_in.dart' ('../../..
+/../../AppData/Local/Pub/Cache
+/hosted/pub.dev/google_sign_in
+-7.2.0/lib/google_sign_in.dart
+').
+Try correcting the name to 
+the name of an existing 
+getter, or defining a getter 
+or field named 'authHeaders'.
+    final authHeaders = await 
+googleUser!.authHeaders;
+                              
+            ^^^^^^^^^^^
+lib/struct/syncClient.dart:126
+:41: Error: The getter 
+'authHeaders' isn't defined 
+for the type 
+'GoogleSignInAccount'.
+ - 'GoogleSignInAccount' is 
+from 'package:google_sign_in/g
+oogle_sign_in.dart' ('../../..
+/../../AppData/Local/Pub/Cache
+/hosted/pub.dev/google_sign_in
+-7.2.0/lib/google_sign_in.dart
+').
+Try correcting the name to 
+the name of an existing 
+getter, or defining a getter 
+or field named 'authHeaders'.
+  final authHeaders = await 
+googleUser!.authHeaders;
+                              
+          ^^^^^^^^^^^
+lib/struct/syncClient.dart:247
+:41: Error: The getter 
+'authHeaders' isn't defined 
+for the type 
+'GoogleSignInAccount'.
+ - 'GoogleSignInAccount' is 
+from 'package:google_sign_in/g
+oogle_sign_in.dart' ('../../..
+/../../AppData/Local/Pub/Cache
+/hosted/pub.dev/google_sign_in
+-7.2.0/lib/google_sign_in.dart
+').
+Try correcting the name to 
+the name of an existing 
+getter, or defining a getter 
+or field named 'authHeaders'.
+  final authHeaders = await 
+googleUser!.authHeaders;
+                              
+          ^^^^^^^^^^^
+lib/pages/autoTransactionsPage
+Email.dart:426:45: Error: The 
+getter 'authHeaders' isn't 
+defined for the type 
+'GoogleSignInAccount'.
+ - 'GoogleSignInAccount' is 
+from 'package:google_sign_in/g
+oogle_sign_in.dart' ('../../..
+/../../AppData/Local/Pub/Cache
+/hosted/pub.dev/google_sign_in
+-7.2.0/lib/google_sign_in.dart
+').
+Try correcting the name to 
+the name of an existing 
+getter, or defining a getter 
+or field named 'authHeaders'.
+      final authHeaders = 
+await googleUser!.authHeaders;
+                              
+              ^^^^^^^^^^^
+lib/pages/autoTransactionsPage
+Email.dart:664:47: Error: The 
+getter 'authHeaders' isn't 
+defined for the type 
+'GoogleSignInAccount'.
+ - 'GoogleSignInAccount' is 
+from 'package:google_sign_in/g
+oogle_sign_in.dart' ('../../..
+/../../AppData/Local/Pub/Cache
+/hosted/pub.dev/google_sign_in
+-7.2.0/lib/google_sign_in.dart
+').
+Try correcting the name to 
+the name of an existing 
+getter, or defining a getter 
+or field named 'authHeaders'.
+        final authHeaders = 
+await googleUser!.authHeaders;
+                              
+                ^^^^^^^^^^^
+lib/struct/uploadAttachment.da
+rt:116:41: Error: The getter 
+'authHeaders' isn't defined 
+for the type 
+'GoogleSignInAccount'.
+ - 'GoogleSignInAccount' is 
+from 'package:google_sign_in/g
+oogle_sign_in.dart' ('../../..
+/../../AppData/Local/Pub/Cache
+/hosted/pub.dev/google_sign_in
+-7.2.0/lib/google_sign_in.dart
+').
+Try correcting the name to 
+the name of an existing 
+getter, or defining a getter 
+or field named 'authHeaders'.
+  final authHeaders = await 
+googleUser!.authHeaders;
+                              
+          ^^^^^^^^^^^
+Target 
+kernel_snapshot_program 
+failed: Exception
+
+
+FAILURE: Build failed with an 
+exception.
+
+* What went wrong:
+Execution failed for task ':ap
+p:compileFlutterBuildDebug'.
+> Process 'command 'C:\src\flu
+tter\bin\flutter.bat'' 
+finished with non-zero exit 
+value 1
+
+* Try:
+> Run with --stacktrace 
+option to get the stack trace.
+> Run with --info or --debug 
+option to get more log output.
+> Run with --scan to get full 
+insights.
+> Get more help at 
+https://help.gradle.org.
+
+BUILD FAILED in 39s
+Running Gradle task 'assembleDebug'...                             39.4s
+Gradle task assembleDebug 
+failed with exit code 1

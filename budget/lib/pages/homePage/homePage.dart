@@ -263,36 +263,35 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   children: [
                     PreviewDemoWarning(),
                     if (useSmallBanner) SizedBox(height: 13),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        useSmallBanner
-                            ? Expanded(
-                                child: HomePageWelcomeBannerSmall(
-                                  showUsername: showUsername,
-                                  showGreeting: showGreeting,
-                                  username: appStateSettings["username"] ?? "",
-                                ),
-                              )
-                            : SizedBox.shrink(),
-                        Tooltip(
-                          message: "edit-home".tr(),
-                          child: IconButton(
-                            padding: EdgeInsetsDirectional.all(15),
-                            onPressed: () {
-                              pushRoute(context, EditHomePage());
-                            },
-                            icon: Icon(
-                              appStateSettings["outlinedIcons"]
-                                  ? Icons.more_vert_outlined
-                                  : Icons.more_vert_rounded,
+                    if (useSmallBanner)
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            child: HomePageWelcomeBannerSmall(
+                              showUsername: showUsername,
+                              showGreeting: showGreeting,
+                              username: appStateSettings["username"] ?? "",
                             ),
                           ),
-                        ),
-                      ],
-                    ),
+                          Tooltip(
+                            message: "edit-home".tr(),
+                            child: IconButton(
+                              padding: EdgeInsetsDirectional.all(15),
+                              onPressed: () {
+                                pushRoute(context, EditHomePage());
+                              },
+                              icon: Icon(
+                                appStateSettings["outlinedIcons"]
+                                    ? Icons.more_vert_outlined
+                                    : Icons.more_vert_rounded,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     // Wipe all remaining pixels off - sometimes graphics artifacts are left behind
                     Container(
                       height: 1,
@@ -300,97 +299,119 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     ),
 
                     showWelcomeBanner
-                        ? ConstrainedBox(
-                            constraints: BoxConstraints(
-                              minHeight:
-                                  getExpandedHeaderHeight(
-                                    context,
-                                    null,
-                                    isHomePageSpace: true,
-                                  ) /
-                                  1.34,
-                            ),
-                            child: Container(
-                              // Subtract one (1) here because of the thickness of the wiper above
-                              alignment: AlignmentDirectional.bottomStart,
-                              padding: EdgeInsetsDirectional.only(
-                                start: 9,
-                                bottom: enableDoubleColumn(context) ? 10 : 17,
-                                end: 9,
-                              ),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  HomePageUsername(
-                                    animationControllerHeader:
-                                        _animationControllerHeader,
-                                    animationControllerHeader2:
-                                        _animationControllerHeader2,
-                                    showUsername: showUsername,
-                                    showGreeting: showGreeting,
-                                    enterNameBottomSheet: enterNameBottomSheet,
-                                    username:
-                                        appStateSettings["username"] ?? "",
+                        ? Stack(
+                            children: [
+                              ConstrainedBox(
+                                constraints: BoxConstraints(
+                                  minHeight:
+                                      getExpandedHeaderHeight(
+                                        context,
+                                        null,
+                                        isHomePageSpace: true,
+                                      ) /
+                                      1.34,
+                                ),
+                                child: Container(
+                                  // Subtract one (1) here because of the thickness of the wiper above
+                                  alignment: AlignmentDirectional.bottomStart,
+                                  padding: EdgeInsetsDirectional.only(
+                                    start: 9,
+                                    bottom: enableDoubleColumn(context) ? 10 : 17,
+                                    end: 9,
                                   ),
-                                  AnimatedBuilder(
-                                    animation: _animationControllerHeader,
-                                    builder: (_, child) {
-                                      return Transform.scale(
-                                        alignment:
-                                            AlignmentDirectional.bottomStart,
-                                        scale:
-                                            _animationControllerHeader.value <
-                                                0.5
-                                            ? 0.5 * 0.4 + 0.6
-                                            : (_animationControllerHeader
-                                                          .value) *
-                                                      0.4 +
-                                                  0.6,
-                                        child: child ?? SizedBox.shrink(),
-                                      );
-                                    },
-                                    child: IconButton(
-                                      padding: EdgeInsets.zero,
-                                      constraints: BoxConstraints(),
-                                      onPressed: () async {
-                                        await updateSettings(
-                                          "obscureAmounts",
-                                          !(appStateSettings["obscureAmounts"] ??
-                                              false),
-                                          pagesNeedingRefresh: [0, 1, 2],
-                                          updateGlobalState: true,
-                                        );
-                                        openSnackbar(SnackbarMessage(
-                                            title: (appStateSettings["obscureAmounts"] ?? false)
-                                                ? "Amounts hidden"
-                                                : "Amounts shown",
-                                            icon: (appStateSettings["obscureAmounts"] ?? false)
-                                                ? Icons.visibility_off
-                                                : Icons.visibility));
-                                      },
-                                      icon: Icon(
-                                        appStateSettings["obscureAmounts"] ==
-                                                true
-                                            ? (appStateSettings["outlinedIcons"]
-                                                  ? Icons
-                                                        .visibility_off_outlined
-                                                  : Icons
-                                                        .visibility_off_rounded)
-                                            : (appStateSettings["outlinedIcons"]
-                                                  ? Icons.visibility_outlined
-                                                  : Icons.visibility_rounded),
-                                        size: 28,
-                                        color: Theme.of(
-                                          context,
-                                        ).colorScheme.onPrimaryContainer,
+                                  child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      HomePageUsername(
+                                        animationControllerHeader:
+                                            _animationControllerHeader,
+                                        animationControllerHeader2:
+                                            _animationControllerHeader2,
+                                        showUsername: showUsername,
+                                        showGreeting: showGreeting,
+                                        enterNameBottomSheet: enterNameBottomSheet,
+                                        username:
+                                            appStateSettings["username"] ?? "",
                                       ),
+                                      AnimatedBuilder(
+                                        animation: _animationControllerHeader,
+                                        builder: (_, child) {
+                                          return Transform.scale(
+                                            alignment:
+                                                AlignmentDirectional.bottomStart,
+                                            scale:
+                                                _animationControllerHeader.value <
+                                                    0.5
+                                                ? 0.5 * 0.4 + 0.6
+                                                : (_animationControllerHeader
+                                                              .value) *
+                                                          0.4 +
+                                                      0.6,
+                                            child: child ?? SizedBox.shrink(),
+                                          );
+                                        },
+                                        child: IconButton(
+                                          padding: EdgeInsets.zero,
+                                          constraints: BoxConstraints(),
+                                          onPressed: () async {
+                                            await updateSettings(
+                                              "obscureAmounts",
+                                              !(appStateSettings["obscureAmounts"] ??
+                                                  false),
+                                              pagesNeedingRefresh: [0, 1, 2],
+                                              updateGlobalState: true,
+                                            );
+                                            openSnackbar(SnackbarMessage(
+                                                title: (appStateSettings["obscureAmounts"] ?? false)
+                                                    ? "Amounts hidden"
+                                                    : "Amounts shown",
+                                                icon: (appStateSettings["obscureAmounts"] ?? false)
+                                                    ? Icons.visibility_off
+                                                    : Icons.visibility));
+                                          },
+                                          icon: Icon(
+                                            appStateSettings["obscureAmounts"] ==
+                                                    true
+                                                ? (appStateSettings["outlinedIcons"]
+                                                      ? Icons
+                                                            .visibility_off_outlined
+                                                      : Icons
+                                                            .visibility_off_rounded)
+                                                : (appStateSettings["outlinedIcons"]
+                                                      ? Icons.visibility_outlined
+                                                      : Icons.visibility_rounded),
+                                            size: 28,
+                                            color: Theme.of(
+                                              context,
+                                            ).colorScheme.onPrimaryContainer,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              PositionedDirectional(
+                                top: 0,
+                                end: 0,
+                                child: Tooltip(
+                                  message: "edit-home".tr(),
+                                  child: IconButton(
+                                    padding: EdgeInsetsDirectional.all(15),
+                                    onPressed: () {
+                                      pushRoute(context, EditHomePage());
+                                    },
+                                    icon: Icon(
+                                      appStateSettings["outlinedIcons"]
+                                          ? Icons.more_vert_outlined
+                                          : Icons.more_vert_rounded,
                                     ),
                                   ),
-                                ],
+                                ),
                               ),
-                            ),
+                            ],
                           )
                         : SizedBox(height: 5),
                     // Not full screen
