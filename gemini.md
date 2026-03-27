@@ -15,7 +15,8 @@
 - 2026-03-23: Iterative Enhancement - Converted `SelectedTransactionsAppBar` to a `StatefulWidget` and modified `TotalSpent` to expand the temporary reveal behavior to the top App Bar totals and nested analytics screens using `forceReveal` and external gesture listeners (`Listener`).
 - 2025-03-27: Iterative Enhancement - Replaced `GestureDetector` with `Listener` on `TransactionEntryAmount` and `BudgetPage`'s `TotalSpent` widget. The `GestureDetector`'s gesture arena was capturing and absorbing long-press events, preventing parent widgets (like lists or swipe-to-delete handlers) from functioning correctly. Using raw `Listener` (`onPointerDown`, `onPointerUp`) allows the temporary reveal functionality to coexist with other gestures without conflicts, improving overall app responsiveness and usability.
 - 2025-03-28: Iterative Enhancement - Implemented an auto-collapse timeout (2 seconds) across all major UI components that support the temporary reveal feature (`TransactionEntryAmount`, `WalletEntry`, `TransactionsAmountBox`, `BudgetContainer`, `SelectedTransactionsAppBar`, and `TotalSpent`). This defense-in-depth measure automatically resets the `_isRevealed` state to `false`, mitigating the risk of prolonged exposure if a user becomes distracted or accidentally holds the reveal button in a public setting.
-**Next Planned Step:** Consider adding an animation for the auto-collapse transition to provide visual feedback before the balance hides, or audit the obfuscation logic across exported PDF/CSV reports.
+- 2025-03-29: Iterative Enhancement - Audited the obfuscation logic across exported CSV reports. Determined that data should remain unobfuscated to preserve export utility. However, user-generated fields (like transaction names and notes) are now sanitized to prevent CSV Injection (Formula Injection) vulnerabilities by prefixing risky characters (`=`, `+`, `-`, `@`, `\t`, `\r`, `\n`) with a single quote.
+**Next Planned Step:** Consider adding an animation for the auto-collapse transition to provide visual feedback before the balance hides.
 
 ## 🚨 Critical Security Learnings
 *Only add entries here for unique, repo-specific security gaps, unexpected side effects, or reusable patterns.*
@@ -27,3 +28,7 @@
   - **Vulnerability/Gap:** Sensitive data temporarily revealed by user action (like holding a button) could remain exposed if the action is sustained indefinitely.
   - **Learning:** Time-bounding the display of sensitive information, even when initiated securely, limits the window of opportunity for shoulder surfing or unauthorized capture.
   - **Prevention:** Implement strict auto-collapse or TTL (Time-To-Live) timers on temporary UI state reveals to ensure sensitive data reverts to a secure/obfuscated state automatically.
+- **2025-03-29 - CSV Injection Risk in Exports:**
+  - **Vulnerability/Gap:** User-generated fields exported to CSV files were unsanitized, posing a risk of CSV Injection (Formula Injection) if a user entered malicious payload formulas into the app.
+  - **Learning:** Data that escapes the application's native environment must be sanitized according to the conventions of the destination format.
+  - **Prevention:** Prefix any CSV fields that start with dangerous characters (`=`, `+`, `-`, `@`, `\t`, `\r`, `\n`) with a single quote (`'`) to ensure spreadsheet applications interpret them as text instead of executable formulas.
