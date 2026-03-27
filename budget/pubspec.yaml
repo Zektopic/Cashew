@@ -61,6 +61,7 @@ dependencies:
   pausable_timer: ^3.1.0+3
   animated_fractionally_sized_box: ^2.0.1
   flutter_local_notifications: ^17.2.1+1
+  flutter_local_notifications_linux: ^4.0.0+1
   system_theme: ^3.0.0
   firebase_core: ^3.2.0
   firebase_auth: ^5.1.2
