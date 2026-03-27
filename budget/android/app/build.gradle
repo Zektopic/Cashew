@@ -38,7 +38,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.budget.tracker_app"
+        applicationId "com.budget.tracker_app.dev"
         minSdkVersion flutter.minSdkVersion
         targetSdk 35
         versionCode flutterVersionCode.toInteger()
