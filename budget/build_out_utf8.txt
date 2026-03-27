@@ -1,0 +1,305 @@
+﻿Resolving dependencies...
+Downloading packages...
+  _discoveryapis_commons 1.0.6 (1.0.7 available)
+  _fe_analyzer_shared 61.0.0 (98.0.0 available)
+  _flutterfire_internals 1.3.39 (1.3.68 available)
+  analyzer 5.13.0 (12.0.0 available)
+  analyzer_plugin 0.11.2 (0.14.7 available)
+  animations 2.0.11 (2.1.1 available)
+  app_links 6.1.4 (7.0.0 available)
+  app_links_web 1.0.3 (1.0.4 available)
+  app_settings 5.1.1 (7.0.0 available)
+  archive 3.3.7 (affected by advisories: [^0], [^1], 4.0.9 available)
+  args 2.4.2 (2.7.0 available)
+  async 2.11.0 (2.13.1 available)
+  boolean_selector 2.1.1 (2.1.2 available)
+  build 2.4.0 (4.0.5 available)
+  build_config 1.1.1 (1.3.0 available)
+  build_daemon 4.0.0 (4.1.1 available)
+  build_resolvers 2.4.1 (3.0.4 available)
+  build_runner 2.4.9 (2.13.1 available)
+  build_runner_core 7.2.10 (9.3.2 available)
+  built_value 8.6.1 (8.12.5 available)
+  charcode 1.3.1 (1.4.0 available)
+  checked_yaml 2.0.3 (2.0.4 available)
+  cli_util 0.3.5 (0.4.2 available)
+  cloud_firestore 5.1.0 (6.2.0 available)
+  cloud_firestore_platform_interface 6.2.9 (7.1.0 available)
+  cloud_firestore_web 4.0.3 (5.2.0 available)
+  code_builder 4.5.0 (4.11.1 available)
+  confetti 0.7.0 (0.8.0 available)
+  convert 3.1.1 (3.1.2 available)
+  cross_file 0.3.4+1 (0.3.5+2 available)
+  crypto 3.0.3 (3.0.7 available)
+  csslib 0.17.3 (1.0.2 available)
+  csv 6.0.0 (8.0.0 available)
+  dart_style 2.3.1 (3.1.8 available)
+  dbus 0.7.8 (0.7.12 available)
+  device_info_plus 10.1.0 (12.3.0 available)
+  device_info_plus_platform_interface 7.0.0 (7.0.3 available)
+  drift 2.18.0 (2.32.1 available)
+  drift_dev 2.18.0 (2.32.1 available)
+  expandable_page_view 1.0.17 (1.2.1 available)
+  file 6.1.4 (7.0.1 available)
+  file_picker 8.0.7 (10.3.10 available)
+  file_selector_linux 0.9.2+1 (0.9.4 available)
+  file_selector_macos 0.9.3+3 (0.9.5 available)
+  file_selector_platform_interface 2.6.1 (2.7.0 available)
+  file_selector_windows 0.9.3+1 (0.9.3+5 available)
+  firebase_auth 5.1.2 (6.3.0 available)
+  firebase_auth_platform_interface 7.4.2 (8.1.8 available)
+  firebase_auth_web 5.12.4 (6.1.4 available)
+  firebase_core 3.2.0 (4.6.0 available)
+  firebase_core_platform_interface 5.1.0 (6.0.3 available)
+  firebase_core_web 2.17.3 (3.5.1 available)
+  fixnum 1.1.0 (1.1.1 available)
+  fl_chart 0.68.0 (1.2.0 available)
+  flutter_charset_detector 2.1.0 (5.0.0 available)
+  flutter_charset_detector_android 2.1.1 (3.1.1 available)
+  flutter_charset_detector_web 1.2.0 (2.0.0 available)
+  flutter_displaymode 0.6.0 (0.7.0 available)
+  flutter_launcher_icons 0.10.0 (0.14.4 available)
+  flutter_lazy_indexed_stack 0.0.6 (0.1.0 available)
+  flutter_local_notifications 17.2.1+2 (21.0.0 available)
+  flutter_local_notifications_linux 4.0.0+1 (8.0.0 available)
+  flutter_local_notifications_platform_interface 7.2.0 (11.0.0 available)
+  flutter_plugin_android_lifecycle 2.0.33 (2.0.34 available)
+  frontend_server_client 3.2.0 (4.0.0 available)
+  glob 2.1.2 (2.1.3 available)
+  google_identity_services_web 0.3.1+1 (0.3.3+1 available)
+  google_sign_in 6.2.1 (7.2.0 available)
+  google_sign_in_android 6.1.16 (7.2.10 available)
+  google_sign_in_ios 5.7.6 (6.3.0 available)
+  google_sign_in_platform_interface 2.4.1 (3.1.0 available)
+  google_sign_in_web 0.12.4+1 (1.1.3 available)
+  googleapis 13.1.0 (16.0.0 available)
+  gradient_borders 1.0.1 (1.0.2 available)
+  graphs 2.3.1 (2.3.2 available)
+  html 0.15.4 (0.15.6 available)
+  http 0.13.6 (1.6.0 available)
+  http_multi_server 3.2.1 (3.2.2 available)
+  http_parser 4.0.2 (4.1.2 available)
+  image 3.3.0 (4.8.0 available)
+  image_picker 1.1.2 (1.2.1 available)
+  image_picker_android 0.8.8+2 (0.8.13+15 available)
+  image_picker_for_web 3.0.1 (3.1.1 available)
+  image_picker_ios 0.8.8+4 (0.8.13+6 available)
+  image_picker_linux 0.2.1+1 (0.2.2 available)
+  image_picker_macos 0.2.1+1 (0.2.2+1 available)
+  image_picker_platform_interface 2.10.0 (2.11.1 available)
+  image_picker_windows 0.2.1+1 (0.2.2 available)
+  in_app_purchase 3.2.0 (3.2.3 available)
+  in_app_purchase_android 0.3.6 (0.4.0+10 available)
+  in_app_purchase_storekit 0.3.17 (0.4.8+1 available)
+  in_app_review 2.0.9 (2.0.11 available)
+  io 1.0.4 (1.0.5 available)
+  js 0.7.1 (0.7.2 available)
+  local_auth 2.2.0 (3.0.1 available)
+  local_auth_android 1.0.56 (2.0.7 available)
+  local_auth_darwin 1.6.1 (2.0.3 available)
+  local_auth_platform_interface 1.0.7 (1.1.0 available)
+  local_auth_windows 1.0.8 (2.0.1 available)
+  logging 1.2.0 (1.3.0 available)
+  material_symbols_icons 4.2768.0 (4.2906.0 available)
+  math_expressions 2.5.0 (3.1.0 available)
+  meta 1.17.0 (1.18.2 available)
+  mime 1.0.4 (2.0.0 available)
+  notification_listener_service 0.3.3 (0.3.5 available)
+  package_config 2.1.0 (2.2.0 available)
+  package_info_plus 8.0.0 (9.0.0 available)
+  package_info_plus_platform_interface 3.0.0 (3.2.1 available)
+  path_provider 2.1.3 (2.1.5 available)
+  path_provider_android 2.2.1 (2.2.23 available)
+  path_provider_foundation 2.4.0 (2.6.0 available)
+  path_provider_platform_interface 2.1.1 (2.1.2 available)
+  path_provider_windows 2.2.1 (2.3.0 available)
+  petitparser 5.4.0 (7.0.2 available)
+  platform 3.1.0 (3.1.6 available)
+  pointycastle 3.9.1 (4.0.0 available)
+  pool 1.5.1 (1.5.2 available)
+  process 4.2.4 (5.0.5 available)
+  provider 6.1.2 (6.1.5+1 available)
+  pub_semver 2.1.4 (2.2.0 available)
+  pubspec_parse 1.2.3 (1.5.0 available)
+  quick_actions 1.0.7 (1.1.0 available)
+  quick_actions_android 1.0.7 (1.0.28 available)
+  quick_actions_ios 1.0.6 (1.2.3 available)
+  quick_actions_platform_interface 1.0.4 (1.1.0 available)
+  quiver 3.2.1 (3.2.2 available)
+  recaptcha_enterprise_flutter 18.5.1 (18.8.2 available)
+  share_plus 10.0.0 (12.0.1 available)
+  share_plus_platform_interface 5.0.0 (6.1.0 available)
+  shared_preferences 2.2.3 (2.5.5 available)
+  shared_preferences_android 2.1.4 (2.4.23 available)
+  shared_preferences_foundation 2.4.0 (2.5.6 available)
+  shared_preferences_linux 2.2.0 (2.4.1 available)
+  shared_preferences_platform_interface 2.3.2 (2.4.2 available)
+  shared_preferences_web 2.1.0 (2.4.3 available)
+  shared_preferences_windows 2.2.0 (2.4.1 available)
+  shelf 1.4.1 (1.4.2 available)
+  shelf_web_socket 1.0.4 (3.0.0 available)
+  simple_animations 5.0.2 (5.2.0 available)
+  source_gen 1.3.2 (4.2.2 available)
+  source_span 1.10.0 (1.10.2 available)
+  sqlite3 2.4.3 (3.2.0 available)
+  sqlite3_flutter_libs 0.5.15 (0.6.0+eol available)
+  sqlparser 0.36.0 (0.44.3 available)
+  stream_transform 2.1.0 (2.1.1 available)
+  string_scanner 1.2.0 (1.4.1 available)
+  system_theme 3.0.0 (3.2.0 available)
+  system_theme_web 0.0.2 (0.0.4 available)
+  term_glyph 1.2.1 (1.2.2 available)
+  test_api 0.7.10 (0.7.11 available)
+  timezone 0.9.2 (0.11.0 available)
+  timing 1.0.1 (1.0.2 available)
+  typed_data 1.3.2 (1.4.0 available)
+  universal_html 2.2.4 (2.3.0 available)
+  universal_io 2.2.2 (2.3.1 available)
+  url_launcher 6.3.0 (6.3.2 available)
+  url_launcher_android 6.3.2 (6.3.29 available)
+  url_launcher_ios 6.3.1 (6.4.1 available)
+  url_launcher_linux 3.1.1 (3.2.2 available)
+  url_launcher_macos 3.2.0 (3.2.5 available)
+  url_launcher_web 2.3.1 (2.4.2 available)
+  url_launcher_windows 3.1.1 (3.1.5 available)
+  uuid 3.0.7 (4.5.3 available)
+  vector_math 2.2.0 (2.3.0 available)
+  vm_service 13.0.0 (15.0.2 available)
+  watcher 1.1.0 (1.2.1 available)
+  web 0.5.1 (1.1.1 available)
+  web_socket_channel 2.4.0 (3.0.3 available)
+! win32 5.15.0 (overridden) (6.0.0 available)
+  win32_registry 1.1.1 (3.0.2 available)
+  xdg_directories 1.0.0 (1.1.0 available)
+  xml 6.3.0 (6.6.1 available)
+  yaml 3.1.2 (3.1.3 available)
+Got dependencies!
+Dependencies are affected by security advisories:
+  [^0]: https://github.com/advisories/GHSA-9v85-q87q-g4vg
+  [^1]: https://github.com/advisories/GHSA-r285-q736-9v95
+173 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+flutter : Package flutter_loca
+l_notifications:linux 
+references flutter_local_notif
+ications_linux:linux as the 
+default plugin, but the 
+package does not exist, or is 
+not a plugin package.
+At line:1 char:1
++ flutter build apk --debug > 
+build_out.txt 2>&1
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : 
+    NotSpecified: (Package f  
+  lutter...plugin package.:   
+ String) [], RemoteExcepti    
+on
+    + FullyQualifiedErrorId : 
+    NativeCommandError
+ 
+Ask the maintainers of 
+flutter_local_notifications 
+to either avoid referencing a 
+default implementation via 
+`platforms: linux: 
+default_package: flutter_local
+_notifications_linux` or 
+create a plugin named flutter_
+local_notifications_linux.
+
+Package flutter_local_notifica
+tions:linux references flutter
+_local_notifications_linux:lin
+ux as the default plugin, but 
+the package does not exist, 
+or is not a plugin package.
+Ask the maintainers of 
+flutter_local_notifications 
+to either avoid referencing a 
+default implementation via 
+`platforms: linux: 
+default_package: flutter_local
+_notifications_linux` or 
+create a plugin named flutter_
+local_notifications_linux.
+
+Package flutter_local_notifica
+tions:linux references flutter
+_local_notifications_linux:lin
+ux as the default plugin, but 
+the package does not exist, 
+or is not a plugin package.
+Ask the maintainers of 
+flutter_local_notifications 
+to either avoid referencing a 
+default implementation via 
+`platforms: linux: 
+default_package: flutter_local
+_notifications_linux` or 
+create a plugin named flutter_
+local_notifications_linux.
+
+Package flutter_local_notifica
+tions:linux references flutter
+_local_notifications_linux:lin
+ux as the default plugin, but 
+the package does not exist, 
+or is not a plugin package.
+Ask the maintainers of 
+flutter_local_notifications 
+to either avoid referencing a 
+default implementation via 
+`platforms: linux: 
+default_package: flutter_local
+_notifications_linux` or 
+create a plugin named flutter_
+local_notifications_linux.
+
+Running Gradle task 'assembleDebug'...                          
+lib/main.dart:59:34: Error: A 
+value of type 'TimezoneInfo' 
+can't be assigned to a 
+variable of type 'String?'.
+ - 'TimezoneInfo' is from 'pac
+kage:flutter_timezone/timezone
+_info.dart' ('../../../../../A
+ppData/Local/Pub/Cache/hosted/
+pub.dev/flutter_timezone-5.0.2
+/lib/timezone_info.dart').
+    final String? 
+locationName = await FlutterTi
+mezone.getLocalTimezone();
+                              
+   ^
+Target 
+kernel_snapshot_program 
+failed: Exception
+
+
+FAILURE: Build failed with an 
+exception.
+
+* What went wrong:
+Execution failed for task ':ap
+p:compileFlutterBuildDebug'.
+> Process 'command 'C:\src\flu
+tter\bin\flutter.bat'' 
+finished with non-zero exit 
+value 1
+
+* Try:
+> Run with --stacktrace 
+option to get the stack trace.
+> Run with --info or --debug 
+option to get more log output.
+> Run with --scan to get full 
+insights.
+> Get more help at 
+https://help.gradle.org.
+
+BUILD FAILED in 9s
+Running Gradle task 'assembleDebug'...                              9.7s
+Gradle task assembleDebug 
+failed with exit code 1

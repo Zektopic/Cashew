@@ -60,7 +60,7 @@ dependencies:
   transparent_image: ^2.0.0
   pausable_timer: ^3.1.0+3
   animated_fractionally_sized_box: ^2.0.1
-  flutter_local_notifications: ^17.2.1+1
+  flutter_local_notifications: ^17.2.1+2
   system_theme: ^3.0.0
   firebase_core: ^3.2.0
   firebase_auth: ^5.1.2
@@ -79,7 +79,7 @@ dependencies:
   app_settings: ^5.1.1
   provider: ^6.1.2
   in_app_review: ^2.0.9 
-  flutter_timezone: ^1.0.8
+  flutter_timezone: ^5.0.2
   device_preview: ^1.2.0
   scrollable_positioned_list: ^0.3.8
   easy_localization: ^3.0.7
@@ -118,6 +118,7 @@ dev_dependencies:
 
 dependency_overrides:
   win32: ^5.5.4
+  flutter_local_notifications_linux: any
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
