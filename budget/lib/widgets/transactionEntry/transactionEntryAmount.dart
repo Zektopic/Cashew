@@ -88,17 +88,21 @@ class _TransactionEntryAmountState extends State<TransactionEntryAmount> {
                                 iconSize: 24,
                               ),
                       ),
-                      TextFont(
-                        text: convertToMoney(
-                          Provider.of<AllWallets>(context),
-                          number,
-                          finalNumber: count,
-                          forceReveal: _isRevealed,
+                      AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 300),
+                        child: TextFont(
+                          key: ValueKey(_isRevealed),
+                          text: convertToMoney(
+                            Provider.of<AllWallets>(context),
+                            number,
+                            finalNumber: count,
+                            forceReveal: _isRevealed,
+                          ),
+                          fontSize: 19 - (widget.showOtherCurrency ? 1 : 0),
+                          fontWeight: FontWeight.bold,
+                          textColor: getTransactionAmountColor(
+                              context, widget.transaction),
                         ),
-                        fontSize: 19 - (widget.showOtherCurrency ? 1 : 0),
-                        fontWeight: FontWeight.bold,
-                        textColor: getTransactionAmountColor(
-                            context, widget.transaction),
                       ),
                     ],
                   );
@@ -109,24 +113,27 @@ class _TransactionEntryAmountState extends State<TransactionEntryAmount> {
           // Original amount:
           AnimatedSizeSwitcher(
             child: widget.showOtherCurrency
-                ? TextFont(
-                    key: ValueKey(1),
-                    text: convertToMoney(
-                      Provider.of<AllWallets>(context),
-                      widget.transaction.amount.abs(),
-                      decimals: Provider.of<AllWallets>(context)
-                              .indexedByPk[widget.transaction.walletFk]
-                              ?.decimals ??
-                          2,
-                      currencyKey: Provider.of<AllWallets>(context)
-                          .indexedByPk[widget.transaction.walletFk]
-                          ?.currency,
-                      addCurrencyName: true,
-                      forceReveal: _isRevealed,
+                ? AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    child: TextFont(
+                      key: ValueKey('other_curr_${_isRevealed}'),
+                      text: convertToMoney(
+                        Provider.of<AllWallets>(context),
+                        widget.transaction.amount.abs(),
+                        decimals: Provider.of<AllWallets>(context)
+                                .indexedByPk[widget.transaction.walletFk]
+                                ?.decimals ??
+                            2,
+                        currencyKey: Provider.of<AllWallets>(context)
+                            .indexedByPk[widget.transaction.walletFk]
+                            ?.currency,
+                        addCurrencyName: true,
+                        forceReveal: _isRevealed,
+                      ),
+                      fontSize: 12,
+                      textColor: getTransactionAmountColor(
+                          context, widget.transaction),
                     ),
-                    fontSize: 12,
-                    textColor:
-                        getTransactionAmountColor(context, widget.transaction),
                   )
                 : Container(
                     key: ValueKey(0),

@@ -399,22 +399,26 @@ class _AmountAccountState extends State<AmountAccount> {
             decimals: widget.walletWithDetails.wallet.decimals,
             initialCount: 0,
             textBuilder: (number) {
-              return TextFont(
-                textAlign: widget.textAlign,
-                text: convertToMoney(
-                  Provider.of<AllWallets>(context),
-                  number,
-                  finalNumber: finalTotal,
-                  currencyKey: widget.walletWithDetails.wallet.currency,
-                  decimals: widget.walletWithDetails.wallet.decimals,
-                  addCurrencyName:
-                      Provider.of<AllWallets>(context).allContainSameCurrency() ==
-                          false,
-                  forceReveal: _isRevealed,
+              return AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                child: TextFont(
+                  key: ValueKey(_isRevealed),
+                  textAlign: widget.textAlign,
+                  text: convertToMoney(
+                    Provider.of<AllWallets>(context),
+                    number,
+                    finalNumber: finalTotal,
+                    currencyKey: widget.walletWithDetails.wallet.currency,
+                    decimals: widget.walletWithDetails.wallet.decimals,
+                    addCurrencyName:
+                        Provider.of<AllWallets>(context).allContainSameCurrency() ==
+                            false,
+                    forceReveal: _isRevealed,
+                  ),
+                  textColor: textColor,
+                  fontSize: widget.fontSize,
+                  fontWeight: FontWeight.bold,
                 ),
-                textColor: textColor,
-                fontSize: widget.fontSize,
-                fontWeight: FontWeight.bold,
               );
             },
           ),
