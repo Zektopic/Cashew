@@ -57,8 +57,9 @@ class _TransactionsAmountBoxState extends State<TransactionsAmountBox> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration:
-          BoxDecoration(boxShadow: boxShadowCheck(boxShadowGeneral(context))),
+      decoration: BoxDecoration(
+        boxShadow: boxShadowCheck(boxShadowGeneral(context)),
+      ),
       child: OpenContainerNavigation(
         closedColor: getColor(context, "lightDarkAccentHeavyLight"),
         openPage: widget.openPage ?? SizedBox.shrink(),
@@ -91,7 +92,9 @@ class _TransactionsAmountBoxState extends State<TransactionsAmountBox> {
               child: Container(
                 child: Padding(
                   padding: const EdgeInsetsDirectional.symmetric(
-                      horizontal: 15, vertical: 17),
+                    horizontal: 15,
+                    vertical: 17,
+                  ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     mainAxisSize: MainAxisSize.min,
@@ -110,12 +113,13 @@ class _TransactionsAmountBoxState extends State<TransactionsAmountBox> {
                         builder: (context, snapshot) {
                           double totalSpent = snapshot.data?.total ?? 0;
                           int totalCount = snapshot.data?.count ?? 0;
-                          double finalAmount = snapshot.hasData == false ||
-                                  snapshot.data == null
+                          double finalAmount =
+                              snapshot.hasData == false || snapshot.data == null
                               ? 0
                               : widget.absolute == true
-                                  ? (totalSpent).abs()
-                                  : totalSpent * (widget.invertSign == true ? -1 : 1);
+                              ? (totalSpent).abs()
+                              : totalSpent *
+                                    (widget.invertSign == true ? -1 : 1);
                           return Column(
                             children: [
                               CountNumber(
@@ -123,31 +127,38 @@ class _TransactionsAmountBoxState extends State<TransactionsAmountBox> {
                                 duration: Duration(milliseconds: 1000),
                                 initialCount: (0),
                                 textBuilder: (number) {
-                                  return TextFont(
-                                    text: convertToMoney(
-                                        Provider.of<AllWallets>(context), number,
+                                  return AnimatedSwitcher(
+                                    duration: const Duration(milliseconds: 300),
+                                    child: TextFont(
+                                      key: ValueKey(_isRevealed),
+                                      text: convertToMoney(
+                                        Provider.of<AllWallets>(context),
+                                        number,
                                         currencyKey: widget.currencyKey,
-                                        addCurrencyName: widget.currencyKey != null,
+                                        addCurrencyName:
+                                            widget.currencyKey != null,
                                         finalNumber: finalAmount,
                                         forceReveal: _isRevealed,
+                                      ),
+                                      textColor: widget.getTextColor != null
+                                          ? widget.getTextColor!(totalSpent)
+                                          : widget.textColor,
+                                      fontWeight: FontWeight.bold,
+                                      textAlign: TextAlign.center,
+                                      autoSizeText: true,
+                                      fontSize: 21,
+                                      maxFontSize: 21,
+                                      minFontSize: 10,
+                                      maxLines: 1,
                                     ),
-                                    textColor: widget.getTextColor != null
-                                        ? widget.getTextColor!(totalSpent)
-                                        : widget.textColor,
-                                    fontWeight: FontWeight.bold,
-                                    textAlign: TextAlign.center,
-                                    autoSizeText: true,
-                                    fontSize: 21,
-                                    maxFontSize: 21,
-                                    minFontSize: 10,
-                                    maxLines: 1,
                                   );
                                 },
                               ),
                               SizedBox(height: 6),
                               TextFont(
                                 maxLines: 2,
-                                text: totalCount.toString() +
+                                text:
+                                    totalCount.toString() +
                                     " " +
                                     (totalCount == 1
                                         ? "transaction".tr().toLowerCase()

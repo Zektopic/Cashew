@@ -63,11 +63,15 @@ class _BudgetContainerState extends State<BudgetContainer> {
   @override
   Widget build(BuildContext context) {
     double budgetAmount = budgetAmountToPrimaryCurrency(
-        Provider.of<AllWallets>(context, listen: true), widget.budget);
-    DateTime dateForRangeLocal =
-        widget.dateForRange == null ? DateTime.now() : widget.dateForRange!;
+      Provider.of<AllWallets>(context, listen: true),
+      widget.budget,
+    );
+    DateTime dateForRangeLocal = widget.dateForRange == null
+        ? DateTime.now()
+        : widget.dateForRange!;
     DateTimeRange budgetRange = getBudgetDate(widget.budget, dateForRangeLocal);
-    bool isOutOfRange = budgetRange.end.difference(DateTime.now()).inDays < 0 ||
+    bool isOutOfRange =
+        budgetRange.end.difference(DateTime.now()).inDays < 0 ||
         budgetRange.start.difference(DateTime.now()).inDays > 0;
     var innerWidget = StreamBuilder<List<CategoryWithTotal>>(
       stream: database.watchTotalSpentInEachCategoryInTimeRangeFromCategories(
@@ -79,9 +83,10 @@ class _BudgetContainerState extends State<BudgetContainer> {
         budgetTransactionFilters: widget.budget.budgetTransactionFilters,
         memberTransactionFilters: widget.budget.memberTransactionFilters,
         onlyShowTransactionsBelongingToBudgetPk:
-            widget.budget.sharedKey != null || widget.budget.addedTransactionsOnly == true
-                ? widget.budget.budgetPk
-                : null,
+            widget.budget.sharedKey != null ||
+                widget.budget.addedTransactionsOnly == true
+            ? widget.budget.budgetPk
+            : null,
         budget: widget.budget,
       ),
       builder: (context, snapshot) {
@@ -104,15 +109,19 @@ class _BudgetContainerState extends State<BudgetContainer> {
                       Positioned.fill(
                         child: AnimatedGooBackground(
                           randomOffset: widget.budget.name.length,
-                          color: HexColor(widget.budget.colour,
-                                  defaultColor:
-                                      Theme.of(context).colorScheme.primary)
-                              .withOpacity(0.8),
+                          color: HexColor(
+                            widget.budget.colour,
+                            defaultColor: Theme.of(context).colorScheme.primary,
+                          ).withOpacity(0.8),
                         ),
                       ),
                       Padding(
                         padding: const EdgeInsetsDirectional.only(
-                            start: 23, end: 23, bottom: 13, top: 13),
+                          start: 23,
+                          end: 23,
+                          bottom: 13,
+                          top: 13,
+                        ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
@@ -135,27 +144,35 @@ class _BudgetContainerState extends State<BudgetContainer> {
                                     children: [
                                       Container(
                                         child: CountNumber(
-                                          count: appStateSettings[
-                                                  "showTotalSpentForBudget"]
+                                          count:
+                                              appStateSettings["showTotalSpentForBudget"]
                                               ? totalSpent
                                               : budgetAmount - totalSpent,
                                           duration: Duration(milliseconds: 700),
                                           initialCount: (0),
                                           textBuilder: (number) {
-                                            return TextFont(
-                                              text: convertToMoney(
-                                                Provider.of<AllWallets>(
-                                                    context),
-                                                number,
-                                                finalNumber: appStateSettings[
-                                                        "showTotalSpentForBudget"]
-                                                    ? totalSpent
-                                                    : budgetAmount - totalSpent,
-                                                forceReveal: _isRevealed,
+                                            return AnimatedSwitcher(
+                                              duration: const Duration(
+                                                milliseconds: 300,
                                               ),
-                                              fontSize: 18,
-                                              textAlign: TextAlign.start,
-                                              fontWeight: FontWeight.bold,
+                                              child: TextFont(
+                                                key: ValueKey(_isRevealed),
+                                                text: convertToMoney(
+                                                  Provider.of<AllWallets>(
+                                                    context,
+                                                  ),
+                                                  number,
+                                                  finalNumber:
+                                                      appStateSettings["showTotalSpentForBudget"]
+                                                      ? totalSpent
+                                                      : budgetAmount -
+                                                            totalSpent,
+                                                  forceReveal: _isRevealed,
+                                                ),
+                                                fontSize: 18,
+                                                textAlign: TextAlign.start,
+                                                fontWeight: FontWeight.bold,
+                                              ),
                                             );
                                           },
                                         ),
@@ -164,19 +181,31 @@ class _BudgetContainerState extends State<BudgetContainer> {
                                         child: Padding(
                                           padding:
                                               const EdgeInsetsDirectional.only(
-                                                  bottom: 1.4),
+                                                bottom: 1.4,
+                                              ),
                                           child: Container(
-                                            child: TextFont(
-                                              text: getBudgetSpentText(
-                                                      widget.budget.income) +
-                                                  convertToMoney(
+                                            child: AnimatedSwitcher(
+                                              duration: const Duration(
+                                                milliseconds: 300,
+                                              ),
+                                              child: TextFont(
+                                                key: ValueKey(
+                                                  'budget_1_${_isRevealed}',
+                                                ),
+                                                text:
+                                                    getBudgetSpentText(
+                                                      widget.budget.income,
+                                                    ) +
+                                                    convertToMoney(
                                                       Provider.of<AllWallets>(
-                                                          context),
+                                                        context,
+                                                      ),
                                                       budgetAmount,
                                                       forceReveal: _isRevealed,
-                                                  ),
-                                              fontSize: 13,
-                                              textAlign: TextAlign.start,
+                                                    ),
+                                                fontSize: 13,
+                                                textAlign: TextAlign.start,
+                                              ),
                                             ),
                                           ),
                                         ),
@@ -189,28 +218,35 @@ class _BudgetContainerState extends State<BudgetContainer> {
                                     children: [
                                       Container(
                                         child: CountNumber(
-                                          count: appStateSettings[
-                                                  "showTotalSpentForBudget"]
+                                          count:
+                                              appStateSettings["showTotalSpentForBudget"]
                                               ? totalSpent
                                               : totalSpent - budgetAmount,
                                           duration: Duration(milliseconds: 700),
                                           initialCount: (0),
                                           textBuilder: (number) {
-                                            return TextFont(
-                                              text: convertToMoney(
+                                            return AnimatedSwitcher(
+                                              duration: const Duration(
+                                                milliseconds: 300,
+                                              ),
+                                              child: TextFont(
+                                                key: ValueKey(_isRevealed),
+                                                text: convertToMoney(
                                                   Provider.of<AllWallets>(
-                                                      context),
+                                                    context,
+                                                  ),
                                                   number,
-                                                  finalNumber: appStateSettings[
-                                                          "showTotalSpentForBudget"]
+                                                  finalNumber:
+                                                      appStateSettings["showTotalSpentForBudget"]
                                                       ? totalSpent
                                                       : totalSpent -
-                                                          budgetAmount,
+                                                            budgetAmount,
                                                   forceReveal: _isRevealed,
+                                                ),
+                                                fontSize: 18,
+                                                textAlign: TextAlign.start,
+                                                fontWeight: FontWeight.bold,
                                               ),
-                                              fontSize: 18,
-                                              textAlign: TextAlign.start,
-                                              fontWeight: FontWeight.bold,
                                             );
                                           },
                                         ),
@@ -219,18 +255,30 @@ class _BudgetContainerState extends State<BudgetContainer> {
                                         child: Container(
                                           padding:
                                               const EdgeInsetsDirectional.only(
-                                                  bottom: 1.4),
-                                          child: TextFont(
-                                            text: getBudgetOverSpentText(
-                                                    widget.budget.income) +
-                                                convertToMoney(
+                                                bottom: 1.4,
+                                              ),
+                                          child: AnimatedSwitcher(
+                                            duration: const Duration(
+                                              milliseconds: 300,
+                                            ),
+                                            child: TextFont(
+                                              key: ValueKey(
+                                                'budget_2_${_isRevealed}',
+                                              ),
+                                              text:
+                                                  getBudgetOverSpentText(
+                                                    widget.budget.income,
+                                                  ) +
+                                                  convertToMoney(
                                                     Provider.of<AllWallets>(
-                                                        context),
+                                                      context,
+                                                    ),
                                                     budgetAmount,
                                                     forceReveal: _isRevealed,
-                                                ),
-                                            fontSize: 13,
-                                            textAlign: TextAlign.start,
+                                                  ),
+                                              fontSize: 13,
+                                              textAlign: TextAlign.start,
+                                            ),
                                           ),
                                         ),
                                       ),
@@ -243,35 +291,47 @@ class _BudgetContainerState extends State<BudgetContainer> {
                         alignment: AlignmentDirectional.topEnd,
                         child: Container(
                           padding: EdgeInsetsDirectional.only(
-                              top: 10, end: 10, start: 10),
-                          child: widget.budget.reoccurrence == BudgetReoccurence.custom
+                            top: 10,
+                            end: 10,
+                            start: 10,
+                          ),
+                          child:
+                              widget.budget.reoccurrence ==
+                                  BudgetReoccurence.custom
                               ? SizedBox.shrink()
                               : ButtonIcon(
                                   onTap: () {
                                     pushRoute(
                                       context,
                                       PastBudgetsPage(
-                                          budgetPk: widget.budget.budgetPk),
+                                        budgetPk: widget.budget.budgetPk,
+                                      ),
                                     );
                                   },
                                   icon: appStateSettings["outlinedIcons"]
                                       ? Icons.history_outlined
                                       : Icons.history_rounded,
                                   color: dynamicPastel(
-                                      context,
-                                      HexColor(widget.budget.colour,
-                                          defaultColor: Theme.of(context)
-                                              .colorScheme
-                                              .primary),
-                                      amount: 0.5),
+                                    context,
+                                    HexColor(
+                                      widget.budget.colour,
+                                      defaultColor: Theme.of(
+                                        context,
+                                      ).colorScheme.primary,
+                                    ),
+                                    amount: 0.5,
+                                  ),
                                   iconColor: dynamicPastel(
-                                      context,
-                                      HexColor(widget.budget.colour,
-                                          defaultColor: Theme.of(context)
-                                              .colorScheme
-                                              .primary),
-                                      amount: 0.7,
-                                      inverse: true),
+                                    context,
+                                    HexColor(
+                                      widget.budget.colour,
+                                      defaultColor: Theme.of(
+                                        context,
+                                      ).colorScheme.primary,
+                                    ),
+                                    amount: 0.7,
+                                    inverse: true,
+                                  ),
                                   size: 38,
                                   iconPadding: 18,
                                 ),
@@ -284,56 +344,65 @@ class _BudgetContainerState extends State<BudgetContainer> {
                         ? EdgeInsetsDirectional.only(
                             start: 15,
                             end: 15,
-                            top: widget.squishInactiveBudgetContainerHeight == true &&
+                            top:
+                                widget.squishInactiveBudgetContainerHeight ==
+                                        true &&
                                     isOutOfRange
                                 ? 8.5
                                 : 16.5,
                             bottom:
-                                widget.squishInactiveBudgetContainerHeight == true &&
-                                        isOutOfRange
-                                    ? 0
-                                    : 8.5,
+                                widget.squishInactiveBudgetContainerHeight ==
+                                        true &&
+                                    isOutOfRange
+                                ? 0
+                                : 8.5,
                           )
                         : EdgeInsetsDirectional.symmetric(horizontal: 15),
                     child: StreamBuilder<double?>(
-                        stream: database.watchTotalOfBudget(
-                          allWallets: Provider.of<AllWallets>(context),
-                          start: budgetRange.start,
-                          end: budgetRange.end,
-                          categoryFks: widget.budget.categoryFks,
-                          categoryFksExclude: widget.budget.categoryFksExclude,
-                          budgetTransactionFilters:
-                              widget.budget.budgetTransactionFilters,
-                          memberTransactionFilters:
-                              widget.budget.memberTransactionFilters,
-                          onlyShowTransactionsBelongingToBudgetPk:
-                              widget.budget.sharedKey != null ||
-                                      widget.budget.addedTransactionsOnly == true
-                                  ? widget.budget.budgetPk
-                                  : null,
-                          budget: widget.budget,
-                          searchFilters:
-                              SearchFilters(paidStatus: [PaidStatus.notPaid]),
-                          paidOnly: false,
+                      stream: database.watchTotalOfBudget(
+                        allWallets: Provider.of<AllWallets>(context),
+                        start: budgetRange.start,
+                        end: budgetRange.end,
+                        categoryFks: widget.budget.categoryFks,
+                        categoryFksExclude: widget.budget.categoryFksExclude,
+                        budgetTransactionFilters:
+                            widget.budget.budgetTransactionFilters,
+                        memberTransactionFilters:
+                            widget.budget.memberTransactionFilters,
+                        onlyShowTransactionsBelongingToBudgetPk:
+                            widget.budget.sharedKey != null ||
+                                widget.budget.addedTransactionsOnly == true
+                            ? widget.budget.budgetPk
+                            : null,
+                        budget: widget.budget,
+                        searchFilters: SearchFilters(
+                          paidStatus: [PaidStatus.notPaid],
                         ),
-                        builder: (context, snapshot) {
-                          return BudgetTimeline(
-                            budget: widget.budget,
-                            percent: budgetAmount == 0
-                                ? 0
-                                : (totalSpent / budgetAmount * 100),
-                            yourPercent: 0,
-                            todayPercent: getPercentBetweenDates(
-                                budgetRange, dateForRangeLocal),
-                            dateForRange: dateForRangeLocal,
-                            ghostPercent: budgetAmount == 0
-                                ? 0
-                                : (((snapshot.data ?? 0) *
-                                            determineBudgetPolarity(widget.budget)) /
+                        paidOnly: false,
+                      ),
+                      builder: (context, snapshot) {
+                        return BudgetTimeline(
+                          budget: widget.budget,
+                          percent: budgetAmount == 0
+                              ? 0
+                              : (totalSpent / budgetAmount * 100),
+                          yourPercent: 0,
+                          todayPercent: getPercentBetweenDates(
+                            budgetRange,
+                            dateForRangeLocal,
+                          ),
+                          dateForRange: dateForRangeLocal,
+                          ghostPercent: budgetAmount == 0
+                              ? 0
+                              : (((snapshot.data ?? 0) *
+                                            determineBudgetPolarity(
+                                              widget.budget,
+                                            )) /
                                         budgetAmount) *
                                     100,
-                          );
-                        }),
+                        );
+                      },
+                    ),
                   ),
                   DaySpending(
                     budget: widget.budget,
@@ -342,7 +411,8 @@ class _BudgetContainerState extends State<BudgetContainer> {
                     padding: EdgeInsetsDirectional.only(
                       start: 10,
                       end: 10,
-                      bottom: widget.squishInactiveBudgetContainerHeight == true &&
+                      bottom:
+                          widget.squishInactiveBudgetContainerHeight == true &&
                               isOutOfRange
                           ? 4
                           : 17,
@@ -359,35 +429,38 @@ class _BudgetContainerState extends State<BudgetContainer> {
       },
     );
     ColorScheme budgetColorScheme = ColorScheme.fromSeed(
-      seedColor: HexColor(widget.budget.colour,
-          defaultColor: Theme.of(context).colorScheme.primary),
+      seedColor: HexColor(
+        widget.budget.colour,
+        defaultColor: Theme.of(context).colorScheme.primary,
+      ),
       brightness: determineBrightnessTheme(context),
     );
     Color backgroundColor = appStateSettings["materialYou"]
         ? widget.budget.colour == null
-            ? appStateSettings["accentSystemColor"] == true &&
-                    appStateSettings["materialYou"] &&
-                    appStateSettings["batterySaver"] == false
-                ? dynamicPastel(
-                    context,
-                    Theme.of(context).colorScheme.primary,
-                    amountDark: 0.85,
-                    amountLight: 0.96,
-                  )
-                : dynamicPastel(
-                    context, HexColor(appStateSettings["accentColor"]),
-                    amountDark: 0.8,
-                    amountLight: appStateSettings["batterySaver"] ? 0.8 : 0.92)
-            : dynamicPastel(
-                context,
-                budgetColorScheme.secondaryContainer,
-                amountDark: 0.6,
-                amountLight: 0.75,
-              )
-        : getColor(
-            context,
-            "lightDarkAccentHeavyLight",
-          );
+              ? appStateSettings["accentSystemColor"] == true &&
+                        appStateSettings["materialYou"] &&
+                        appStateSettings["batterySaver"] == false
+                    ? dynamicPastel(
+                        context,
+                        Theme.of(context).colorScheme.primary,
+                        amountDark: 0.85,
+                        amountLight: 0.96,
+                      )
+                    : dynamicPastel(
+                        context,
+                        HexColor(appStateSettings["accentColor"]),
+                        amountDark: 0.8,
+                        amountLight: appStateSettings["batterySaver"]
+                            ? 0.8
+                            : 0.92,
+                      )
+              : dynamicPastel(
+                  context,
+                  budgetColorScheme.secondaryContainer,
+                  amountDark: 0.6,
+                  amountLight: 0.75,
+                )
+        : getColor(context, "lightDarkAccentHeavyLight");
     return Container(
       decoration: BoxDecoration(
         boxShadow: boxShadowCheck(boxShadowGeneral(context)),
@@ -461,44 +534,48 @@ class DaySpending extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     double budgetAmount = budgetAmountToPrimaryCurrency(
-        Provider.of<AllWallets>(context, listen: true), budget);
-    bool isOutOfRange = budgetRange.end.difference(DateTime.now()).inDays < 0 ||
+      Provider.of<AllWallets>(context, listen: true),
+      budget,
+    );
+    bool isOutOfRange =
+        budgetRange.end.difference(DateTime.now()).inDays < 0 ||
         budgetRange.start.difference(DateTime.now()).inDays > 0;
     Widget textWidget = Padding(
       padding: EdgeInsetsDirectional.symmetric(horizontal: 6),
       child: large && isOutOfRange
           ? SizedBox(height: 1)
-          : Builder(builder: (context) {
-              // Add one because if there are zero days left, we want to make it the last day
-              int remainingDays =
-                  budgetRange.end.difference(DateTime.now().justDay()).inDays +
-                      1;
-              return TextFont(
-                textColor: getColor(context, "black").withAlpha(80),
-                text: isOutOfRange
-                    ? ""
-                    : getAmountPerDayString(
-                        context,
-                        totalAmount: totalAmount,
-                        budgetAmount: budgetAmount,
-                        budget: budget,
-                        remainingDays: remainingDays,
-                      ),
-                fontSize: large ? 14 : 13,
-                textAlign: TextAlign.center,
-                maxLines: 4,
-              );
-            }),
+          : Builder(
+              builder: (context) {
+                // Add one because if there are zero days left, we want to make it the last day
+                int remainingDays =
+                    budgetRange.end
+                        .difference(DateTime.now().justDay())
+                        .inDays +
+                    1;
+                return TextFont(
+                  textColor: getColor(context, "black").withAlpha(80),
+                  text: isOutOfRange
+                      ? ""
+                      : getAmountPerDayString(
+                          context,
+                          totalAmount: totalAmount,
+                          budgetAmount: budgetAmount,
+                          budget: budget,
+                          remainingDays: remainingDays,
+                        ),
+                  fontSize: large ? 14 : 13,
+                  textAlign: TextAlign.center,
+                  maxLines: 4,
+                );
+              },
+            ),
     );
     return Padding(
       padding: large && isOutOfRange ? EdgeInsetsDirectional.zero : padding,
       child: Center(
         child: large
             ? textWidget
-            : FittedBox(
-                fit: BoxFit.fitWidth,
-                child: textWidget,
-              ),
+            : FittedBox(fit: BoxFit.fitWidth, child: textWidget),
       ),
     );
   }
@@ -512,24 +589,27 @@ String getAmountPerDayString(
   required int remainingDays,
 }) {
   bool isIncomeBudget = budget.income;
-  double amountPerDay = ((totalAmount - budgetAmount) / remainingDays) *
+  double amountPerDay =
+      ((totalAmount - budgetAmount) / remainingDays) *
       determineBudgetPolarity(budget);
-  String remainingDaysString = "for".tr() +
+  String remainingDaysString =
+      "for".tr() +
       " " +
       remainingDays.toString() +
       " " +
       (remainingDays == 1 ? "more-day".tr() : "more-days".tr());
   bool isOverBudget =
       amountPerDay > 0 && isIncomeBudget || amountPerDay < 0 && !isIncomeBudget
-          ? true
-          : false;
+      ? true
+      : false;
 
   if (isOverBudget) {
     return convertToMoney(
-            Provider.of<AllWallets>(context),
-            !appStateSettings["showTotalSpentForBudget"]
-                ? totalAmount
-                : totalAmount - budgetAmount) +
+          Provider.of<AllWallets>(context),
+          !appStateSettings["showTotalSpentForBudget"]
+              ? totalAmount
+              : totalAmount - budgetAmount,
+        ) +
         (appStateSettings["showTotalSpentForBudget"]
             ? (" " + "over".tr() + " ")
             : " / ") +
@@ -568,8 +648,12 @@ class AnimatedGooBackground extends StatelessWidget {
         appStateSettings["appAnimations"] != AppAnimations.all.index) {
       return Container(
         decoration: BoxDecoration(
-          color:
-              dynamicPastel(context, color, amountLight: 0.6, amountDark: 0.3),
+          color: dynamicPastel(
+            context,
+            color,
+            amountLight: 0.6,
+            amountDark: 0.3,
+          ),
         ),
       );
     }
@@ -577,9 +661,7 @@ class AnimatedGooBackground extends StatelessWidget {
     return Transform(
       transform: Matrix4.skewX(0.001),
       child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white.withAlpha(200),
-        ),
+        decoration: BoxDecoration(color: Colors.white.withAlpha(200)),
         child: PlasmaRenderer(
           key: ValueKey(key),
           type: PlasmaType.infinity,
@@ -596,8 +678,8 @@ class AnimatedGooBackground extends StatelessWidget {
           variation1: 0,
           variation2: 0,
           variation3: 0,
-          rotation:
-              (randomInt[0] % (randomOffset > 0 ? randomOffset : 1)).toDouble(),
+          rotation: (randomInt[0] % (randomOffset > 0 ? randomOffset : 1))
+              .toDouble(),
         ),
       ),
     );
@@ -628,8 +710,9 @@ class BudgetTimeline extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    DateTime dateForRangeLocal =
-        dateForRange == null ? DateTime.now() : dateForRange!;
+    DateTime dateForRangeLocal = dateForRange == null
+        ? DateTime.now()
+        : dateForRange!;
     return Column(
       children: [
         Row(
@@ -640,17 +723,20 @@ class BudgetTimeline extends StatelessWidget {
                 : TextFont(
                     textAlign: TextAlign.center,
                     text: getWordedDateShort(
-                        getBudgetDate(budget, dateForRangeLocal).start,
-                        includeYear:
-                            budget.reoccurrence == BudgetReoccurence.yearly),
+                      getBudgetDate(budget, dateForRangeLocal).start,
+                      includeYear:
+                          budget.reoccurrence == BudgetReoccurence.yearly,
+                    ),
                     fontSize: large ? 16 : 12,
                   ),
             Expanded(
               child: BudgetProgress(
                 color: budgetColorScheme != null
                     ? budgetColorScheme!.primary
-                    : HexColor(budget.colour,
-                        defaultColor: Theme.of(context).colorScheme.primary),
+                    : HexColor(
+                        budget.colour,
+                        defaultColor: Theme.of(context).colorScheme.primary,
+                      ),
                 percent: percent,
                 yourPercent: yourPercent,
                 ghostPercent: ghostPercent,
@@ -663,9 +749,10 @@ class BudgetTimeline extends StatelessWidget {
                 : TextFont(
                     textAlign: TextAlign.center,
                     text: getWordedDateShort(
-                        getBudgetDate(budget, dateForRangeLocal).end,
-                        includeYear:
-                            budget.reoccurrence == BudgetReoccurence.yearly),
+                      getBudgetDate(budget, dateForRangeLocal).end,
+                      includeYear:
+                          budget.reoccurrence == BudgetReoccurence.yearly,
+                    ),
                     fontSize: large ? 16 : 12,
                   ),
           ],
@@ -679,23 +766,25 @@ class BudgetTimeline extends StatelessWidget {
                     TextFont(
                       textAlign: TextAlign.center,
                       text: getWordedDateShortMore(
-                          getBudgetDate(budget, dateForRangeLocal).start,
-                          includeYear:
-                              budget.reoccurrence == BudgetReoccurence.yearly),
+                        getBudgetDate(budget, dateForRangeLocal).start,
+                        includeYear:
+                            budget.reoccurrence == BudgetReoccurence.yearly,
+                      ),
                       fontSize: large ? 15 : 12,
                     ),
                     TextFont(
                       textAlign: TextAlign.center,
                       text: getWordedDateShortMore(
-                          getBudgetDate(budget, dateForRangeLocal).end,
-                          includeYear:
-                              budget.reoccurrence == BudgetReoccurence.yearly),
+                        getBudgetDate(budget, dateForRangeLocal).end,
+                        includeYear:
+                            budget.reoccurrence == BudgetReoccurence.yearly,
+                      ),
                       fontSize: large ? 15 : 12,
                     ),
                   ],
                 ),
               )
-            : Container()
+            : Container(),
       ],
     );
   }
@@ -767,46 +856,55 @@ class BudgetProgress extends StatelessWidget {
                     Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadiusDirectional.circular(50),
-                        color: backgroundColor ??
+                        color:
+                            backgroundColor ??
                             (appStateSettings["materialYou"]
                                 ? large
-                                    ? dynamicPastel(context, color,
-                                        amountLight: 0.9, amountDark: 0.8)
-                                    : dynamicPastel(
-                                        context,
-                                        dynamicPastel(context, color,
-                                            amount: 0.7, inverse: true),
-                                        amountLight: 0.87,
-                                        amountDark: 0.75)
+                                      ? dynamicPastel(
+                                          context,
+                                          color,
+                                          amountLight: 0.9,
+                                          amountDark: 0.8,
+                                        )
+                                      : dynamicPastel(
+                                          context,
+                                          dynamicPastel(
+                                            context,
+                                            color,
+                                            amount: 0.7,
+                                            inverse: true,
+                                          ),
+                                          amountLight: 0.87,
+                                          amountDark: 0.75,
+                                        )
                                 : large
-                                    ? getColor(context, "lightDarkAccent")
-                                    : getColor(
-                                        context, "lightDarkAccentHeavy")),
+                                ? getColor(context, "lightDarkAccent")
+                                : getColor(context, "lightDarkAccentHeavy")),
                       ),
                     ),
                     if (ghostPercent > 0)
                       Opacity(
                         opacity:
                             Theme.of(context).brightness == Brightness.light
-                                ? appStateSettings["materialYou"]
-                                    ? large
+                            ? appStateSettings["materialYou"]
+                                  ? large
                                         ? 0.4
                                         : 0.3
-                                    : 0.2
-                                : appStateSettings["materialYou"]
-                                    ? large
-                                        ? 0.1
-                                        : 0.13
-                                    : 0.15,
+                                  : 0.2
+                            : appStateSettings["materialYou"]
+                            ? large
+                                  ? 0.1
+                                  : 0.13
+                            : 0.15,
                         child: ClipRRect(
                           borderRadius: directionalityReverse(context) == -1
                               ? BorderRadiusDirectional.circular(50)
                               : (percent < 50
-                                  ? BorderRadiusDirectional.only(
-                                      topEnd: Radius.circular(50),
-                                      bottomEnd: Radius.circular(50),
-                                    )
-                                  : BorderRadiusDirectional.circular(50)),
+                                    ? BorderRadiusDirectional.only(
+                                        topEnd: Radius.circular(50),
+                                        bottomEnd: Radius.circular(50),
+                                      )
+                                    : BorderRadiusDirectional.circular(50)),
                           child: Container(
                             child: AnimatedProgress(
                               percent: percent + ghostPercent,
@@ -822,11 +920,11 @@ class BudgetProgress extends StatelessWidget {
                       borderRadius: directionalityReverse(context) == -1
                           ? BorderRadiusDirectional.circular(50)
                           : (percent < 50
-                              ? BorderRadiusDirectional.only(
-                                  topEnd: Radius.circular(50),
-                                  bottomEnd: Radius.circular(50),
-                                )
-                              : BorderRadiusDirectional.circular(50)),
+                                ? BorderRadiusDirectional.only(
+                                    topEnd: Radius.circular(50),
+                                    bottomEnd: Radius.circular(50),
+                                  )
+                                : BorderRadiusDirectional.circular(50)),
                       child: Container(
                         child: AnimatedProgress(
                           percent: percent,
@@ -842,9 +940,14 @@ class BudgetProgress extends StatelessWidget {
                       opacity: percent <= 40 ? 1 : 0,
                       child: getPercentText(
                         lightenPastel(
-                            dynamicPastel(context, color,
-                                inverse: true, amount: 0.7),
-                            amount: 0.3),
+                          dynamicPastel(
+                            context,
+                            color,
+                            inverse: true,
+                            amount: 0.7,
+                          ),
+                          amount: 0.3,
+                        ),
                       ),
                     ),
                   ],
@@ -855,11 +958,8 @@ class BudgetProgress extends StatelessWidget {
         ),
         showToday == true
             ? todayPercent < 0 || todayPercent > 100
-                ? Container(height: 39)
-                : TodayIndicator(
-                    percent: todayPercent,
-                    large: large,
-                  )
+                  ? Container(height: 39)
+                  : TodayIndicator(percent: todayPercent, large: large)
             : SizedBox.shrink(),
       ],
     );
@@ -914,7 +1014,8 @@ class _AnimatedProgressState extends State<AnimatedProgress> {
 
   @override
   Widget build(BuildContext context) {
-    double percent = widget.percent == double.infinity ||
+    double percent =
+        widget.percent == double.infinity ||
             widget.percent == double.negativeInfinity ||
             widget.otherPercent == double.infinity ||
             widget.otherPercent == double.negativeInfinity ||
@@ -946,15 +1047,18 @@ class _AnimatedProgressState extends State<AnimatedProgress> {
                   heightFactor: 1,
                   widthFactor: animateIn
                       ? (widget.otherPercent > 100
-                          ? 1
-                          : widget.otherPercent / 100)
+                            ? 1
+                            : widget.otherPercent / 100)
                       : 0,
                   child: Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadiusDirectional.circular(20),
-                      color: dynamicPastel(context, widget.color,
-                              amountDark: 0.1, amountLight: 0.3)
-                          .withOpacity(0.8),
+                      color: dynamicPastel(
+                        context,
+                        widget.color,
+                        amountDark: 0.1,
+                        amountLight: 0.3,
+                      ).withOpacity(0.8),
                     ),
                   ),
                 ),
@@ -963,8 +1067,8 @@ class _AnimatedProgressState extends State<AnimatedProgress> {
                 AnimatedOpacity(
                   opacity: percent > 40
                       ? fadeIn
-                          ? 1
-                          : 0
+                            ? 1
+                            : 0
                       : 0,
                   duration: Duration(milliseconds: 500),
                   child: widget.getPercentText!(
@@ -982,14 +1086,14 @@ class _AnimatedProgressState extends State<AnimatedProgress> {
                 duration: Duration(milliseconds: 1500),
                 width: animateIn
                     ? percent / 100 <= 0
-                        ? 0
-                        : widget.large
-                            ? 15
-                            : 10
+                          ? 0
+                          : widget.large
+                          ? 15
+                          : 10
                     : 0,
                 color: lightenPastel(widget.color, amount: 0.6),
               )
-            : SizedBox.shrink()
+            : SizedBox.shrink(),
       ],
     );
   }
@@ -997,7 +1101,7 @@ class _AnimatedProgressState extends State<AnimatedProgress> {
 
 class TodayIndicator extends StatefulWidget {
   TodayIndicator({Key? key, required this.percent, this.large = false})
-      : super(key: key);
+    : super(key: key);
 
   final double percent;
   final bool large;
@@ -1057,12 +1161,13 @@ class _TodayIndicatorState extends State<TodayIndicator> {
             progressSize = size;
           },
           child: Align(
-            alignment: (percent < percentThreshold
-                    ? FractionalOffset(0, 0)
-                    : indicatorOffsetPercent > 1
+            alignment:
+                (percent < percentThreshold
+                        ? FractionalOffset(0, 0)
+                        : indicatorOffsetPercent > 1
                         ? FractionalOffset(1, 0)
                         : FractionalOffset(indicatorOffsetPercent, 0))
-                .withDirectionality(context),
+                    .withDirectionality(context),
             child: Column(
               children: [
                 WidgetSize(
@@ -1076,14 +1181,19 @@ class _TodayIndicatorState extends State<TodayIndicator> {
                     child: SlideFadeTransition(
                       child: Container(
                         decoration: BoxDecoration(
-                            borderRadius: BorderRadiusDirectional.circular(6),
-                            color:
-                                Theme.of(context).brightness == Brightness.light
-                                    ? Color(0xFF1F1F1F)
-                                    : getColor(context, "black")),
+                          borderRadius: BorderRadiusDirectional.circular(6),
+                          color:
+                              Theme.of(context).brightness == Brightness.light
+                              ? Color(0xFF1F1F1F)
+                              : getColor(context, "black"),
+                        ),
                         child: Padding(
                           padding: EdgeInsetsDirectional.only(
-                              top: 3, end: 5, start: 5, bottom: 3),
+                            top: 3,
+                            end: 5,
+                            start: 5,
+                            bottom: 3,
+                          ),
                           child: MediaQuery(
                             child: TextFont(
                               textAlign: TextAlign.center,
@@ -1091,8 +1201,9 @@ class _TodayIndicatorState extends State<TodayIndicator> {
                               fontSize: widget.large ? 10 : 9,
                               textColor: getColor(context, "white"),
                             ),
-                            data: MediaQuery.of(context)
-                                .copyWith(textScaleFactor: 1.0),
+                            data: MediaQuery.of(
+                              context,
+                            ).copyWith(textScaleFactor: 1.0),
                           ),
                         ),
                       ),
@@ -1104,11 +1215,13 @@ class _TodayIndicatorState extends State<TodayIndicator> {
                   child: Container(
                     width: 3,
                     margin: EdgeInsetsDirectional.symmetric(
-                        horizontal: horizontalMargin),
+                      horizontal: horizontalMargin,
+                    ),
                     height: widget.large ? 27 : 22,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadiusDirectional.vertical(
-                          bottom: Radius.circular(5)),
+                        bottom: Radius.circular(5),
+                      ),
                       color: getColor(context, "black").withOpacity(0.4),
                     ),
                   ),
@@ -1118,17 +1231,21 @@ class _TodayIndicatorState extends State<TodayIndicator> {
           ),
         ),
         Align(
-          alignment:
-              FractionalOffset(percent / 100, 0).withDirectionality(context),
+          alignment: FractionalOffset(
+            percent / 100,
+            0,
+          ).withDirectionality(context),
           child: FadeIn(
             child: Container(
-              margin:
-                  EdgeInsetsDirectional.symmetric(horizontal: horizontalMargin),
+              margin: EdgeInsetsDirectional.symmetric(
+                horizontal: horizontalMargin,
+              ),
               width: 3,
               height: widget.large ? 27 : 22,
               decoration: BoxDecoration(
                 borderRadius: BorderRadiusDirectional.vertical(
-                    bottom: Radius.circular(5)),
+                  bottom: Radius.circular(5),
+                ),
                 color: getColor(context, "black").withOpacity(0.4),
               ),
             ),
@@ -1185,16 +1302,18 @@ class _BudgetSpenderSummaryState extends State<BudgetSpenderSummary> {
     members = (widget.budget.sharedAllMembersEver ?? []).toSet();
     // print(widget.budget.sharedAllMembersEver);
     for (String member in members) {
-      watchedSpenderTotals.add(database.watchTotalSpentByUser(
-        Provider.of<AllWallets>(context, listen: false),
-        widget.budgetRange.start,
-        widget.budgetRange.end,
-        widget.budget.categoryFks,
-        widget.budget.categoryFksExclude,
-        member,
-        widget.budget.budgetPk,
-        allTime: widget.allTime,
-      ));
+      watchedSpenderTotals.add(
+        database.watchTotalSpentByUser(
+          Provider.of<AllWallets>(context, listen: false),
+          widget.budgetRange.start,
+          widget.budgetRange.end,
+          widget.budget.categoryFks,
+          widget.budget.categoryFksExclude,
+          member,
+          widget.budget.budgetPk,
+          allTime: widget.allTime,
+        ),
+      );
     }
     mergedStreams = StreamZip(watchedSpenderTotals);
     setState(() {});
@@ -1205,7 +1324,8 @@ class _BudgetSpenderSummaryState extends State<BudgetSpenderSummary> {
     // if (widget.budget.sharedTransactionsShow ==
     //     SharedTransactionsShow.onlyIfOwner) return SizedBox.shrink();
     if (widget.budget.memberTransactionFilters ==
-        [appStateSettings["currentUserEmail"]]) return SizedBox.shrink();
+        [appStateSettings["currentUserEmail"]])
+      return SizedBox.shrink();
     if (mergedStreams == null) return SizedBox.shrink();
     return StreamBuilder<List<double?>>(
       stream: mergedStreams,
@@ -1271,9 +1391,10 @@ class _BudgetSpenderSummaryState extends State<BudgetSpenderSummary> {
                     duration: Duration(milliseconds: 500),
                     color: selectedMember == spender.member
                         ? dynamicPastel(
-                                context, Theme.of(context).colorScheme.primary,
-                                amount: 0.3)
-                            .withAlpha(80)
+                            context,
+                            Theme.of(context).colorScheme.primary,
+                            amount: 0.3,
+                          ).withAlpha(80)
                         : Colors.transparent,
                     padding: EdgeInsetsDirectional.only(
                       start: 20,
@@ -1289,24 +1410,22 @@ class _BudgetSpenderSummaryState extends State<BudgetSpenderSummary> {
                         //   margin: EdgeInsetsDirectional.zero,
                         // ),
                         MemberSpendingPercent(
-                          displayLetter: getMemberNickname(spender.member)
-                              .capitalizeFirst
-                              .substring(0, 1),
+                          displayLetter: getMemberNickname(
+                            spender.member,
+                          ).capitalizeFirst.substring(0, 1),
                           percent: totalSpent == 0
                               ? 0
                               : spender.amount / totalSpent * 100,
                           progressBackgroundColor:
                               selectedMember == spender.member
-                                  ? getColor(context, "white")
-                                  : getColor(context, "lightDarkAccentHeavy"),
+                              ? getColor(context, "white")
+                              : getColor(context, "lightDarkAccentHeavy"),
                           color: Theme.of(context).colorScheme.primary,
                           size: widget.isLarge ? 28 : 28,
                           insetPadding: widget.isLarge ? 23 : 18,
                           isLarge: widget.isLarge,
                         ),
-                        Container(
-                          width: 15,
-                        ),
+                        Container(width: 15),
                         Expanded(
                           child: Container(
                             child: Column(
@@ -1317,22 +1436,23 @@ class _BudgetSpenderSummaryState extends State<BudgetSpenderSummary> {
                                   text: getMemberNickname(spender.member),
                                   fontSize: widget.isLarge ? 19 : 18,
                                 ),
-                                SizedBox(
-                                  height: widget.isLarge ? 3 : 1,
-                                ),
+                                SizedBox(height: widget.isLarge ? 3 : 1),
                                 TextFont(
                                   maxLines: 1,
-                                  text: (totalSpent == 0
+                                  text:
+                                      (totalSpent == 0
                                           ? "0"
                                           : (spender.amount / totalSpent * 100)
-                                              .toStringAsFixed(0)) +
+                                                .toStringAsFixed(0)) +
                                       "% of budget",
                                   fontSize: 14,
                                   textColor: selectedMember == spender.member
-                                      ? getColor(context, "black")
-                                          .withOpacity(0.4)
+                                      ? getColor(
+                                          context,
+                                          "black",
+                                        ).withOpacity(0.4)
                                       : getColor(context, "textLight"),
-                                )
+                                ),
                               ],
                             ),
                           ),
@@ -1344,41 +1464,44 @@ class _BudgetSpenderSummaryState extends State<BudgetSpenderSummary> {
                             TextFont(
                               fontWeight: FontWeight.bold,
                               text: convertToMoney(
-                                  Provider.of<AllWallets>(context),
-                                  spender.amount),
+                                Provider.of<AllWallets>(context),
+                                spender.amount,
+                              ),
                               fontSize: widget.isLarge ? 21 : 20,
                             ),
-                            SizedBox(
-                              height: 1,
-                            ),
+                            SizedBox(height: 1),
                             StreamBuilder<List<Transaction>>(
-                                stream: database.watchAllTransactionsByUser(
-                                    start: widget.budgetRange.start,
-                                    end: widget.budgetRange.end,
-                                    categoryFks: widget.budget.categoryFks,
-                                    categoryFksExclude:
-                                        widget.budget.categoryFksExclude,
-                                    userEmail: spender.member),
-                                builder: (context, snapshot) {
-                                  if (snapshot.hasData) {
-                                    return TextFont(
-                                      text: snapshot.data!.length.toString() +
-                                          " " +
-                                          (snapshot.data!.length == 1
-                                              ? "transaction".tr().toLowerCase()
-                                              : "transactions"
+                              stream: database.watchAllTransactionsByUser(
+                                start: widget.budgetRange.start,
+                                end: widget.budgetRange.end,
+                                categoryFks: widget.budget.categoryFks,
+                                categoryFksExclude:
+                                    widget.budget.categoryFksExclude,
+                                userEmail: spender.member,
+                              ),
+                              builder: (context, snapshot) {
+                                if (snapshot.hasData) {
+                                  return TextFont(
+                                    text:
+                                        snapshot.data!.length.toString() +
+                                        " " +
+                                        (snapshot.data!.length == 1
+                                            ? "transaction".tr().toLowerCase()
+                                            : "transactions"
                                                   .tr()
                                                   .toLowerCase()),
-                                      fontSize: 14,
-                                      textColor:
-                                          selectedMember == spender.member
-                                              ? getColor(context, "black")
-                                                  .withOpacity(0.4)
-                                              : getColor(context, "textLight"),
-                                    );
-                                  }
-                                  return SizedBox.shrink();
-                                }),
+                                    fontSize: 14,
+                                    textColor: selectedMember == spender.member
+                                        ? getColor(
+                                            context,
+                                            "black",
+                                          ).withOpacity(0.4)
+                                        : getColor(context, "textLight"),
+                                  );
+                                }
+                                return SizedBox.shrink();
+                              },
+                            ),
                           ],
                         ),
                       ],
@@ -1390,10 +1513,12 @@ class _BudgetSpenderSummaryState extends State<BudgetSpenderSummary> {
           }
         }
 
-        return Column(children: [
-          // HorizontalBarChart(data: chartData),
-          ...memberWidgets
-        ]);
+        return Column(
+          children: [
+            // HorizontalBarChart(data: chartData),
+            ...memberWidgets,
+          ],
+        );
       },
     );
   }
@@ -1421,36 +1546,39 @@ class MemberSpendingPercent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(alignment: AlignmentDirectional.center, children: [
-      Padding(
-        padding: EdgeInsetsDirectional.all(insetPadding / 2),
-        child: TextFont(
-          text: displayLetter,
-          fontWeight: FontWeight.bold,
-          fontSize: isLarge ? 23 : 21,
-          textColor: dynamicPastel(
-            context,
-            color,
-            amount: 0.4,
-            amountLight: 0.7,
-            inverse: true,
+    return Stack(
+      alignment: AlignmentDirectional.center,
+      children: [
+        Padding(
+          padding: EdgeInsetsDirectional.all(insetPadding / 2),
+          child: TextFont(
+            text: displayLetter,
+            fontWeight: FontWeight.bold,
+            fontSize: isLarge ? 23 : 21,
+            textColor: dynamicPastel(
+              context,
+              color,
+              amount: 0.4,
+              amountLight: 0.7,
+              inverse: true,
+            ),
           ),
         ),
-      ),
-      AnimatedSwitcher(
-        duration: Duration(milliseconds: 300),
-        child: Container(
-          key: ValueKey(progressBackgroundColor.toString()),
-          height: size + insetPadding,
-          width: size + insetPadding,
-          child: AnimatedCircularProgress(
-            percent: percent / 100,
-            backgroundColor: progressBackgroundColor,
-            foregroundColor: color,
+        AnimatedSwitcher(
+          duration: Duration(milliseconds: 300),
+          child: Container(
+            key: ValueKey(progressBackgroundColor.toString()),
+            height: size + insetPadding,
+            width: size + insetPadding,
+            child: AnimatedCircularProgress(
+              percent: percent / 100,
+              backgroundColor: progressBackgroundColor,
+              foregroundColor: color,
+            ),
           ),
         ),
-      ),
-    ]);
+      ],
+    );
   }
 }
 
@@ -1478,12 +1606,11 @@ class HorizontalBarChart extends StatelessWidget {
                 flex: (data[i].units * 100).toInt(),
                 child: Padding(
                   padding: EdgeInsetsDirectional.only(
-                      end: i == data.length - 1 ? 0 : 5),
-                  child: Container(
-                    color: data[i].color,
+                    end: i == data.length - 1 ? 0 : 5,
                   ),
+                  child: Container(color: data[i].color),
                 ),
-              )
+              ),
           ],
         ),
       ),
