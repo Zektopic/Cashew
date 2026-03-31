@@ -18,10 +18,16 @@
 - 2025-03-29: Iterative Enhancement - Audited the obfuscation logic across exported CSV reports. Determined that data should remain unobfuscated to preserve export utility. However, user-generated fields (like transaction names and notes) are now sanitized to prevent CSV Injection (Formula Injection) vulnerabilities by prefixing risky characters (`=`, `+`, `-`, `@`, `\t`, `\r`, `\n`) with a single quote.
 - 2025-03-30: Iterative Enhancement - Added an `AnimatedSwitcher` to the `TextFont` displaying obscured amounts in `TransactionEntryAmount` and `WalletEntry` to provide smooth visual feedback (fade animation) during auto-collapse transitions between revealed and obscured states.
 - 2025-03-31: Iterative Enhancement - Extended the `AnimatedSwitcher` visual feedback animations to `TransactionsAmountBox` and `BudgetContainer` to ensure a uniform and smooth user experience across all major amount displays during temporary reveal transitions.
-**Next Planned Step:** Consider introducing a haptic feedback pulse when the temporary reveal is activated, or extend the feature to the remaining minor summary widgets to fully complete the privacy mode implementation.
+- 2025-04-01: Iterative Enhancement - Introduced a haptic feedback pulse (`HapticFeedback.selectionClick()`) when the temporary reveal is activated across all major UI components (`TransactionEntryAmount`, `TransactionsAmountBox`, `WalletEntry`, `BudgetContainer`, `BudgetPage`, and `SelectedTransactionsAppBar`). This provides tactile confirmation to the user, improving accessibility and user confidence when interacting with sensitive data.
+**Next Planned Step:** Extend the temporary reveal feature to the remaining minor summary widgets (e.g., custom goal widgets or specific stat cards) to fully complete the privacy mode implementation across all corners of the application.
 
 ## 🚨 Critical Security Learnings
 *Only add entries here for unique, repo-specific security gaps, unexpected side effects, or reusable patterns.*
+- **2025-04-01 - Log Injection Vulnerability:**
+  - **Vulnerability/Gap:** The custom `LogService` (`budget/lib/struct/logging.dart`) accepted raw string messages without sanitizing newlines (`\n` and `\r`). This allowed potential log forging/injection, where an attacker could inject forged log entries by including newline characters in input fields that get logged.
+  - **Learning:** Any input that eventually becomes part of a log entry must be sanitized to prevent log spoofing, ensuring the integrity and auditability of the application's logs.
+  - **Prevention:** Before appending to the log array or file, replace carriage returns (`\r`) and newlines (`\n`) with their escaped string equivalents (`\\r` and `\\n`).
+
 - **2024-03-24 - Initial Scan:**
   - **Vulnerability/Gap:** Checked for standard client-side issues (SQLi, exposed secrets, insecure webviews). Codebase relies on `drift` ORM and safe HTTP practices.
   - **Learning:** The architecture safely separates raw API secrets (Firebase config files) which are intended for public client distribution, from backend administrative roles.

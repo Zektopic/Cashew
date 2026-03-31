@@ -8,6 +8,7 @@ import 'dart:async';
 import 'package:budget/widgets/textWidgets.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:budget/widgets/countNumber.dart';
 import 'package:provider/provider.dart';
 
@@ -67,6 +68,7 @@ class _TransactionsAmountBoxState extends State<TransactionsAmountBox> {
         button: (openContainer) {
           return Listener(
             onPointerDown: (_) {
+              HapticFeedback.selectionClick();
               setState(() => _isRevealed = true);
               _revealTimer?.cancel();
               _revealTimer = Timer(Duration(seconds: 2), () {

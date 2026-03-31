@@ -27,6 +27,7 @@ import 'package:drift/drift.dart' hide Column;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:budget/widgets/countNumber.dart';
 import 'package:budget/widgets/framework/popupFramework.dart';
@@ -198,6 +199,7 @@ class _SelectedTransactionsAppBarState extends State<SelectedTransactionsAppBar>
                                 ),
                                 Listener(
                                   onPointerDown: (_) {
+                                    HapticFeedback.selectionClick();
                                     setState(() => _isRevealed = true);
                                     _revealTimer?.cancel();
                                     _revealTimer = Timer(Duration(seconds: 2), () {

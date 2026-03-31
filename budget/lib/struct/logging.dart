@@ -25,7 +25,11 @@ class LogService {
       bool shouldLog =
           !filterKeywords.any((keyword) => message.contains(keyword));
       if (shouldLog) {
-        _logs.insert(0, "[${DateTime.now()}] : $message");
+        // Prevent log forging/injection by sanitizing newlines
+        String sanitizedMessage = message
+            .replaceAll('\r', '\\r')
+            .replaceAll('\n', '\\n');
+        _logs.insert(0, "[${DateTime.now()}] : $sanitizedMessage");
       }
 
       if (_logs.length > maxLogSize) {
