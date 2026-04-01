@@ -147,7 +147,6 @@ int countDecimalDigits(String value) {
   for (int i = decimalIndex + 1; i < value.length; i++) {
     count++;
   }
-  print(count);
   return count;
 }
 
