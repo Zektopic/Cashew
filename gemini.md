@@ -22,3 +22,7 @@
   - **Vulnerability/Gap:** Checked for standard client-side issues (SQLi, exposed secrets, insecure webviews). Codebase relies on `drift` ORM and safe HTTP practices.
   - **Learning:** The architecture safely separates raw API secrets (Firebase config files) which are intended for public client distribution, from backend administrative roles.
   - **Prevention:** Continue to use parameterized inputs via ORM (`drift`) and avoid dynamic `eval` or insecure `WebView` integrations.
+- **2025-05-22 - Log Injection (Log Forging):**
+  - **Vulnerability/Gap:** The `LogService.log` function was found to be vulnerable to log injection (also known as log forging). An attacker could inject newline (`\n`) or carriage return (`\r`) characters into messages that were being logged, allowing them to create fake log entries that appeared to be from the system.
+  - **Learning:** Even internal logging mechanisms must sanitize input if the messages can originate from untrusted sources (e.g., error messages that include user-provided data or API responses).
+  - **Prevention:** Always sanitize log messages by replacing or stripping control characters like `\n` and `\r` before they are written to the log store or printed to the console.

@@ -20,12 +20,18 @@ class LogService {
     "[🌎 Easy Localization] [WARNING]",
   ];
 
+  String _sanitizeLogMessage(String message) {
+    return message.replaceAll('\n', ' ').replaceAll('\r', ' ');
+  }
+
   void log(String message) {
+    String sanitizedMessage = _sanitizeLogMessage(message);
+
     if (appStateSettings["logging"] == true) {
       bool shouldLog =
           !filterKeywords.any((keyword) => message.contains(keyword));
       if (shouldLog) {
-        _logs.insert(0, "[${DateTime.now()}] : $message");
+        _logs.insert(0, "[${DateTime.now()}] : $sanitizedMessage");
       }
 
       if (_logs.length > maxLogSize) {
@@ -34,7 +40,7 @@ class LogService {
     }
 
     Zone.root.run(() {
-      print(message);
+      print(sanitizedMessage);
     });
   }
 
