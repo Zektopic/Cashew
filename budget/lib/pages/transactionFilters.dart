@@ -321,57 +321,89 @@ class SearchFilters {
   }
 
   String getFilterString() {
-    String outString = "";
+    StringBuffer outString = StringBuffer();
     for (String element in walletPks) {
-      outString += "walletPks:-:" + element + ":-:";
+      outString.write("walletPks:-:");
+      outString.write(element);
+      outString.write(":-:");
     }
     for (String element in categoryPks) {
-      outString += "categoryPks:-:" + element + ":-:";
+      outString.write("categoryPks:-:");
+      outString.write(element);
+      outString.write(":-:");
     }
     for (String element in subcategoryPks ?? []) {
-      outString += "subcategoryPks:-:" + element + ":-:";
+      outString.write("subcategoryPks:-:");
+      outString.write(element);
+      outString.write(":-:");
     }
     if (subcategoryPks == null) {
-      outString += "subcategoryPks:-:" + "null" + ":-:";
+      outString.write("subcategoryPks:-:null:-:");
     }
     for (String? element in budgetPks) {
-      outString += "budgetPks:-:" + element.toString() + ":-:";
+      outString.write("budgetPks:-:");
+      outString.write(element.toString());
+      outString.write(":-:");
     }
     for (String? element in excludedBudgetPks) {
-      outString += "excludedBudgetPks:-:" + element.toString() + ":-:";
+      outString.write("excludedBudgetPks:-:");
+      outString.write(element.toString());
+      outString.write(":-:");
     }
     for (String? element in objectivePks) {
-      outString += "objectivePks:-:" + element.toString() + ":-:";
+      outString.write("objectivePks:-:");
+      outString.write(element.toString());
+      outString.write(":-:");
     }
     for (String? element in objectiveLoanPks) {
-      outString += "objectiveLoanPks:-:" + element.toString() + ":-:";
+      outString.write("objectiveLoanPks:-:");
+      outString.write(element.toString());
+      outString.write(":-:");
     }
     for (ExpenseIncome element in expenseIncome) {
-      outString += "expenseIncome:-:" + (element.index).toString() + ":-:";
+      outString.write("expenseIncome:-:");
+      outString.write(element.index.toString());
+      outString.write(":-:");
     }
-    outString += "positiveCashFlow:-:" + positiveCashFlow.toString() + ":-:";
+    outString.write("positiveCashFlow:-:");
+    outString.write(positiveCashFlow.toString());
+    outString.write(":-:");
     for (PaidStatus element in paidStatus) {
-      outString += "paidStatus:-:" + (element.index).toString() + ":-:";
+      outString.write("paidStatus:-:");
+      outString.write(element.index.toString());
+      outString.write(":-:");
     }
     for (TransactionSpecialType? element in transactionTypes) {
-      outString +=
-          "transactionTypes:-:" + (element?.index ?? null).toString() + ":-:";
+      outString.write("transactionTypes:-:");
+      outString.write((element?.index).toString());
+      outString.write(":-:");
     }
     for (BudgetTransactionFilters element in budgetTransactionFilters) {
-      outString +=
-          "budgetTransactionFilters:-:" + (element.index).toString() + ":-:";
+      outString.write("budgetTransactionFilters:-:");
+      outString.write(element.index.toString());
+      outString.write(":-:");
     }
     for (MethodAdded? element in methodAdded) {
-      outString +=
-          "methodAdded:-:" + (element?.index ?? null).toString() + ":-:";
+      outString.write("methodAdded:-:");
+      outString.write((element?.index).toString());
+      outString.write(":-:");
     }
-    outString += "amountRange:-:" + amountRange.toString() + ":-:";
-    outString += "dateTimeRange:-:" + dateTimeRange.toString() + ":-:";
-    outString += "searchQuery:-:" + searchQuery.toString() + ":-:";
-    outString += "titleContains:-:" + titleContains.toString() + ":-:";
-    outString += "noteContains:-:" + noteContains.toString() + ":-:";
-    //print(outString);
-    return outString;
+    outString.write("amountRange:-:");
+    outString.write(amountRange.toString());
+    outString.write(":-:");
+    outString.write("dateTimeRange:-:");
+    outString.write(dateTimeRange.toString());
+    outString.write(":-:");
+    outString.write("searchQuery:-:");
+    outString.write(searchQuery.toString());
+    outString.write(":-:");
+    outString.write("titleContains:-:");
+    outString.write(titleContains.toString());
+    outString.write(":-:");
+    outString.write("noteContains:-:");
+    outString.write(noteContains.toString());
+    outString.write(":-:");
+    return outString.toString();
   }
 }
 
