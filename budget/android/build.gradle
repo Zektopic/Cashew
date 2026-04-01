@@ -29,6 +29,19 @@ subprojects {
     project.evaluationDependsOn(':app')
 }
 
+gradle.projectsEvaluated {
+    subprojects { project ->
+        def javaTask = project.tasks.findByName('compileDebugJavaWithJavac')
+        if (javaTask != null) {
+            project.tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+                kotlinOptions {
+                    jvmTarget = javaTask.targetCompatibility
+                }
+            }
+        }
+    }
+}
+
 tasks.register("clean", Delete) {
     delete rootProject.buildDir
 }

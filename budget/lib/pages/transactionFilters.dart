@@ -1433,7 +1433,8 @@ class AppliedFilterChips extends StatelessWidget {
       ));
     }
     // Budgets
-    for (Budget budget in await database.getAllBudgets()) {
+    List<Budget> allBudgets = await database.getAllBudgets();
+    for (Budget budget in allBudgets) {
       if (searchFilters.budgetPks.contains(budget.budgetPk))
         out.add(AppliedFilterChip(
           label: budget.name,
@@ -1445,7 +1446,7 @@ class AppliedFilterChips extends StatelessWidget {
         ));
     }
     // Excluded Budgets
-    for (Budget budget in await database.getAllBudgets()) {
+    for (Budget budget in allBudgets) {
       if (searchFilters.excludedBudgetPks.contains(budget.budgetPk))
         out.add(AppliedFilterChip(
           label: "excluded-from".tr() + ": " + budget.name,
