@@ -86,6 +86,51 @@ void main() {
     });
   });
 
+  group('hasDecimalPoints', () {
+    test('null returns false', () {
+      expect(hasDecimalPoints(null), false);
+    });
+
+    test('integer double returns false', () {
+      expect(hasDecimalPoints(10.0), false);
+    });
+
+    test('double with decimal part returns true', () {
+      expect(hasDecimalPoints(10.5), true);
+    });
+
+    test('double with trailing zeros after decimal value returns true', () {
+      expect(hasDecimalPoints(10.50), true);
+    });
+
+    test('double with leading zeros in decimal part returns true', () {
+      expect(hasDecimalPoints(10.05), true);
+    });
+
+    test('zero returns false', () {
+      expect(hasDecimalPoints(0.0), false);
+    });
+
+    test('negative zero returns false', () {
+      expect(hasDecimalPoints(-0.0), false);
+    });
+
+    test('negative number with decimal part returns true', () {
+      expect(hasDecimalPoints(-3.14), true);
+    });
+
+    test('small fractional number returns true', () {
+      expect(hasDecimalPoints(0.0001), true);
+    });
+
+    test('exponential notation double string characterization', () {
+      // 1e-7 and smaller are represented as e.g. '1e-7' in Dart without a '.',
+      // thus hasDecimalPoints returns false. This is characterization of current behavior.
+      expect(hasDecimalPoints(0.0000001), false);
+      expect(hasDecimalPoints(1e-10), false);
+    });
+  });
+
   group('cleanupNoteStringWithURLs', () {
     test('removes standard http URL', () {
       final input = "Check out this link: http://example.com/page";
