@@ -85,4 +85,51 @@ void main() {
       expect(daysBetween(from, to), 1);
     });
   });
+
+  group('getDomainNameFromURL', () {
+    test('extracts domain from http URL', () {
+      expect(getDomainNameFromURL('http://example.com'), 'example.com');
+    });
+
+    test('extracts domain from https URL', () {
+      expect(getDomainNameFromURL('https://example.com'), 'example.com');
+    });
+
+    test('removes www from domain', () {
+      expect(getDomainNameFromURL('https://www.example.com'), 'example.com');
+    });
+
+    test('extracts domain with path', () {
+      expect(getDomainNameFromURL('http://www.example.com/path/to/page'), 'example.com');
+    });
+
+    test('extracts domain with query parameters', () {
+      expect(getDomainNameFromURL('https://example.com/search?q=test'), 'example.com');
+    });
+
+    test('extracts domain with hash fragment', () {
+      expect(getDomainNameFromURL('https://example.com/#section'), 'example.com');
+    });
+
+    test('ignores ports in URL', () {
+      expect(getDomainNameFromURL('https://example.com:8080'), 'example.com');
+    });
+
+    test('handles URLs without protocol', () {
+      expect(getDomainNameFromURL('example.com'), 'example.com');
+    });
+
+    test('handles URLs with authentication', () {
+      expect(getDomainNameFromURL('user:pass@example.com'), 'example.com');
+      expect(getDomainNameFromURL('https://user:pass@example.com'), 'example.com');
+    });
+
+    test('returns empty string for empty input', () {
+      expect(getDomainNameFromURL(''), '');
+    });
+
+    test('returns the original string if not a standard URL format but no special characters', () {
+      expect(getDomainNameFromURL('invalid_url'), 'invalid_url');
+    });
+  });
 }
