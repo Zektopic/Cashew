@@ -336,6 +336,13 @@ Future<int> downloadTransactionsFromBudgets(
     FirebaseFirestore db, List<DocumentSnapshot> snapshots) async {
   if (appStateSettings["sharedBudgets"] == false) return 0;
   int totalUpdated = 0;
+
+  List<TransactionCategory> allCategories =
+      await database.getAllCategories(includeSubCategories: true);
+  Map<String, TransactionCategory> categoryCache = {
+    for (var cat in allCategories) cat.name: cat
+  };
+
   for (DocumentSnapshot budget in snapshots) {
     Set<String> allMembersEver = {};
     Map<dynamic, dynamic> budgetDecoded = budget.data() as Map;
@@ -399,8 +406,11 @@ Future<int> downloadTransactionsFromBudgets(
           transaction["logType"] == "update") {
         TransactionCategory selectedCategory;
         try {
-          selectedCategory = await database
-              .getCategoryInstanceGivenName(transactionDecoded["categoryName"]);
+          if (categoryCache.containsKey(transactionDecoded["categoryName"])) {
+            selectedCategory = categoryCache[transactionDecoded["categoryName"]]!;
+          } else {
+            throw Exception("Category not found in cache");
+          }
         } catch (_) {
           int numberOfCategories =
               (await database.getTotalCountOfCategories())[0] ?? 0;
@@ -420,6 +430,7 @@ Future<int> downloadTransactionsFromBudgets(
           );
           selectedCategory = await database
               .getCategoryInstanceGivenName(transactionDecoded["categoryName"]);
+          categoryCache[transactionDecoded["categoryName"]] = selectedCategory;
         }
 
         await database.createOrUpdateFromSharedTransaction(
