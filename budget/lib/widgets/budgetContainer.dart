@@ -20,6 +20,7 @@ import 'package:budget/widgets/util/widgetSize.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:sa3_liquid/sa3_liquid.dart';
 import 'dart:async';
@@ -467,6 +468,7 @@ class _BudgetContainerState extends State<BudgetContainer> {
       ),
       child: Listener(
         onPointerDown: (_) {
+          HapticFeedback.selectionClick();
           setState(() => _isRevealed = true);
           _revealTimer?.cancel();
           _revealTimer = Timer(Duration(seconds: 2), () {

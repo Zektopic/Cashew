@@ -1332,6 +1332,7 @@ class _TotalSpentState extends State<TotalSpent> {
 
     return Listener(
       onPointerDown: (_) {
+        HapticFeedback.selectionClick();
         setState(() => _isRevealed = true);
         _revealTimer?.cancel();
         _revealTimer = Timer(Duration(seconds: 2), () {

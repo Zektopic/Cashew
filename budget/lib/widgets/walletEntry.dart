@@ -17,6 +17,7 @@ import 'package:budget/widgets/transactionEntry/incomeAmountArrow.dart';
 import 'package:budget/widgets/watchAllWallets.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:budget/pages/walletDetailsPage.dart';
 import 'package:budget/colors.dart';
 import 'package:provider/provider.dart';
@@ -361,6 +362,7 @@ class _AmountAccountState extends State<AmountAccount> {
             : (absoluteZero(widget.walletWithDetails.totalSpent ?? 0));
     return Listener(
       onPointerDown: (_) {
+        HapticFeedback.selectionClick();
         setState(() => _isRevealed = true);
         _revealTimer?.cancel();
         _revealTimer = Timer(Duration(seconds: 2), () {

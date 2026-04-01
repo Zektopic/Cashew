@@ -8,6 +8,7 @@ import 'package:budget/widgets/animatedExpanded.dart';
 import 'package:budget/widgets/countNumber.dart';
 import 'package:budget/widgets/textWidgets.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/src/provider.dart';
 
 import 'incomeAmountArrow.dart';
@@ -44,6 +45,7 @@ class _TransactionEntryAmountState extends State<TransactionEntryAmount> {
             Provider.of<AllWallets>(context), widget.transaction.walletFk));
     return Listener(
       onPointerDown: (_) {
+        HapticFeedback.selectionClick();
         setState(() => _isRevealed = true);
         _revealTimer?.cancel();
         _revealTimer = Timer(Duration(seconds: 2), () {
