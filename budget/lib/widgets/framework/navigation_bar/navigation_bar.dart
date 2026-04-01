@@ -75,8 +75,6 @@ class NavigationBar extends StatelessWidget {
   ///
   /// The value of [destinations] must be a list of two or more
   /// [NavigationDestination] values.
-  // TODO(goderbauer): This class cannot be const constructed, https://github.com/dart-lang/linter/issues/3366.
-  // ignore: prefer_const_constructors_in_immutables
   NavigationBar({
     super.key,
     this.animationDuration,
