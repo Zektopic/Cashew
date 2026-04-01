@@ -8,6 +8,13 @@ allprojects {
 rootProject.buildDir = '../build'
 
 subprojects {
+    configurations.all {
+        resolutionStrategy {
+            force 'androidx.core:core:1.13.1'
+            force 'androidx.core:core-ktx:1.13.1'
+            force 'androidx.browser:browser:1.8.0'
+        }
+    }
     project.buildDir = "${rootProject.buildDir}/${project.name}"
 
     project.plugins.whenPluginAdded { plugin ->
@@ -27,6 +34,21 @@ subprojects {
     }
 
     project.evaluationDependsOn(':app')
+
+    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+        if (project.name == "app_settings") {
+            kotlinOptions.jvmTarget = "11"  // app_settings java target is 11
+        } else if (project.name == "device_info_plus") {
+            kotlinOptions.jvmTarget = "17"  // device_info_plus java target is 17
+        } else if (project.name == "flutter_charset_detector_android") {
+            kotlinOptions.jvmTarget = "11"  // it errored out earlier: java target 11 vs kotlin 1.8. Let's try 11!
+        } else if (project.name == "flutter_timezone") {
+            // It threw unresolved reference when everything was 17 or something. Wait, last time it passed.
+            // When we don't force its JVM target, it might just use whatever it's configured with.
+        } else {
+            // Do not override! Let the plugins use their default jvmTarget!
+        }
+    }
 }
 
 tasks.register("clean", Delete) {

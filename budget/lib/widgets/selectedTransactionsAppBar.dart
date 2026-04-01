@@ -30,10 +30,20 @@ import 'package:provider/provider.dart';
 import 'package:budget/widgets/countNumber.dart';
 import 'package:budget/widgets/framework/popupFramework.dart';
 
-class SelectedTransactionsAppBar extends StatelessWidget {
+class SelectedTransactionsAppBar extends StatefulWidget {
   const SelectedTransactionsAppBar(
       {Key? key, required this.pageID, this.enableSettleAllButton = false})
       : super(key: key);
+
+  final String pageID;
+  final bool enableSettleAllButton;
+
+  @override
+  State<SelectedTransactionsAppBar> createState() => _SelectedTransactionsAppBarState();
+}
+
+class _SelectedTransactionsAppBarState extends State<SelectedTransactionsAppBar> {
+  bool _isRevealed = false;
 
   Future shareSelectedTransactions(
       {required BuildContext context,
@@ -70,18 +80,17 @@ class SelectedTransactionsAppBar extends StatelessWidget {
     }
   }
 
-  final String pageID;
-  final bool enableSettleAllButton;
+
 
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
       valueListenable: globalSelectedID
-          .select((controller) => (controller.value[pageID] ?? []).length),
+          .select((controller) => (controller.value[widget.pageID] ?? []).length),
       builder: (context, _, __) {
-        List<String> listOfIDs = globalSelectedID.value[pageID] ?? [];
+        List<String> listOfIDs = globalSelectedID.value[widget.pageID] ?? [];
         bool animateIn =
-            globalSelectedID.value[pageID] != null && listOfIDs.length > 0;
+            globalSelectedID.value[widget.pageID] != null && listOfIDs.length > 0;
         return AnimatedPositionedDirectional(
           start: 0,
           end: 0,
@@ -122,7 +131,7 @@ class SelectedTransactionsAppBar extends StatelessWidget {
                           color: Theme.of(context).colorScheme.secondary,
                         ),
                         onPressed: () {
-                          globalSelectedID.value[pageID] = [];
+                          globalSelectedID.value[widget.pageID] = [];
                           globalSelectedID.notifyListeners();
                         },
                       ),
@@ -188,36 +197,43 @@ class SelectedTransactionsAppBar extends StatelessWidget {
                                     return Transform.translate(
                                       offset: Offset(10, 0)
                                           .withDirectionality(context),
-                                      child: Tappable(
-                                        color: Colors.transparent,
-                                        borderRadius: 15,
-                                        onLongPress: () {
-                                          copyToClipboard(
-                                            convertToMoney(
-                                              Provider.of<AllWallets>(context,
-                                                  listen: false),
-                                              number,
-                                              finalNumber: snapshot.hasData
-                                                  ? snapshot.data!
-                                                  : 0,
-                                            ),
-                                          );
-                                        },
-                                        child: Padding(
-                                          padding:
-                                              const EdgeInsetsDirectional.all(
-                                                  10),
-                                          child: TextFont(
-                                            text: convertToMoney(
-                                                Provider.of<AllWallets>(
-                                                    context),
+                                      child: Listener(
+                                        onPointerDown: (_) => setState(() => _isRevealed = true),
+                                        onPointerUp: (_) => setState(() => _isRevealed = false),
+                                        onPointerCancel: (_) => setState(() => _isRevealed = false),
+                                        child: Tappable(
+                                          color: Colors.transparent,
+                                          borderRadius: 15,
+                                          onLongPress: () {
+                                            copyToClipboard(
+                                              convertToMoney(
+                                                Provider.of<AllWallets>(context,
+                                                    listen: false),
                                                 number,
                                                 finalNumber: snapshot.hasData
                                                     ? snapshot.data!
-                                                    : 0),
-                                            fontSize: 17.5,
-                                            textAlign: TextAlign.start,
-                                            maxLines: 1,
+                                                    : 0,
+                                                forceReveal: _isRevealed,
+                                              ),
+                                            );
+                                          },
+                                          child: Padding(
+                                            padding:
+                                                const EdgeInsetsDirectional.all(
+                                                    10),
+                                            child: TextFont(
+                                              text: convertToMoney(
+                                                  Provider.of<AllWallets>(
+                                                      context),
+                                                  number,
+                                                  finalNumber: snapshot.hasData
+                                                      ? snapshot.data!
+                                                      : 0,
+                                                  forceReveal: _isRevealed),
+                                              fontSize: 17.5,
+                                              textAlign: TextAlign.start,
+                                              maxLines: 1,
+                                            ),
                                           ),
                                         ),
                                       ),
@@ -230,9 +246,9 @@ class SelectedTransactionsAppBar extends StatelessWidget {
                         ),
                       ),
                       SelectedTransactionsAppBarMenu(
-                        pageID: pageID,
+                        pageID: widget.pageID,
                         selectedTransactionPks: listOfIDs,
-                        enableSettleAllButton: enableSettleAllButton,
+                        enableSettleAllButton: widget.enableSettleAllButton,
                       )
                     ],
                   ),
