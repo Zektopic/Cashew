@@ -46,8 +46,9 @@ Future<bool> shareBudget(Budget? budgetToShare, context) async {
     "dateUpdated": DateTime.now(),
   };
 
-  DocumentReference budgetCreatedOnCloud =
-      await db.collection("budgets").add(budgetEntry);
+  DocumentReference budgetCreatedOnCloud = await db
+      .collection("budgets")
+      .add(budgetEntry);
 
   await database.createOrUpdateBudget(
     budgetToShare.copyWith(
@@ -67,8 +68,10 @@ Future<bool> shareBudget(Budget? budgetToShare, context) async {
   return true;
 }
 
-Future<bool> removedSharedFromBudget(Budget sharedBudget,
-    {bool removeFromServer = true}) async {
+Future<bool> removedSharedFromBudget(
+  Budget sharedBudget, {
+  bool removeFromServer = true,
+}) async {
   if (appStateSettings["sharedBudgets"] == false) return false;
   if (removeFromServer)
     try {
@@ -76,21 +79,22 @@ Future<bool> removedSharedFromBudget(Budget sharedBudget,
       if (db == null) {
         return false;
       }
-      DocumentReference collectionRef =
-          db.collection('budgets').doc(sharedBudget.sharedKey);
+      DocumentReference collectionRef = db
+          .collection('budgets')
+          .doc(sharedBudget.sharedKey);
       CollectionReference transactionSubCollection = db
           .collection('budgets')
           .doc(sharedBudget.sharedKey)
           .collection("transactions");
 
       WriteBatch batch = db.batch();
-      final QuerySnapshot transactionsOnCloud =
-          await transactionSubCollection.get();
+      final QuerySnapshot transactionsOnCloud = await transactionSubCollection
+          .get();
       // print(transactionsOnCloud);
       for (DocumentSnapshot transaction in transactionsOnCloud.docs) {
         print(transaction);
-        DocumentReference transactionSubCollectionDoc =
-            transactionSubCollection.doc(transaction.id);
+        DocumentReference transactionSubCollectionDoc = transactionSubCollection
+            .doc(transaction.id);
         batch.delete(transactionSubCollectionDoc);
       }
       await batch.commit();
@@ -103,11 +107,13 @@ Future<bool> removedSharedFromBudget(Budget sharedBudget,
       .getAllTransactionsBelongingToSharedBudget(sharedBudget.budgetPk);
   List<Transaction> allTransactionsToUpdate = [];
   for (Transaction transactionFromBudget in transactionsFromBudget) {
-    allTransactionsToUpdate.add(transactionFromBudget.copyWith(
-      sharedKey: Value(null),
-      sharedDateUpdated: Value(null),
-      sharedStatus: Value(null),
-    ));
+    allTransactionsToUpdate.add(
+      transactionFromBudget.copyWith(
+        sharedKey: Value(null),
+        sharedDateUpdated: Value(null),
+        sharedStatus: Value(null),
+      ),
+    );
   }
   await database.updateBatchTransactionsOnly(allTransactionsToUpdate);
   await database.createOrUpdateBudget(
@@ -130,20 +136,27 @@ Future<bool> leaveSharedBudget(Budget sharedBudget) async {
   if (db == null) {
     return false;
   }
-  removeMemberFromBudget(sharedBudget.sharedKey!,
-      FirebaseAuth.instance.currentUser!.email!, sharedBudget);
+  removeMemberFromBudget(
+    sharedBudget.sharedKey!,
+    FirebaseAuth.instance.currentUser!.email!,
+    sharedBudget,
+  );
   removedSharedFromBudget(sharedBudget, removeFromServer: false);
   return true;
 }
 
 Future<bool> addMemberToBudget(
-    String sharedKey, String member, Budget budget) async {
+  String sharedKey,
+  String member,
+  Budget budget,
+) async {
   FirebaseFirestore? db = await firebaseGetDBInstance();
   if (db == null) {
     return false;
   }
-  DocumentReference budgetCreatedOnCloud =
-      db.collection('budgets').doc(sharedKey);
+  DocumentReference budgetCreatedOnCloud = db
+      .collection('budgets')
+      .doc(sharedKey);
   budgetCreatedOnCloud.update({
     "members": FieldValue.arrayUnion([member]),
     "dateUpdated": DateTime.now(),
@@ -151,15 +164,13 @@ Future<bool> addMemberToBudget(
   Budget budgetFromDB = await database.getBudgetInstance(budget.budgetPk);
   List<String> memberList = budgetFromDB.sharedMembers ?? [];
   memberList.add(member);
-  Set<String> allMembersEver =
-      (budgetFromDB.sharedAllMembersEver ?? []).toSet();
+  Set<String> allMembersEver = (budgetFromDB.sharedAllMembersEver ?? [])
+      .toSet();
   allMembersEver.add(member);
   await database.createOrUpdateBudget(
     budgetFromDB.copyWith(
       sharedMembers: Value(memberList),
-      sharedAllMembersEver: Value(
-        allMembersEver.toList(),
-      ),
+      sharedAllMembersEver: Value(allMembersEver.toList()),
     ),
     updateSharedEntry: false,
   );
@@ -167,14 +178,18 @@ Future<bool> addMemberToBudget(
 }
 
 Future<bool> removeMemberFromBudget(
-    String sharedKey, String member, Budget budget) async {
+  String sharedKey,
+  String member,
+  Budget budget,
+) async {
   if (appStateSettings["sharedBudgets"] == false) return false;
   FirebaseFirestore? db = await firebaseGetDBInstance();
   if (db == null) {
     return false;
   }
-  DocumentReference budgetCreatedOnCloud =
-      db.collection('budgets').doc(sharedKey);
+  DocumentReference budgetCreatedOnCloud = db
+      .collection('budgets')
+      .doc(sharedKey);
   budgetCreatedOnCloud.update({
     "members": FieldValue.arrayRemove([member]),
     "dateUpdated": DateTime.now(),
@@ -183,9 +198,7 @@ Future<bool> removeMemberFromBudget(
   List<String> memberList = budgetFromDB.sharedMembers ?? [];
   memberList.remove(member);
   await database.createOrUpdateBudget(
-    budgetFromDB.copyWith(
-      sharedMembers: Value(memberList),
-    ),
+    budgetFromDB.copyWith(sharedMembers: Value(memberList)),
     updateSharedEntry: false,
   );
   return true;
@@ -198,17 +211,18 @@ Future<dynamic> getMembersFromBudget(String sharedKey, Budget budget) async {
   if (db == null) {
     return null;
   }
-  DocumentReference budgetCreatedOnCloud =
-      db.collection('budgets').doc(sharedKey);
+  DocumentReference budgetCreatedOnCloud = db
+      .collection('budgets')
+      .doc(sharedKey);
   Map<dynamic, dynamic> budgetDecoded =
       (await budgetCreatedOnCloud.get()).data() as Map;
   print([
     budgetDecoded["ownerEmail"].toString(),
-    ...List<String>.from(budgetDecoded["members"])
+    ...List<String>.from(budgetDecoded["members"]),
   ]);
   List<String> memberList = [
     budgetDecoded["ownerEmail"].toString(),
-    ...List<String>.from(budgetDecoded["members"])
+    ...List<String>.from(budgetDecoded["members"]),
   ];
   await database.createOrUpdateBudget(
     budget.copyWith(sharedMembers: Value(memberList)),
@@ -218,48 +232,48 @@ Future<dynamic> getMembersFromBudget(String sharedKey, Budget budget) async {
 }
 
 Future<bool> compareSharedToCurrentBudgets(
-    List<QueryDocumentSnapshot<Object?>> budgetSnapshot) async {
+  List<QueryDocumentSnapshot<Object?>> budgetSnapshot,
+) async {
   if (appStateSettings["sharedBudgets"] == false) return false;
   List<Budget> budgets = await database.getAllBudgets();
+
+  Set<String> cloudBudgetIds = budgetSnapshot.map((e) => e.id).toSet();
+  Set<String> localSharedKeys = budgets
+      .map((e) => e.sharedKey)
+      .whereType<String>()
+      .toSet();
+
   for (Budget budget in budgets) {
     if (budget.sharedKey != null) {
-      bool found = false;
-      for (DocumentSnapshot budgetCloud in budgetSnapshot) {
-        if (budgetCloud.id == budget.sharedKey) {
-          print("Found a matching budget!");
-          found = true;
-          break;
-        }
-      }
-      if (found == false) {
-        openSnackbar(SnackbarMessage(
+      if (!cloudBudgetIds.contains(budget.sharedKey)) {
+        openSnackbar(
+          SnackbarMessage(
             icon: appStateSettings["outlinedIcons"]
                 ? Icons.remove_circle_outline_outlined
                 : Icons.remove_circle_outline_rounded,
             title: budget.name,
-            description: "Is no longer shared with you"));
+            description: "Is no longer shared with you",
+          ),
+        );
         print("You have lost permission to this budget: " + budget.name);
         removedSharedFromBudget(budget);
+      } else {
+        print("Found a matching budget!");
       }
     }
   }
   for (DocumentSnapshot budgetCloud in budgetSnapshot) {
-    bool found = false;
-    for (Budget budget in budgets) {
-      if (budget.sharedKey != null && budgetCloud.id == budget.sharedKey) {
-        found = true;
-        break;
-      }
-    }
-    if (found == false) {
+    if (!localSharedKeys.contains(budgetCloud.id)) {
       Map<dynamic, dynamic> budgetDecoded = budgetCloud.data() as Map;
-      openSnackbar(SnackbarMessage(
-        title: budgetCloud["name"] + " was shared with you",
-        description: "From " + getMemberNickname(budgetDecoded["ownerEmail"]),
-        icon: appStateSettings["outlinedIcons"]
-            ? Icons.share_outlined
-            : Icons.share_rounded,
-      ));
+      openSnackbar(
+        SnackbarMessage(
+          title: budgetCloud["name"] + " was shared with you",
+          description: "From " + getMemberNickname(budgetDecoded["ownerEmail"]),
+          icon: appStateSettings["outlinedIcons"]
+              ? Icons.share_outlined
+              : Icons.share_rounded,
+        ),
+      );
     }
   }
   return true;
@@ -284,8 +298,12 @@ Future<bool> getCloudBudgets() async {
     return false;
   }
 
-  final budgetMembersOf = db.collection('budgets').where('members',
-      arrayContains: FirebaseAuth.instance.currentUser!.email);
+  final budgetMembersOf = db
+      .collection('budgets')
+      .where(
+        'members',
+        arrayContains: FirebaseAuth.instance.currentUser!.email,
+      );
   final QuerySnapshot snapshotBudgetMembersOf = await budgetMembersOf.get();
   // for (DocumentSnapshot budget in snapshotBudgetMembersOf.docs) {
   //   print("YOU ARE A MEMBER OF THIS BUDGET " + budget.data().toString());
@@ -297,13 +315,17 @@ Future<bool> getCloudBudgets() async {
   // for (DocumentSnapshot budget in snapshotOwned.docs) {
   //   print("YOU OWN THIS BUDGET " + budget.data().toString());
   // }
-  await compareSharedToCurrentBudgets(
-      [...snapshotBudgetMembersOf.docs, ...snapshotOwned.docs]);
+  await compareSharedToCurrentBudgets([
+    ...snapshotBudgetMembersOf.docs,
+    ...snapshotOwned.docs,
+  ]);
 
   int totalTransactionsUpdated = 0;
-  totalTransactionsUpdated = totalTransactionsUpdated +
+  totalTransactionsUpdated =
+      totalTransactionsUpdated +
       await downloadTransactionsFromBudgets(db, snapshotBudgetMembersOf.docs);
-  totalTransactionsUpdated = totalTransactionsUpdated +
+  totalTransactionsUpdated =
+      totalTransactionsUpdated +
       await downloadTransactionsFromBudgets(db, snapshotOwned.docs);
   int amountSynced =
       snapshotBudgetMembersOf.docs.length + snapshotOwned.docs.length;
@@ -313,12 +335,14 @@ Future<bool> getCloudBudgets() async {
         icon: appStateSettings["outlinedIcons"]
             ? Icons.cloud_sync_outlined
             : Icons.cloud_sync_rounded,
-        title: "synced".tr() +
+        title:
+            "synced".tr() +
             " " +
             totalTransactionsUpdated.toString() +
             " " +
             pluralString(totalTransactionsUpdated == 1, "change"),
-        description: "From " +
+        description:
+            "From " +
             amountSynced.toString() +
             " shared " +
             pluralString(amountSynced == 1, "budget"),
@@ -333,7 +357,9 @@ Future<bool> getCloudBudgets() async {
 }
 
 Future<int> downloadTransactionsFromBudgets(
-    FirebaseFirestore db, List<DocumentSnapshot> snapshots) async {
+  FirebaseFirestore db,
+  List<DocumentSnapshot> snapshots,
+) async {
   if (appStateSettings["sharedBudgets"] == false) return 0;
   int totalUpdated = 0;
   for (DocumentSnapshot budget in snapshots) {
@@ -358,7 +384,8 @@ Future<int> downloadTransactionsFromBudgets(
         order: 0,
         walletFk: "0",
         sharedKey: budget.id,
-        sharedOwnerMember: FirebaseAuth.instance.currentUser!.email ==
+        sharedOwnerMember:
+            FirebaseAuth.instance.currentUser!.email ==
                 budgetDecoded["ownerEmail"]
             ? SharedOwnerMember.owner
             : SharedOwnerMember.member,
@@ -379,16 +406,20 @@ Future<int> downloadTransactionsFromBudgets(
     Query transactionsFromServer;
     if (sharedBudget.sharedDateUpdated == null) {
       print("Download all transactions");
-      transactionsFromServer =
-          db.collection('budgets').doc(budget.id).collection('transactions');
+      transactionsFromServer = db
+          .collection('budgets')
+          .doc(budget.id)
+          .collection('transactions');
     } else {
       print(sharedBudget.sharedDateUpdated);
       transactionsFromServer = db
           .collection('budgets')
           .doc(budget.id)
           .collection('transactions')
-          .where(FieldPath.fromString("dateUpdated"),
-              isGreaterThan: sharedBudget.sharedDateUpdated);
+          .where(
+            FieldPath.fromString("dateUpdated"),
+            isGreaterThan: sharedBudget.sharedDateUpdated,
+          );
     }
     final QuerySnapshot snapshotTransactionsFromServer =
         await transactionsFromServer.get();
@@ -399,8 +430,9 @@ Future<int> downloadTransactionsFromBudgets(
           transaction["logType"] == "update") {
         TransactionCategory selectedCategory;
         try {
-          selectedCategory = await database
-              .getCategoryInstanceGivenName(transactionDecoded["categoryName"]);
+          selectedCategory = await database.getCategoryInstanceGivenName(
+            transactionDecoded["categoryName"],
+          );
         } catch (_) {
           int numberOfCategories =
               (await database.getTotalCountOfCategories())[0] ?? 0;
@@ -418,8 +450,9 @@ Future<int> downloadTransactionsFromBudgets(
               methodAdded: MethodAdded.shared,
             ),
           );
-          selectedCategory = await database
-              .getCategoryInstanceGivenName(transactionDecoded["categoryName"]);
+          selectedCategory = await database.getCategoryInstanceGivenName(
+            transactionDecoded["categoryName"],
+          );
         }
 
         await database.createOrUpdateFromSharedTransaction(
@@ -452,12 +485,15 @@ Future<int> downloadTransactionsFromBudgets(
         if (transactionDecoded["name"] != null &&
             transactionDecoded["name"] != "")
           await addAssociatedTitles(
-              transactionDecoded["name"], selectedCategory);
+            transactionDecoded["name"],
+            selectedCategory,
+          );
       } else if (transaction["logType"] == "delete") {
         print("DELETING");
         try {
           await database.deleteFromSharedTransaction(
-              transactionDecoded["deleteSharedKey"]);
+            transactionDecoded["deleteSharedKey"],
+          );
         } catch (e) {
           print("This shared transaction already deleted" + e.toString());
         }
@@ -468,11 +504,15 @@ Future<int> downloadTransactionsFromBudgets(
     }
     Budget budgetAlreadyStored = (await database.getSharedBudget(budget.id));
     allMembersEver.addAll((budgetAlreadyStored.sharedMembers ?? []).toSet());
-    allMembersEver
-        .addAll((budgetAlreadyStored.sharedAllMembersEver ?? []).toSet());
-    await database.createOrUpdateFromSharedBudget(sharedBudget.copyWith(
+    allMembersEver.addAll(
+      (budgetAlreadyStored.sharedAllMembersEver ?? []).toSet(),
+    );
+    await database.createOrUpdateFromSharedBudget(
+      sharedBudget.copyWith(
         sharedDateUpdated: Value(DateTime.now()),
-        sharedAllMembersEver: Value(allMembersEver.toList())));
+        sharedAllMembersEver: Value(allMembersEver.toList()),
+      ),
+    );
 
     print("DOWNLOADED FROM THIS BUDGET " + budget.data().toString());
   }
@@ -487,8 +527,8 @@ Future<bool> sendTransactionSet(Transaction transaction, Budget budget) async {
   if (db == null) {
     Map<dynamic, dynamic> currentSendTransactionsToServerQueue =
         appStateSettings["sendTransactionsToServerQueue"];
-    currentSendTransactionsToServerQueue[transaction.transactionPk.toString()] =
-        {
+    currentSendTransactionsToServerQueue[transaction.transactionPk
+        .toString()] = {
       "action": "sendTransactionSet",
       "transactionPk": transaction.transactionPk.toString(),
       "budgetPk": budget.budgetPk.toString(),
@@ -508,12 +548,18 @@ Future<bool> sendTransactionSet(Transaction transaction, Budget budget) async {
 
 // update the entry on the server
 Future<bool> setOnServer(
-    FirebaseFirestore db, Transaction transaction, Budget budget) async {
+  FirebaseFirestore db,
+  Transaction transaction,
+  Budget budget,
+) async {
   if (appStateSettings["sharedBudgets"] == false) return false;
-  TransactionCategory transactionCategory =
-      await database.getCategoryInstance(transaction.categoryFk);
-  CollectionReference subCollectionRef =
-      db.collection('budgets').doc(budget.sharedKey).collection("transactions");
+  TransactionCategory transactionCategory = await database.getCategoryInstance(
+    transaction.categoryFk,
+  );
+  CollectionReference subCollectionRef = db
+      .collection('budgets')
+      .doc(budget.sharedKey)
+      .collection("transactions");
   await subCollectionRef.doc(transaction.sharedKey).set({
     "logType": "update", // create, delete, update
     "name": transaction.name,
@@ -533,8 +579,10 @@ Future<bool> setOnServer(
     sharedOldKey: Value(transaction.sharedKey),
   );
   print("Transaction updated on server: " + transaction.toString());
-  await database.createOrUpdateTransaction(transaction,
-      updateSharedEntry: false);
+  await database.createOrUpdateTransaction(
+    transaction,
+    updateSharedEntry: false,
+  );
   return true;
 }
 
@@ -544,8 +592,8 @@ Future<bool> sendTransactionAdd(Transaction transaction, Budget budget) async {
   if (db == null) {
     Map<dynamic, dynamic> currentSendTransactionsToServerQueue =
         appStateSettings["sendTransactionsToServerQueue"];
-    currentSendTransactionsToServerQueue[transaction.transactionPk.toString()] =
-        {
+    currentSendTransactionsToServerQueue[transaction.transactionPk
+        .toString()] = {
       "action": "sendTransactionAdd",
       "transactionPk": transaction.transactionPk.toString(),
       "budgetPk": budget.budgetPk.toString(),
@@ -564,12 +612,18 @@ Future<bool> sendTransactionAdd(Transaction transaction, Budget budget) async {
 }
 
 Future<bool> addOnServer(
-    FirebaseFirestore db, Transaction transaction, Budget budget) async {
+  FirebaseFirestore db,
+  Transaction transaction,
+  Budget budget,
+) async {
   if (appStateSettings["sharedBudgets"] == false) return false;
-  TransactionCategory transactionCategory =
-      await database.getCategoryInstance(transaction.categoryFk);
-  CollectionReference subCollectionRef =
-      db.collection('budgets').doc(budget.sharedKey).collection("transactions");
+  TransactionCategory transactionCategory = await database.getCategoryInstance(
+    transaction.categoryFk,
+  );
+  CollectionReference subCollectionRef = db
+      .collection('budgets')
+      .doc(budget.sharedKey)
+      .collection("transactions");
   DocumentReference addedDocument = await subCollectionRef.add({
     "logType": "create", // create, delete, update
     "name": transaction.name,
@@ -588,25 +642,30 @@ Future<bool> addOnServer(
     sharedKey: Value(addedDocument.id),
     sharedOldKey: Value(addedDocument.id),
     transactionOwnerEmail: Value(transaction.transactionOwnerEmail),
-    transactionOriginalOwnerEmail:
-        Value(FirebaseAuth.instance.currentUser!.email),
+    transactionOriginalOwnerEmail: Value(
+      FirebaseAuth.instance.currentUser!.email,
+    ),
     sharedStatus: Value(SharedStatus.shared),
     sharedDateUpdated: Value(DateTime.now()),
   );
-  await database.createOrUpdateTransaction(transaction,
-      updateSharedEntry: false);
+  await database.createOrUpdateTransaction(
+    transaction,
+    updateSharedEntry: false,
+  );
   return true;
 }
 
 Future<bool> sendTransactionDelete(
-    Transaction transaction, Budget budget) async {
+  Transaction transaction,
+  Budget budget,
+) async {
   if (appStateSettings["sharedBudgets"] == false) return false;
   FirebaseFirestore? db = await firebaseGetDBInstance();
   if (db == null) {
     Map<dynamic, dynamic> currentSendTransactionsToServerQueue =
         appStateSettings["sendTransactionsToServerQueue"];
-    currentSendTransactionsToServerQueue[transaction.transactionPk.toString()] =
-        {
+    currentSendTransactionsToServerQueue[transaction.transactionPk
+        .toString()] = {
       "action": "sendTransactionDelete",
       "transactionSharedKey": transaction.sharedKey.toString(),
       "budgetPk": budget.budgetPk.toString(),
@@ -625,7 +684,10 @@ Future<bool> sendTransactionDelete(
 }
 
 Future<bool> deleteOnServer(
-    FirebaseFirestore db, String? transactionSharedKey, Budget budget) async {
+  FirebaseFirestore db,
+  String? transactionSharedKey,
+  Budget budget,
+) async {
   if (appStateSettings["sharedBudgets"] == false) return false;
   if (transactionSharedKey != null && transactionSharedKey != "null") {
     CollectionReference subCollectionRef = db
@@ -662,7 +724,8 @@ Future<bool> syncPendingQueueOnServer() async {
       Budget budget;
       try {
         budget = await database.getBudgetInstance(
-            currentSendTransactionsToServerQueue[key]["budgetPk"].toString());
+          currentSendTransactionsToServerQueue[key]["budgetPk"].toString(),
+        );
       } catch (e) {
         print(e.toString());
         // budget was probably deleted, we don't need to sync anything...
@@ -672,14 +735,15 @@ Future<bool> syncPendingQueueOnServer() async {
       if (currentSendTransactionsToServerQueue[key]["action"] ==
           "sendTransactionDelete") {
         await deleteOnServer(
-            db,
-            currentSendTransactionsToServerQueue[key]["transactionSharedKey"],
-            budget);
+          db,
+          currentSendTransactionsToServerQueue[key]["transactionSharedKey"],
+          budget,
+        );
       }
 
       Transaction transaction = await database.getTransactionFromPk(
-          currentSendTransactionsToServerQueue[key]["transactionPk"]
-              .toString());
+        currentSendTransactionsToServerQueue[key]["transactionPk"].toString(),
+      );
       print("UPLOADING THIS TRANSACTION");
       print(transaction);
       if (currentSendTransactionsToServerQueue[key]["action"] ==
@@ -694,24 +758,30 @@ Future<bool> syncPendingQueueOnServer() async {
       print("skipping syncing this transaction...");
     }
   }
-  updateSettings("sendTransactionsToServerQueue", {},
-      pagesNeedingRefresh: [], updateGlobalState: false);
+  updateSettings(
+    "sendTransactionsToServerQueue",
+    {},
+    pagesNeedingRefresh: [],
+    updateGlobalState: false,
+  );
   return true;
 }
 
 Future<bool> updateTransactionOnServerAfterChangingCategoryInformation(
-    TransactionCategory category) async {
+  TransactionCategory category,
+) async {
   if (appStateSettings["sharedBudgets"] == false) return false;
   loadingIndeterminateKey.currentState?.setVisibility(true);
-  List<Transaction> sharedTransactionsInCategory =
-      await database.getAllTransactionsSharedInCategory(category.categoryPk);
+  List<Transaction> sharedTransactionsInCategory = await database
+      .getAllTransactionsSharedInCategory(category.categoryPk);
 
   List<Future> asyncCalls = [];
   for (Transaction transaction in sharedTransactionsInCategory) {
     // update all shared transactions one by one, need to update the server
     if (transaction.sharedReferenceBudgetPk != null) {
-      Budget budget = await database
-          .getBudgetInstance(transaction.sharedReferenceBudgetPk!);
+      Budget budget = await database.getBudgetInstance(
+        transaction.sharedReferenceBudgetPk!,
+      );
       asyncCalls.add(sendTransactionSet(transaction, budget));
     }
   }
