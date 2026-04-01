@@ -3015,9 +3015,19 @@ class FinanceDatabase extends _$FinanceDatabase {
         await (select(categoryBudgetLimits)
               ..where((t) => t.budgetFk.equals(budgetPk)))
             .get();
+
+    List<String> categoryPks =
+        categorySpendingLimits.map((e) => e.categoryFk).toList();
+    List<TransactionCategory> categories = await (select(this.categories)
+          ..where((t) => t.categoryPk.isIn(categoryPks)))
+        .get();
+    Map<String, TransactionCategory> categoryMap = {
+      for (var cat in categories) cat.categoryPk: cat
+    };
+
     for (CategoryBudgetLimit categorySpendingLimit in categorySpendingLimits) {
       TransactionCategory category =
-          await getCategoryInstance(categorySpendingLimit.categoryFk);
+          categoryMap[categorySpendingLimit.categoryFk]!;
       double convertedAmount;
       if (category.mainCategoryPk == null) {
         // This is a main category
@@ -3058,6 +3068,8 @@ class FinanceDatabase extends _$FinanceDatabase {
       }
       limitsInserting.add(categorySpendingLimit.copyWith(
           amount: convertedAmount, dateTimeModified: Value(DateTime.now())));
+    }
+    if (limitsInserting.isNotEmpty) {
       await updateBatchCategoryLimitsOnly(limitsInserting);
     }
     return true;
@@ -5401,8 +5413,7 @@ class FinanceDatabase extends _$FinanceDatabase {
     List<TransactionCategory> allSubCategories = await database
         .getAllSubCategoriesOfMainCategory(categoryFrom.categoryPk);
     List<TransactionCategory> categoriesEdited = [];
-    int order =
-        await database.getAmountOfSubCategories(categoryTo.categoryPk);
+    int order = await database.getAmountOfSubCategories(categoryTo.categoryPk);
     for (TransactionCategory category in allSubCategories) {
       categoriesEdited.add(
         category.copyWith(
