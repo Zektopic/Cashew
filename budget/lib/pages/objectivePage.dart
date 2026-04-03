@@ -651,6 +651,7 @@ String objectiveRemainingAmountText({
   required double objectiveAmount,
   required double totalAmount,
   required BuildContext context,
+  bool forceReveal = false,
 }) {
   String result = '';
 
@@ -664,7 +665,8 @@ String objectiveRemainingAmountText({
     result = " / ";
   }
 
-  result += convertToMoney(Provider.of<AllWallets>(context), objectiveAmount);
+  result += convertToMoney(Provider.of<AllWallets>(context), objectiveAmount,
+      forceReveal: forceReveal);
 
   return result;
 }
