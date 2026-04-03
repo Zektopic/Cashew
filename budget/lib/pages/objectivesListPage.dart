@@ -22,6 +22,8 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart'
     hide SliverReorderableList, ReorderableDelayedDragStartListener;
 import 'package:provider/provider.dart';
+import 'dart:async';
+import 'package:flutter/services.dart';
 import 'addButton.dart';
 
 // This defines what a difference only loan can be
@@ -370,7 +372,7 @@ class ObjectiveListDifferenceLoan extends StatelessWidget {
   }
 }
 
-class ObjectiveContainer extends StatelessWidget {
+class ObjectiveContainer extends StatefulWidget {
   const ObjectiveContainer({
     required this.objective,
     required this.index,
@@ -390,325 +392,383 @@ class ObjectiveContainer extends StatelessWidget {
   final bool? isGridView;
 
   @override
+  State<ObjectiveContainer> createState() => _ObjectiveContainerState();
+}
+
+class _ObjectiveContainerState extends State<ObjectiveContainer> {
+  bool _isRevealed = false;
+  Timer? _revealTimer;
+
+  @override
+  void dispose() {
+    _revealTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    double borderRadius =
-        getPlatform() == PlatformOS.isIOS && forceAndroidBubbleDesign == false
-            ? 0
-            : 20;
-    Color containerColor =
-        getPlatform() == PlatformOS.isIOS && forceAndroidBubbleDesign == false
-            ? Theme.of(context).colorScheme.background
-            : getColor(context, "lightDarkAccentHeavyLight");
+    double borderRadius = getPlatform() == PlatformOS.isIOS &&
+            widget.forceAndroidBubbleDesign == false
+        ? 0
+        : 20;
+    Color containerColor = getPlatform() == PlatformOS.isIOS &&
+            widget.forceAndroidBubbleDesign == false
+        ? Theme.of(context).colorScheme.background
+        : getColor(context, "lightDarkAccentHeavyLight");
     EdgeInsetsDirectional containerPadding = EdgeInsetsDirectional.only(
-      start:
-          getPlatform() == PlatformOS.isIOS && forceAndroidBubbleDesign == false
-              ? 23
-              : 30,
-      end:
-          getPlatform() == PlatformOS.isIOS && forceAndroidBubbleDesign == false
-              ? 23
-              : 20,
+      start: getPlatform() == PlatformOS.isIOS &&
+              widget.forceAndroidBubbleDesign == false
+          ? 23
+          : 30,
+      end: getPlatform() == PlatformOS.isIOS &&
+              widget.forceAndroidBubbleDesign == false
+          ? 23
+          : 20,
     );
     Widget child = WatchTotalAndAmountOfObjective(
-      objective: objective,
+      objective: widget.objective,
       builder: (objectiveAmount, totalAmount, percentageTowardsGoal) {
-        if (forcedTotalAmount != null) {
-          totalAmount = forcedTotalAmount ?? totalAmount;
-          percentageTowardsGoal = (forcedTotalAmount ?? 0) / objectiveAmount;
+        if (widget.forcedTotalAmount != null) {
+          totalAmount = widget.forcedTotalAmount ?? totalAmount;
+          percentageTowardsGoal =
+              (widget.forcedTotalAmount ?? 0) / objectiveAmount;
         }
 
         return Container(
           decoration: BoxDecoration(
             boxShadow: getPlatform() == PlatformOS.isIOS &&
-                    forceAndroidBubbleDesign == false
+                    widget.forceAndroidBubbleDesign == false
                 ? []
                 : boxShadowCheck(boxShadowGeneral(context)),
           ),
           child: OpenContainerNavigation(
-            openPage: ObjectivePage(objectivePk: objective.objectivePk),
+            openPage: ObjectivePage(objectivePk: widget.objective.objectivePk),
             borderRadius: borderRadius,
             closedColor: containerColor,
             button: (openContainer()) {
-              return Tappable(
-                onLongPress: () {
-                  pushRoute(
-                    context,
-                    AddObjectivePage(
-                      routesToPopAfterDelete: RoutesToPopAfterDelete.One,
-                      objective: objective,
+              return Listener(
+                onPointerDown: (_) {
+                  HapticFeedback.selectionClick();
+                  setState(() => _isRevealed = true);
+                  _revealTimer?.cancel();
+                  _revealTimer = Timer(Duration(seconds: 2), () {
+                    if (mounted) setState(() => _isRevealed = false);
+                  });
+                },
+                onPointerUp: (_) {
+                  _revealTimer?.cancel();
+                  setState(() => _isRevealed = false);
+                },
+                onPointerCancel: (_) {
+                  _revealTimer?.cancel();
+                  setState(() => _isRevealed = false);
+                },
+                child: Tappable(
+                  onLongPress: () {
+                    pushRoute(
+                      context,
+                      AddObjectivePage(
+                        routesToPopAfterDelete: RoutesToPopAfterDelete.One,
+                        objective: widget.objective,
+                      ),
+                    );
+                  },
+                  color: containerColor,
+                  onTap: () {
+                    openContainer();
+                  },
+                  child: Padding(
+                    padding: EdgeInsetsDirectional.only(
+                      top: 18,
+                      bottom: 23,
                     ),
-                  );
-                },
-                color: containerColor,
-                onTap: () {
-                  openContainer();
-                },
-                child: Padding(
-                  padding: EdgeInsetsDirectional.only(
-                    top: 18,
-                    bottom: 23,
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Padding(
-                        padding: containerPadding,
-                        child: Column(children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    TextFont(
-                                      text: objective.name,
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                    Row(
-                                      children: [
-                                        Flexible(
-                                          child: Padding(
-                                            padding: const EdgeInsetsDirectional
-                                                .only(end: 3),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Padding(
+                          padding: containerPadding,
+                          child: Column(children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      TextFont(
+                                        text: widget.objective.name,
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      Row(
+                                        children: [
+                                          Flexible(
                                             child: Padding(
                                               padding:
                                                   const EdgeInsetsDirectional
-                                                      .only(bottom: 3),
-                                              child:
-                                                  Builder(builder: (context) {
-                                                String content =
-                                                    getWordedDateShortMore(
-                                                  objective.dateCreated,
-                                                  includeYear: objective
-                                                          .dateCreated.year !=
-                                                      DateTime.now().year,
-                                                );
-                                                if (objective.endDate != null) {
-                                                  content = getObjectiveStatus(
-                                                    context,
-                                                    objective,
-                                                    totalAmount,
-                                                    percentageTowardsGoal,
-                                                    objectiveAmount,
+                                                      .only(end: 3),
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsetsDirectional
+                                                        .only(bottom: 3),
+                                                child:
+                                                    Builder(builder: (context) {
+                                                  String content =
+                                                      getWordedDateShortMore(
+                                                    widget
+                                                        .objective.dateCreated,
+                                                    includeYear: widget
+                                                            .objective
+                                                            .dateCreated
+                                                            .year !=
+                                                        DateTime.now().year,
                                                   );
-                                                }
-                                                return TextFont(
-                                                  text: content,
-                                                  fontSize: 15,
-                                                  textColor:
-                                                      getColor(context, "black")
-                                                          .withOpacity(0.65),
-                                                  maxLines: 1,
-                                                );
-                                              }),
+                                                  if (widget
+                                                          .objective.endDate !=
+                                                      null) {
+                                                    content =
+                                                        getObjectiveStatus(
+                                                      context,
+                                                      widget.objective,
+                                                      totalAmount,
+                                                      percentageTowardsGoal,
+                                                      objectiveAmount,
+                                                    );
+                                                  }
+                                                  return TextFont(
+                                                    text: content,
+                                                    fontSize: 15,
+                                                    textColor: getColor(
+                                                            context, "black")
+                                                        .withOpacity(0.65),
+                                                    maxLines: 1,
+                                                  );
+                                                }),
+                                              ),
                                             ),
                                           ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
+                                        ],
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                              SizedBox(width: 5),
-                              CategoryIcon(
-                                categoryPk: "-1",
-                                category: TransactionCategory(
+                                SizedBox(width: 5),
+                                CategoryIcon(
                                   categoryPk: "-1",
-                                  name: "",
-                                  dateCreated: DateTime.now(),
-                                  dateTimeModified: null,
-                                  order: 0,
-                                  income: false,
-                                  iconName: objective.iconName,
-                                  colour: objective.colour,
-                                  emojiIconName: objective.emojiIconName,
+                                  category: TransactionCategory(
+                                    categoryPk: "-1",
+                                    name: "",
+                                    dateCreated: DateTime.now(),
+                                    dateTimeModified: null,
+                                    order: 0,
+                                    income: false,
+                                    iconName: widget.objective.iconName,
+                                    colour: widget.objective.colour,
+                                    emojiIconName:
+                                        widget.objective.emojiIconName,
+                                  ),
+                                  size: 30,
+                                  sizePadding: 20,
+                                  borderRadius: 100,
+                                  canEditByLongPress: false,
+                                  margin: EdgeInsetsDirectional.zero,
                                 ),
-                                size: 30,
-                                sizePadding: 20,
-                                borderRadius: 100,
-                                canEditByLongPress: false,
-                                margin: EdgeInsetsDirectional.zero,
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 4),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Flexible(
-                                child: LayoutBuilder(
-                                  builder: (context, constraints) {
-                                    if (constraints.maxWidth <= 73) {
-                                      return SizedBox.shrink();
-                                    }
-                                    return StreamBuilder<int?>(
-                                      stream: database
-                                          .getTotalCountOfTransactionsInObjective(
-                                              objective.objectivePk)
-                                          .$1,
-                                      builder: (context, snapshot) {
-                                        int numberTransactions =
-                                            forcedNumberTransactions ??
-                                                snapshot.data ??
-                                                0;
-                                        return Padding(
-                                          padding:
-                                              const EdgeInsetsDirectional.only(
-                                                  bottom: 2),
+                              ],
+                            ),
+                            SizedBox(height: 4),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Flexible(
+                                  child: LayoutBuilder(
+                                    builder: (context, constraints) {
+                                      if (constraints.maxWidth <= 73) {
+                                        return SizedBox.shrink();
+                                      }
+                                      return StreamBuilder<int?>(
+                                        stream: database
+                                            .getTotalCountOfTransactionsInObjective(
+                                                widget.objective.objectivePk)
+                                            .$1,
+                                        builder: (context, snapshot) {
+                                          int numberTransactions =
+                                              widget.forcedNumberTransactions ??
+                                                  snapshot.data ??
+                                                  0;
+                                          return Padding(
+                                            padding: const EdgeInsetsDirectional
+                                                .only(bottom: 2),
+                                            child: TextFont(
+                                              textAlign: TextAlign.start,
+                                              text: (widget.objective.type ==
+                                                      ObjectiveType.loan
+                                                  ? (widget.objective.income
+                                                      ? "lent".tr()
+                                                      : "borrowed".tr())
+                                                  : (numberTransactions
+                                                          .toString() +
+                                                      " " +
+                                                      (numberTransactions == 1
+                                                          ? "transaction"
+                                                              .tr()
+                                                              .toLowerCase()
+                                                          : "transactions"
+                                                              .tr()
+                                                              .toLowerCase()))),
+                                              fontSize: 15,
+                                              textColor:
+                                                  getColor(context, "black")
+                                                      .withOpacity(0.65),
+                                            ),
+                                          );
+                                        },
+                                      );
+                                    },
+                                  ),
+                                ),
+                                Builder(builder: (context) {
+                                  String amountSpentLabel =
+                                      getObjectiveAmountSpentLabel(
+                                    context: context,
+                                    showTotalSpent: appStateSettings[
+                                        "showTotalSpentForObjective"],
+                                    objectiveAmount: objectiveAmount,
+                                    totalAmount: totalAmount,
+                                    objective: widget.objective,
+                                    forceReveal: _isRevealed,
+                                  );
+                                  return Row(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      AnimatedSwitcher(
+                                        duration:
+                                            const Duration(milliseconds: 300),
+                                        child: TextFont(
+                                          key: ValueKey(_isRevealed),
+                                          fontWeight: FontWeight.bold,
+                                          text: amountSpentLabel,
+                                          fontSize: 24,
+                                          textColor: widget.objective.type ==
+                                                  ObjectiveType.loan
+                                              ? totalAmount >= objectiveAmount
+                                                  ? getColor(context, "black")
+                                                  : widget.objective.income
+                                                      ? getColor(context,
+                                                          "unPaidUpcoming")
+                                                      : getColor(context,
+                                                          "unPaidOverdue")
+                                              : totalAmount >= objectiveAmount
+                                                  ? getColor(
+                                                      context, "incomeAmount")
+                                                  : getColor(context, "black"),
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding:
+                                            const EdgeInsetsDirectional.only(
+                                                bottom: 2),
+                                        child: AnimatedSwitcher(
+                                          duration:
+                                              const Duration(milliseconds: 300),
                                           child: TextFont(
-                                            textAlign: TextAlign.start,
-                                            text: (objective.type ==
-                                                    ObjectiveType.loan
-                                                ? (objective.income
-                                                    ? "lent".tr()
-                                                    : "borrowed".tr())
-                                                : (numberTransactions
-                                                        .toString() +
-                                                    " " +
-                                                    (numberTransactions == 1
-                                                        ? "transaction"
-                                                            .tr()
-                                                            .toLowerCase()
-                                                        : "transactions"
-                                                            .tr()
-                                                            .toLowerCase()))),
+                                            key: ValueKey(_isRevealed),
+                                            text: objectiveRemainingAmountText(
+                                              objectiveAmount: objectiveAmount,
+                                              totalAmount: totalAmount,
+                                              context: context,
+                                              forceReveal: _isRevealed,
+                                            ),
                                             fontSize: 15,
                                             textColor:
                                                 getColor(context, "black")
-                                                    .withOpacity(0.65),
+                                                    .withOpacity(0.3),
                                           ),
-                                        );
-                                      },
-                                    );
-                                  },
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                }),
+                              ],
+                            ),
+                            SizedBox(height: 8),
+                          ]),
+                        ),
+                        Padding(
+                          padding: widget.objective.endDate == null
+                              ? containerPadding
+                              : const EdgeInsetsDirectional.symmetric(
+                                  horizontal: 15),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              if (widget.objective.endDate != null)
+                                Padding(
+                                  padding:
+                                      const EdgeInsetsDirectional.only(end: 7),
+                                  child: TextFont(
+                                    textAlign: TextAlign.center,
+                                    text: getWordedDateShort(
+                                      widget.objective.dateCreated,
+                                      includeYear:
+                                          widget.objective.dateCreated.year !=
+                                              DateTime.now().year,
+                                    ),
+                                    fontSize: 12,
+                                    textColor: getColor(context, "black")
+                                        .withOpacity(0.3),
+                                  ),
+                                ),
+                              Expanded(
+                                child: BudgetProgress(
+                                  color: HexColor(
+                                    widget.objective.colour,
+                                    defaultColor:
+                                        Theme.of(context).colorScheme.primary,
+                                  ),
+                                  ghostPercent: 0,
+                                  percent: percentageTowardsGoal * 100,
+                                  todayPercent: -1,
+                                  showToday: false,
+                                  yourPercent: 0,
+                                  padding: EdgeInsetsDirectional.zero,
+                                  enableShake: false,
+                                  backgroundColor: (getPlatform() ==
+                                                  PlatformOS.isIOS &&
+                                              widget.forceAndroidBubbleDesign ==
+                                                  false) ||
+                                          appStateSettings["materialYou"] ==
+                                              false
+                                      ? null
+                                      : Theme.of(context)
+                                          .colorScheme
+                                          .secondaryContainer,
                                 ),
                               ),
-                              Builder(builder: (context) {
-                                String amountSpentLabel =
-                                    getObjectiveAmountSpentLabel(
-                                  context: context,
-                                  showTotalSpent: appStateSettings[
-                                      "showTotalSpentForObjective"],
-                                  objectiveAmount: objectiveAmount,
-                                  totalAmount: totalAmount,
-                                  objective: objective,
-                                );
-                                return Row(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    TextFont(
-                                      fontWeight: FontWeight.bold,
-                                      text: amountSpentLabel,
-                                      fontSize: 24,
-                                      textColor: objective.type ==
-                                              ObjectiveType.loan
-                                          ? totalAmount >= objectiveAmount
-                                              ? getColor(context, "black")
-                                              : objective.income
-                                                  ? getColor(
-                                                      context, "unPaidUpcoming")
-                                                  : getColor(
-                                                      context, "unPaidOverdue")
-                                          : totalAmount >= objectiveAmount
-                                              ? getColor(
-                                                  context, "incomeAmount")
-                                              : getColor(context, "black"),
+                              if (widget.objective.endDate != null)
+                                Padding(
+                                  padding: const EdgeInsetsDirectional.only(
+                                      start: 7),
+                                  child: TextFont(
+                                    textAlign: TextAlign.center,
+                                    text: getWordedDateShort(
+                                      widget.objective.endDate!,
+                                      includeYear:
+                                          widget.objective.endDate?.year !=
+                                              DateTime.now().year,
                                     ),
-                                    Padding(
-                                      padding: const EdgeInsetsDirectional.only(
-                                          bottom: 2),
-                                      child: TextFont(
-                                        text: objectiveRemainingAmountText(
-                                          objectiveAmount: objectiveAmount,
-                                          totalAmount: totalAmount,
-                                          context: context,
-                                        ),
-                                        fontSize: 15,
-                                        textColor: getColor(context, "black")
-                                            .withOpacity(0.3),
-                                      ),
-                                    ),
-                                  ],
-                                );
-                              }),
+                                    fontSize: 12,
+                                    textColor: getColor(context, "black")
+                                        .withOpacity(0.3),
+                                  ),
+                                ),
                             ],
                           ),
-                          SizedBox(height: 8),
-                        ]),
-                      ),
-                      Padding(
-                        padding: objective.endDate == null
-                            ? containerPadding
-                            : const EdgeInsetsDirectional.symmetric(
-                                horizontal: 15),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            if (objective.endDate != null)
-                              Padding(
-                                padding:
-                                    const EdgeInsetsDirectional.only(end: 7),
-                                child: TextFont(
-                                  textAlign: TextAlign.center,
-                                  text: getWordedDateShort(
-                                    objective.dateCreated,
-                                    includeYear: objective.dateCreated.year !=
-                                        DateTime.now().year,
-                                  ),
-                                  fontSize: 12,
-                                  textColor: getColor(context, "black")
-                                      .withOpacity(0.3),
-                                ),
-                              ),
-                            Expanded(
-                              child: BudgetProgress(
-                                color: HexColor(
-                                  objective.colour,
-                                  defaultColor:
-                                      Theme.of(context).colorScheme.primary,
-                                ),
-                                ghostPercent: 0,
-                                percent: percentageTowardsGoal * 100,
-                                todayPercent: -1,
-                                showToday: false,
-                                yourPercent: 0,
-                                padding: EdgeInsetsDirectional.zero,
-                                enableShake: false,
-                                backgroundColor: (getPlatform() ==
-                                                PlatformOS.isIOS &&
-                                            forceAndroidBubbleDesign ==
-                                                false) ||
-                                        appStateSettings["materialYou"] == false
-                                    ? null
-                                    : Theme.of(context)
-                                        .colorScheme
-                                        .secondaryContainer,
-                              ),
-                            ),
-                            if (objective.endDate != null)
-                              Padding(
-                                padding:
-                                    const EdgeInsetsDirectional.only(start: 7),
-                                child: TextFont(
-                                  textAlign: TextAlign.center,
-                                  text: getWordedDateShort(
-                                    objective.endDate!,
-                                    includeYear: objective.endDate?.year !=
-                                        DateTime.now().year,
-                                  ),
-                                  fontSize: 12,
-                                  textColor: getColor(context, "black")
-                                      .withOpacity(0.3),
-                                ),
-                              ),
-                          ],
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               );
@@ -717,7 +777,7 @@ class ObjectiveContainer extends StatelessWidget {
         );
       },
     );
-    if (demoObjective) {
+    if (widget.demoObjective) {
       return IgnorePointer(
         child: Opacity(
           opacity: 0.25,
@@ -742,7 +802,7 @@ class ObjectiveContainer extends StatelessWidget {
   }
 }
 
-class ObjectiveContainerDifferenceLoan extends StatelessWidget {
+class ObjectiveContainerDifferenceLoan extends StatefulWidget {
   const ObjectiveContainerDifferenceLoan({
     required this.objective,
     required this.index,
@@ -756,175 +816,216 @@ class ObjectiveContainerDifferenceLoan extends StatelessWidget {
   final bool rowEntry;
 
   @override
+  State<ObjectiveContainerDifferenceLoan> createState() =>
+      _ObjectiveContainerDifferenceLoanState();
+}
+
+class _ObjectiveContainerDifferenceLoanState
+    extends State<ObjectiveContainerDifferenceLoan> {
+  bool _isRevealed = false;
+  Timer? _revealTimer;
+
+  @override
+  void dispose() {
+    _revealTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    double borderRadius = rowEntry ||
+    double borderRadius = widget.rowEntry ||
             (getPlatform() == PlatformOS.isIOS &&
-                forceAndroidBubbleDesign == false)
+                widget.forceAndroidBubbleDesign == false)
         ? 0
         : 20;
-    Color containerColor =
-        getPlatform() == PlatformOS.isIOS && forceAndroidBubbleDesign == false
-            ? Theme.of(context).colorScheme.background
-            : getColor(context, "lightDarkAccentHeavyLight");
+    Color containerColor = getPlatform() == PlatformOS.isIOS &&
+            widget.forceAndroidBubbleDesign == false
+        ? Theme.of(context).colorScheme.background
+        : getColor(context, "lightDarkAccentHeavyLight");
     Widget child = WatchTotalAndAmountOfObjective(
-      objective: objective,
+      objective: widget.objective,
       builder: (objectiveAmount, totalAmount, percentageTowardsGoal) {
         String amountSpentLabel = getObjectiveAmountSpentLabel(
-          objective: objective,
+          objective: widget.objective,
           context: context,
           showTotalSpent: appStateSettings["showTotalSpentForObjective"],
           objectiveAmount: objectiveAmount,
           totalAmount: totalAmount,
+          forceReveal: _isRevealed,
         );
         return Container(
           decoration: BoxDecoration(
-            boxShadow: rowEntry ||
+            boxShadow: widget.rowEntry ||
                     (getPlatform() == PlatformOS.isIOS &&
-                        forceAndroidBubbleDesign == false)
+                        widget.forceAndroidBubbleDesign == false)
                 ? []
                 : boxShadowCheck(boxShadowGeneral(context)),
           ),
           child: OpenContainerNavigation(
-            openPage: ObjectivePage(objectivePk: objective.objectivePk),
+            openPage: ObjectivePage(objectivePk: widget.objective.objectivePk),
             borderRadius: borderRadius,
             closedColor: containerColor,
             button: (openContainer()) {
-              return Tappable(
-                onLongPress: () {
-                  pushRoute(
-                    context,
-                    AddObjectivePage(
-                      routesToPopAfterDelete: RoutesToPopAfterDelete.One,
-                      objective: objective,
+              return Listener(
+                onPointerDown: (_) {
+                  HapticFeedback.selectionClick();
+                  setState(() => _isRevealed = true);
+                  _revealTimer?.cancel();
+                  _revealTimer = Timer(Duration(seconds: 2), () {
+                    if (mounted) setState(() => _isRevealed = false);
+                  });
+                },
+                onPointerUp: (_) {
+                  _revealTimer?.cancel();
+                  setState(() => _isRevealed = false);
+                },
+                onPointerCancel: (_) {
+                  _revealTimer?.cancel();
+                  setState(() => _isRevealed = false);
+                },
+                child: Tappable(
+                  onLongPress: () {
+                    pushRoute(
+                      context,
+                      AddObjectivePage(
+                        routesToPopAfterDelete: RoutesToPopAfterDelete.One,
+                        objective: widget.objective,
+                      ),
+                    );
+                  },
+                  color: containerColor,
+                  onTap: () {
+                    openContainer();
+                  },
+                  child: Padding(
+                    padding: EdgeInsetsDirectional.only(
+                      top: widget.rowEntry ? 7 : 10,
+                      bottom: widget.rowEntry ? 7 : 10,
+                      start: 15,
+                      end: 20,
                     ),
-                  );
-                },
-                color: containerColor,
-                onTap: () {
-                  openContainer();
-                },
-                child: Padding(
-                  padding: EdgeInsetsDirectional.only(
-                    top: rowEntry ? 7 : 10,
-                    bottom: rowEntry ? 7 : 10,
-                    start: 15,
-                    end: 20,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Flexible(
-                        child: Row(
-                          children: [
-                            CategoryIcon(
-                              categoryPk: "-1",
-                              category: TransactionCategory(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Flexible(
+                          child: Row(
+                            children: [
+                              CategoryIcon(
                                 categoryPk: "-1",
-                                name: "",
-                                dateCreated: DateTime.now(),
-                                dateTimeModified: null,
-                                order: 0,
-                                income: false,
-                                iconName: objective.iconName,
-                                colour: objective.colour,
-                                emojiIconName: objective.emojiIconName,
+                                category: TransactionCategory(
+                                  categoryPk: "-1",
+                                  name: "",
+                                  dateCreated: DateTime.now(),
+                                  dateTimeModified: null,
+                                  order: 0,
+                                  income: false,
+                                  iconName: widget.objective.iconName,
+                                  colour: widget.objective.colour,
+                                  emojiIconName: widget.objective.emojiIconName,
+                                ),
+                                size: 30,
+                                sizePadding: 20,
+                                borderRadius: 100,
+                                canEditByLongPress: false,
+                                margin: EdgeInsetsDirectional.zero,
                               ),
-                              size: 30,
-                              sizePadding: 20,
-                              borderRadius: 100,
-                              canEditByLongPress: false,
-                              margin: EdgeInsetsDirectional.zero,
+                              SizedBox(width: 10),
+                              Flexible(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    TextFont(
+                                      text: widget.objective.name,
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    SizedBox(height: 1),
+                                    StreamBuilder<int?>(
+                                      stream: database
+                                          .getTotalCountOfTransactionsInObjective(
+                                              widget.objective.objectivePk)
+                                          .$1,
+                                      builder: (context, snapshot) {
+                                        int numberTransactions =
+                                            snapshot.data ?? 0;
+                                        return TextFont(
+                                          textAlign: TextAlign.start,
+                                          text: numberTransactions.toString() +
+                                              " " +
+                                              (numberTransactions == 1
+                                                  ? "transaction"
+                                                      .tr()
+                                                      .toLowerCase()
+                                                  : "transactions"
+                                                      .tr()
+                                                      .toLowerCase()),
+                                          fontSize: 14,
+                                          textColor: getColor(context, "black")
+                                              .withOpacity(0.65),
+                                        );
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 300),
+                              child: TextFont(
+                                key: ValueKey(_isRevealed),
+                                fontWeight: FontWeight.bold,
+                                text: amountSpentLabel,
+                                fontSize: 20,
+                                textColor: percentageTowardsGoal == 1
+                                    ? getColor(context, "black")
+                                    : getDifferenceOfLoan(
+                                              widget.objective,
+                                              totalAmount,
+                                              objectiveAmount,
+                                            ) <
+                                            0
+                                        ? getColor(
+                                            context,
+                                            "unPaidUpcoming",
+                                          )
+                                        : getColor(
+                                            context,
+                                            "unPaidOverdue",
+                                          ),
+                              ),
                             ),
-                            SizedBox(width: 10),
-                            Flexible(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  TextFont(
-                                    text: objective.name,
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  SizedBox(height: 1),
-                                  StreamBuilder<int?>(
-                                    stream: database
-                                        .getTotalCountOfTransactionsInObjective(
-                                            objective.objectivePk)
-                                        .$1,
-                                    builder: (context, snapshot) {
-                                      int numberTransactions =
-                                          snapshot.data ?? 0;
-                                      return TextFont(
-                                        textAlign: TextAlign.start,
-                                        text: numberTransactions.toString() +
-                                            " " +
-                                            (numberTransactions == 1
-                                                ? "transaction"
-                                                    .tr()
-                                                    .toLowerCase()
-                                                : "transactions"
-                                                    .tr()
-                                                    .toLowerCase()),
-                                        fontSize: 14,
-                                        textColor: getColor(context, "black")
-                                            .withOpacity(0.65),
-                                      );
-                                    },
-                                  ),
-                                ],
+                            SizedBox(height: 1),
+                            Padding(
+                              padding:
+                                  const EdgeInsetsDirectional.only(bottom: 2),
+                              child: TextFont(
+                                textAlign: TextAlign.end,
+                                text: percentageTowardsGoal == 1
+                                    ? "settled".tr().capitalizeFirst
+                                    : (getDifferenceOfLoan(
+                                                    widget.objective,
+                                                    totalAmount,
+                                                    objectiveAmount) >
+                                                0
+                                            ? "to-pay".tr()
+                                            : "to-collect".tr())
+                                        .capitalizeFirst,
+                                fontSize: 14,
+                                textColor: getColor(context, "black")
+                                    .withOpacity(0.65),
                               ),
                             ),
                           ],
                         ),
-                      ),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          TextFont(
-                            fontWeight: FontWeight.bold,
-                            text: amountSpentLabel,
-                            fontSize: 20,
-                            textColor: percentageTowardsGoal == 1
-                                ? getColor(context, "black")
-                                : getDifferenceOfLoan(
-                                          objective,
-                                          totalAmount,
-                                          objectiveAmount,
-                                        ) <
-                                        0
-                                    ? getColor(
-                                        context,
-                                        "unPaidUpcoming",
-                                      )
-                                    : getColor(
-                                        context,
-                                        "unPaidOverdue",
-                                      ),
-                          ),
-                          SizedBox(height: 1),
-                          Padding(
-                            padding:
-                                const EdgeInsetsDirectional.only(bottom: 2),
-                            child: TextFont(
-                              textAlign: TextAlign.end,
-                              text: percentageTowardsGoal == 1
-                                  ? "settled".tr().capitalizeFirst
-                                  : (getDifferenceOfLoan(objective, totalAmount,
-                                                  objectiveAmount) >
-                                              0
-                                          ? "to-pay".tr()
-                                          : "to-collect".tr())
-                                      .capitalizeFirst,
-                              fontSize: 14,
-                              textColor:
-                                  getColor(context, "black").withOpacity(0.65),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               );
@@ -984,6 +1085,7 @@ String getObjectiveAmountSpentLabel({
   required bool showTotalSpent,
   required double objectiveAmount,
   required double totalAmount,
+  bool forceReveal = false,
 }) {
   double amountSpent =
       showTotalSpent ? totalAmount : (objectiveAmount - totalAmount);
@@ -996,6 +1098,7 @@ String getObjectiveAmountSpentLabel({
   String amountSpentLabel = convertToMoney(
     Provider.of<AllWallets>(context),
     amountSpent,
+    forceReveal: forceReveal,
   );
   return amountSpentLabel;
 }
