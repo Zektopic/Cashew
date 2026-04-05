@@ -47,32 +47,32 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyDKcPuor5e90b__h3EO_E1EF2ZJRJDPTOw',
-    appId: '1:444620404094:web:9c226a10c4b6bd72fa6f2f',
-    messagingSenderId: '444620404094',
-    projectId: 'cashew-budget-app-23736',
-    authDomain: 'cashew-budget-app-23736.firebaseapp.com',
-    storageBucket: 'cashew-budget-app-23736.firebasestorage.app',
-    measurementId: 'G-T2V05D4QRM',
+    apiKey: String.fromEnvironment('FIREBASE_API_KEY_WEB', defaultValue: ''),
+    appId: String.fromEnvironment('FIREBASE_APP_ID_WEB', defaultValue: ''),
+    messagingSenderId: String.fromEnvironment('FIREBASE_MESSAGING_SENDER_ID', defaultValue: ''),
+    projectId: String.fromEnvironment('FIREBASE_PROJECT_ID', defaultValue: ''),
+    authDomain: String.fromEnvironment('FIREBASE_AUTH_DOMAIN', defaultValue: ''),
+    storageBucket: String.fromEnvironment('FIREBASE_STORAGE_BUCKET', defaultValue: ''),
+    measurementId: String.fromEnvironment('FIREBASE_MEASUREMENT_ID', defaultValue: ''),
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyA2ROvBi_5MUMXF7BZSGwyGiCWsKw0NfMo',
-    appId: '1:444620404094:android:4d3936a8ae7b8693fa6f2f',
-    messagingSenderId: '444620404094',
-    projectId: 'cashew-budget-app-23736',
-    storageBucket: 'cashew-budget-app-23736.firebasestorage.app',
+    apiKey: String.fromEnvironment('FIREBASE_API_KEY_ANDROID', defaultValue: ''),
+    appId: String.fromEnvironment('FIREBASE_APP_ID_ANDROID', defaultValue: ''),
+    messagingSenderId: String.fromEnvironment('FIREBASE_MESSAGING_SENDER_ID', defaultValue: ''),
+    projectId: String.fromEnvironment('FIREBASE_PROJECT_ID', defaultValue: ''),
+    storageBucket: String.fromEnvironment('FIREBASE_STORAGE_BUCKET', defaultValue: ''),
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyBibAwY1UBIWR4guyZbw-d5VNJDZcklh0k',
-    appId: '1:444620404094:ios:7d6412ee4fc46578fa6f2f',
-    messagingSenderId: '444620404094',
-    projectId: 'cashew-budget-app-23736',
-    storageBucket: 'cashew-budget-app-23736.firebasestorage.app',
-    androidClientId: '444620404094-ff71svihsbdqtgglvipgdvca69mpkso3.apps.googleusercontent.com',
-    iosClientId: '444620404094-ct2ekv0l1vjituav0r01uccdkdir9tah.apps.googleusercontent.com',
-    iosBundleId: 'com.budget.tracker-app',
+    apiKey: String.fromEnvironment('FIREBASE_API_KEY_IOS', defaultValue: ''),
+    appId: String.fromEnvironment('FIREBASE_APP_ID_IOS', defaultValue: ''),
+    messagingSenderId: String.fromEnvironment('FIREBASE_MESSAGING_SENDER_ID', defaultValue: ''),
+    projectId: String.fromEnvironment('FIREBASE_PROJECT_ID', defaultValue: ''),
+    storageBucket: String.fromEnvironment('FIREBASE_STORAGE_BUCKET', defaultValue: ''),
+    androidClientId: String.fromEnvironment('FIREBASE_ANDROID_CLIENT_ID_IOS', defaultValue: ''),
+    iosClientId: String.fromEnvironment('FIREBASE_IOS_CLIENT_ID_IOS', defaultValue: ''),
+    iosBundleId: String.fromEnvironment('FIREBASE_IOS_BUNDLE_ID', defaultValue: ''),
   );
 
 }
