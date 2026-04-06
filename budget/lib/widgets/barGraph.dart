@@ -6,6 +6,8 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'dart:async';
+import 'package:flutter/services.dart';
 
 class BarGraph extends StatefulWidget {
   BarGraph({
@@ -35,87 +37,130 @@ class BarGraph extends StatefulWidget {
 class BarGraphState extends State<BarGraph> {
   bool loaded = false;
 
+  bool _isRevealed = false;
+  Timer? _revealTimer;
+
+  void _setRevealed(bool reveal) {
+    setState(() {
+      _isRevealed = reveal;
+    });
+
+    if (reveal) {
+      HapticFeedback.selectionClick();
+      _revealTimer?.cancel();
+      _revealTimer = Timer(const Duration(seconds: 2), () {
+        if (mounted) {
+          setState(() {
+            _isRevealed = false;
+          });
+        }
+      });
+    } else {
+      _revealTimer?.cancel();
+    }
+  }
+
+  @override
+  void dispose() {
+    _revealTimer?.cancel();
+    super.dispose();
+  }
+
   @override
   void initState() {
     super.initState();
     Future.delayed(Duration(milliseconds: 0), () {
-      setState(() {
-        loaded = true;
-      });
+      if (mounted) {
+        setState(() {
+          loaded = true;
+        });
+      }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsetsDirectional.only(
-        start: 10,
-        end: 30,
-        top: 5,
-      ),
-      child: Container(
-        height: 190,
-        child: BarChart(
-          swapAnimationCurve: Curves.easeInOutCubicEmphasized,
-          swapAnimationDuration: Duration(milliseconds: 1700),
-          BarChartData(
-            maxY: widget.maxY,
-            minY: -1,
-            alignment: BarChartAlignment.spaceBetween,
-            barTouchData: BarTouchData(
-              handleBuiltInTouches: false,
-            ),
-            gridData: FlGridData(
-              show: true,
-              horizontalInterval: 1,
-              checkToShowHorizontalLine: (value) {
-                if (value == widget.horizontalLineAt) {
-                  return true;
-                } else if (value == 0) {
-                  return true;
-                } else if (value % ((widget.maxY / 3.8).ceil()) == 1) {
-                  return true;
-                }
-                return false;
-              },
-              getDrawingHorizontalLine: (value) {
-                if (value == widget.horizontalLineAt) {
+    return Listener(
+      onPointerDown: (_) => _setRevealed(true),
+      onPointerUp: (_) => _setRevealed(false),
+      onPointerCancel: (_) => _setRevealed(false),
+      child: Padding(
+        padding: const EdgeInsetsDirectional.only(start: 10, end: 30, top: 5),
+        child: Container(
+          height: 190,
+          child: BarChart(
+            swapAnimationCurve: Curves.easeInOutCubicEmphasized,
+            swapAnimationDuration: Duration(milliseconds: 1700),
+            BarChartData(
+              maxY: widget.maxY,
+              minY: -1,
+              alignment: BarChartAlignment.spaceBetween,
+              barTouchData: BarTouchData(handleBuiltInTouches: false),
+              gridData: FlGridData(
+                show: true,
+                horizontalInterval: 1,
+                checkToShowHorizontalLine: (value) {
+                  if (value == widget.horizontalLineAt) {
+                    return true;
+                  } else if (value == 0) {
+                    return true;
+                  } else if (value % ((widget.maxY / 3.8).ceil()) == 1) {
+                    return true;
+                  }
+                  return false;
+                },
+                getDrawingHorizontalLine: (value) {
+                  if (value == widget.horizontalLineAt) {
+                    return FlLine(
+                      dashArray: [2, 2],
+                      strokeWidth: 2,
+                      color: dynamicPastel(
+                        context,
+                        widget.color,
+                        amount: 0.3,
+                      ).withOpacity(0.7),
+                    );
+                  } else if (value == 0) {
+                    return FlLine(
+                      color: dynamicPastel(
+                        context,
+                        widget.color,
+                        amount: 0.3,
+                      ).withOpacity(0.2),
+                      strokeWidth: 2,
+                    );
+                  } else if (value % ((widget.maxY / 3.8).ceil()) == 1) {
+                    return FlLine(
+                      color: dynamicPastel(
+                        context,
+                        widget.color,
+                        amount: 0.3,
+                      ).withOpacity(0.2),
+                      strokeWidth: 2,
+                      dashArray: [2, 8],
+                    );
+                  }
+                  return FlLine(color: Colors.transparent, strokeWidth: 0);
+                },
+                getDrawingVerticalLine: (value) {
                   return FlLine(
-                    dashArray: [2, 2],
-                    strokeWidth: 2,
-                    color: dynamicPastel(context, widget.color, amount: 0.3)
-                        .withOpacity(0.7),
-                  );
-                } else if (value == 0) {
-                  return FlLine(
-                    color: dynamicPastel(context, widget.color, amount: 0.3)
-                        .withOpacity(0.2),
-                    strokeWidth: 2,
-                  );
-                } else if (value % ((widget.maxY / 3.8).ceil()) == 1) {
-                  return FlLine(
-                    color: dynamicPastel(context, widget.color, amount: 0.3)
-                        .withOpacity(0.2),
+                    color: dynamicPastel(
+                      context,
+                      widget.color,
+                      amount: 0.3,
+                    ).withOpacity(0.2),
                     strokeWidth: 2,
                     dashArray: [2, 8],
                   );
-                }
-                return FlLine(color: Colors.transparent, strokeWidth: 0);
-              },
-              getDrawingVerticalLine: (value) {
-                return FlLine(
-                  color: dynamicPastel(context, widget.color, amount: 0.3)
-                      .withOpacity(0.2),
-                  strokeWidth: 2,
-                  dashArray: [2, 8],
-                );
-              },
-            ),
-            titlesData: FlTitlesData(
-              show: true,
-              topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-              bottomTitles: AxisTitles(
-                sideTitles: SideTitles(
+                },
+              ),
+              titlesData: FlTitlesData(
+                show: true,
+                topTitles: AxisTitles(
+                  sideTitles: SideTitles(showTitles: false),
+                ),
+                bottomTitles: AxisTitles(
+                  sideTitles: SideTitles(
                     showTitles: true,
                     getTitlesWidget: (value, _) {
                       return Padding(
@@ -123,67 +168,79 @@ class BarGraphState extends State<BarGraph> {
                         child: TextFont(
                           textAlign: TextAlign.center,
                           fontSize: 13,
-                          text: widget.budget.reoccurrence ==
+                          text:
+                              widget.budget.reoccurrence ==
                                   BudgetReoccurence.monthly
-                              ? DateFormat('MMM', context.locale.toString())
-                                  .format(
-                                      widget.dateRanges[value.toInt()].start)
+                              ? DateFormat(
+                                  'MMM',
+                                  context.locale.toString(),
+                                ).format(widget.dateRanges[value.toInt()].start)
                               : widget.budget.reoccurrence ==
-                                      BudgetReoccurence.yearly
-                                  ? DateFormat(
-                                          'yyyy', context.locale.toString())
-                                      .format(widget
-                                          .dateRanges[value.toInt()].start)
-                                  : DateFormat(
-                                          'MMM\nd', context.locale.toString())
-                                      .format(widget
-                                          .dateRanges[value.toInt()].start),
-                          textColor: dynamicPastel(context, widget.color,
-                                  amount: 0.8, inverse: true)
-                              .withOpacity(0.5),
+                                    BudgetReoccurence.yearly
+                              ? DateFormat(
+                                  'yyyy',
+                                  context.locale.toString(),
+                                ).format(widget.dateRanges[value.toInt()].start)
+                              : DateFormat(
+                                  'MMM\nd',
+                                  context.locale.toString(),
+                                ).format(
+                                  widget.dateRanges[value.toInt()].start,
+                                ),
+                          textColor: dynamicPastel(
+                            context,
+                            widget.color,
+                            amount: 0.8,
+                            inverse: true,
+                          ).withOpacity(0.5),
                         ),
                       );
-                    }),
-              ),
-              rightTitles:
-                  AxisTitles(sideTitles: SideTitles(showTitles: false)),
-              leftTitles: AxisTitles(
-                sideTitles: SideTitles(
-                  showTitles: true,
-                  getTitlesWidget: (
-                    value,
-                    titleMeta,
-                  ) {
-                    bool show = false;
-                    if (value == 0) {
-                      show = true;
-                    } else if (value < widget.maxY && value > 1) {
-                      show = true;
-                    } else {
-                      return SizedBox.shrink();
-                    }
-                    return Padding(
-                      padding: const EdgeInsetsDirectional.only(end: 8.0),
-                      child: TextFont(
-                        textAlign: TextAlign.end,
-                        text: getWordedNumber(
-                            context, Provider.of<AllWallets>(context), value),
-                        textColor: dynamicPastel(context, widget.color,
-                                amount: 0.5, inverse: true)
-                            .withOpacity(0.3),
-                        fontSize: 13,
-                      ),
-                    );
-                  },
-                  reservedSize: 48,
-                  interval: (widget.maxY / 3.8),
+                    },
+                  ),
+                ),
+                rightTitles: AxisTitles(
+                  sideTitles: SideTitles(showTitles: false),
+                ),
+                leftTitles: AxisTitles(
+                  sideTitles: SideTitles(
+                    showTitles: true,
+                    getTitlesWidget: (value, titleMeta) {
+                      bool show = false;
+                      if (value == 0) {
+                        show = true;
+                      } else if (value < widget.maxY && value > 1) {
+                        show = true;
+                      } else {
+                        return SizedBox.shrink();
+                      }
+                      return Padding(
+                        padding: const EdgeInsetsDirectional.only(end: 8.0),
+                        child: TextFont(
+                          textAlign: TextAlign.end,
+                          text: getWordedNumber(
+                            context,
+                            Provider.of<AllWallets>(context),
+                            value,
+                            forceReveal: _isRevealed,
+                          ),
+                          textColor: dynamicPastel(
+                            context,
+                            widget.color,
+                            amount: 0.5,
+                            inverse: true,
+                          ).withOpacity(0.3),
+                          fontSize: 13,
+                        ),
+                      );
+                    },
+                    reservedSize: 48,
+                    interval: (widget.maxY / 3.8),
+                  ),
                 ),
               ),
+              borderData: FlBorderData(show: false),
+              barGroups: loaded ? widget.bars : widget.initialBars,
             ),
-            borderData: FlBorderData(
-              show: false,
-            ),
-            barGroups: loaded ? widget.bars : widget.initialBars,
           ),
         ),
       ),
