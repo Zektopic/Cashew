@@ -61,10 +61,16 @@ extension DateUtils on DateTime {
     );
   }
 
-  DateTime justDay(
-      {int yearOffset = 0, int monthOffset = 0, int dayOffset = 0}) {
+  DateTime justDay({
+    int yearOffset = 0,
+    int monthOffset = 0,
+    int dayOffset = 0,
+  }) {
     return DateTime(
-        this.year + yearOffset, this.month + monthOffset, this.day + dayOffset);
+      this.year + yearOffset,
+      this.month + monthOffset,
+      this.day + dayOffset,
+    );
   }
 
   DateTime firstDayOfMonth() {
@@ -72,11 +78,26 @@ extension DateUtils on DateTime {
   }
 }
 
-String convertToPercent(double amount,
-    {double? finalNumber,
-    int? numberDecimals,
-    bool useLessThanZero = false,
-    bool shouldRemoveTrailingZeroes = false}) {
+String convertToPercent(
+  double amount, {
+  double? finalNumber,
+  int? numberDecimals,
+  bool useLessThanZero = false,
+  bool shouldRemoveTrailingZeroes = false,
+  bool forceReveal = false,
+}) {
+  if (forceReveal == false && appStateSettings["obscureAmounts"] == true) {
+    String char = appStateSettings["obscureAmountsCharacter"] ?? "•";
+    if (appStateSettings["obscureAmountsMagnitude"] == true) {
+      double valueToScale = finalNumber != null ? finalNumber : amount;
+      int numDigits = valueToScale == 0
+          ? 1
+          : valueToScale.abs().truncate().toString().length;
+      return char * numDigits + "%";
+    }
+    return (char * 3) + "%";
+  }
+
   amount = absoluteZero(amount);
   finalNumber = absoluteZeroNull(finalNumber);
 
@@ -91,9 +112,11 @@ String convertToPercent(double amount,
   if (shouldRemoveTrailingZeroes) {
     if (finalNumber != null) {
       int finalTrailingZeroes = countNonTrailingZeroes(
-          finalNumber.toStringAsFixed(numberDecimalsGet));
-      roundedAmount = finalNumber
-          .toStringAsFixed(max(finalTrailingZeroes, numberDecimalsGet));
+        finalNumber.toStringAsFixed(numberDecimalsGet),
+      );
+      roundedAmount = finalNumber.toStringAsFixed(
+        max(finalTrailingZeroes, numberDecimalsGet),
+      );
     } else {
       roundedAmount = removeTrailingZeroes(roundedAmount);
     }
@@ -167,24 +190,27 @@ bool hasDecimalPoints(double? value) {
   return false;
 }
 
-String convertToMoney(AllWallets allWallets, double amount,
-    {String? currencyKey,
-    double? finalNumber,
-    int? decimals,
-    bool? allDecimals,
-    bool? addCurrencyName,
-    bool forceHideCurrencyName = false,
-    bool forceAllDecimals = false,
-    bool forceNonCustomNumberFormat = false,
-    bool forceCustomNumberFormat = false,
-    String? customSymbol,
-    String Function(String)? editFormattedOutput,
-    bool forceCompactNumberFormatter = false,
-    bool forceDefaultNumberFormatter = false,
-    bool forceAbsoluteZero = true,
-    bool forceReveal = false,
-    NumberFormat Function(int? decimalDigits, String? locale, String? symbol)?
-        getCustomNumberFormat}) {
+String convertToMoney(
+  AllWallets allWallets,
+  double amount, {
+  String? currencyKey,
+  double? finalNumber,
+  int? decimals,
+  bool? allDecimals,
+  bool? addCurrencyName,
+  bool forceHideCurrencyName = false,
+  bool forceAllDecimals = false,
+  bool forceNonCustomNumberFormat = false,
+  bool forceCustomNumberFormat = false,
+  String? customSymbol,
+  String Function(String)? editFormattedOutput,
+  bool forceCompactNumberFormatter = false,
+  bool forceDefaultNumberFormatter = false,
+  bool forceAbsoluteZero = true,
+  bool forceReveal = false,
+  NumberFormat Function(int? decimalDigits, String? locale, String? symbol)?
+  getCustomNumberFormat,
+}) {
   if (forceReveal == false && appStateSettings["obscureAmounts"] == true) {
     String char = appStateSettings["obscureAmountsCharacter"] ?? "•";
     if (appStateSettings["obscureAmountsMagnitude"] == true) {
@@ -197,14 +223,16 @@ String convertToMoney(AllWallets allWallets, double amount,
     return char * 3;
   }
 
-  int numberDecimals = decimals ??
+  int numberDecimals =
+      decimals ??
       allWallets.indexedByPk[appStateSettings["selectedWalletPk"]]?.decimals ??
       2;
-  numberDecimals = numberDecimals > 2 &&
+  numberDecimals =
+      numberDecimals > 2 &&
           (finalNumber ?? amount).toString().split('.').length > 1
       ? (finalNumber ?? amount).toString().split('.')[1].length < numberDecimals
-          ? (finalNumber ?? amount).toString().split('.')[1].length
-          : numberDecimals
+            ? (finalNumber ?? amount).toString().split('.')[1].length
+            : numberDecimals
       : numberDecimals;
 
   if (amount == double.infinity || amount == double.negativeInfinity) {
@@ -220,24 +248,28 @@ String convertToMoney(AllWallets allWallets, double amount,
   int? decimalDigits = forceAllDecimals
       ? decimals
       : allDecimals == true ||
-              hasDecimalPoints(finalNumber) ||
-              hasDecimalPoints(amount)
-          ? numberDecimals
-          : 0;
+            hasDecimalPoints(finalNumber) ||
+            hasDecimalPoints(amount)
+      ? numberDecimals
+      : 0;
   String? locale = appStateSettings["customNumberFormat"] == true
       ? "en-US"
       : Platform.localeName;
   String? symbol =
       customSymbol ?? getCurrencyString(allWallets, currencyKey: currencyKey);
 
-  bool useCustomNumberFormat = forceCustomNumberFormat ||
+  bool useCustomNumberFormat =
+      forceCustomNumberFormat ||
       (forceNonCustomNumberFormat == false &&
           appStateSettings["customNumberFormat"] == true);
 
   final NumberFormat formatter;
   if (getCustomNumberFormat != null) {
     formatter = getCustomNumberFormat(
-        decimalDigits, locale, useCustomNumberFormat ? "" : symbol);
+      decimalDigits,
+      locale,
+      useCustomNumberFormat ? "" : symbol,
+    );
   } else if (forceDefaultNumberFormatter == false &&
       (forceCompactNumberFormatter ||
           appStateSettings["shortNumberFormat"] == "compact")) {
@@ -268,8 +300,10 @@ String convertToMoney(AllWallets allWallets, double amount,
   if (addCurrencyName == true && currencyKey != null) {
     currencyName = " " + currencyKey.toUpperCase();
   } else if (addCurrencyName == true) {
-    currencyName = " " +
-        (allWallets.indexedByPk[appStateSettings["selectedWalletPk"]]
+    currencyName =
+        " " +
+        (allWallets
+                    .indexedByPk[appStateSettings["selectedWalletPk"]]
                     ?.currency ??
                 "")
             .toUpperCase();
@@ -358,21 +392,20 @@ initializeLocalizedMonthNames() {
 
 String getMonth(DateTime dateTime, {bool includeYear = false}) {
   if (includeYear) {
-    return DateFormat.yMMMM(navigatorKey.currentContext?.locale.toString())
-        .format(dateTime);
+    return DateFormat.yMMMM(
+      navigatorKey.currentContext?.locale.toString(),
+    ).format(dateTime);
   }
-  return DateFormat.MMMM(navigatorKey.currentContext?.locale.toString())
-      .format(dateTime);
+  return DateFormat.MMMM(
+    navigatorKey.currentContext?.locale.toString(),
+  ).format(dateTime);
 }
 
-String getWordedTime(
-  String? locale,
-  DateTime dateTime,
-) {
+String getWordedTime(String? locale, DateTime dateTime) {
   if (isSetting24HourFormat() == null) {
     return DateFormat.jm(
-            locale ?? navigatorKey.currentContext?.locale.toString())
-        .format(dateTime);
+      locale ?? navigatorKey.currentContext?.locale.toString(),
+    ).format(dateTime);
   } else {
     if (isSetting24HourFormat() == true) {
       return DateFormat("H:mm").format(dateTime);
@@ -488,8 +521,11 @@ String getTimeAgo(DateTime time) {
 }
 
 //e.g. Today/Yesterday/Tomorrow/Tuesday/ Thursday, September 15
-getWordedDate(DateTime date,
-    {bool includeMonthDate = false, bool includeYearIfNotCurrentYear = true}) {
+getWordedDate(
+  DateTime date, {
+  bool includeMonthDate = false,
+  bool includeYearIfNotCurrentYear = true,
+}) {
   DateTime now = DateTime.now();
 
   String extraYear = "";
@@ -501,55 +537,61 @@ getWordedDate(DateTime date,
     return checkYesterdayTodayTomorrow(date) +
         (includeMonthDate
             ? ", " +
-                DateFormat.MMMMd(navigatorKey.currentContext?.locale.toString())
-                    .format(date)
-                    .toString() +
-                extraYear
+                  DateFormat.MMMMd(
+                    navigatorKey.currentContext?.locale.toString(),
+                  ).format(date).toString() +
+                  extraYear
             : "");
   }
 
   if (includeMonthDate == false &&
       now.difference(date).inDays < 4 &&
       now.difference(date).inDays > 0) {
-    String weekday =
-        DateFormat('EEEE', navigatorKey.currentContext?.locale.toString())
-            .format(date);
+    String weekday = DateFormat(
+      'EEEE',
+      navigatorKey.currentContext?.locale.toString(),
+    ).format(date);
     return weekday + extraYear;
   }
-  return DateFormat.MMMMEEEEd(navigatorKey.currentContext?.locale.toString())
-          .format(date)
-          .toString() +
+  return DateFormat.MMMMEEEEd(
+        navigatorKey.currentContext?.locale.toString(),
+      ).format(date).toString() +
       extraYear;
 }
 
 setTextInput(TextEditingController inputController, String value) {
   inputController.value = TextEditingValue(
     text: value,
-    selection: TextSelection.fromPosition(
-      TextPosition(offset: value.length),
-    ),
+    selection: TextSelection.fromPosition(TextPosition(offset: value.length)),
   );
 }
 
-DateTime getDatePastToDetermineBudgetDate(int index, Budget budget,
-    {bool isChecking = true}) {
+DateTime getDatePastToDetermineBudgetDate(
+  int index,
+  Budget budget, {
+  bool isChecking = true,
+}) {
   BudgetReoccurence? reoccurrence = budget.reoccurrence;
   int periodLength = budget.periodLength;
   if (reoccurrence == null) return DateTime.now();
 
-  int year = DateTime.now().year -
+  int year =
+      DateTime.now().year -
       (reoccurrence == BudgetReoccurence.yearly ? index * periodLength : 0);
-  int month = DateTime.now().month -
+  int month =
+      DateTime.now().month -
       (reoccurrence == BudgetReoccurence.monthly ? index * periodLength : 0);
   // This fixes a bug where if the currentDate is the 31 of a month, February for example won't be considered since it doesn't have 30 days
   // Every monthly budget will have a day that falls on the first!
   int day = reoccurrence == BudgetReoccurence.monthly
       ? 1
       : DateTime.now().day -
-          (reoccurrence == BudgetReoccurence.daily ? index * periodLength : 0) -
-          (reoccurrence == BudgetReoccurence.weekly
-              ? index * 7 * periodLength
-              : 0);
+            (reoccurrence == BudgetReoccurence.daily
+                ? index * periodLength
+                : 0) -
+            (reoccurrence == BudgetReoccurence.weekly
+                ? index * 7 * periodLength
+                : 0);
 
   // This ensures that there will always be a current period, since we start
   // on the first of the month, the current period may not be shown and we have to remove
@@ -558,10 +600,15 @@ DateTime getDatePastToDetermineBudgetDate(int index, Budget budget,
   // Only needed for months
   if (isChecking && reoccurrence == BudgetReoccurence.monthly) {
     DateTimeRange budgetRange = getBudgetDate(
-        budget, getDatePastToDetermineBudgetDate(0, budget, isChecking: false));
+      budget,
+      getDatePastToDetermineBudgetDate(0, budget, isChecking: false),
+    );
     if (budgetRange.end.isBefore(DateTime.now().subtract(Duration(days: 1))))
-      return getDatePastToDetermineBudgetDate(index - 1, budget,
-          isChecking: false);
+      return getDatePastToDetermineBudgetDate(
+        index - 1,
+        budget,
+        isChecking: false,
+      );
   }
 
   return DateTime(year, month, day, 0, 0, 1);
@@ -596,17 +643,21 @@ DateTimeRange getBudgetDate(Budget budget, DateTime currentDate) {
     DateTime currentDateLoopStart = budget.startDate;
     late DateTime currentDateLoopEnd;
     if (budget.reoccurrence == BudgetReoccurence.daily) {
-      currentDateLoopEnd =
-          currentDateLoopStart.justDay(dayOffset: budget.periodLength);
+      currentDateLoopEnd = currentDateLoopStart.justDay(
+        dayOffset: budget.periodLength,
+      );
     } else if (budget.reoccurrence == BudgetReoccurence.monthly) {
-      currentDateLoopEnd =
-          currentDateLoopStart.justDay(monthOffset: budget.periodLength);
+      currentDateLoopEnd = currentDateLoopStart.justDay(
+        monthOffset: budget.periodLength,
+      );
     } else if (budget.reoccurrence == BudgetReoccurence.yearly) {
-      currentDateLoopEnd =
-          currentDateLoopStart.justDay(yearOffset: budget.periodLength);
+      currentDateLoopEnd = currentDateLoopStart.justDay(
+        yearOffset: budget.periodLength,
+      );
     } else if (budget.reoccurrence == BudgetReoccurence.weekly) {
-      currentDateLoopEnd =
-          currentDateLoopStart.justDay(dayOffset: budget.periodLength * 7);
+      currentDateLoopEnd = currentDateLoopStart.justDay(
+        dayOffset: budget.periodLength * 7,
+      );
     }
     // print("START");
     // print(currentDate);
@@ -631,25 +682,33 @@ DateTimeRange getBudgetDate(Budget budget, DateTime currentDate) {
           );
         }
         if (budget.reoccurrence == BudgetReoccurence.daily) {
-          currentDateLoopStart =
-              currentDateLoopStart.justDay(dayOffset: -budget.periodLength);
-          currentDateLoopEnd =
-              currentDateLoopEnd.justDay(dayOffset: -budget.periodLength);
+          currentDateLoopStart = currentDateLoopStart.justDay(
+            dayOffset: -budget.periodLength,
+          );
+          currentDateLoopEnd = currentDateLoopEnd.justDay(
+            dayOffset: -budget.periodLength,
+          );
         } else if (budget.reoccurrence == BudgetReoccurence.monthly) {
-          currentDateLoopStart =
-              currentDateLoopStart.justDay(monthOffset: -budget.periodLength);
-          currentDateLoopEnd =
-              currentDateLoopEnd.justDay(monthOffset: -budget.periodLength);
+          currentDateLoopStart = currentDateLoopStart.justDay(
+            monthOffset: -budget.periodLength,
+          );
+          currentDateLoopEnd = currentDateLoopEnd.justDay(
+            monthOffset: -budget.periodLength,
+          );
         } else if (budget.reoccurrence == BudgetReoccurence.yearly) {
-          currentDateLoopStart =
-              currentDateLoopStart.justDay(yearOffset: -budget.periodLength);
-          currentDateLoopEnd =
-              currentDateLoopEnd.justDay(yearOffset: -budget.periodLength);
+          currentDateLoopStart = currentDateLoopStart.justDay(
+            yearOffset: -budget.periodLength,
+          );
+          currentDateLoopEnd = currentDateLoopEnd.justDay(
+            yearOffset: -budget.periodLength,
+          );
         } else if (budget.reoccurrence == BudgetReoccurence.weekly) {
-          currentDateLoopStart =
-              currentDateLoopStart.justDay(dayOffset: -budget.periodLength * 7);
-          currentDateLoopEnd =
-              currentDateLoopEnd.justDay(dayOffset: -budget.periodLength * 7);
+          currentDateLoopStart = currentDateLoopStart.justDay(
+            dayOffset: -budget.periodLength * 7,
+          );
+          currentDateLoopEnd = currentDateLoopEnd.justDay(
+            dayOffset: -budget.periodLength * 7,
+          );
         }
       }
     } else if (currentDate.millisecondsSinceEpoch >=
@@ -668,25 +727,33 @@ DateTimeRange getBudgetDate(Budget budget, DateTime currentDate) {
           );
         }
         if (budget.reoccurrence == BudgetReoccurence.daily) {
-          currentDateLoopStart =
-              currentDateLoopStart.justDay(dayOffset: budget.periodLength);
-          currentDateLoopEnd =
-              currentDateLoopEnd.justDay(dayOffset: budget.periodLength);
+          currentDateLoopStart = currentDateLoopStart.justDay(
+            dayOffset: budget.periodLength,
+          );
+          currentDateLoopEnd = currentDateLoopEnd.justDay(
+            dayOffset: budget.periodLength,
+          );
         } else if (budget.reoccurrence == BudgetReoccurence.monthly) {
-          currentDateLoopStart =
-              currentDateLoopStart.justDay(monthOffset: budget.periodLength);
-          currentDateLoopEnd =
-              currentDateLoopEnd.justDay(monthOffset: budget.periodLength);
+          currentDateLoopStart = currentDateLoopStart.justDay(
+            monthOffset: budget.periodLength,
+          );
+          currentDateLoopEnd = currentDateLoopEnd.justDay(
+            monthOffset: budget.periodLength,
+          );
         } else if (budget.reoccurrence == BudgetReoccurence.yearly) {
-          currentDateLoopStart =
-              currentDateLoopStart.justDay(yearOffset: budget.periodLength);
-          currentDateLoopEnd =
-              currentDateLoopEnd.justDay(yearOffset: budget.periodLength);
+          currentDateLoopStart = currentDateLoopStart.justDay(
+            yearOffset: budget.periodLength,
+          );
+          currentDateLoopEnd = currentDateLoopEnd.justDay(
+            yearOffset: budget.periodLength,
+          );
         } else if (budget.reoccurrence == BudgetReoccurence.weekly) {
-          currentDateLoopStart =
-              currentDateLoopStart.justDay(dayOffset: budget.periodLength * 7);
-          currentDateLoopEnd =
-              currentDateLoopEnd.justDay(dayOffset: budget.periodLength * 7);
+          currentDateLoopStart = currentDateLoopStart.justDay(
+            dayOffset: budget.periodLength * 7,
+          );
+          currentDateLoopEnd = currentDateLoopEnd.justDay(
+            dayOffset: budget.periodLength * 7,
+          );
         }
       }
     }
@@ -698,7 +765,11 @@ DateTimeRange getBudgetDate(Budget budget, DateTime currentDate) {
 }
 
 String getWordedNumber(
-    BuildContext context, AllWallets allWallets, double value, {bool forceReveal = false}) {
+  BuildContext context,
+  AllWallets allWallets,
+  double value, {
+  bool forceReveal = false,
+}) {
   if (removeTrailingZeroes(value.toStringAsFixed(10)) == "0") {
     return getCurrencyString(allWallets) + "0";
   }
@@ -717,21 +788,24 @@ String getWordedNumber(
       formatter.significantDigitsInUse = false;
       formatter.maximumFractionDigits = value.abs() < 1000
           ? value.abs() < 10
-              ? (decimalDigits ?? 2)
-              : 0
+                ? (decimalDigits ?? 2)
+                : 0
           : 1;
-      formatter.minimumFractionDigits =
-          value.abs() < 10 ? (decimalDigits ?? 2) : 0;
+      formatter.minimumFractionDigits = value.abs() < 10
+          ? (decimalDigits ?? 2)
+          : 0;
       return formatter;
     },
   );
 }
 
 double getPercentBetweenDates(DateTimeRange timeRange, DateTime currentTime) {
-  int millisecondDifference = timeRange.end.millisecondsSinceEpoch -
+  int millisecondDifference =
+      timeRange.end.millisecondsSinceEpoch -
       timeRange.start.millisecondsSinceEpoch +
       Duration(days: 1).inMilliseconds;
-  double percent = (currentTime.millisecondsSinceEpoch -
+  double percent =
+      (currentTime.millisecondsSinceEpoch -
           timeRange.start.millisecondsSinceEpoch) /
       millisecondDifference;
   return percent * 100;
@@ -765,7 +839,7 @@ String getWelcomeMessage() {
   List<String> greetingsEvening = ["greetings-evening-1".tr()];
   List<String> greetingsLate = [
     "greetings-late-1".tr(),
-    "greetings-late-2".tr()
+    "greetings-late-2".tr(),
   ];
   if (randomInt[0] % 2 == 0) {
     if (h24 <= 12 && h24 >= 6)
@@ -814,17 +888,24 @@ IconData getTransactionTypeIcon(TransactionSpecialType? selectedType) {
       : Icons.event_repeat_rounded;
 }
 
-getTotalSubscriptions(AllWallets allWallets, SelectedSubscriptionsType type,
-    List<Transaction>? subscriptions) {
+getTotalSubscriptions(
+  AllWallets allWallets,
+  SelectedSubscriptionsType type,
+  List<Transaction>? subscriptions,
+) {
   double total = 0;
   DateTime today = DateTime.now();
   if (subscriptions != null) {
     for (Transaction subscription in subscriptions) {
       subscription = subscription.copyWith(
-          amount: subscription.amount *
-              (amountRatioToPrimaryCurrencyGivenPk(
-                      allWallets, subscription.walletFk) ??
-                  0));
+        amount:
+            subscription.amount *
+            (amountRatioToPrimaryCurrencyGivenPk(
+                  allWallets,
+                  subscription.walletFk,
+                ) ??
+                0),
+      );
       if (subscription.type == TransactionSpecialType.upcoming) {
         total += subscription.amount;
       } else if (subscription.periodLength == 0) {
@@ -925,8 +1006,12 @@ String pluralString(bool condition, String string) {
 }
 
 bool lockAppWaitForRestart = false;
-void restartAppPopup(context,
-    {String? subtitle, String? description, String? codeBlock}) async {
+void restartAppPopup(
+  context, {
+  String? subtitle,
+  String? description,
+  String? codeBlock,
+}) async {
   // For now, enforce this until better solution found
   if (kIsWeb || true) {
     // Lock the side navigation
@@ -982,11 +1067,11 @@ class CustomMaterialPageRoute extends MaterialPageRoute {
     bool maintainState = true,
     bool fullscreenDialog = false,
   }) : super(
-          builder: builder,
-          settings: settings,
-          maintainState: maintainState,
-          fullscreenDialog: fullscreenDialog,
-        );
+         builder: builder,
+         settings: settings,
+         maintainState: maintainState,
+         fullscreenDialog: fullscreenDialog,
+       );
 }
 
 popRoute<T extends Object?>(BuildContext? context, [T? result]) {
@@ -1006,8 +1091,10 @@ popRoute<T extends Object?>(BuildContext? context, [T? result]) {
   // });
 }
 
-Future<bool> maybePopRoute<T extends Object?>(BuildContext? context,
-    [T? result]) async {
+Future<bool> maybePopRoute<T extends Object?>(
+  BuildContext? context, [
+  T? result,
+]) async {
   BuildContext? contextToPop = context;
   if (context == null) contextToPop = navigatorKey.currentContext;
   if (contextToPop == null) return false;
@@ -1018,12 +1105,17 @@ popAllRoutes(BuildContext? context) {
   BuildContext? contextToPop = context;
   if (context == null) contextToPop = navigatorKey.currentContext;
   if (contextToPop == null) return;
-  Navigator.of(contextToPop, rootNavigator: false)
-      .popUntil((route) => route.isFirst);
+  Navigator.of(
+    contextToPop,
+    rootNavigator: false,
+  ).popUntil((route) => route.isFirst);
 }
 
-Future<dynamic> pushRoute(BuildContext? context, Widget page,
-    {String? routeName}) async {
+Future<dynamic> pushRoute(
+  BuildContext? context,
+  Widget page, {
+  String? routeName,
+}) async {
   BuildContext? contextToPush = context;
   if (context == null) contextToPush = navigatorKey.currentContext;
   if (contextToPush == null) return;
@@ -1043,8 +1135,10 @@ Future<dynamic> pushRoute(BuildContext? context, Widget page,
       transitionDuration: Duration(milliseconds: 300),
       reverseTransitionDuration: Duration(milliseconds: 125),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        final tween = Tween(begin: Offset(0, 0.05), end: Offset.zero)
-            .chain(CurveTween(curve: Curves.easeOut));
+        final tween = Tween(
+          begin: Offset(0, 0.05),
+          end: Offset.zero,
+        ).chain(CurveTween(curve: Curves.easeOut));
         return SlideTransition(
           position: animation.drive(tween),
           child: FadeTransition(opacity: animation, child: child),
@@ -1061,10 +1155,10 @@ Brightness determineBrightnessTheme(context) {
   return getSettingConstants(appStateSettings)["theme"] == ThemeMode.system
       ? MediaQuery.platformBrightnessOf(context)
       : getSettingConstants(appStateSettings)["theme"] == ThemeMode.light
-          ? Brightness.light
-          : getSettingConstants(appStateSettings)["theme"] == ThemeMode.dark
-              ? Brightness.dark
-              : Brightness.light;
+      ? Brightness.light
+      : getSettingConstants(appStateSettings)["theme"] == ThemeMode.dark
+      ? Brightness.dark
+      : Brightness.light;
 }
 
 String getMemberNickname(member) {
@@ -1093,13 +1187,16 @@ bool isNumber(dynamic value) {
 bool getIsKeyboardOpen(context) {
   return EdgeInsetsDirectional.zero !=
       EdgeInsets.fromViewPadding(
-          View.of(context).viewInsets, View.of(context).devicePixelRatio);
+        View.of(context).viewInsets,
+        View.of(context).devicePixelRatio,
+      );
 }
 
 double getKeyboardHeight(context) {
   return EdgeInsets.fromViewPadding(
-          View.of(context).viewInsets, View.of(context).devicePixelRatio)
-      .bottom;
+    View.of(context).viewInsets,
+    View.of(context).devicePixelRatio,
+  ).bottom;
 }
 
 double getKeyboardHeightForceBuild(context) {
@@ -1155,16 +1252,20 @@ List<String> extractLinks(String text) {
 
 String getDomainNameFromURL(String text) {
   RegExp regExp = RegExp(
-      r'^(?:https?:\/\/)?(?:[^@\/\n]+@)?(?:www\.)?([^:\/?\n]+)',
-      multiLine: true,
-      caseSensitive: false);
+    r'^(?:https?:\/\/)?(?:[^@\/\n]+@)?(?:www\.)?([^:\/?\n]+)',
+    multiLine: true,
+    caseSensitive: false,
+  );
   Match? match = regExp.firstMatch(text);
   return match?.group(1) ?? '';
 }
 
 String cleanupNoteStringWithURLs(String text) {
-  RegExp regExp = RegExp(r'https?:\/\/(?:www\.)?\S+',
-      multiLine: true, caseSensitive: false);
+  RegExp regExp = RegExp(
+    r'https?:\/\/(?:www\.)?\S+',
+    multiLine: true,
+    caseSensitive: false,
+  );
 
   Iterable<Match> matches = regExp.allMatches(text);
 
@@ -1173,7 +1274,9 @@ String cleanupNoteStringWithURLs(String text) {
   for (Match match in matches) {
     if (match.group(0) != null)
       modifiedText = modifiedText.replaceFirst(
-          match.group(0)!, getDomainNameFromURL(match.group(0)!));
+        match.group(0)!,
+        getDomainNameFromURL(match.group(0)!),
+      );
   }
 
   return modifiedText.trim();
@@ -1186,10 +1289,7 @@ Future<bool> openUrl(String link) async {
     uri = uri.replace(scheme: 'https');
   }
   if (await canLaunchUrl(uri))
-    return await launchUrl(
-      uri,
-      mode: LaunchMode.externalApplication,
-    );
+    return await launchUrl(uri, mode: LaunchMode.externalApplication);
   return false;
 }
 
@@ -1229,8 +1329,11 @@ String getDevicesDefaultCurrencyCode() {
   return popularCurrencies[0];
 }
 
-void copyToClipboard(String text,
-    {bool showSnackbar = true, String? customSnackbarDescription}) async {
+void copyToClipboard(
+  String text, {
+  bool showSnackbar = true,
+  String? customSnackbarDescription,
+}) async {
   HapticFeedback.mediumImpact();
   await Clipboard.setData(ClipboardData(text: text));
   if (showSnackbar)
@@ -1340,11 +1443,7 @@ double? getAmountFromString(String inputString) {
   return null;
 }
 
-enum PlatformOS {
-  isIOS,
-  isAndroid,
-  web,
-}
+enum PlatformOS { isIOS, isAndroid, web }
 
 PlatformOS? getPlatform({bool ignoreEmulation = false}) {
   if (appStateSettings["iOSEmulate"] == true && ignoreEmulation == false) {
@@ -1426,7 +1525,8 @@ String getWalletStringName(AllWallets allWallets, TransactionWallet? wallet) {
   if (wallet.name == wallet.currency.toString().toUpperCase()) {
     return wallet.currency.toString().toUpperCase();
   } else {
-    bool showCurrencyLabel = appStateSettings["showCurrencyLabel"] == true &&
+    bool showCurrencyLabel =
+        appStateSettings["showCurrencyLabel"] == true &&
         allWallets.allContainSameCurrency() == false;
     if (showCurrencyLabel) {
       return wallet.name +
@@ -1439,8 +1539,12 @@ String getWalletStringName(AllWallets allWallets, TransactionWallet? wallet) {
   }
 }
 
-String addAmountToString(String string, int amount,
-    {String? extraText, bool addCommaWithExtraText = true}) {
+String addAmountToString(
+  String string,
+  int amount, {
+  String? extraText,
+  bool addCommaWithExtraText = true,
+}) {
   return string +
       " " +
       "( ×" +
@@ -1456,7 +1560,9 @@ int directionalityReverse(BuildContext context) {
 }
 
 EdgeInsets convertEdgeInsetsDirectionalToEdgeInsets(
-    BuildContext context, EdgeInsetsDirectional edgeInsetsDirectional) {
+  BuildContext context,
+  EdgeInsetsDirectional edgeInsetsDirectional,
+) {
   return EdgeInsets.only(
     left: Directionality.of(context) == ui.TextDirection.ltr
         ? edgeInsetsDirectional.start
