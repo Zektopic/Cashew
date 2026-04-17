@@ -52,57 +52,64 @@ class _ImportCSVState extends State<ImportCSV> {
   }
 
   Future<String?> _getCSVStringFromBackupFile() async {
-    dynamic csvStringOut = await openLoadingPopupTryCatch(() async {
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
-        allowedExtensions: ['csv'],
-        type: FileType.custom,
-      );
+    dynamic csvStringOut = await openLoadingPopupTryCatch(
+      () async {
+        FilePickerResult? result = await FilePicker.platform.pickFiles(
+          allowedExtensions: ['csv'],
+          type: FileType.custom,
+        );
 
-      if (result != null) {
-        String csvString;
-        if (kIsWeb) {
-          List<int> fileBytes = result.files.single.bytes!;
-          csvString = utf8.decode(fileBytes);
+        if (result != null) {
+          String csvString;
+          if (kIsWeb) {
+            List<int> fileBytes = result.files.single.bytes!;
+            csvString = utf8.decode(fileBytes);
+          } else {
+            File file = File(result.files.single.path ?? "");
+            Uint8List fileBytes = await file.readAsBytes();
+            DecodingResult decoded = await CharsetDetector.autoDecode(
+              fileBytes,
+            );
+            csvString = decoded.string;
+          }
+          // print(csvString);
+          return csvString;
         } else {
-          File file = File(result.files.single.path ?? "");
-          Uint8List fileBytes = await file.readAsBytes();
-          DecodingResult decoded = await CharsetDetector.autoDecode(fileBytes);
-          csvString = decoded.string;
+          throw "no-file-selected".tr();
         }
-        // print(csvString);
-        return csvString;
-      } else {
-        throw "no-file-selected".tr();
-      }
-    }, onError: (e) {
-      print("Error opening CSV: " + e.toString());
-      openPopup(
-        context,
-        title: "csv-error".tr(),
-        description: "consider-csv-template".tr() + "\n" + e.toString(),
-        onCancelWithBoxContext: (BuildContext boxContext) async {
-          await saveSampleCSV(boxContext: boxContext);
-          popRoute(context);
-        },
-        onCancelLabel: "get-template".tr(),
-        icon: appStateSettings["outlinedIcons"]
-            ? Icons.error_outlined
-            : Icons.error_rounded,
-        onSubmitLabel: "ok".tr(),
-        onSubmit: () {
-          popRoute(context);
-        },
-        barrierDismissible: false,
-      );
-    });
+      },
+      onError: (e) {
+        print("Error opening CSV: " + e.toString());
+        openPopup(
+          context,
+          title: "csv-error".tr(),
+          description: "consider-csv-template".tr() + "\n" + e.toString(),
+          onCancelWithBoxContext: (BuildContext boxContext) async {
+            await saveSampleCSV(boxContext: boxContext);
+            popRoute(context);
+          },
+          onCancelLabel: "get-template".tr(),
+          icon: appStateSettings["outlinedIcons"]
+              ? Icons.error_outlined
+              : Icons.error_rounded,
+          onSubmitLabel: "ok".tr(),
+          onSubmit: () {
+            popRoute(context);
+          },
+          barrierDismissible: false,
+        );
+      },
+    );
     if (csvStringOut is String) {
       return csvStringOut;
     }
     return null;
   }
 
-  Future<void> _assignColumns(String csvString,
-      {bool importFromSheets = false}) async {
+  Future<void> _assignColumns(
+    String csvString, {
+    bool importFromSheets = false,
+  }) async {
     try {
       List<List<String>> fileContents = CsvToListConverter().convert(
         csvString,
@@ -110,7 +117,9 @@ class _ImportCSVState extends State<ImportCSV> {
         shouldParseNumbers: false,
       );
       int maxColumns = fileContents.fold(
-          0, (prev, element) => element.length > prev ? element.length : prev);
+        0,
+        (prev, element) => element.length > prev ? element.length : prev,
+      );
 
       // Add missing values to rows with fewer columns
       fileContents = fileContents
@@ -125,9 +134,11 @@ class _ImportCSVState extends State<ImportCSV> {
       int headersIndex =
           _findListIndexWithMultipleNonEmptyStrings(fileContents) ?? 0;
       List<String> headers = fileContents[headersIndex];
-      List<String> firstEntry = fileContents[
-          _findListIndexWithMultipleNonEmptyStrings(fileContents,
-                  afterIndex: headersIndex) ??
+      List<String> firstEntry =
+          fileContents[_findListIndexWithMultipleNonEmptyStrings(
+                fileContents,
+                afterIndex: headersIndex,
+              ) ??
               1];
       String dateFormat = "";
       Map<String, Map<String, dynamic>> assignedColumns = {
@@ -137,7 +148,7 @@ class _ImportCSVState extends State<ImportCSV> {
             "FormattedDate", //For the Google Sheet template
             "date",
             "date created",
-            "dateCreated"
+            "dateCreated",
           ],
           "required": true,
           "setHeaderValue": "",
@@ -185,20 +196,27 @@ class _ImportCSVState extends State<ImportCSV> {
       };
       for (dynamic key in assignedColumns.keys) {
         String setHeaderValue = determineInitialValue(
-            assignedColumns[key]!["headerValues"],
-            headers,
-            assignedColumns[key]!["required"],
-            assignedColumns[key]!["canSelectCurrentWallet"]);
+          assignedColumns[key]!["headerValues"],
+          headers,
+          assignedColumns[key]!["required"],
+          assignedColumns[key]!["canSelectCurrentWallet"],
+        );
         assignedColumns[key]!["setHeaderValue"] = setHeaderValue;
-        assignedColumns[key]!["setHeaderIndex"] =
-            _getHeaderIndex(headers, setHeaderValue);
+        assignedColumns[key]!["setHeaderIndex"] = _getHeaderIndex(
+          headers,
+          setHeaderValue,
+        );
       }
 
       // Skip assigning columns, if they used the template this will succeed
       if (importFromSheets) {
         try {
-          await _importEntries(assignedColumns, dateFormat, fileContents,
-              noPop: true);
+          await _importEntries(
+            assignedColumns,
+            dateFormat,
+            fileContents,
+            noPop: true,
+          );
           return;
         } catch (e) {
           openPopup(
@@ -242,11 +260,13 @@ class _ImportCSVState extends State<ImportCSV> {
                       ? Icons.live_help_outlined
                       : Icons.live_help_rounded,
                   onPressed: () => openUrl(
-                      "https://cashewapp.web.app/faq.html#import-csv-data"),
+                    "https://cashewapp.web.app/faq.html#import-csv-data",
+                  ),
                 )
               : null,
           title: "assign-columns".tr(),
-          subtitle: (fileContents.length - 1).toString() +
+          subtitle:
+              (fileContents.length - 1).toString() +
               " " +
               "transactions-in-the-csv".tr(),
           child: Column(
@@ -258,14 +278,18 @@ class _ImportCSVState extends State<ImportCSV> {
               ),
               Padding(
                 padding: const EdgeInsetsDirectional.symmetric(
-                    horizontal: 18, vertical: 15),
+                  horizontal: 18,
+                  vertical: 15,
+                ),
                 child: Column(
                   children: [
                     Padding(
                       padding: const EdgeInsetsDirectional.only(bottom: 5),
                       child: Container(
                         padding: EdgeInsetsDirectional.symmetric(
-                            vertical: 10, horizontal: 15),
+                          vertical: 10,
+                          horizontal: 15,
+                        ),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadiusDirectional.circular(10),
                           color: containerColor,
@@ -275,10 +299,10 @@ class _ImportCSVState extends State<ImportCSV> {
                           setDateFormat: (value) {
                             dateFormat = value;
                           },
-                          firstDateString: firstEntry[assignedColumns["date"]
-                                  ?["setHeaderIndex"]]
-                              .toString()
-                              .trim(),
+                          firstDateString:
+                              firstEntry[assignedColumns["date"]?["setHeaderIndex"]]
+                                  .toString()
+                                  .trim(),
                         ),
                       ),
                     ),
@@ -287,7 +311,9 @@ class _ImportCSVState extends State<ImportCSV> {
                         padding: const EdgeInsetsDirectional.only(bottom: 5),
                         child: Container(
                           padding: EdgeInsetsDirectional.symmetric(
-                              vertical: 10, horizontal: 15),
+                            vertical: 10,
+                            horizontal: 15,
+                          ),
                           decoration: BoxDecoration(
                             borderRadius: BorderRadiusDirectional.circular(10),
                             color: containerColor,
@@ -311,25 +337,24 @@ class _ImportCSVState extends State<ImportCSV> {
                                     SizedBox(width: 10),
                                     DropdownSelect(
                                       compact: true,
-                                      initial: assignedColumns[key]![
-                                          "setHeaderValue"],
-                                      items: assignedColumns[key]![
-                                                  "canSelectCurrentWallet"] ==
+                                      initial:
+                                          assignedColumns[key]!["setHeaderValue"],
+                                      items:
+                                          assignedColumns[key]!["canSelectCurrentWallet"] ==
                                               true
                                           ? ["~Current Wallet~", ...headers]
                                           : assignedColumns[key]!["required"]
-                                              ? [
-                                                  ...(assignedColumns[key]?[
-                                                              "setHeaderValue"] ==
-                                                          ""
-                                                      ? [""]
-                                                      : []),
-                                                  ...headers
-                                                ]
-                                              : ["~None~", ...headers],
+                                          ? [
+                                              ...(assignedColumns[key]?["setHeaderValue"] ==
+                                                      ""
+                                                  ? [""]
+                                                  : []),
+                                              ...headers,
+                                            ]
+                                          : ["~None~", ...headers],
                                       boldedValues: [
                                         "~Current Wallet~",
-                                        "~None~"
+                                        "~None~",
                                       ],
                                       getLabel: (label) {
                                         if (label == "~Current Wallet~") {
@@ -342,25 +367,25 @@ class _ImportCSVState extends State<ImportCSV> {
                                         return label;
                                       },
                                       onChanged: (String setHeaderValue) {
-                                        assignedColumns[key]![
-                                            "setHeaderValue"] = setHeaderValue;
-                                        assignedColumns[key]![
-                                                "setHeaderIndex"] =
+                                        assignedColumns[key]!["setHeaderValue"] =
+                                            setHeaderValue;
+                                        assignedColumns[key]!["setHeaderIndex"] =
                                             _getHeaderIndex(
-                                                headers, setHeaderValue);
+                                              headers,
+                                              setHeaderValue,
+                                            );
                                         if (key == "date") {
                                           customDateFormatKey.currentState
                                               ?.updateFirstDateString(
-                                                  firstEntry[assignedColumns[
-                                                              "date"]
-                                                          ?["setHeaderIndex"]]
-                                                      .toString()
-                                                      .trim());
+                                                firstEntry[assignedColumns["date"]?["setHeaderIndex"]]
+                                                    .toString()
+                                                    .trim(),
+                                              );
                                         }
                                       },
-                                      backgroundColor: Theme.of(context)
-                                          .colorScheme
-                                          .secondaryContainer,
+                                      backgroundColor: Theme.of(
+                                        context,
+                                      ).colorScheme.secondaryContainer,
                                       checkInitialValue: true,
                                     ),
                                   ],
@@ -380,7 +405,10 @@ class _ImportCSVState extends State<ImportCSV> {
                   onTap: () async {
                     try {
                       await _importEntries(
-                          assignedColumns, dateFormat, fileContents);
+                        assignedColumns,
+                        dateFormat,
+                        fileContents,
+                      );
                     } catch (e) {
                       openPopup(
                         context,
@@ -396,11 +424,11 @@ class _ImportCSVState extends State<ImportCSV> {
                         onSubmitLabel: "ok".tr(),
                         onCancelWithBoxContext:
                             (BuildContext boxContext) async {
-                          await importFromSheets
-                              ? getGoogleSheetTemplate(context)
-                              : saveSampleCSV(boxContext: boxContext);
-                          popRoute(context);
-                        },
+                              await importFromSheets
+                                  ? getGoogleSheetTemplate(context)
+                                  : saveSampleCSV(boxContext: boxContext);
+                              popRoute(context);
+                            },
                         onCancelLabel: "get-template".tr(),
                       );
                     }
@@ -433,9 +461,12 @@ class _ImportCSVState extends State<ImportCSV> {
     }
   }
 
-  Future<void> _importEntries(Map<String, Map<String, dynamic>> assignedColumns,
-      String dateFormat, List<List<String>> fileContents,
-      {bool noPop = false}) async {
+  Future<void> _importEntries(
+    Map<String, Map<String, dynamic>> assignedColumns,
+    String dateFormat,
+    List<List<String>> fileContents, {
+    bool noPop = false,
+  }) async {
     try {
       //Check to see if all the required parameters have been set
       for (dynamic key in assignedColumns.keys) {
@@ -453,9 +484,11 @@ class _ImportCSVState extends State<ImportCSV> {
 
     int headersIndex =
         _findListIndexWithMultipleNonEmptyStrings(fileContents) ?? 0;
-    int firstEntryIndex = _findListIndexWithMultipleNonEmptyStrings(
-            fileContents,
-            afterIndex: headersIndex) ??
+    int firstEntryIndex =
+        _findListIndexWithMultipleNonEmptyStrings(
+          fileContents,
+          afterIndex: headersIndex,
+        ) ??
         1;
 
     openPopupCustom(
@@ -473,7 +506,8 @@ class _ImportCSVState extends State<ImportCSV> {
                 ? Icons.check_circle_outline_outlined
                 : Icons.check_circle_outline_rounded,
             title: "done".tr() + "!",
-            description: "successfully-imported".tr().capitalizeFirst +
+            description:
+                "successfully-imported".tr().capitalizeFirst +
                 " " +
                 // Subtract one, since we don't count the header of the CSV as an entry
                 (fileContents.length - firstEntryIndex - numberOfErrors)
@@ -483,10 +517,10 @@ class _ImportCSVState extends State<ImportCSV> {
                 "." +
                 (numberOfErrors > 0
                     ? (" " +
-                        "errors".tr().capitalizeFirst +
-                        ": " +
-                        numberOfErrors.toString() +
-                        ".")
+                          "errors".tr().capitalizeFirst +
+                          ": " +
+                          numberOfErrors.toString() +
+                          ".")
                     : ""),
             onSubmitLabel: "ok".tr(),
             onSubmit: () {
@@ -501,8 +535,12 @@ class _ImportCSVState extends State<ImportCSV> {
     return;
   }
 
-  String determineInitialValue(List<String> headerValues, List<String> headers,
-      bool required, bool? canSelectCurrentWallet) {
+  String determineInitialValue(
+    List<String> headerValues,
+    List<String> headers,
+    bool required,
+    bool? canSelectCurrentWallet,
+  ) {
     for (String header in headers) {
       if (headerValues.contains(header.toLowerCase()) ||
           headerValues.contains(header) ||
@@ -535,29 +573,33 @@ class _ImportCSVState extends State<ImportCSV> {
           setSelectedText: (_) {},
           nextWithInput: (url) async {
             String? csvString;
-            await openLoadingPopupTryCatch(() async {
-              String? csvURL = convertGoogleSheetsUrlToCsvUrl(url);
-              csvString = await fetchDataFromCsvUrl(csvURL);
-            }, onError: (e) {
-              openPopup(
-                context,
-                title: "csv-error".tr(),
-                description: "consider-csv-template".tr() + "\n" + e.toString(),
-                onCancelWithBoxContext: (BuildContext boxContext) async {
-                  await saveSampleCSV(boxContext: boxContext);
-                  popRoute(context);
-                },
-                onCancelLabel: "get-template".tr(),
-                icon: appStateSettings["outlinedIcons"]
-                    ? Icons.error_outlined
-                    : Icons.error_rounded,
-                onSubmitLabel: "ok".tr(),
-                onSubmit: () {
-                  popRoute(context);
-                },
-                barrierDismissible: false,
-              );
-            });
+            await openLoadingPopupTryCatch(
+              () async {
+                String? csvURL = convertGoogleSheetsUrlToCsvUrl(url);
+                csvString = await fetchDataFromCsvUrl(csvURL);
+              },
+              onError: (e) {
+                openPopup(
+                  context,
+                  title: "csv-error".tr(),
+                  description:
+                      "consider-csv-template".tr() + "\n" + e.toString(),
+                  onCancelWithBoxContext: (BuildContext boxContext) async {
+                    await saveSampleCSV(boxContext: boxContext);
+                    popRoute(context);
+                  },
+                  onCancelLabel: "get-template".tr(),
+                  icon: appStateSettings["outlinedIcons"]
+                      ? Icons.error_outlined
+                      : Icons.error_rounded,
+                  onSubmitLabel: "ok".tr(),
+                  onSubmit: () {
+                    popRoute(context);
+                  },
+                  barrierDismissible: false,
+                );
+              },
+            );
             if (csvString != null) {
               _assignColumns(csvString!, importFromSheets: true);
             }
@@ -570,11 +612,19 @@ class _ImportCSVState extends State<ImportCSV> {
     );
   }
 
-  String? convertGoogleSheetsUrlToCsvUrl(String googleSheetsUrl) {
+  static String? convertGoogleSheetsUrlToCsvUrl(String googleSheetsUrl) {
+    if (!googleSheetsUrl.startsWith(
+      "https://docs.google.com/spreadsheets/d/",
+    )) {
+      throw ("Invalid URL format");
+    }
     List<String> parts = googleSheetsUrl.split("/");
     int index = parts.indexOf("d");
     if (index != -1 && index + 1 < parts.length) {
       String spreadsheetId = parts[index + 1];
+      if (RegExp(r'[/?#@\\]|\.\.').hasMatch(spreadsheetId)) {
+        throw ("Invalid spreadsheet ID");
+      }
       String csvUrl =
           "https://docs.google.com/spreadsheets/d/$spreadsheetId/gviz/tq?tqx=out:csv";
       return csvUrl;
@@ -582,7 +632,7 @@ class _ImportCSVState extends State<ImportCSV> {
     throw ("Error parsing URL");
   }
 
-  Future<String?> fetchDataFromCsvUrl(String? csvUrl) async {
+  static Future<String?> fetchDataFromCsvUrl(String? csvUrl) async {
     if (csvUrl == null) throw ("URL Parsing error.");
     final response = await http.get(Uri.parse(csvUrl));
     if (response.statusCode == 200) {
@@ -609,24 +659,26 @@ class _ImportCSVState extends State<ImportCSV> {
           icon: appStateSettings["outlinedIcons"]
               ? Icons.file_open_outlined
               : Icons.file_open_rounded,
-          afterWidget: Builder(builder: (boxContext) {
-            return LowKeyButton(
-              onTap: () async {
-                saveSampleCSV(boxContext: boxContext);
-              },
-              extraWidget: Padding(
-                padding: const EdgeInsetsDirectional.only(start: 4),
-                child: Icon(
-                  appStateSettings["outlinedIcons"]
-                      ? Icons.download_outlined
-                      : Icons.download_rounded,
-                  size: 18,
-                  color: getColor(context, "black").withOpacity(0.5),
+          afterWidget: Builder(
+            builder: (boxContext) {
+              return LowKeyButton(
+                onTap: () async {
+                  saveSampleCSV(boxContext: boxContext);
+                },
+                extraWidget: Padding(
+                  padding: const EdgeInsetsDirectional.only(start: 4),
+                  child: Icon(
+                    appStateSettings["outlinedIcons"]
+                        ? Icons.download_outlined
+                        : Icons.download_rounded,
+                    size: 18,
+                    color: getColor(context, "black").withOpacity(0.5),
+                  ),
                 ),
-              ),
-              text: "template".tr(),
-            );
-          }),
+                text: "template".tr(),
+              );
+            },
+          ),
         ),
         SettingsContainer(
           onTap: () async {
@@ -659,8 +711,11 @@ class _ImportCSVState extends State<ImportCSV> {
 }
 
 class CustomDateFormatInput extends StatefulWidget {
-  const CustomDateFormatInput(
-      {required this.firstDateString, required this.setDateFormat, super.key});
+  const CustomDateFormatInput({
+    required this.firstDateString,
+    required this.setDateFormat,
+    super.key,
+  });
   final String firstDateString;
   final Function(String dateFormat) setDateFormat;
 
@@ -682,35 +737,34 @@ class _CustomDateFormatInputState extends State<CustomDateFormatInput> {
   Widget build(BuildContext context) {
     DateTime? dateTimeParsed;
     try {
-      dateTimeParsed =
-          tryToParseCustomDateFormat(context, setDateFormat, firstDateString);
+      dateTimeParsed = tryToParseCustomDateFormat(
+        context,
+        setDateFormat,
+        firstDateString,
+      );
     } catch (e) {
       dateTimeParsed = null;
     }
     String parsedDateText = dateTimeParsed == null
         ? "???"
-        : getWordedDateShort(dateTimeParsed,
-                includeYear: true, showTodayTomorrow: false) +
-            " " +
-            getWordedTime(context.locale.toString(), dateTimeParsed);
+        : getWordedDateShort(
+                dateTimeParsed,
+                includeYear: true,
+                showTodayTomorrow: false,
+              ) +
+              " " +
+              getWordedTime(context.locale.toString(), dateTimeParsed);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        TextFont(
-          text: "date-format".tr(),
-          fontSize: 15,
-        ),
+        TextFont(text: "date-format".tr(), fontSize: 15),
         TextFont(
           text: "example".tr() + " " + "dd/MM/yyyy HH:mm",
           fontSize: 12,
           maxLines: 5,
         ),
-        TextFont(
-          text: "date-format-note".tr(),
-          maxLines: 5,
-          fontSize: 12,
-        ),
+        TextFont(text: "date-format-note".tr(), maxLines: 5, fontSize: 12),
         SizedBox(height: 10),
         TextInput(
           labelText: "date-format".tr(),
@@ -775,7 +829,7 @@ class _CustomDateFormatInputState extends State<CustomDateFormatInput> {
               ),
             ),
           ),
-        )
+        ),
       ],
     );
   }
@@ -783,7 +837,8 @@ class _CustomDateFormatInputState extends State<CustomDateFormatInput> {
 
 getGoogleSheetTemplate(BuildContext context) {
   openUrl(
-      "https://docs.google.com/spreadsheets/d/1Eiib2fiaC8SNdau8T8TBQql-wyWXVYOLJY-7Ycuky4I/edit?usp=sharing");
+    "https://docs.google.com/spreadsheets/d/1Eiib2fiaC8SNdau8T8TBQql-wyWXVYOLJY-7Ycuky4I/edit?usp=sharing",
+  );
   openPopup(
     context,
     icon: appStateSettings["outlinedIcons"]
@@ -797,7 +852,8 @@ getGoogleSheetTemplate(BuildContext context) {
     onSubmitLabel: "ok".tr(),
     onCancel: () {
       openUrl(
-          "https://support.google.com/docs/answer/49114?hl=en&co=GENIE.Platform%3DDesktop#zippy=%2Cmake-a-copy-of-a-file#:~:text=Make%20a%20copy%20of%20a%20file");
+        "https://support.google.com/docs/answer/49114?hl=en&co=GENIE.Platform%3DDesktop#zippy=%2Cmake-a-copy-of-a-file#:~:text=Make%20a%20copy%20of%20a%20file",
+      );
     },
     onCancelLabel: "help".tr(),
   );
@@ -831,7 +887,8 @@ Future saveSampleCSV({required BuildContext boxContext}) async {
       "",
     ]);
     String csv = ListToCsvConverter().convert(csvData);
-    String fileName = "cashew-import-template" +
+    String fileName =
+        "cashew-import-template" +
         DateTime.now().millisecondsSinceEpoch.toString() +
         ".csv";
     return saveCSV(boxContext: boxContext, csv: csv, fileName: fileName);
@@ -872,16 +929,22 @@ class _ImportingEntriesPopupState extends State<ImportingEntriesPopup> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _importEntries(
-        widget.assignedColumns, widget.dateFormat, widget.fileContents));
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _importEntries(
+        widget.assignedColumns,
+        widget.dateFormat,
+        widget.fileContents,
+      ),
+    );
   }
 
   Future<ImportingTransactionAndTitle> _importEntry(
-      Map<String, Map<String, dynamic>> assignedColumns,
-      String dateFormat,
-      List<String> row,
-      int i,
-      {int? transactionTypeIndex}) async {
+    Map<String, Map<String, dynamic>> assignedColumns,
+    String dateFormat,
+    List<String> row,
+    int i, {
+    int? transactionTypeIndex,
+  }) async {
     String name = "";
     if (assignedColumns["name"]!["setHeaderIndex"] != -1) {
       name = row[assignedColumns["name"]!["setHeaderIndex"]].toString().trim();
@@ -889,7 +952,8 @@ class _ImportingEntriesPopupState extends State<ImportingEntriesPopup> {
 
     double? amount;
     amount = getAmountFromString(
-        (row[assignedColumns["amount"]!["setHeaderIndex"]]).toString().trim());
+      (row[assignedColumns["amount"]!["setHeaderIndex"]]).toString().trim(),
+    );
     if (amount == null) throw ("Unable to parse amount");
 
     // Handle Mint transaction types
@@ -912,15 +976,13 @@ class _ImportingEntriesPopupState extends State<ImportingEntriesPopup> {
     TransactionCategory selectedCategory;
     try {
       selectedCategory = await database.getCategoryInstanceGivenName(
-          row[assignedColumns["category"]!["setHeaderIndex"]]
-              .toString()
-              .trim());
+        row[assignedColumns["category"]!["setHeaderIndex"]].toString().trim(),
+      );
     } catch (e) {
       try {
         selectedCategory = await database.getCategoryInstanceGivenNameTrim(
-            row[assignedColumns["category"]!["setHeaderIndex"]]
-                .toString()
-                .trim());
+          row[assignedColumns["category"]!["setHeaderIndex"]].toString().trim(),
+        );
       } catch (e) {
         // just make a new category, no point in checking associated titles - doesn't make much sense!
 
@@ -958,9 +1020,8 @@ class _ImportingEntriesPopupState extends State<ImportingEntriesPopup> {
           ),
         );
         selectedCategory = await database.getCategoryInstanceGivenName(
-            row[assignedColumns["category"]!["setHeaderIndex"]]
-                .toString()
-                .trim());
+          row[assignedColumns["category"]!["setHeaderIndex"]].toString().trim(),
+        );
       }
 
       // }
@@ -981,40 +1042,37 @@ class _ImportingEntriesPopupState extends State<ImportingEntriesPopup> {
     } else {
       try {
         walletFk = (await database.getWalletInstanceGivenName(
-                row[assignedColumns["wallet"]!["setHeaderIndex"]]
-                    .toString()
-                    .trim()))
-            .walletPk;
+          row[assignedColumns["wallet"]!["setHeaderIndex"]].toString().trim(),
+        )).walletPk;
       } catch (e) {
         try {
           walletFk = (await database.getWalletInstanceGivenNameTrim(
-                  row[assignedColumns["wallet"]!["setHeaderIndex"]]
-                      .toString()
-                      .trim()))
-              .walletPk;
+            row[assignedColumns["wallet"]!["setHeaderIndex"]].toString().trim(),
+          )).walletPk;
         } catch (e) {
           try {
             int numberOfWallets =
                 (await database.getTotalCountOfWallets())[0] ?? 0;
             await database.createOrUpdateWallet(
               insert: true,
-              Provider.of<AllWallets>(context, listen: false)
-                  .indexedByPk[appStateSettings["selectedWalletPk"]]!
-                  .copyWith(
-                    walletPk: "-1",
-                    name: row[assignedColumns["wallet"]!["setHeaderIndex"]]
-                        .toString()
-                        .trim(),
-                    dateCreated: DateTime.now(),
-                    dateTimeModified: Value(DateTime.now()),
-                    order: numberOfWallets,
-                  ),
+              Provider.of<AllWallets>(
+                context,
+                listen: false,
+              ).indexedByPk[appStateSettings["selectedWalletPk"]]!.copyWith(
+                walletPk: "-1",
+                name: row[assignedColumns["wallet"]!["setHeaderIndex"]]
+                    .toString()
+                    .trim(),
+                dateCreated: DateTime.now(),
+                dateTimeModified: Value(DateTime.now()),
+                order: numberOfWallets,
+              ),
             );
             walletFk = (await database.getWalletInstanceGivenName(
-                    row[assignedColumns["wallet"]!["setHeaderIndex"]]
-                        .toString()
-                        .trim()))
-                .walletPk;
+              row[assignedColumns["wallet"]!["setHeaderIndex"]]
+                  .toString()
+                  .trim(),
+            )).walletPk;
           } catch (e) {
             throw "Wallet not found! If you want to import to the current wallet, please select '~Current Wallet~'. Details: " +
                 e.toString();
@@ -1026,7 +1084,8 @@ class _ImportingEntriesPopupState extends State<ImportingEntriesPopup> {
     DateTime dateCreated;
     try {
       dateCreated = DateTime.parse(
-          row[assignedColumns["date"]!["setHeaderIndex"]].toString().trim());
+        row[assignedColumns["date"]!["setHeaderIndex"]].toString().trim(),
+      );
       dateCreated = DateTime(
         dateCreated.year,
         dateCreated.month,
@@ -1051,8 +1110,10 @@ class _ImportingEntriesPopupState extends State<ImportingEntriesPopup> {
           throw "Failed to parse date and time! Please use the custom 'Date Format' that matches your data. \n\n  Details: " +
               e.toString();
         } else {
-          print("Successfully parsed data with a common date format: " +
-              result.toString());
+          print(
+            "Successfully parsed data with a common date format: " +
+                result.toString(),
+          );
           dateCreated = result;
         }
       } else {
@@ -1107,8 +1168,11 @@ class _ImportingEntriesPopupState extends State<ImportingEntriesPopup> {
     );
   }
 
-  Future<void> _importEntries(Map<String, Map<String, dynamic>> assignedColumns,
-      String dateFormat, List<List<String>> fileContents) async {
+  Future<void> _importEntries(
+    Map<String, Map<String, dynamic>> assignedColumns,
+    String dateFormat,
+    List<List<String>> fileContents,
+  ) async {
     List<String> skippedError = [];
     try {
       List<TransactionsCompanion> transactionsInserting = [];
@@ -1116,9 +1180,11 @@ class _ImportingEntriesPopupState extends State<ImportingEntriesPopup> {
 
       int headersIndex =
           _findListIndexWithMultipleNonEmptyStrings(fileContents) ?? 0;
-      int firstEntryIndex = _findListIndexWithMultipleNonEmptyStrings(
-              fileContents,
-              afterIndex: headersIndex) ??
+      int firstEntryIndex =
+          _findListIndexWithMultipleNonEmptyStrings(
+            fileContents,
+            afterIndex: headersIndex,
+          ) ??
           1;
 
       for (int i = firstEntryIndex; i < fileContents.length; i++) {
@@ -1152,30 +1218,36 @@ class _ImportingEntriesPopupState extends State<ImportingEntriesPopup> {
           );
         } catch (e) {
           transactionAndTitle = null;
-          skippedError
-              .add("Skipping row #" + i.toString() + "\n" + e.toString());
+          skippedError.add(
+            "Skipping row #" + i.toString() + "\n" + e.toString(),
+          );
         }
         if (transactionAndTitle == null) continue;
 
         // Use auto generated ID when inserting
-        TransactionsCompanion companionTransactionToInsert =
-            transactionAndTitle.transaction.toCompanion(true);
+        TransactionsCompanion companionTransactionToInsert = transactionAndTitle
+            .transaction
+            .toCompanion(true);
         companionTransactionToInsert = companionTransactionToInsert.copyWith(
-            transactionPk: Value.absent());
+          transactionPk: Value.absent(),
+        );
         transactionsInserting.add(companionTransactionToInsert);
         // Use auto generated ID when inserting
         if (transactionAndTitle.title != null) {
-          AssociatedTitlesCompanion companionTitleToInsert =
-              transactionAndTitle.title!.toCompanion(true);
+          AssociatedTitlesCompanion companionTitleToInsert = transactionAndTitle
+              .title!
+              .toCompanion(true);
           companionTitleToInsert = companionTitleToInsert.copyWith(
-              associatedTitlePk: Value.absent());
+            associatedTitlePk: Value.absent(),
+          );
           titlesInserting.add(companionTitleToInsert);
         }
       }
 
       // Sort and remove duplicate titles
-      titlesInserting
-          .sort((a, b) => b.dateCreated.value.compareTo(a.dateCreated.value));
+      titlesInserting.sort(
+        (a, b) => b.dateCreated.value.compareTo(a.dateCreated.value),
+      );
       Map<String, AssociatedTitlesCompanion> titlesMap = {};
       for (AssociatedTitlesCompanion item in titlesInserting) {
         titlesMap[item.title.value] = item;
@@ -1190,7 +1262,8 @@ class _ImportingEntriesPopupState extends State<ImportingEntriesPopup> {
         await openPopup(
           context,
           title: "csv-error".tr(),
-          description: "consider-csv-template".tr() +
+          description:
+              "consider-csv-template".tr() +
               "\n" +
               "Skipped importing " +
               skippedError.length.toString() +
@@ -1248,17 +1321,20 @@ class _ImportingEntriesPopupState extends State<ImportingEntriesPopup> {
         SizedBox(height: 10),
         TextFont(
           fontSize: 15,
-          text: currentEntryIndex.toString() +
+          text:
+              currentEntryIndex.toString() +
               " / " +
               currentFileLength.toString(),
-        )
+        ),
       ],
     );
   }
 }
 
-int? _findListIndexWithMultipleNonEmptyStrings(List<List<String>> lists,
-    {int? afterIndex}) {
+int? _findListIndexWithMultipleNonEmptyStrings(
+  List<List<String>> lists, {
+  int? afterIndex,
+}) {
   for (int i = 0; i < lists.length; i++) {
     if (afterIndex != null && i <= afterIndex) {
       continue;
@@ -1277,9 +1353,14 @@ int? _findListIndexWithMultipleNonEmptyStrings(List<List<String>> lists,
 }
 
 DateTime? tryDateFormatting(
-    BuildContext context, String dateFormat, String stringToParse) {
-  DateFormat format =
-      DateFormat(dateFormat.toString(), context.locale.toString());
+  BuildContext context,
+  String dateFormat,
+  String stringToParse,
+) {
+  DateFormat format = DateFormat(
+    dateFormat.toString(),
+    context.locale.toString(),
+  );
   DateTime? dateCreated;
   try {
     dateCreated = format.parse(stringToParse.trim());
@@ -1292,9 +1373,14 @@ DateTime? tryDateFormatting(
 }
 
 DateTime tryToParseCustomDateFormat(
-    BuildContext context, String dateFormat, String stringToParse) {
-  DateFormat format =
-      DateFormat(dateFormat.toString(), context.locale.toString());
+  BuildContext context,
+  String dateFormat,
+  String stringToParse,
+) {
+  DateFormat format = DateFormat(
+    dateFormat.toString(),
+    context.locale.toString(),
+  );
   DateTime dateCreated;
   try {
     dateCreated = format.parse(stringToParse);
