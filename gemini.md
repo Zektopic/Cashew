@@ -32,6 +32,11 @@
   - **Learning:** Production secrets, including Firebase config, should never be checked into version control. They should be injected at build/runtime.
   - **Prevention:** Use `String.fromEnvironment` to load credentials via `--dart-define-from-file=firebase_config.json` during the build process, and provide a `.example` template for local development.
 
+- **2024-04-17 - Missing URL Validation for Google Sheets Import:**
+  - **Vulnerability/Gap:** The `convertGoogleSheetsUrlToCsvUrl` function did not validate if the provided URL started with `https://docs.google.com/spreadsheets/d/` and did not sanitize the extracted spreadsheet ID. This could allow for Server-Side Request Forgery (SSRF) or path traversal attacks if a maliciously crafted URL was provided.
+  - **Learning:** Always validate user-provided URLs and sanitize extracted identifiers before using them in HTTP requests to external services.
+  - **Prevention:** Implement strict prefix checking for expected URLs and regex-based sanitization to reject IDs containing dangerous characters (`[/?#@\\]` or `..`).
+
 - **2025-04-01 - Log Injection Vulnerability:**
   - **Vulnerability/Gap:** The custom `LogService` (`budget/lib/struct/logging.dart`) accepted raw string messages without sanitizing newlines (`\n` and `\r`). This allowed potential log forging/injection, where an attacker could inject forged log entries by including newline characters in input fields that get logged.
   - **Learning:** Any input that eventually becomes part of a log entry must be sanitized to prevent log spoofing, ensuring the integrity and auditability of the application's logs.
