@@ -4908,6 +4908,7 @@ class TitleInput extends StatefulWidget {
 
 class _TitleInputState extends State<TitleInput> {
   late TextEditingController _titleInputController;
+  Timer? _searchDebounce;
 
   @override
   void initState() {
@@ -4917,6 +4918,12 @@ class _TitleInputState extends State<TitleInput> {
     } else {
       _titleInputController = widget.titleInputController!;
     }
+  }
+
+  @override
+  void dispose() {
+    _searchDebounce?.cancel();
+    super.dispose();
   }
 
   List<TransactionAssociatedTitleWithCategory> foundAssociatedTitles = [];
@@ -4957,34 +4964,42 @@ class _TitleInputState extends State<TitleInput> {
                     ? Icons.title_outlined
                     : Icons.title_rounded,
                 controller: _titleInputController,
-                onChanged: (text) async {
+                onChanged: (text) {
                   widget.setSelectedTitle(text);
-                  List<TransactionAssociatedTitleWithCategory>
-                      newFoundAssociatedTitles = [];
-                  if (text.trim() != "") {
-                    newFoundAssociatedTitles =
-                        await database.getSimilarAssociatedTitles(
-                      title: widget.textToSearchFilter != null
-                          ? widget.textToSearchFilter!(text)
-                          : text,
-                      excludeTitles: widget.getTextToExclude != null
-                          ? widget.getTextToExclude!(text)
-                          : [],
-                      limit: enableDoubleColumn(context) ? 5 : 3,
-                      alsoSearchCategories: widget.alsoSearchCategories,
-                      tryToCompleteSearch: widget.tryToCompleteSearch,
-                    );
-                  }
+                  _searchDebounce?.cancel();
+                  _searchDebounce = Timer(
+                    const Duration(milliseconds: 300),
+                    () async {
+                      if (!mounted) return;
+                      List<TransactionAssociatedTitleWithCategory>
+                          newFoundAssociatedTitles = [];
+                      if (text.trim() != "") {
+                        newFoundAssociatedTitles =
+                            await database.getSimilarAssociatedTitles(
+                          title: widget.textToSearchFilter != null
+                              ? widget.textToSearchFilter!(text)
+                              : text,
+                          excludeTitles: widget.getTextToExclude != null
+                              ? widget.getTextToExclude!(text)
+                              : [],
+                          limit: enableDoubleColumn(context) ? 5 : 3,
+                          alsoSearchCategories: widget.alsoSearchCategories,
+                          tryToCompleteSearch: widget.tryToCompleteSearch,
+                        );
+                      }
 
-                  if (foundAssociatedTitles.toString() !=
-                      newFoundAssociatedTitles.toString()) {
-                    if (widget.resizePopupWhenChanged) fixResizingPopup();
-                    if (widget.onNewRecommendedTitle != null)
-                      widget.onNewRecommendedTitle!();
-                  }
+                      if (!mounted) return;
+                      if (foundAssociatedTitles.toString() !=
+                          newFoundAssociatedTitles.toString()) {
+                        if (widget.resizePopupWhenChanged) fixResizingPopup();
+                        if (widget.onNewRecommendedTitle != null)
+                          widget.onNewRecommendedTitle!();
+                      }
 
-                  foundAssociatedTitles = newFoundAssociatedTitles;
-                  setState(() {});
+                      foundAssociatedTitles = newFoundAssociatedTitles;
+                      setState(() {});
+                    },
+                  );
                 },
                 onSubmitted: widget.onSubmitted,
                 autoFocus:

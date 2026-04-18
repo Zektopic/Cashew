@@ -1035,14 +1035,21 @@ Future<dynamic> pushRoute(BuildContext? context, Widget page,
   //   );
   // }
 
+  if (appStateSettings["batterySaver"] == true) {
+    return await Navigator.push(
+      contextToPush,
+      MaterialPageRoute(builder: (context) => page),
+    );
+  }
+
   return await Navigator.push(
     contextToPush,
     PageRouteBuilder(
       opaque: true,
-      transitionDuration: Duration(milliseconds: 300),
-      reverseTransitionDuration: Duration(milliseconds: 125),
+      transitionDuration: const Duration(milliseconds: 200),
+      reverseTransitionDuration: const Duration(milliseconds: 100),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        final tween = Tween(begin: Offset(0, 0.05), end: Offset.zero)
+        final tween = Tween(begin: const Offset(0, 0.04), end: Offset.zero)
             .chain(CurveTween(curve: Curves.easeOut));
         return SlideTransition(
           position: animation.drive(tween),

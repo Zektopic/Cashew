@@ -65,7 +65,7 @@ class _LineChartState extends State<_LineChart> with WidgetsBindingObserver {
       child: GestureDetector(
         child: LineChart(
           data,
-          duration: const Duration(milliseconds: 2000),
+          duration: const Duration(milliseconds: 600),
           curve: Curves.fastLinearToSlowEaseIn,
           chartRendererKey: ValueKey(1),
         ),

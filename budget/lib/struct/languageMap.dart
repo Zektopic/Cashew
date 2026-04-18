@@ -2,15 +2,21 @@ import 'dart:convert';
 
 import 'package:budget/struct/settings.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 String globalAppName = "Cashew";
 
 Map<String, dynamic> languageNamesJSON = {};
+
+Map<String, dynamic> _decodeJsonMap(String jsonStr) =>
+    Map<String, dynamic>.from(json.decode(jsonStr));
+
 loadLanguageNamesJSON() async {
-  languageNamesJSON = await json
-      .decode(await rootBundle.loadString('assets/static/language-names.json'));
+  final String jsonStr =
+      await rootBundle.loadString('assets/static/language-names.json');
+  languageNamesJSON = await compute(_decodeJsonMap, jsonStr);
 }
 
 Map<String, Locale> supportedLocales = {

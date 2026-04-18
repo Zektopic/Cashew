@@ -57,7 +57,7 @@ class BarGraphState extends State<BarGraph> {
         height: 190,
         child: BarChart(
           swapAnimationCurve: Curves.easeInOutCubicEmphasized,
-          swapAnimationDuration: Duration(milliseconds: 1700),
+          swapAnimationDuration: const Duration(milliseconds: 500),
           BarChartData(
             maxY: widget.maxY,
             minY: -1,

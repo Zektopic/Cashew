@@ -158,6 +158,18 @@ Future<bool> initializeSettings() async {
   return true;
 }
 
+// Settings that require full MaterialApp rebuild (theme, colors, locale)
+const Set<String> _settingsRequiringFullRebuild = {
+  'theme',
+  'accentColor',
+  'materialYou',
+  'accentSystemColor',
+  'obscureAmounts',
+  'obscureAmountsCharacter',
+  'obscureAmountsMagnitude',
+  'hasOnboarded',
+};
+
 // setAppStateSettings
 Future<bool> updateSettings(
   String setting,
@@ -180,7 +192,12 @@ Future<bool> updateSettings(
           setting.toString() +
           " : " +
           value.toString());
-      appStateKey.currentState?.refreshAppState();
+      if (_settingsRequiringFullRebuild.contains(setting)) {
+        appStateKey.currentState?.refreshAppState();
+      } else {
+        refreshPageFrameworks();
+        homePageStateKey.currentState?.refreshState();
+      }
     }
   } else {
     if (setStateAllPageFrameworks) {

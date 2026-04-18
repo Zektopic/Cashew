@@ -36,7 +36,7 @@ const int NOTE_LIMIT = 500;
 const int COLOUR_LIMIT = 50;
 
 // Query Constants
-const int DEFAULT_LIMIT = 100000;
+const int DEFAULT_LIMIT = 2500;
 const int DEFAULT_OFFSET = 0;
 
 enum BudgetReoccurence { custom, daily, weekly, monthly, yearly }

@@ -194,6 +194,9 @@ class _TransactionEntriesState extends State<TransactionEntries> {
       ),
       builder: (context, snapshot) {
         if (snapshot.data != null && snapshot.hasData) {
+          final DateTime now = DateTime.now();
+          final DateTime nowDay = now.justDay();
+          final AllWallets allWallets = Provider.of<AllWallets>(context);
           List<TransactionWithCategory> data = snapshot.data ?? [];
           int totalNumberTransactionsAll = data.length;
           if (loadAll == false)
@@ -215,7 +218,7 @@ class _TransactionEntriesState extends State<TransactionEntries> {
               .where((transactionWithCategory) => transactionWithCategory
                   .transaction.dateCreated
                   .justDay()
-                  .isAfter(DateTime.now().justDay()))
+                  .isAfter(nowDay))
               .map((transactionWithCategory) =>
                   transactionWithCategory.transaction.transactionPk)
               .toSet());
@@ -292,7 +295,7 @@ class _TransactionEntriesState extends State<TransactionEntries> {
             if (currentDate == null) {
               currentDate = currentTransactionDate;
               if (currentDate.millisecondsSinceEpoch <
-                  DateTime.now().millisecondsSinceEpoch) totalPastUniqueDays++;
+                  now.millisecondsSinceEpoch) totalPastUniqueDays++;
             }
             if (currentDate == currentTransactionDate) {
               transactionListForDay.add(transactionWithCategory);
@@ -301,7 +304,7 @@ class _TransactionEntriesState extends State<TransactionEntries> {
                 totalSpentForDayWithBalanceCorrection +=
                     transactionWithCategory.transaction.amount *
                         (amountRatioToPrimaryCurrencyGivenPk(
-                            Provider.of<AllWallets>(context),
+                            allWallets,
                             transactionWithCategory.transaction.walletFk));
               }
               if (transactionWithCategory.transaction.paid &&
@@ -309,7 +312,7 @@ class _TransactionEntriesState extends State<TransactionEntries> {
                 double amountForDay =
                     transactionWithCategory.transaction.amount *
                         (amountRatioToPrimaryCurrencyGivenPk(
-                            Provider.of<AllWallets>(context),
+                            allWallets,
                             transactionWithCategory.transaction.walletFk));
                 totalSpentForDay += amountForDay;
                 if (amountForDay < 0) {
@@ -329,8 +332,7 @@ class _TransactionEntriesState extends State<TransactionEntries> {
             if (nextTransactionDate == null ||
                 nextTransactionDate != currentTransactionDate) {
               if (transactionListForDay.length > 0) {
-                int daysDifference = DateTime.now()
-                    .justDay()
+                int daysDifference = nowDay
                     .difference(currentTransactionDate)
                     .inDays;
 
@@ -339,7 +341,7 @@ class _TransactionEntriesState extends State<TransactionEntries> {
                             notYetAddedPastTransactionsDivider &&
                             currentTransactionDate
                                     .justDay()
-                                    .isAfter(DateTime.now().justDay()) ==
+                                    .isAfter(nowDay) ==
                                 false
                         ? PastTransactionsDivider(
                             listID: widget.listID,

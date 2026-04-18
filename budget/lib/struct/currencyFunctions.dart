@@ -1,14 +1,19 @@
 import 'package:budget/struct/settings.dart';
 import 'dart:convert';
 import 'package:budget/database/tables.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 
 Map<String, dynamic> currenciesJSON = {};
 
+Map<String, dynamic> _decodeJsonMap(String jsonStr) =>
+    Map<String, dynamic>.from(json.decode(jsonStr));
+
 loadCurrencyJSON() async {
-  currenciesJSON = await json.decode(
-      await rootBundle.loadString('assets/static/generated/currencies.json'));
+  final String jsonStr = await rootBundle
+      .loadString('assets/static/generated/currencies.json');
+  currenciesJSON = await compute(_decodeJsonMap, jsonStr);
 }
 
 Future<bool> getExchangeRates() async {

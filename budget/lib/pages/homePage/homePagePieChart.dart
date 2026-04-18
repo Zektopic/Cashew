@@ -34,6 +34,21 @@ class HomePagePieChart extends StatefulWidget {
 
 class _HomePagePieChartState extends State<HomePagePieChart>
     with SingleTickerProviderStateMixin {
+  late PageController _pageController;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(
+        initialPage: appStateSettings["pieChartTotal"] != "incoming" ? 0 : 1);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
   void openPieChartSettings() async {
     await openPieChartHomePageBottomSheetSettings(context);
     homePageStateKey.currentState?.refreshState();
@@ -41,8 +56,6 @@ class _HomePagePieChartState extends State<HomePagePieChart>
 
   @override
   Widget build(BuildContext context) {
-    final PageController _pageController = PageController(
-        initialPage: appStateSettings["pieChartTotal"] != "incoming" ? 0 : 1);
     TransactionCategory? selectedCategory;
 
     const double borderRadius = 15;

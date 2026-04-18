@@ -79,6 +79,8 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
   late AnimationController _animationControllerHeader;
   late AnimationController _animationControllerHeader2;
   int selectedSlidingSelector = 1;
+  Map<String, Widget?> _cachedHomePageSections = {};
+  String? _lastHomePageOrder;
 
   void initState() {
     super.initState();
@@ -157,11 +159,11 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
             mainAxisSize: MainAxisSize.min,
             children: [
               slidingSelector,
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
               HomeTransactions(
                 selectedSlidingSelector: selectedSlidingSelector,
               ),
-              SizedBox(height: 7),
+              const SizedBox(height: 7),
               Center(child: ViewAllTransactionsButton()),
               if (enableDoubleColumn(context)) SizedBox(height: 35),
             ],
@@ -177,48 +179,55 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
               ),
             );
 
-    Map<String, Widget?> homePageSections = {
-      "wallets": isHomeScreenSectionEnabled(context, "showWalletSwitcher")
-          ? HomePageWalletSwitcher()
-          : null,
-      "walletsList": isHomeScreenSectionEnabled(context, "showWalletList")
-          ? HomePageWalletList()
-          : null,
-      "budgets": isHomeScreenSectionEnabled(context, "showPinnedBudgets")
-          ? HomePageBudgets()
-          : null,
-      "overdueUpcoming":
-          isHomeScreenSectionEnabled(context, "showOverdueUpcoming")
-          ? HomePageUpcomingTransactions()
-          : null,
-      "allSpendingSummary":
-          isHomeScreenSectionEnabled(context, "showAllSpendingSummary")
-          ? HomePageAllSpendingSummary()
-          : null,
-      "netWorth": isHomeScreenSectionEnabled(context, "showNetWorth")
-          ? HomePageNetWorth()
-          : null,
-      "objectives": isHomeScreenSectionEnabled(context, "showObjectives")
-          ? HomePageObjectives(objectiveType: ObjectiveType.goal)
-          : null,
-      "creditDebts": isHomeScreenSectionEnabled(context, "showCreditDebt")
-          ? HomePageCreditDebts()
-          : null,
-      "objectiveLoans":
-          isHomeScreenSectionEnabled(context, "showObjectiveLoans")
-          ? HomePageObjectives(objectiveType: ObjectiveType.loan)
-          : null,
-      "spendingGraph": isHomeScreenSectionEnabled(context, "showSpendingGraph")
-          ? HomePageLineGraph(selectedSlidingSelector: selectedSlidingSelector)
-          : null,
-      "pieChart": isHomeScreenSectionEnabled(context, "showPieChart")
-          ? HomePagePieChart()
-          : null,
-      "heatMap": isHomeScreenSectionEnabled(context, "showHeatMap")
-          ? HomePageHeatMap()
-          : null,
-      "transactionsList": homePageTransactionsList ?? SizedBox.shrink(),
-    };
+    final String currentHomePageOrder =
+        "${appStateSettings[getHomePageOrderSettingsKey(context)]}|$selectedSlidingSelector";
+    if (_lastHomePageOrder != currentHomePageOrder) {
+      _lastHomePageOrder = currentHomePageOrder;
+      _cachedHomePageSections = {
+        "wallets": isHomeScreenSectionEnabled(context, "showWalletSwitcher")
+            ? HomePageWalletSwitcher()
+            : null,
+        "walletsList": isHomeScreenSectionEnabled(context, "showWalletList")
+            ? HomePageWalletList()
+            : null,
+        "budgets": isHomeScreenSectionEnabled(context, "showPinnedBudgets")
+            ? HomePageBudgets()
+            : null,
+        "overdueUpcoming":
+            isHomeScreenSectionEnabled(context, "showOverdueUpcoming")
+            ? HomePageUpcomingTransactions()
+            : null,
+        "allSpendingSummary":
+            isHomeScreenSectionEnabled(context, "showAllSpendingSummary")
+            ? HomePageAllSpendingSummary()
+            : null,
+        "netWorth": isHomeScreenSectionEnabled(context, "showNetWorth")
+            ? HomePageNetWorth()
+            : null,
+        "objectives": isHomeScreenSectionEnabled(context, "showObjectives")
+            ? HomePageObjectives(objectiveType: ObjectiveType.goal)
+            : null,
+        "creditDebts": isHomeScreenSectionEnabled(context, "showCreditDebt")
+            ? HomePageCreditDebts()
+            : null,
+        "objectiveLoans":
+            isHomeScreenSectionEnabled(context, "showObjectiveLoans")
+            ? HomePageObjectives(objectiveType: ObjectiveType.loan)
+            : null,
+        "spendingGraph":
+            isHomeScreenSectionEnabled(context, "showSpendingGraph")
+            ? HomePageLineGraph(selectedSlidingSelector: selectedSlidingSelector)
+            : null,
+        "pieChart": isHomeScreenSectionEnabled(context, "showPieChart")
+            ? HomePagePieChart()
+            : null,
+        "heatMap": isHomeScreenSectionEnabled(context, "showHeatMap")
+            ? HomePageHeatMap()
+            : null,
+        "transactionsList": homePageTransactionsList ?? const SizedBox.shrink(),
+      };
+    }
+    final Map<String, Widget?> homePageSections = _cachedHomePageSections;
     bool showWelcomeBanner = isHomeScreenSectionEnabled(
       context,
       "showUsernameWelcomeBanner",
@@ -413,13 +422,13 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                               ),
                             ],
                           )
-                        : SizedBox(height: 5),
+                        : const SizedBox(height: 5),
                     // Not full screen
                     if (enableDoubleColumn(context) != true) ...[
                       KeepAliveClientMixin(child: HomePageRatingBox()),
                       for (String sectionKey
                           in appStateSettings["homePageOrder"])
-                        homePageSections[sectionKey] ?? SizedBox.shrink(),
+                        homePageSections[sectionKey] ?? const SizedBox.shrink(),
                     ],
                     // Full screen top section
                     if (enableDoubleColumn(context) == true) ...[
@@ -428,7 +437,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                         if (homePageSectionsFullScreenCenter.contains(
                           sectionKey,
                         ))
-                          homePageSections[sectionKey] ?? SizedBox.shrink(),
+                          homePageSections[sectionKey] ?? const SizedBox.shrink(),
                     ],
                     // Full screen bottom split section
                     if (enableDoubleColumn(context) == true)

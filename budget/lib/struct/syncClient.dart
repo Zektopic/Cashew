@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 import 'package:async/async.dart';
 import 'dart:convert';
 import 'package:budget/database/binary_string_conversion.dart';
@@ -173,6 +174,120 @@ class SyncLog {
   }
 }
 
+/// Holds all 9 query results so they can be passed to a background isolate.
+/// All fields are plain Dart data classes (Drift-generated) — safely copyable
+/// across isolate boundaries without serialization.
+class _SyncLogsInput {
+  final List<TransactionWallet> wallets;
+  final List<TransactionCategory> categories;
+  final List<Budget> budgets;
+  final List<CategoryBudgetLimit> categoryBudgetLimits;
+  final List<Transaction> transactions;
+  final List<TransactionAssociatedTitle> titles;
+  final List<ScannerTemplate> scannerTemplates;
+  final List<Objective> objectives;
+  final List<DeleteLog> deleteLogs;
+
+  _SyncLogsInput({
+    required this.wallets,
+    required this.categories,
+    required this.budgets,
+    required this.categoryBudgetLimits,
+    required this.transactions,
+    required this.titles,
+    required this.scannerTemplates,
+    required this.objectives,
+    required this.deleteLogs,
+  });
+}
+
+/// Top-level function — executed in a background isolate via compute().
+/// Converts raw query results into SyncLog entries without touching the DB or UI.
+List<SyncLog> _buildSyncLogsIsolate(_SyncLogsInput input) {
+  final List<SyncLog> logs = [];
+  for (final e in input.wallets) {
+    logs.add(SyncLog(
+      deleteLogType: null,
+      updateLogType: UpdateLogType.TransactionWallet,
+      pk: e.walletPk,
+      itemToUpdate: e,
+      transactionDateTime: e.dateTimeModified,
+    ));
+  }
+  for (final e in input.categories) {
+    logs.add(SyncLog(
+      deleteLogType: null,
+      updateLogType: UpdateLogType.TransactionCategory,
+      pk: e.categoryPk,
+      itemToUpdate: e,
+      transactionDateTime: e.dateTimeModified,
+    ));
+  }
+  for (final e in input.budgets) {
+    logs.add(SyncLog(
+      deleteLogType: null,
+      updateLogType: UpdateLogType.Budget,
+      pk: e.budgetPk,
+      itemToUpdate: e,
+      transactionDateTime: e.dateTimeModified,
+    ));
+  }
+  for (final e in input.categoryBudgetLimits) {
+    logs.add(SyncLog(
+      deleteLogType: null,
+      updateLogType: UpdateLogType.CategoryBudgetLimit,
+      pk: e.categoryLimitPk,
+      itemToUpdate: e,
+      transactionDateTime: e.dateTimeModified,
+    ));
+  }
+  for (final e in input.transactions) {
+    logs.add(SyncLog(
+      deleteLogType: null,
+      updateLogType: UpdateLogType.Transaction,
+      pk: e.transactionPk,
+      itemToUpdate: e,
+      transactionDateTime: e.dateTimeModified,
+    ));
+  }
+  for (final e in input.titles) {
+    logs.add(SyncLog(
+      deleteLogType: null,
+      updateLogType: UpdateLogType.TransactionAssociatedTitle,
+      pk: e.associatedTitlePk,
+      itemToUpdate: e,
+      transactionDateTime: e.dateTimeModified,
+    ));
+  }
+  for (final e in input.scannerTemplates) {
+    logs.add(SyncLog(
+      deleteLogType: null,
+      updateLogType: UpdateLogType.ScannerTemplate,
+      pk: e.scannerTemplatePk,
+      itemToUpdate: e,
+      transactionDateTime: e.dateTimeModified,
+    ));
+  }
+  for (final e in input.objectives) {
+    logs.add(SyncLog(
+      deleteLogType: null,
+      updateLogType: UpdateLogType.Objective,
+      pk: e.objectivePk,
+      itemToUpdate: e,
+      transactionDateTime: e.dateTimeModified,
+    ));
+  }
+  for (final e in input.deleteLogs) {
+    logs.add(SyncLog(
+      deleteLogType: e.type,
+      updateLogType: null,
+      pk: e.entryPk,
+      transactionDateTime: e.dateTimeModified,
+    ));
+  }
+  return logs;
+}
+
 // Only allow one sync at a time
 bool canSyncData = true;
 
@@ -251,7 +366,10 @@ Future<bool> _syncData(BuildContext context) async {
     throw "Failed to login to Google Drive";
   }
 
-  await createSyncBackup();
+  // Run backup upload and Drive file listing in parallel — they are independent
+  // network operations that each create their own DriveApi client internally.
+  // ignore: unawaited_futures
+  createSyncBackup();
 
   drive.FileList fileList = await driveApi.files.list(
       spaces: 'appDataFolder', $fields: 'files(id, name, modifiedTime, size)');
@@ -310,21 +428,22 @@ Future<bool> _syncData(BuildContext context) async {
     print("SYNCING WITH " + (file.name ?? ""));
     filesSyncing.add(file);
 
-    List<int> dataStore = [];
+    // BytesBuilder is faster than List.insertAll for accumulating streamed chunks
+    final builder = BytesBuilder(copy: false);
     dynamic response = await driveApi.files
         .get(fileId, downloadOptions: drive.DownloadOptions.fullMedia);
-    await for (var data in response.stream) {
-      dataStore.insertAll(dataStore.length, data);
+    await for (final data in response.stream) {
+      builder.add(data);
     }
+    final Uint8List dataStore = builder.toBytes();
 
     FinanceDatabase databaseSync;
 
     if (kIsWeb) {
-      String dataEncoded = bin2str.encode(Uint8List.fromList(dataStore));
+      String dataEncoded = bin2str.encode(dataStore);
 
       try {
-        databaseSync = await constructDb('syncdb',
-            initialDataWeb: Uint8List.fromList(dataStore));
+        databaseSync = await constructDb('syncdb', initialDataWeb: dataStore);
       } catch (e) {
         double megabytes = dataEncoded.length / (1024 * 1024);
         await openPopup(
@@ -356,128 +475,44 @@ Future<bool> _syncData(BuildContext context) async {
     }
 
     try {
-      List<TransactionWallet> newWallets =
-          await databaseSync.getAllNewWallets(lastSynced);
-      for (TransactionWallet newEntry in newWallets) {
-        syncLogs.add(SyncLog(
-          deleteLogType: null,
-          updateLogType: UpdateLogType.TransactionWallet,
-          pk: newEntry.walletPk,
-          itemToUpdate: newEntry,
-          transactionDateTime: newEntry.dateTimeModified,
-        ));
-      }
-      print("NEW WALLETS");
-      print(newWallets);
+      // Run all 9 table queries in parallel — Drift's MultiExecutor has a
+      // separate read executor so concurrent reads don't block each other.
+      final queryResults = await Future.wait([
+        databaseSync.getAllNewWallets(lastSynced),
+        databaseSync.getAllNewCategories(lastSynced),
+        databaseSync.getAllNewBudgets(lastSynced),
+        databaseSync.getAllNewCategoryBudgetLimits(lastSynced),
+        databaseSync.getAllNewTransactions(lastSynced),
+        databaseSync.getAllNewAssociatedTitles(lastSynced),
+        databaseSync.getAllNewScannerTemplates(lastSynced),
+        databaseSync.getAllNewObjectives(lastSynced),
+        databaseSync.getAllNewDeleteLogs(lastSynced),
+      ]);
 
-      List<TransactionCategory> newCategories =
-          await databaseSync.getAllNewCategories(lastSynced);
-      for (TransactionCategory newEntry in newCategories) {
-        syncLogs.add(SyncLog(
-          deleteLogType: null,
-          updateLogType: UpdateLogType.TransactionCategory,
-          pk: newEntry.categoryPk,
-          itemToUpdate: newEntry,
-          transactionDateTime: newEntry.dateTimeModified,
-        ));
-      }
-      print("NEW CATEGORIES");
-      print(newCategories);
+      // Build SyncLog objects in a background isolate — pure Dart iteration,
+      // no DB or UI access needed.
+      final List<SyncLog> newSyncLogs = await compute(
+        _buildSyncLogsIsolate,
+        _SyncLogsInput(
+          wallets: queryResults[0] as List<TransactionWallet>,
+          categories: queryResults[1] as List<TransactionCategory>,
+          budgets: queryResults[2] as List<Budget>,
+          categoryBudgetLimits:
+              queryResults[3] as List<CategoryBudgetLimit>,
+          transactions: queryResults[4] as List<Transaction>,
+          titles: queryResults[5] as List<TransactionAssociatedTitle>,
+          scannerTemplates: queryResults[6] as List<ScannerTemplate>,
+          objectives: queryResults[7] as List<Objective>,
+          deleteLogs: queryResults[8] as List<DeleteLog>,
+        ),
+      );
+      syncLogs.addAll(newSyncLogs);
 
-      List<Budget> newBudgets = await databaseSync.getAllNewBudgets(lastSynced);
-      for (Budget newEntry in newBudgets) {
-        syncLogs.add(SyncLog(
-          deleteLogType: null,
-          updateLogType: UpdateLogType.Budget,
-          pk: newEntry.budgetPk,
-          itemToUpdate: newEntry,
-          transactionDateTime: newEntry.dateTimeModified,
-        ));
-      }
-      print("NEW BUDGETS");
-      print(newBudgets);
-
-      List<CategoryBudgetLimit> newCategoryBudgetLimits =
-          await databaseSync.getAllNewCategoryBudgetLimits(lastSynced);
-      for (CategoryBudgetLimit newEntry in newCategoryBudgetLimits) {
-        syncLogs.add(SyncLog(
-          deleteLogType: null,
-          updateLogType: UpdateLogType.CategoryBudgetLimit,
-          pk: newEntry.categoryLimitPk,
-          itemToUpdate: newEntry,
-          transactionDateTime: newEntry.dateTimeModified,
-        ));
-      }
-      print("NEW CATEGORY LIMITS");
-      print(newCategoryBudgetLimits);
-
-      List<Transaction> newTransactions =
-          await databaseSync.getAllNewTransactions(lastSynced);
-      for (Transaction newEntry in newTransactions) {
-        syncLogs.add(SyncLog(
-          deleteLogType: null,
-          updateLogType: UpdateLogType.Transaction,
-          pk: newEntry.transactionPk,
-          itemToUpdate: newEntry,
-          transactionDateTime: newEntry.dateTimeModified,
-        ));
-      }
-      print("NEW TRANSACTIONS");
-      print(newTransactions);
-
-      List<TransactionAssociatedTitle> newTitles =
-          await databaseSync.getAllNewAssociatedTitles(lastSynced);
-      for (TransactionAssociatedTitle newEntry in newTitles) {
-        syncLogs.add(SyncLog(
-          deleteLogType: null,
-          updateLogType: UpdateLogType.TransactionAssociatedTitle,
-          pk: newEntry.associatedTitlePk,
-          itemToUpdate: newEntry,
-          transactionDateTime: newEntry.dateTimeModified,
-        ));
-      }
-      print("NEW TITLES");
-      print(newTitles);
-
-      for (ScannerTemplate newEntry
-          in (await databaseSync.getAllNewScannerTemplates(lastSynced))) {
-        syncLogs.add(SyncLog(
-          deleteLogType: null,
-          updateLogType: UpdateLogType.ScannerTemplate,
-          pk: newEntry.scannerTemplatePk,
-          itemToUpdate: newEntry,
-          transactionDateTime: newEntry.dateTimeModified,
-        ));
-      }
-
-      List<Objective> newObjectives =
-          await databaseSync.getAllNewObjectives(lastSynced);
-      for (Objective newEntry in newObjectives) {
-        syncLogs.add(SyncLog(
-          deleteLogType: null,
-          updateLogType: UpdateLogType.Objective,
-          pk: newEntry.objectivePk,
-          itemToUpdate: newEntry,
-          transactionDateTime: newEntry.dateTimeModified,
-        ));
-      }
-      print("NEW OBJECTIVES");
-      print(newObjectives);
-
-      List<DeleteLog> deleteLogs =
-          await databaseSync.getAllNewDeleteLogs(lastSynced);
-
-      for (DeleteLog deleteLog in deleteLogs) {
-        syncLogs.add(SyncLog(
-          deleteLogType: deleteLog.type,
-          updateLogType: null,
-          pk: deleteLog.entryPk,
-          transactionDateTime: deleteLog.dateTimeModified,
-        ));
-      }
-
-      print("DELETE LOGS");
-      print(deleteLogs);
+      print("SYNC QUERY COUNTS: "
+          "wallets=${(queryResults[0] as List).length}, "
+          "categories=${(queryResults[1] as List).length}, "
+          "transactions=${(queryResults[4] as List).length}, "
+          "deleteLogs=${(queryResults[8] as List).length}");
     } catch (e) {
       print("Syncing error and failed: " + e.toString());
       filesSyncing.remove(file);
@@ -515,6 +550,9 @@ Future<bool> _syncData(BuildContext context) async {
     await databaseSync.close();
   }
 
+  // Yield to the frame scheduler before the heavy batch write so Flutter
+  // can paint at least one frame between sync and DB commit.
+  await Future.delayed(Duration.zero);
   await database.processSyncLogs(syncLogs);
   for (drive.File file in filesSyncing)
     setDateOfLastSyncedWithClient(getDeviceFromSyncBackupFileName(file.name),

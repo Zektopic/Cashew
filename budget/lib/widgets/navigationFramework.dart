@@ -428,7 +428,8 @@ class PageNavigationFrameworkState extends State<PageNavigationFramework> {
         isRatingPopupShown = openRatingPopupCheck(context);
       }
 
-      await setDailyNotifications(context);
+      // Schedule daily notifications in background — doesn't block startup
+      setDailyNotifications(context);
       await initializeDefaultDatabase();
       runNotificationPayLoads(context);
       runQuickActionsPayLoads(context);
@@ -447,16 +448,21 @@ class PageNavigationFrameworkState extends State<PageNavigationFramework> {
 
       // Mark subscriptions as paid AFTER syncing with cloud
       // Maybe another device already marked them as paid
-      await markSubscriptionsAsPaid(context);
-      await markUpcomingAsPaid();
+      await Future.wait([
+        markSubscriptionsAsPaid(context),
+        markUpcomingAsPaid(),
+      ]);
 
       // Should do this after syncing and after the subscriptions/upcoming transactions auto paid for
       // The upcoming transactions may have been modified after a sync
       await setUpcomingNotifications(context);
 
-      await database.deleteWanderingTransactions();
-      await database.deleteWanderingTitles();
-      await database.fixDuplicateAssociatedTitles();
+      // Run DB cleanup tasks in parallel
+      await Future.wait([
+        database.deleteWanderingTransactions(),
+        database.deleteWanderingTitles(),
+        database.fixDuplicateAssociatedTitles(),
+      ]);
 
       entireAppLoaded = true;
 
