@@ -50,6 +50,15 @@ class CategoryLimits extends StatefulWidget {
 }
 
 class _CategoryLimitsState extends State<CategoryLimits> {
+  bool _isRevealed = false;
+  Timer? _revealTimer;
+
+  @override
+  void dispose() {
+    _revealTimer?.cancel();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return SliverPadding(
@@ -76,12 +85,27 @@ class _CategoryLimitsState extends State<CategoryLimits> {
                   bool isOver = widget.isAbsoluteSpendingLimit
                       ? (snapshot.data ?? 0) > widget.budgetLimit
                       : (snapshot.data ?? 0) > 100;
-                  return CountNumber(
-                    count: snapshot.data ?? 0,
-                    duration: Duration(milliseconds: 700),
-                    initialCount: 0,
-                    textBuilder: (number) {
-                      return Column(
+                  return Listener(
+                    onPointerDown: (event) {
+                      HapticFeedback.selectionClick();
+                      setState(() => _isRevealed = true);
+                      _revealTimer?.cancel();
+                      _revealTimer = Timer(Duration(seconds: 2), () {
+                        if (mounted) setState(() => _isRevealed = false);
+                      });
+                    },
+                    onPointerUp: (event) {
+                      setState(() => _isRevealed = false);
+                    },
+                    child: CountNumber(
+                      count: snapshot.data ?? 0,
+                      duration: Duration(milliseconds: 700),
+                      initialCount: 0,
+                      textBuilder: (number) {
+                        return AnimatedSwitcher(
+                          duration: Duration(milliseconds: 300),
+                          child: Column(
+                            key: ValueKey(_isRevealed),
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           TextFont(
@@ -97,15 +121,15 @@ class _CategoryLimitsState extends State<CategoryLimits> {
                                 ? (convertToMoney(
                                         Provider.of<AllWallets>(context),
                                         number,
-                                        finalNumber: number) +
+                                        finalNumber: number, forceReveal: _isRevealed) +
                                     " / " +
                                     convertToMoney(
                                         Provider.of<AllWallets>(context),
-                                        widget.budgetLimit))
+                                        widget.budgetLimit, forceReveal: _isRevealed))
                                 : (convertToPercent(number,
                                         numberDecimals: 2,
                                         shouldRemoveTrailingZeroes: true,
-                                        finalNumber: number) +
+                                        finalNumber: number, forceReveal: _isRevealed) +
                                     " / " +
                                     "100%"),
                           ),
@@ -126,11 +150,11 @@ class _CategoryLimitsState extends State<CategoryLimits> {
                                           (widget.budgetLimit - number).abs(),
                                           finalNumber:
                                               (widget.budgetLimit - number)
-                                                  .abs()))
+                                                  .abs(), forceReveal: _isRevealed))
                                       : (convertToPercent((100 - number).abs(),
                                           numberDecimals: 2,
                                           shouldRemoveTrailingZeroes: true,
-                                          finalNumber: (100 - number).abs()))) +
+                                          finalNumber: (100 - number).abs(), forceReveal: _isRevealed))) +
                                   " " +
                                   (isOver
                                       ? "over".tr().toLowerCase()
@@ -138,8 +162,10 @@ class _CategoryLimitsState extends State<CategoryLimits> {
                             ),
                           ),
                         ],
-                      );
-                    },
+                          ),
+                        );
+                      },
+                    ),
                   );
                 },
               ),
@@ -317,6 +343,7 @@ class _CategoryLimitEntryState extends State<CategoryLimitEntry> {
                                         : categoryLimitAmount / widget.budgetLimit * 100,
                                     numberDecimals: 2,
                                     shouldRemoveTrailingZeroes: true,
+                                    forceReveal: _isRevealed,
                                   ) +
                                   " " +
                                   (widget.isSubCategory == true
@@ -349,6 +376,7 @@ class _CategoryLimitEntryState extends State<CategoryLimitEntry> {
                           widget.categoryLimit?.amount ?? 0,
                           numberDecimals: 2,
                           shouldRemoveTrailingZeroes: true,
+                          forceReveal: _isRevealed,
                         ),
                   placeholder: widget.isAbsoluteSpendingLimit
                       ? convertToMoney(Provider.of<AllWallets>(context), 0,
@@ -357,7 +385,7 @@ class _CategoryLimitEntryState extends State<CategoryLimitEntry> {
                                   .indexedByPk[widget.categoryLimit?.walletFk ??
                                       appStateSettings["selectedWalletPk"]]
                                   ?.currency, forceReveal: _isRevealed)
-                      : convertToPercent(0),
+                      : convertToPercent(0, forceReveal: _isRevealed),
                   showPlaceHolderWhenTextEquals: widget.isAbsoluteSpendingLimit
                       ? convertToMoney(Provider.of<AllWallets>(context), 0,
                           currencyKey:
@@ -365,7 +393,7 @@ class _CategoryLimitEntryState extends State<CategoryLimitEntry> {
                                   .indexedByPk[widget.categoryLimit?.walletFk ??
                                       appStateSettings["selectedWalletPk"]]
                                   ?.currency, forceReveal: _isRevealed)
-                      : convertToPercent(0),
+                      : convertToPercent(0, forceReveal: _isRevealed),
                   onTap: () {
                     enterCategoryLimitPopup(
                       context,
@@ -443,7 +471,7 @@ class _CategoryLimitEntryState extends State<CategoryLimitEntry> {
                                   : (convertToPercent(number,
                                           numberDecimals: 2,
                                           shouldRemoveTrailingZeroes: true,
-                                          finalNumber: snapshot.data ?? 0) +
+                                          finalNumber: snapshot.data ?? 0, forceReveal: _isRevealed) +
                                       " / " +
                                       "100%"),
                             ),

@@ -8,32 +8,33 @@ void main() async {
   // Insert some dummy data
   for (int i = 0; i < 100; i++) {
     await db.into(db.categories).insert(CategoriesCompanion.insert(
-      categoryPk: i.toString(),
+      categoryPk: Value(i.toString()),
       name: 'Cat $i',
-      dateCreated: DateTime.now(),
+      dateCreated: Value(DateTime.now()),
       order: i,
-      colour: '',
-      iconName: '',
+      colour: Value(''),
+      iconName: Value(''),
     ));
     await db.into(db.budgets).insert(BudgetsCompanion.insert(
-      budgetPk: i.toString(),
+      budgetPk: Value(i.toString()),
       name: 'Budget $i',
-      dateCreated: DateTime.now(),
+      dateCreated: Value(DateTime.now()),
       order: i,
-      colour: '',
+      colour: Value(''),
       amount: 100,
       startDate: DateTime.now(),
       endDate: DateTime.now(),
+      periodLength: 1,
     ));
     await db.into(db.objectives).insert(ObjectivesCompanion.insert(
-      objectivePk: i.toString(),
+      objectivePk: Value(i.toString()),
       name: 'Obj $i',
-      dateCreated: DateTime.now(),
+      dateCreated: Value(DateTime.now()),
       order: i,
-      colour: '',
+      colour: Value(''),
       amount: 100,
-      iconName: '',
-      type: i % 2,
+      iconName: Value(''),
+      type: Value(i % 2 == 0 ? ObjectiveType.goal : ObjectiveType.loan),
     ));
   }
 
