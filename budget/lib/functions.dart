@@ -698,13 +698,15 @@ DateTimeRange getBudgetDate(Budget budget, DateTime currentDate) {
 }
 
 String getWordedNumber(
-    BuildContext context, AllWallets allWallets, double value) {
+    BuildContext context, AllWallets allWallets, double value,
+    {bool forceReveal = false}) {
   if (removeTrailingZeroes(value.toStringAsFixed(10)) == "0") {
     return getCurrencyString(allWallets) + "0";
   }
   return convertToMoney(
     allWallets,
     value,
+    forceReveal: forceReveal,
     forceHideCurrencyName: true,
     addCurrencyName: false,
     getCustomNumberFormat: (decimalDigits, locale, currencySymbol) {

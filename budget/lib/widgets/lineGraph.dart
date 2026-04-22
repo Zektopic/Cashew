@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:budget/colors.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'dart:async';
 
 class _LineChart extends StatefulWidget {
   _LineChart({
@@ -47,6 +48,15 @@ class _LineChart extends StatefulWidget {
 class _LineChartState extends State<_LineChart> with WidgetsBindingObserver {
   bool loaded = false;
   double extraHorizontalPadding = 10;
+  bool _isRevealed = false;
+  Timer? _revealTimer;
+
+  @override
+  void dispose() {
+    _revealTimer?.cancel();
+    super.dispose();
+  }
+
   @override
   void initState() {
     super.initState();
@@ -62,12 +72,31 @@ class _LineChartState extends State<_LineChart> with WidgetsBindingObserver {
     return Padding(
       padding: EdgeInsets.only(
           right: 15 + extraHorizontalPadding, top: 8, bottom: 0),
-      child: GestureDetector(
-        child: LineChart(
-          data,
-          duration: const Duration(milliseconds: 2000),
-          curve: Curves.fastLinearToSlowEaseIn,
-          chartRendererKey: ValueKey(1),
+      child: Listener(
+        onPointerDown: (_) {
+          HapticFeedback.selectionClick();
+          setState(() => _isRevealed = true);
+          _revealTimer?.cancel();
+        },
+        onPointerUp: (_) {
+          _revealTimer?.cancel();
+          _revealTimer = Timer(Duration(seconds: 2), () {
+            if (mounted) setState(() => _isRevealed = false);
+          });
+        },
+        onPointerCancel: (_) {
+          _revealTimer?.cancel();
+          _revealTimer = Timer(Duration(seconds: 2), () {
+            if (mounted) setState(() => _isRevealed = false);
+          });
+        },
+        child: GestureDetector(
+          child: LineChart(
+            data,
+            duration: const Duration(milliseconds: 2000),
+            curve: Curves.fastLinearToSlowEaseIn,
+            chartRendererKey: ValueKey(1),
+          ),
         ),
       ),
     );
@@ -241,7 +270,8 @@ class _LineChartState extends State<_LineChart> with WidgetsBindingObserver {
                     softWrap: false,
                     textAlign: TextAlign.end,
                     text: getWordedNumber(context,
-                        Provider.of<AllWallets>(context, listen: false), value),
+                        Provider.of<AllWallets>(context, listen: false), value,
+                        forceReveal: _isRevealed),
                     textColor: dynamicPastel(context, widget.color,
                             amount: 0.5, inverse: true)
                         .withOpacity(0.3),
@@ -382,7 +412,8 @@ class _LineChartState extends State<_LineChart> with WidgetsBindingObserver {
                     "\n" +
                     convertToMoney(
                         Provider.of<AllWallets>(context, listen: false),
-                        lineBarSpot.y),
+                        lineBarSpot.y,
+                        forceReveal: _isRevealed),
                 const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
