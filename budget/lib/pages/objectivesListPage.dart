@@ -399,6 +399,22 @@ class _ObjectiveContainerState extends State<ObjectiveContainer> {
   bool _isRevealed = false;
   Timer? _revealTimer;
 
+  void _triggerReveal() {
+    HapticFeedback.selectionClick();
+    setState(() {
+      _isRevealed = true;
+    });
+
+    _revealTimer?.cancel();
+    _revealTimer = Timer(const Duration(seconds: 2), () {
+      if (mounted) {
+        setState(() {
+          _isRevealed = false;
+        });
+      }
+    });
+  }
+
   @override
   void dispose() {
     _revealTimer?.cancel();
@@ -825,6 +841,22 @@ class _ObjectiveContainerDifferenceLoanState
   bool _isRevealed = false;
   Timer? _revealTimer;
 
+  void _triggerReveal() {
+    HapticFeedback.selectionClick();
+    setState(() {
+      _isRevealed = true;
+    });
+
+    _revealTimer?.cancel();
+    _revealTimer = Timer(const Duration(seconds: 2), () {
+      if (mounted) {
+        setState(() {
+          _isRevealed = false;
+        });
+      }
+    });
+  }
+
   @override
   void dispose() {
     _revealTimer?.cancel();
@@ -867,14 +899,7 @@ class _ObjectiveContainerDifferenceLoanState
             closedColor: containerColor,
             button: (openContainer()) {
               return Listener(
-                onPointerDown: (_) {
-                  HapticFeedback.selectionClick();
-                  setState(() => _isRevealed = true);
-                  _revealTimer?.cancel();
-                  _revealTimer = Timer(Duration(seconds: 2), () {
-                    if (mounted) setState(() => _isRevealed = false);
-                  });
-                },
+                onPointerDown: (_) => _triggerReveal(),
                 onPointerUp: (_) {
                   _revealTimer?.cancel();
                   setState(() => _isRevealed = false);

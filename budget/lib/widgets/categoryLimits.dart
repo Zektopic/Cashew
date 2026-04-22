@@ -24,6 +24,8 @@ import 'package:budget/widgets/framework/popupFramework.dart';
 
 import 'package:budget/pages/addButton.dart';
 import 'sliverStickyLabelDivider.dart';
+import 'dart:async';
+import 'package:flutter/services.dart';
 import 'tappableTextEntry.dart';
 
 class CategoryLimits extends StatefulWidget {
@@ -50,6 +52,31 @@ class CategoryLimits extends StatefulWidget {
 }
 
 class _CategoryLimitsState extends State<CategoryLimits> {
+  bool _isRevealed = false;
+  Timer? _revealTimer;
+
+  void _triggerReveal() {
+    HapticFeedback.selectionClick();
+    setState(() {
+      _isRevealed = true;
+    });
+
+    _revealTimer?.cancel();
+    _revealTimer = Timer(const Duration(seconds: 2), () {
+      if (mounted) {
+        setState(() {
+          _isRevealed = false;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _revealTimer?.cancel();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return SliverPadding(
@@ -63,85 +90,104 @@ class _CategoryLimitsState extends State<CategoryLimits> {
               info: widget.isIncomeBudget
                   ? "category-saving-goals".tr()
                   : "category-spending-goals".tr(),
-              extraInfoWidget: StreamBuilder<double?>(
-                stream:
-                    database.watchTotalOfCategoryLimitsInBudgetWithCategories(
-                  allWallets: Provider.of<AllWallets>(context),
-                  budgetPk: widget.budgetPk,
-                  categoryPks: widget.categoryFks,
-                  categoryPksExclude: widget.categoryFksExclude,
-                  isAbsoluteSpendingLimit: widget.isAbsoluteSpendingLimit,
-                ),
-                builder: (context, snapshot) {
-                  bool isOver = widget.isAbsoluteSpendingLimit
-                      ? (snapshot.data ?? 0) > widget.budgetLimit
-                      : (snapshot.data ?? 0) > 100;
-                  return CountNumber(
-                    count: snapshot.data ?? 0,
-                    duration: Duration(milliseconds: 700),
-                    initialCount: 0,
-                    textBuilder: (number) {
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          TextFont(
-                            fontSize: 15,
-                            textColor: isOver
-                                ? getColor(context, "expenseAmount")
-                                : getColor(context, "black").withOpacity(
-                                    appStateSettings["increaseTextContrast"] ==
-                                            true
-                                        ? 0.7
-                                        : 0.5),
-                            text: widget.isAbsoluteSpendingLimit
-                                ? (convertToMoney(
-                                        Provider.of<AllWallets>(context),
-                                        number,
-                                        finalNumber: number) +
-                                    " / " +
-                                    convertToMoney(
-                                        Provider.of<AllWallets>(context),
-                                        widget.budgetLimit))
-                                : (convertToPercent(number,
-                                        numberDecimals: 2,
-                                        shouldRemoveTrailingZeroes: true,
-                                        finalNumber: number) +
-                                    " / " +
-                                    "100%"),
-                          ),
-                          Opacity(
-                            opacity: appStateSettings["increaseTextContrast"] ==
-                                        false &&
-                                    isOver
-                                ? 0.6
-                                : 1,
-                            child: TextFont(
-                              fontSize: 15,
-                              textColor: isOver
-                                  ? getColor(context, "expenseAmount")
-                                  : getColor(context, "textLight"),
-                              text: (widget.isAbsoluteSpendingLimit
-                                      ? (convertToMoney(
-                                          Provider.of<AllWallets>(context),
-                                          (widget.budgetLimit - number).abs(),
-                                          finalNumber:
-                                              (widget.budgetLimit - number)
-                                                  .abs()))
-                                      : (convertToPercent((100 - number).abs(),
-                                          numberDecimals: 2,
-                                          shouldRemoveTrailingZeroes: true,
-                                          finalNumber: (100 - number).abs()))) +
-                                  " " +
-                                  (isOver
-                                      ? "over".tr().toLowerCase()
-                                      : "remaining".tr().toLowerCase()),
-                            ),
-                          ),
-                        ],
-                      );
-                    },
-                  );
+              extraInfoWidget: Listener(
+                onPointerDown: (_) => _triggerReveal(),
+                onPointerUp: (_) {
+                  _revealTimer?.cancel();
+                  setState(() => _isRevealed = false);
                 },
+                onPointerCancel: (_) {
+                  _revealTimer?.cancel();
+                  setState(() => _isRevealed = false);
+                },
+                child: StreamBuilder<double?>(
+                  stream:
+                      database.watchTotalOfCategoryLimitsInBudgetWithCategories(
+                    allWallets: Provider.of<AllWallets>(context),
+                    budgetPk: widget.budgetPk,
+                    categoryPks: widget.categoryFks,
+                    categoryPksExclude: widget.categoryFksExclude,
+                    isAbsoluteSpendingLimit: widget.isAbsoluteSpendingLimit,
+                  ),
+                  builder: (context, snapshot) {
+                    bool isOver = widget.isAbsoluteSpendingLimit
+                        ? (snapshot.data ?? 0) > widget.budgetLimit
+                        : (snapshot.data ?? 0) > 100;
+                    return CountNumber(
+                      count: snapshot.data ?? 0,
+                      duration: Duration(milliseconds: 700),
+                      initialCount: 0,
+                      textBuilder: (number) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            AnimatedSwitcher(
+                              duration: Duration(milliseconds: 300),
+                              child: TextFont(
+                                key: ValueKey(_isRevealed),
+                                fontSize: 15,
+                                textColor: isOver
+                                    ? getColor(context, "expenseAmount")
+                                    : getColor(context, "black").withOpacity(
+                                        appStateSettings["increaseTextContrast"] ==
+                                                true
+                                            ? 0.7
+                                            : 0.5),
+                                text: widget.isAbsoluteSpendingLimit
+                                    ? (convertToMoney(
+                                            Provider.of<AllWallets>(context),
+                                            number,
+                                            finalNumber: number, forceReveal: _isRevealed) +
+                                        " / " +
+                                        convertToMoney(
+                                            Provider.of<AllWallets>(context),
+                                            widget.budgetLimit, forceReveal: _isRevealed))
+                                    : (convertToPercent(number,
+                                            numberDecimals: 2,
+                                            shouldRemoveTrailingZeroes: true,
+                                            finalNumber: number, forceReveal: _isRevealed) +
+                                        " / " +
+                                        "100%"),
+                              ),
+                            ),
+                            AnimatedSwitcher(
+                              duration: Duration(milliseconds: 300),
+                              child: Opacity(
+                                key: ValueKey(_isRevealed),
+                                opacity: appStateSettings["increaseTextContrast"] ==
+                                            false &&
+                                        isOver
+                                    ? 0.6
+                                    : 1,
+                                child: TextFont(
+                                  fontSize: 15,
+                                  textColor: isOver
+                                      ? getColor(context, "expenseAmount")
+                                      : getColor(context, "textLight"),
+                                  text: (widget.isAbsoluteSpendingLimit
+                                          ? (convertToMoney(
+                                              Provider.of<AllWallets>(context),
+                                              (widget.budgetLimit - number).abs(),
+                                              finalNumber:
+                                                  (widget.budgetLimit - number)
+                                                      .abs(), forceReveal: _isRevealed))
+                                          : (convertToPercent((100 - number).abs(),
+                                              numberDecimals: 2,
+                                              shouldRemoveTrailingZeroes: true,
+                                              finalNumber: (100 - number).abs(), forceReveal: _isRevealed))) +
+                                      " " +
+                                      (isOver
+                                          ? "over".tr().toLowerCase()
+                                          : "remaining".tr().toLowerCase()),
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  },
+                ),
               ),
               sliver: ColumnSliver(
                 children: [
@@ -231,6 +277,22 @@ class _CategoryLimitEntryState extends State<CategoryLimitEntry> {
   bool _isRevealed = false;
   Timer? _revealTimer;
 
+  void _triggerReveal() {
+    HapticFeedback.selectionClick();
+    setState(() {
+      _isRevealed = true;
+    });
+
+    _revealTimer?.cancel();
+    _revealTimer = Timer(const Duration(seconds: 2), () {
+      if (mounted) {
+        setState(() {
+          _isRevealed = false;
+        });
+      }
+    });
+  }
+
   @override
   void dispose() {
     _revealTimer?.cancel();
@@ -317,6 +379,7 @@ class _CategoryLimitEntryState extends State<CategoryLimitEntry> {
                                         : categoryLimitAmount / widget.budgetLimit * 100,
                                     numberDecimals: 2,
                                     shouldRemoveTrailingZeroes: true,
+                                    forceReveal: _isRevealed,
                                   ) +
                                   " " +
                                   (widget.isSubCategory == true
@@ -357,7 +420,7 @@ class _CategoryLimitEntryState extends State<CategoryLimitEntry> {
                                   .indexedByPk[widget.categoryLimit?.walletFk ??
                                       appStateSettings["selectedWalletPk"]]
                                   ?.currency, forceReveal: _isRevealed)
-                      : convertToPercent(0),
+                      : convertToPercent(widget.categoryLimit?.amount ?? 0, forceReveal: _isRevealed),
                   showPlaceHolderWhenTextEquals: widget.isAbsoluteSpendingLimit
                       ? convertToMoney(Provider.of<AllWallets>(context), 0,
                           currencyKey:
@@ -443,7 +506,7 @@ class _CategoryLimitEntryState extends State<CategoryLimitEntry> {
                                   : (convertToPercent(number,
                                           numberDecimals: 2,
                                           shouldRemoveTrailingZeroes: true,
-                                          finalNumber: snapshot.data ?? 0) +
+                                          finalNumber: snapshot.data ?? 0, forceReveal: _isRevealed) +
                                       " / " +
                                       "100%"),
                             ),
@@ -497,14 +560,7 @@ class _CategoryLimitEntryState extends State<CategoryLimitEntry> {
         }
 
         return Listener(
-          onPointerDown: (_) {
-            HapticFeedback.selectionClick();
-            setState(() => _isRevealed = true);
-            _revealTimer?.cancel();
-            _revealTimer = Timer(Duration(seconds: 2), () {
-              if (mounted) setState(() => _isRevealed = false);
-            });
-          },
+          onPointerDown: (_) => _triggerReveal(),
           onPointerUp: (_) {
             _revealTimer?.cancel();
             setState(() => _isRevealed = false);
