@@ -156,12 +156,6 @@ class _EditObjectivesPageState extends State<EditObjectivesPage> {
               ),
             ),
           ),
-          // SliverToBoxAdapter(
-          //   child: AnimatedExpanded(
-          //     expand: hideIfSearching(searchValue, isFocused, context) == false,
-          //     child: ObjectiveSettings(),
-          //   ),
-          // ),
           StreamBuilder<List<Objective>>(
             stream: database.watchAllObjectives(
               objectiveType: widget.objectiveType,
@@ -316,42 +310,6 @@ class _EditObjectivesPageState extends State<EditObjectivesPage> {
                                     );
                                   },
                                 ),
-                                // StreamBuilder<int?>(
-                                //   stream: database
-                                //       .getTotalCountOfTransactionsInObjective(
-                                //           objective.objectivePk)
-                                //       .$1,
-                                //   builder: (context, snapshot) {
-                                //     if (snapshot.hasData &&
-                                //         snapshot.data != null) {
-                                //       return TextFont(
-                                //         textAlign: TextAlign.start,
-                                //         text: snapshot.data.toString() +
-                                //             " " +
-                                //             (snapshot.data == 1
-                                //                 ? "transaction"
-                                //                     .tr()
-                                //                     .toLowerCase()
-                                //                 : "transactions"
-                                //                     .tr()
-                                //                     .toLowerCase()),
-                                //         fontSize: 14,
-                                //         textColor:
-                                //             getColor(context, "black")
-                                //                 .withOpacity(0.65),
-                                //       );
-                                //     } else {
-                                //       return TextFont(
-                                //         textAlign: TextAlign.start,
-                                //         text: "/ transactions",
-                                //         fontSize: 14,
-                                //         textColor:
-                                //             getColor(context, "black")
-                                //                 .withOpacity(0.65),
-                                //       );
-                                //     }
-                                //   },
-                                // ),
                               ],
                             ),
                           ),
