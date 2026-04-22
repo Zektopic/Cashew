@@ -624,32 +624,34 @@ Future<bool> markSubscriptionsAsPaid(BuildContext context,
         findMatchingPairsPks(subscriptions);
 
     bool hasUpdatedASubscription = false;
-    for (Transaction transaction in subscriptions) {
-      // Only mark it as paid if it was not marked as unpaid at any point (createdAnotherFutureTransaction == false)
-      // Add one minute so that if a notification is tapped right away, it will automatically be marked as paid since it will be overdue
-      if (transaction.createdAnotherFutureTransaction != true &&
-          transaction.dateCreated
-              .isBefore(DateTime.now().add(Duration(minutes: 1)))) {
-        hasUpdatedASubscription = true;
-        Transaction transactionNew = transaction.copyWith(
-          paid: true,
-          dateCreated: transaction.dateCreated,
-          createdAnotherFutureTransaction: Value(true),
-        );
-        await database.createOrUpdateTransaction(transactionNew);
-        if (transaction.categoryFk == "0" &&
-            transaction.pairedTransactionFk != null &&
-            relatedMatchingPairs[transaction.pairedTransactionFk] != null) {
-          // print("PAIR:" +
-          //     relatedMatchingPairs[transaction.transactionPk].toString());
-          await createNewSubscriptionTransaction(context, transaction,
-              closelyRelatedPairedTransactionFk:
-                  relatedMatchingPairs[transaction.transactionPk]);
-        } else {
-          await createNewSubscriptionTransaction(context, transaction);
+    await database.transaction(() async {
+      for (Transaction transaction in subscriptions) {
+        // Only mark it as paid if it was not marked as unpaid at any point (createdAnotherFutureTransaction == false)
+        // Add one minute so that if a notification is tapped right away, it will automatically be marked as paid since it will be overdue
+        if (transaction.createdAnotherFutureTransaction != true &&
+            transaction.dateCreated
+                .isBefore(DateTime.now().add(Duration(minutes: 1)))) {
+          hasUpdatedASubscription = true;
+          Transaction transactionNew = transaction.copyWith(
+            paid: true,
+            dateCreated: transaction.dateCreated,
+            createdAnotherFutureTransaction: Value(true),
+          );
+          await database.createOrUpdateTransaction(transactionNew);
+          if (transaction.categoryFk == "0" &&
+              transaction.pairedTransactionFk != null &&
+              relatedMatchingPairs[transaction.pairedTransactionFk] != null) {
+            // print("PAIR:" +
+            //     relatedMatchingPairs[transaction.transactionPk].toString());
+            await createNewSubscriptionTransaction(context, transaction,
+                closelyRelatedPairedTransactionFk:
+                    relatedMatchingPairs[transaction.transactionPk]);
+          } else {
+            await createNewSubscriptionTransaction(context, transaction);
+          }
         }
       }
-    }
+    });
     if (hasUpdatedASubscription) {
       await markSubscriptionsAsPaid(context, iteration: (iteration ?? 0) + 1);
     }
@@ -663,19 +665,21 @@ Future<bool> markUpcomingAsPaid() async {
   if (appStateSettings["automaticallyPayUpcoming"]) {
     List<Transaction> upcoming =
         await database.getAllOverdueUpcomingTransactions().$2;
-    for (Transaction transaction in upcoming) {
-      // Only mark it as paid if it was not marked as unpaid at any point (createdAnotherFutureTransaction == false)
-      // Add one minute so that if a notification is tapped right away, it will automatically be marked as paid since it will be overdue
-      if (transaction.createdAnotherFutureTransaction != true &&
-          transaction.dateCreated
-              .isBefore(DateTime.now().add(Duration(minutes: 1)))) {
-        Transaction transactionNew = transaction.copyWith(
-          paid: true,
-          dateCreated: transaction.dateCreated,
-        );
-        await database.createOrUpdateTransaction(transactionNew);
+    await database.transaction(() async {
+      for (Transaction transaction in upcoming) {
+        // Only mark it as paid if it was not marked as unpaid at any point (createdAnotherFutureTransaction == false)
+        // Add one minute so that if a notification is tapped right away, it will automatically be marked as paid since it will be overdue
+        if (transaction.createdAnotherFutureTransaction != true &&
+            transaction.dateCreated
+                .isBefore(DateTime.now().add(Duration(minutes: 1)))) {
+          Transaction transactionNew = transaction.copyWith(
+            paid: true,
+            dateCreated: transaction.dateCreated,
+          );
+          await database.createOrUpdateTransaction(transactionNew);
+        }
       }
-    }
+    });
     print("Automatically paid upcoming transactions");
   }
   return true;

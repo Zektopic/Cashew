@@ -115,6 +115,8 @@ flutter_icons:
 dev_dependencies:
   drift_dev: ^2.14.0
   build_runner: ^2.4.7
+  flutter_test:
+    sdk: flutter
 
 dependency_overrides:
   win32: ^5.5.4
