@@ -87,20 +87,6 @@ Future<bool> initializeSettings() async {
   await attemptToMigrateSetLongTermLoansAmountTo0();
   attemptToMigrateCustomNumberFormattingSettings();
 
-  // Disable sync every change is not on web
-  // It will still sync when user pulls down to refresh
-  // if (!kIsWeb) {
-  //   appStateSettings["syncEveryChange"] = false;
-  // }
-  // Instead we now check for web with the setting appStateSettings["syncEveryChange"]
-
-  // Load iOS font when iOS
-  // Disable iOS font for now... Avenir looks better
-  // if (getPlatform() == PlatformOS.isIOS) {
-  //   // appStateSettings["font"] = "SFProText";
-  //   appStateSettings["font"] = "Avenir";
-  // }
-
   if (appStateSettings["hasOnboarded"] == true) {
     appStateSettings["numLogins"] = appStateSettings["numLogins"] + 1;
   }
