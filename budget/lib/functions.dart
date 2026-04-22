@@ -698,8 +698,12 @@ DateTimeRange getBudgetDate(Budget budget, DateTime currentDate) {
 }
 
 String getWordedNumber(
+<<<<<<< Updated upstream
+    BuildContext context, AllWallets allWallets, double value, {bool forceReveal = false}) {
+=======
     BuildContext context, AllWallets allWallets, double value,
     {bool forceReveal = false}) {
+>>>>>>> Stashed changes
   if (removeTrailingZeroes(value.toStringAsFixed(10)) == "0") {
     return getCurrencyString(allWallets) + "0";
   }
@@ -709,6 +713,7 @@ String getWordedNumber(
     forceReveal: forceReveal,
     forceHideCurrencyName: true,
     addCurrencyName: false,
+    forceReveal: forceReveal,
     getCustomNumberFormat: (decimalDigits, locale, currencySymbol) {
       final NumberFormat formatter = NumberFormat.compactCurrency(
         locale: locale,

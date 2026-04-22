@@ -11,6 +11,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'dart:async';
 
 class BudgetHistoryLineGraph extends StatelessWidget {
   const BudgetHistoryLineGraph({
@@ -72,15 +73,17 @@ class BudgetHistoryLineGraph extends StatelessWidget {
         numberZeroList.add(numberZero);
       }
 
-      int minNumberZero =
-          numberZeroList.isNotEmpty ? numberZeroList.reduce(min) : 0;
+      int minNumberZero = numberZeroList.isNotEmpty
+          ? numberZeroList.reduce(min)
+          : 0;
       // Always keep at least minimumNumberOfZero periods in view even if zero
       if (dateRanges.length - minNumberZero <= minimumNumberOfZero) {
         minNumberZero = dateRanges.length - minimumNumberOfZero;
       }
 
-      filteredDateRanges =
-          dateRanges.take(dateRanges.length - minNumberZero).toList();
+      filteredDateRanges = dateRanges
+          .take(dateRanges.length - minNumberZero)
+          .toList();
 
       // Remove the zeroes
       List<List<FlSpot>> filteredSpots = [];
@@ -158,11 +161,8 @@ class BudgetHistoryLineGraph extends StatelessWidget {
       filteredSpotsFixedX = [
         [
           for (int i = 0; i < minimumNumberOfZero; i++)
-            FlSpot(
-              i.toDouble(),
-              minY,
-            ),
-        ]
+            FlSpot(i.toDouble(), minY),
+        ],
       ];
     }
 
@@ -170,10 +170,7 @@ class BudgetHistoryLineGraph extends StatelessWidget {
     for (int i = 0; i < filteredSpotsFixedX.length; i++) {
       List<FlSpot> initialSpots = [];
       for (int j = 0; j < filteredSpotsFixedX[i].length; j++) {
-        initialSpots.add(FlSpot(
-          j.toDouble(),
-          minY,
-        ));
+        initialSpots.add(FlSpot(j.toDouble(), minY));
       }
       initialSpotsAll.add(initialSpots);
     }
@@ -241,13 +238,44 @@ class _BudgetHistoryLineGraphState extends State<_BudgetHistoryLineGraph> {
   bool loaded = false;
   int? touchedValue = null;
 
+  bool _isRevealed = false;
+  Timer? _revealTimer;
+
+  void _setRevealed(bool reveal) {
+    setState(() {
+      _isRevealed = reveal;
+    });
+
+    if (reveal) {
+      HapticFeedback.selectionClick();
+      _revealTimer?.cancel();
+      _revealTimer = Timer(const Duration(seconds: 2), () {
+        if (mounted) {
+          setState(() {
+            _isRevealed = false;
+          });
+        }
+      });
+    } else {
+      _revealTimer?.cancel();
+    }
+  }
+
+  @override
+  void dispose() {
+    _revealTimer?.cancel();
+    super.dispose();
+  }
+
   @override
   void initState() {
     super.initState();
     Future.delayed(Duration.zero, () {
-      setState(() {
-        loaded = true;
-      });
+      if (mounted) {
+        setState(() {
+          loaded = true;
+        });
+      }
     });
   }
 
@@ -272,24 +300,27 @@ class _BudgetHistoryLineGraphState extends State<_BudgetHistoryLineGraph> {
                   show: widget.minY >= 0 && widget.maxY >= 0
                       ? false
                       : i != 0
-                          ? false
-                          : true,
+                      ? false
+                      : true,
                   gradient: LinearGradient(
                     colors: [
                       i == 0
-                          ? (widget.lineColors?[i] ?? widget.color)
-                              .withAlpha(100)
-                          : (widget.lineColors?[i] ?? widget.color)
-                              .withAlpha(1),
+                          ? (widget.lineColors?[i] ?? widget.color).withAlpha(
+                              100,
+                            )
+                          : (widget.lineColors?[i] ?? widget.color).withAlpha(
+                              1,
+                            ),
                       (widget.lineColors?[i] ?? widget.color).withAlpha(1),
                     ],
                     begin: Alignment.bottomCenter,
                     end: Alignment(
-                        0,
-                        widget.maxY > 0
-                            ? -(widget.minY).abs() /
+                      0,
+                      widget.maxY > 0
+                          ? -(widget.minY).abs() /
                                 ((widget.maxY).abs() + (widget.minY).abs())
-                            : -1),
+                          : -1,
+                    ),
                   ),
                   // gradientFrom: Offset(
                   //     0,
@@ -316,17 +347,20 @@ class _BudgetHistoryLineGraphState extends State<_BudgetHistoryLineGraph> {
                   gradient: LinearGradient(
                     colors: [
                       i == 0
-                          ? (widget.lineColors?[i] ?? widget.color)
-                              .withAlpha(100)
-                          : (widget.lineColors?[i] ?? widget.color)
-                              .withAlpha(1),
+                          ? (widget.lineColors?[i] ?? widget.color).withAlpha(
+                              100,
+                            )
+                          : (widget.lineColors?[i] ?? widget.color).withAlpha(
+                              1,
+                            ),
                       (widget.lineColors?[i] ?? widget.color).withAlpha(1),
                     ],
                     begin: Alignment.topCenter,
                     end: Alignment(
-                        0,
-                        (widget.maxY).abs() /
-                            ((widget.maxY).abs() + (widget.minY).abs())),
+                      0,
+                      (widget.maxY).abs() /
+                          ((widget.maxY).abs() + (widget.minY).abs()),
+                    ),
                   ),
                 ),
           dotData: FlDotData(
@@ -334,15 +368,18 @@ class _BudgetHistoryLineGraphState extends State<_BudgetHistoryLineGraph> {
             getDotPainter: (spot, percent, barData, index) {
               return FlDotCirclePainter(
                 radius: 4,
-                color: lightenPastel(widget.lineColors?[i] ?? widget.color,
-                        amount: 0.3)
-                    .withOpacity(0.8),
+                color: lightenPastel(
+                  widget.lineColors?[i] ?? widget.color,
+                  amount: 0.3,
+                ).withOpacity(0.8),
                 strokeWidth: 0,
               );
             },
           ),
-          color:
-              lightenPastel(widget.lineColors?[i] ?? widget.color, amount: 0.3),
+          color: lightenPastel(
+            widget.lineColors?[i] ?? widget.color,
+            amount: 0.3,
+          ),
         ),
       if (widget.horizontalLineAt != null)
         for (int i = 0; i < widget.spots.length; i++)
@@ -383,415 +420,479 @@ class _BudgetHistoryLineGraphState extends State<_BudgetHistoryLineGraph> {
               return FlDotCirclePainter(
                 radius: 3,
                 color: lightenPastel(
-                        HexColor(widget.categoriesMapped[categoryPk]?.colour),
-                        amount: 0.3)
-                    .withOpacity(0.6),
+                  HexColor(widget.categoriesMapped[categoryPk]?.colour),
+                  amount: 0.3,
+                ).withOpacity(0.6),
                 strokeWidth: 0,
               );
             },
           ),
           color: lightenPastel(
-                  HexColor(widget.categoriesMapped[categoryPk]?.colour),
-                  amount: 0.3)
-              .withOpacity(0.8),
+            HexColor(widget.categoriesMapped[categoryPk]?.colour),
+            amount: 0.3,
+          ).withOpacity(0.8),
         ),
     ];
 
-    return Container(
-      height: MediaQuery.sizeOf(context).height * 0.3 >
-              (getIsFullScreen(context) == false ? 190 : 350)
-          ? getIsFullScreen(context) == false
-              ? 190
-              : 350
-          : MediaQuery.sizeOf(context).height * 0.3,
-      padding: const EdgeInsets.only(
-        left: 10,
-        right: 25,
-        top: 25,
-      ),
-      child: LineChart(
-        curve: Curves.easeInOutCubicEmphasized,
-        duration: Duration(milliseconds: 2000),
-        LineChartData(
-          lineBarsData: lineBarsData,
-          minY: widget.minY,
-          maxY: widget.maxY,
-          lineTouchData: LineTouchData(
-            touchCallback:
-                (FlTouchEvent event, LineTouchResponse? touchResponse) {
-              if (!event.isInterestedForInteractions || touchResponse == null) {
-                if (touchedValue != null) if (widget.onTouchedIndex != null)
-                  widget.onTouchedIndex!(null);
-                touchedValue = null;
-                return;
-              }
+    return Listener(
+      onPointerDown: (_) => _setRevealed(true),
+      onPointerUp: (_) => _setRevealed(false),
+      onPointerCancel: (_) => _setRevealed(false),
+      child: Container(
+        height:
+            MediaQuery.sizeOf(context).height * 0.3 >
+                (getIsFullScreen(context) == false ? 190 : 350)
+            ? getIsFullScreen(context) == false
+                  ? 190
+                  : 350
+            : MediaQuery.sizeOf(context).height * 0.3,
+        padding: const EdgeInsets.only(left: 10, right: 25, top: 25),
+        child: LineChart(
+          curve: Curves.easeInOutCubicEmphasized,
+          duration: Duration(milliseconds: 2000),
+          LineChartData(
+            lineBarsData: lineBarsData,
+            minY: widget.minY,
+            maxY: widget.maxY,
+            lineTouchData: LineTouchData(
+              touchCallback:
+                  (FlTouchEvent event, LineTouchResponse? touchResponse) {
+                    if (!event.isInterestedForInteractions ||
+                        touchResponse == null) {
+                      if (touchedValue != null)
+                        if (widget.onTouchedIndex != null)
+                          widget.onTouchedIndex!(null);
+                      touchedValue = null;
+                      return;
+                    }
 
-              // Correct the x value, because not all loaded periods may be shown in the graph
-              // because we remove the zero values
-              double value = (widget.originalDateRanges.length -
-                      (widget.spots.firstOrNull ?? []).length) +
-                  touchResponse.lineBarSpots![0].x;
-              if (touchedValue != value.toInt()) if (widget.onTouchedIndex !=
-                  null) widget.onTouchedIndex!(value.toInt());
+                    // Correct the x value, because not all loaded periods may be shown in the graph
+                    // because we remove the zero values
+                    double value =
+                        (widget.originalDateRanges.length -
+                            (widget.spots.firstOrNull ?? []).length) +
+                        touchResponse.lineBarSpots![0].x;
+                    if (touchedValue != value.toInt())
+                      if (widget.onTouchedIndex != null)
+                        widget.onTouchedIndex!(value.toInt());
 
-              if (event.runtimeType == FlLongPressStart) {
-                HapticFeedback.selectionClick();
-              } else if (touchedValue != value.toInt() &&
-                  (event.runtimeType == FlLongPressMoveUpdate ||
-                      event.runtimeType == FlPanUpdateEvent)) {
-                HapticFeedback.selectionClick();
-              }
+                    if (event.runtimeType == FlLongPressStart) {
+                      HapticFeedback.selectionClick();
+                    } else if (touchedValue != value.toInt() &&
+                        (event.runtimeType == FlLongPressMoveUpdate ||
+                            event.runtimeType == FlPanUpdateEvent)) {
+                      HapticFeedback.selectionClick();
+                    }
 
-              touchedValue = value.toInt();
-            },
-            enabled: true,
-            touchSpotThreshold: 1000,
-            getTouchedSpotIndicator:
-                (LineChartBarData barData, List<int> spotIndexes) {
-              return spotIndexes.map((index) {
-                return TouchedSpotIndicatorData(
-                  FlLine(
-                    color: (widget.extraCategorySpots.keys.length <= 0
-                            ? widget.color
-                            : barData.color) ??
-                        Theme.of(context).colorScheme.primary,
-                    strokeWidth: 2,
-                    dashArray: [2, 2],
-                  ),
-                  FlDotData(
-                    show: true,
-                    getDotPainter: (spot, percent, barData, index) =>
-                        FlDotCirclePainter(
-                      radius: 3,
-                      color: (widget.extraCategorySpots.keys.length <= 0 &&
-                                  widget.lineColors == null
-                              ? widget.color.withOpacity(0.9)
-                              : barData.color) ??
-                          Theme.of(context).colorScheme.primary,
-                      strokeWidth: 2,
-                      strokeColor:
-                          (widget.extraCategorySpots.keys.length <= 0 &&
-                                      widget.lineColors == null
-                                  ? widget.color.withOpacity(0.9)
+                    touchedValue = value.toInt();
+                  },
+              enabled: true,
+              touchSpotThreshold: 1000,
+              getTouchedSpotIndicator:
+                  (LineChartBarData barData, List<int> spotIndexes) {
+                    return spotIndexes.map((index) {
+                      return TouchedSpotIndicatorData(
+                        FlLine(
+                          color:
+                              (widget.extraCategorySpots.keys.length <= 0
+                                  ? widget.color
                                   : barData.color) ??
                               Theme.of(context).colorScheme.primary,
-                    ),
-                  ),
-                );
-              }).toList();
-            },
-            touchTooltipData: LineTouchTooltipData(
-              maxContentWidth: 170,
-              getTooltipColor: (_) =>
-                  widget.extraCategorySpots.keys.length <= 0 &&
-                          (widget.lineColors == null ||
-                              (widget.lineColors?.length ?? 0) <= 0)
-                      ? widget.color.withOpacity(0.7)
-                      : dynamicPastel(
-                          context,
-                          getColor(context, "white"),
-                          inverse: true,
-                          amountLight: 0.2,
-                          amountDark: 0.05,
-                        ).withOpacity(0.8),
-              tooltipRoundedRadius: 8,
-              fitInsideVertically: true,
-              fitInsideHorizontally: true,
-              tooltipPadding:
-                  EdgeInsets.only(left: 8, right: 8, top: 8, bottom: 6),
-              getTooltipItems: (List<LineBarSpot> lineBarsSpot) {
-                return lineBarsSpot.asMap().entries.map((entry) {
-                  LineBarSpot lineBarSpot = entry.value;
-                  int index = entry.key;
-                  // hide touch data for the overage line
-                  if (lineBarSpot.bar.color == Colors.transparent) {
-                    return null;
-                  }
-                  DateTimeRange? dateRange;
-                  try {
-                    List<DateTimeRange> dateRanges = widget.dateRanges
-                        .take(widget.spots.first.length)
-                        .toList();
-                    dateRange = dateRanges[
-                        dateRanges.length - 1 - (lineBarsSpot.first.x).round()];
-                  } catch (e) {
-                    print(
+                          strokeWidth: 2,
+                          dashArray: [2, 2],
+                        ),
+                        FlDotData(
+                          show: true,
+                          getDotPainter: (spot, percent, barData, index) =>
+                              FlDotCirclePainter(
+                                radius: 3,
+                                color:
+                                    (widget.extraCategorySpots.keys.length <=
+                                                0 &&
+                                            widget.lineColors == null
+                                        ? widget.color.withOpacity(0.9)
+                                        : barData.color) ??
+                                    Theme.of(context).colorScheme.primary,
+                                strokeWidth: 2,
+                                strokeColor:
+                                    (widget.extraCategorySpots.keys.length <=
+                                                0 &&
+                                            widget.lineColors == null
+                                        ? widget.color.withOpacity(0.9)
+                                        : barData.color) ??
+                                    Theme.of(context).colorScheme.primary,
+                              ),
+                        ),
+                      );
+                    }).toList();
+                  },
+              touchTooltipData: LineTouchTooltipData(
+                maxContentWidth: 170,
+                getTooltipColor: (_) =>
+                    widget.extraCategorySpots.keys.length <= 0 &&
+                        (widget.lineColors == null ||
+                            (widget.lineColors?.length ?? 0) <= 0)
+                    ? widget.color.withOpacity(0.7)
+                    : dynamicPastel(
+                        context,
+                        getColor(context, "white"),
+                        inverse: true,
+                        amountLight: 0.2,
+                        amountDark: 0.05,
+                      ).withOpacity(0.8),
+                tooltipRoundedRadius: 8,
+                fitInsideVertically: true,
+                fitInsideHorizontally: true,
+                tooltipPadding: EdgeInsets.only(
+                  left: 8,
+                  right: 8,
+                  top: 8,
+                  bottom: 6,
+                ),
+                getTooltipItems: (List<LineBarSpot> lineBarsSpot) {
+                  return lineBarsSpot.asMap().entries.map((entry) {
+                    LineBarSpot lineBarSpot = entry.value;
+                    int index = entry.key;
+                    // hide touch data for the overage line
+                    if (lineBarSpot.bar.color == Colors.transparent) {
+                      return null;
+                    }
+                    DateTimeRange? dateRange;
+                    try {
+                      List<DateTimeRange> dateRanges = widget.dateRanges
+                          .take(widget.spots.first.length)
+                          .toList();
+                      dateRange =
+                          dateRanges[dateRanges.length -
+                              1 -
+                              (lineBarsSpot.first.x).round()];
+                    } catch (e) {
+                      print(
                         "Error with date ranges passed in, length mismatched that of lines: " +
-                            e.toString());
-                  }
+                            e.toString(),
+                      );
+                    }
 
-                  String startAndEndDateString = "";
-                  if (dateRange != null && widget.showDateOnHover) {
-                    String startDateString =
-                        getWordedDateShort(dateRange.start);
-                    String endDateString = getWordedDateShort(dateRange.end);
-                    if (startDateString == endDateString) {
-                      startAndEndDateString = getWordedDateShort(
+                    String startAndEndDateString = "";
+                    if (dateRange != null && widget.showDateOnHover) {
+                      String startDateString = getWordedDateShort(
+                        dateRange.start,
+                      );
+                      String endDateString = getWordedDateShort(dateRange.end);
+                      if (startDateString == endDateString) {
+                        startAndEndDateString = getWordedDateShort(
                           dateRange.start,
                           includeYear:
-                              dateRange.start.year != DateTime.now().year);
-                    } else {
-                      startAndEndDateString =
-                          getWordedDateShort(dateRange.start) +
-                              " – " +
-                              getWordedDateShort(dateRange.end,
-                                  includeYear: dateRange.end.year !=
-                                      DateTime.now().year);
+                              dateRange.start.year != DateTime.now().year,
+                        );
+                      } else {
+                        startAndEndDateString =
+                            getWordedDateShort(dateRange.start) +
+                            " – " +
+                            getWordedDateShort(
+                              dateRange.end,
+                              includeYear:
+                                  dateRange.end.year != DateTime.now().year,
+                            );
+                      }
+                      startAndEndDateString = startAndEndDateString + "\n";
                     }
-                    startAndEndDateString = startAndEndDateString + "\n";
-                  }
 
-                  return LineTooltipItem(
-                    "",
-                    TextStyle(),
-                    children: [
-                      if (dateRange != null &&
-                          index == 0 &&
-                          widget.showDateOnHover)
+                    return LineTooltipItem(
+                      "",
+                      TextStyle(),
+                      children: [
+                        if (dateRange != null &&
+                            index == 0 &&
+                            widget.showDateOnHover)
+                          TextSpan(
+                            text: startAndEndDateString,
+                            style: TextStyle(
+                              color: getColor(
+                                context,
+                                "black",
+                              ).withOpacity(0.8),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                              fontFamilyFallback: ['Inter'],
+                            ),
+                          ),
                         TextSpan(
-                          text: startAndEndDateString,
+                          text: convertToMoney(
+                            Provider.of<AllWallets>(context, listen: false),
+                            lineBarSpot.y == -1e-14 ? 0 : lineBarSpot.y,
+                            forceReveal: _isRevealed,
+                          ),
                           style: TextStyle(
-                            color: getColor(context, "black").withOpacity(0.8),
+                            color:
+                                lineBarSpot.bar.color ==
+                                    lightenPastel(widget.color, amount: 0.3)
+                                ? getColor(context, "black").withOpacity(0.8)
+                                : lineBarSpot.bar.color,
                             fontWeight: FontWeight.bold,
                             fontSize: 12,
                             fontFamilyFallback: ['Inter'],
+                            height:
+                                index == 0 &&
+                                    widget.showDateOnHover &&
+                                    lineBarsSpot.length > 1
+                                ? 1.8
+                                : null,
                           ),
                         ),
-                      TextSpan(
-                        text: convertToMoney(
-                            Provider.of<AllWallets>(context, listen: false),
-                            lineBarSpot.y == -1e-14 ? 0 : lineBarSpot.y),
-                        style: TextStyle(
-                          color: lineBarSpot.bar.color ==
-                                  lightenPastel(widget.color, amount: 0.3)
-                              ? getColor(context, "black").withOpacity(0.8)
-                              : lineBarSpot.bar.color,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                          fontFamilyFallback: ['Inter'],
-                          height: index == 0 &&
-                                  widget.showDateOnHover &&
-                                  lineBarsSpot.length > 1
-                              ? 1.8
-                              : null,
-                        ),
-                      ),
-                    ],
-                  );
-                }).toList();
-              },
+                      ],
+                    );
+                  }).toList();
+                },
+              ),
             ),
-          ),
-          titlesData: FlTitlesData(
-            bottomTitles: AxisTitles(
-              sideTitles: SideTitles(
-                interval: null,
-                showTitles: true,
-                reservedSize: widget.budget.reoccurrence ==
-                            BudgetReoccurence.weekly ||
-                        widget.budget.reoccurrence == BudgetReoccurence.daily
-                    ? 38
-                    : 22,
-                getTitlesWidget: (value, meta) {
-                  DateTime startDate = widget.dateRanges[0].start;
-                  if ((widget.spots.firstOrNull ?? []).length -
+            titlesData: FlTitlesData(
+              bottomTitles: AxisTitles(
+                sideTitles: SideTitles(
+                  interval: null,
+                  showTitles: true,
+                  reservedSize:
+                      widget.budget.reoccurrence == BudgetReoccurence.weekly ||
+                          widget.budget.reoccurrence == BudgetReoccurence.daily
+                      ? 38
+                      : 22,
+                  getTitlesWidget: (value, meta) {
+                    DateTime startDate = widget.dateRanges[0].start;
+                    if ((widget.spots.firstOrNull ?? []).length -
+                                1 -
+                                value.round() <
+                            widget.dateRanges.length &&
+                        (widget.spots.firstOrNull ?? []).length -
+                                1 -
+                                value.round() >=
+                            0) {
+                      startDate = widget
+                          .dateRanges[(widget.spots.firstOrNull ?? []).length -
                               1 -
-                              value.round() <
-                          widget.dateRanges.length &&
-                      (widget.spots.firstOrNull ?? []).length -
-                              1 -
-                              value.round() >=
-                          0) {
-                    startDate = widget
-                        .dateRanges[(widget.spots.firstOrNull ?? []).length -
-                            1 -
-                            value.round()]
-                        .start;
-                  }
-                  if (value.toStringAsFixed(2) ==
-                      value.round().toStringAsFixed(2)) {
-                    return Padding(
-                      padding: const EdgeInsets.only(top: 7),
-                      child: MediaQuery(
-                        data: MediaQuery.of(context)
-                            .copyWith(textScaler: TextScaler.linear(1.0)),
-                        child: TextFont(
-                          maxLines: 1,
-                          textAlign: TextAlign.center,
-                          fontSize: 13,
-                          text: widget.budget.reoccurrence ==
-                                  BudgetReoccurence.weekly
-                              ? DateFormat('MMM\ndd', context.locale.toString())
-                                  .format(startDate)
-                              : widget.budget.reoccurrence ==
+                              value.round()]
+                          .start;
+                    }
+                    if (value.toStringAsFixed(2) ==
+                        value.round().toStringAsFixed(2)) {
+                      return Padding(
+                        padding: const EdgeInsets.only(top: 7),
+                        child: MediaQuery(
+                          data: MediaQuery.of(
+                            context,
+                          ).copyWith(textScaler: TextScaler.linear(1.0)),
+                          child: TextFont(
+                            maxLines: 1,
+                            textAlign: TextAlign.center,
+                            fontSize: 13,
+                            text:
+                                widget.budget.reoccurrence ==
+                                    BudgetReoccurence.weekly
+                                ? DateFormat(
+                                    'MMM\ndd',
+                                    context.locale.toString(),
+                                  ).format(startDate)
+                                : widget.budget.reoccurrence ==
                                       BudgetReoccurence.daily
-                                  ? DateFormat(
-                                          'MMM\ndd', context.locale.toString())
-                                      .format(startDate)
-                                  : widget.budget.reoccurrence ==
-                                          BudgetReoccurence.monthly
-                                      ? DateFormat(
-                                              'MMM', context.locale.toString())
-                                          .format(startDate)
-                                      : widget.budget.reoccurrence ==
-                                              BudgetReoccurence.yearly
-                                          ? DateFormat('yyyy',
-                                                  context.locale.toString())
-                                              .format(startDate)
-                                          : DateFormat('MMM',
-                                                  context.locale.toString())
-                                              .format(startDate),
-                          textColor: dynamicPastel(context, widget.color,
-                                  amount: 0.8, inverse: true)
-                              .withOpacity(0.5),
+                                ? DateFormat(
+                                    'MMM\ndd',
+                                    context.locale.toString(),
+                                  ).format(startDate)
+                                : widget.budget.reoccurrence ==
+                                      BudgetReoccurence.monthly
+                                ? DateFormat(
+                                    'MMM',
+                                    context.locale.toString(),
+                                  ).format(startDate)
+                                : widget.budget.reoccurrence ==
+                                      BudgetReoccurence.yearly
+                                ? DateFormat(
+                                    'yyyy',
+                                    context.locale.toString(),
+                                  ).format(startDate)
+                                : DateFormat(
+                                    'MMM',
+                                    context.locale.toString(),
+                                  ).format(startDate),
+                            textColor: dynamicPastel(
+                              context,
+                              widget.color,
+                              amount: 0.8,
+                              inverse: true,
+                            ).withOpacity(0.5),
+                          ),
+                        ),
+                      );
+                    }
+                    return SizedBox.shrink();
+                  },
+                ),
+              ),
+              rightTitles: AxisTitles(
+                sideTitles: SideTitles(showTitles: false),
+              ),
+              topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+              leftTitles: AxisTitles(
+                sideTitles: SideTitles(
+                  showTitles: true,
+                  getTitlesWidget: (value, titleMeta) {
+                    bool show = false;
+                    if (value == 0) {
+                      show = true;
+                    } else if (value <= widget.maxY && value > widget.minY) {
+                      show = true;
+                    } else {
+                      return SizedBox.shrink();
+                    }
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8.0),
+                      child: MediaQuery(
+                        data: MediaQuery.of(
+                          context,
+                        ).copyWith(textScaler: TextScaler.linear(1.0)),
+                        child: TextFont(
+                          overflow: TextOverflow.fade,
+                          maxLines: 1,
+                          softWrap: false,
+                          textAlign: TextAlign.end,
+                          text: getWordedNumber(
+                            context,
+                            Provider.of<AllWallets>(context),
+                            value,
+                            forceReveal: _isRevealed,
+                          ),
+                          textColor: dynamicPastel(
+                            context,
+                            widget.color,
+                            amount: 0.5,
+                            inverse: true,
+                          ).withOpacity(0.3),
+                          fontSize: 13,
                         ),
                       ),
                     );
-                  }
-                  return SizedBox.shrink();
-                },
+                  },
+                  interval:
+                      double.parse(
+                            (widget.maxY - widget.minY).toStringAsFixed(5),
+                          ) ==
+                          0.0
+                      ? 0.001
+                      : ((widget.maxY - widget.minY) /
+                                (getIsFullScreen(context) ? 7 : 4))
+                            .abs(),
+                  reservedSize:
+                      (widget.minY <= -10000
+                          ? 55
+                          : widget.minY <= -1000
+                          ? 45
+                          : widget.minY <= -100
+                          ? 40
+                          : (widget.maxY >= 100
+                                ? (widget.maxY >= 1000 ? 37 : 33)
+                                : 25)) +
+                      10 +
+                      measureCurrencyStringExtraWidth(
+                        Provider.of<AllWallets>(context),
+                      ),
+                ),
               ),
             ),
-            rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            leftTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                getTitlesWidget: (
-                  value,
-                  titleMeta,
-                ) {
-                  bool show = false;
-                  if (value == 0) {
-                    show = true;
-                  } else if (value <= widget.maxY && value > widget.minY) {
-                    show = true;
-                  } else {
-                    return SizedBox.shrink();
-                  }
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 8.0),
-                    child: MediaQuery(
-                      data: MediaQuery.of(context)
-                          .copyWith(textScaler: TextScaler.linear(1.0)),
-                      child: TextFont(
-                        overflow: TextOverflow.fade,
-                        maxLines: 1,
-                        softWrap: false,
-                        textAlign: TextAlign.end,
-                        text: getWordedNumber(
-                            context, Provider.of<AllWallets>(context), value),
-                        textColor: dynamicPastel(context, widget.color,
-                                amount: 0.5, inverse: true)
-                            .withOpacity(0.3),
-                        fontSize: 13,
-                      ),
-                    ),
-                  );
-                },
-                interval: double.parse(
-                            (widget.maxY - widget.minY).toStringAsFixed(5)) ==
-                        0.0
-                    ? 0.001
-                    : ((widget.maxY - widget.minY) /
-                            (getIsFullScreen(context) ? 7 : 4))
-                        .abs(),
-                reservedSize: (widget.minY <= -10000
-                        ? 55
-                        : widget.minY <= -1000
-                            ? 45
-                            : widget.minY <= -100
-                                ? 40
-                                : (widget.maxY >= 100
-                                    ? (widget.maxY >= 1000 ? 37 : 33)
-                                    : 25)) +
-                    10 +
-                    measureCurrencyStringExtraWidth(
-                        Provider.of<AllWallets>(context)),
-              ),
+            extraLinesData: ExtraLinesData(
+              horizontalLines: [
+                HorizontalLine(
+                  y: 0,
+                  color: dynamicPastel(
+                    context,
+                    widget.color,
+                    amount: 0.3,
+                  ).withOpacity(0.4),
+                ),
+                ...(widget.horizontalLineAt == null
+                    ? []
+                    : [
+                        HorizontalLine(
+                          y: widget.horizontalLineAt!,
+                          color: dynamicPastel(
+                            context,
+                            widget.color,
+                            amount: 0.3,
+                          ).withOpacity(0.7),
+                          dashArray: [2, 2],
+                        ),
+                      ]),
+              ],
             ),
-          ),
-          extraLinesData: ExtraLinesData(
-            horizontalLines: [
-              HorizontalLine(
-                y: 0,
-                color: dynamicPastel(context, widget.color, amount: 0.3)
-                    .withOpacity(0.4),
-              ),
-              ...(widget.horizontalLineAt == null
-                  ? []
-                  : [
-                      HorizontalLine(
-                        y: widget.horizontalLineAt!,
-                        color: dynamicPastel(context, widget.color, amount: 0.3)
-                            .withOpacity(0.7),
-                        dashArray: [2, 2],
-                      ),
-                    ])
-            ],
-          ),
-          gridData: FlGridData(
-            show: true,
-            // checkToShowHorizontalLine: (value) {
-            //   if (value == widget.horizontalLineAt) {
-            //     return true;
-            //   } else if (value == 0) {
-            //     return true;
-            //   } else if (value % ((widget.maxY / 3.8).ceil()) == 1) {
-            //     return true;
-            //   }
-            //   return false;
-            // },
-            // getDrawingHorizontalLine: (value) {
-            //   if (value == widget.horizontalLineAt) {
-            //     return FlLine(
-            //       dashArray: [2, 2],
-            //       strokeWidth: 2,
-            //       color: dynamicPastel(context, widget.color, amount: 0.3)
-            //           .withOpacity(0.7),
-            //     );
-            //   } else if (value == 0) {
-            //     return FlLine(
-            //       color: dynamicPastel(context, widget.color, amount: 0.3)
-            //           .withOpacity(0.2),
-            //       strokeWidth: 2,
-            //     );
-            //   } else if (value % ((widget.maxY / 3.8).ceil()) == 1) {
-            //     return FlLine(
-            //       color: dynamicPastel(context, widget.color, amount: 0.3)
-            //           .withOpacity(0.2),
-            //       strokeWidth: 2,
-            //       dashArray: [2, 8],
-            //     );
-            //   }
-            //   return FlLine(color: Colors.transparent, strokeWidth: 0);
-            // },
-            // If the interval is equal to a really small number (almost 0, it freezes the app!)
-            horizontalInterval:
-                double.parse((widget.maxY - widget.minY).toStringAsFixed(5)) ==
-                        0.0
-                    ? 0.001
-                    : ((widget.maxY - widget.minY) /
+            gridData: FlGridData(
+              show: true,
+              // checkToShowHorizontalLine: (value) {
+              //   if (value == widget.horizontalLineAt) {
+              //     return true;
+              //   } else if (value == 0) {
+              //     return true;
+              //   } else if (value % ((widget.maxY / 3.8).ceil()) == 1) {
+              //     return true;
+              //   }
+              //   return false;
+              // },
+              // getDrawingHorizontalLine: (value) {
+              //   if (value == widget.horizontalLineAt) {
+              //     return FlLine(
+              //       dashArray: [2, 2],
+              //       strokeWidth: 2,
+              //       color: dynamicPastel(context, widget.color, amount: 0.3)
+              //           .withOpacity(0.7),
+              //     );
+              //   } else if (value == 0) {
+              //     return FlLine(
+              //       color: dynamicPastel(context, widget.color, amount: 0.3)
+              //           .withOpacity(0.2),
+              //       strokeWidth: 2,
+              //     );
+              //   } else if (value % ((widget.maxY / 3.8).ceil()) == 1) {
+              //     return FlLine(
+              //       color: dynamicPastel(context, widget.color, amount: 0.3)
+              //           .withOpacity(0.2),
+              //       strokeWidth: 2,
+              //       dashArray: [2, 8],
+              //     );
+              //   }
+              //   return FlLine(color: Colors.transparent, strokeWidth: 0);
+              // },
+              // If the interval is equal to a really small number (almost 0, it freezes the app!)
+              horizontalInterval:
+                  double.parse(
+                        (widget.maxY - widget.minY).toStringAsFixed(5),
+                      ) ==
+                      0.0
+                  ? 0.001
+                  : ((widget.maxY - widget.minY) /
                             (getIsFullScreen(context) ? 7 : 4))
                         .abs(),
-            getDrawingHorizontalLine: (value) {
-              return FlLine(
-                color: dynamicPastel(context, widget.color, amount: 0.3)
-                    .withOpacity(0.2),
-                strokeWidth: 2,
-                dashArray: [2, 8],
-              );
-            },
-            getDrawingVerticalLine: (value) {
-              return FlLine(
-                color: dynamicPastel(context, widget.color, amount: 0.3)
-                    .withOpacity(0.2),
-                strokeWidth: 2,
-                dashArray: [2, 8],
-              );
-            },
+              getDrawingHorizontalLine: (value) {
+                return FlLine(
+                  color: dynamicPastel(
+                    context,
+                    widget.color,
+                    amount: 0.3,
+                  ).withOpacity(0.2),
+                  strokeWidth: 2,
+                  dashArray: [2, 8],
+                );
+              },
+              getDrawingVerticalLine: (value) {
+                return FlLine(
+                  color: dynamicPastel(
+                    context,
+                    widget.color,
+                    amount: 0.3,
+                  ).withOpacity(0.2),
+                  strokeWidth: 2,
+                  dashArray: [2, 8],
+                );
+              },
+            ),
+            borderData: FlBorderData(show: false),
           ),
-          borderData: FlBorderData(show: false),
         ),
       ),
     );
