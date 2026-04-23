@@ -267,54 +267,8 @@ class _EditObjectivesPageState extends State<EditObjectivesPage> {
                                   textColor: getColor(context, "black")
                                       .withOpacity(0.65),
                                 ),
-                                WatchTotalAndAmountOfObjective(
+                                ObjectiveRowAmountDisplay(
                                   objective: objective,
-                                  builder: (double objectiveAmount,
-                                      double totalAmount,
-                                      double percentageTowardsGoal) {
-                                    bool showTotalSpent = appStateSettings[
-                                        "showTotalSpentForObjective"];
-                                    String amountSpentLabel =
-                                        getObjectiveAmountSpentLabel(
-                                      objective: objective,
-                                      context: context,
-                                      showTotalSpent: showTotalSpent,
-                                      objectiveAmount: objectiveAmount,
-                                      totalAmount: totalAmount,
-                                    );
-                                    String amountRemainingLabel =
-                                        objectiveRemainingAmountText(
-                                      objectiveAmount: objectiveAmount,
-                                      totalAmount: totalAmount,
-                                      context: context,
-                                    );
-                                    String differenceOnlyLoanLabel =
-                                        getIsDifferenceOnlyLoan(objective)
-                                            ? (percentageTowardsGoal == 1
-                                                ? "all-settled".tr()
-                                                : (getDifferenceOfLoan(
-                                                            objective,
-                                                            totalAmount,
-                                                            objectiveAmount) >
-                                                        0)
-                                                    ? "to-pay".tr()
-                                                    : "to-collect".tr())
-                                            : "";
-                                    return TextFont(
-                                      textAlign: TextAlign.start,
-                                      text: getIsDifferenceOnlyLoan(objective)
-                                          ? (amountSpentLabel +
-                                              " " +
-                                              differenceOnlyLoanLabel
-                                                  .toLowerCase())
-                                          : (amountSpentLabel +
-                                              amountRemainingLabel),
-                                      fontSize: 14,
-                                      textColor: getColor(context, "black")
-                                          .withOpacity(0.65),
-                                      maxLines: 2,
-                                    );
-                                  },
                                 ),
                                 // StreamBuilder<int?>(
                                 //   stream: database
@@ -629,4 +583,96 @@ List<double> getInstallmentPaymentCalculations({
     numberOfInstallmentPaymentsDisplay,
     amountPerInstallmentPaymentDisplay
   ];
+}
+
+
+class ObjectiveRowAmountDisplay extends StatefulWidget {
+  final Objective objective;
+
+  const ObjectiveRowAmountDisplay({
+    required this.objective,
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  State<ObjectiveRowAmountDisplay> createState() => _ObjectiveRowAmountDisplayState();
+}
+
+class _ObjectiveRowAmountDisplayState extends State<ObjectiveRowAmountDisplay> {
+  bool _isRevealed = false;
+  Timer? _revealTimer;
+
+  @override
+  void dispose() {
+    _revealTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return WatchTotalAndAmountOfObjective(
+      objective: widget.objective,
+      builder: (double objectiveAmount, double totalAmount,
+          double percentageTowardsGoal) {
+        bool showTotalSpent = appStateSettings["showTotalSpentForObjective"];
+        String amountSpentLabel = getObjectiveAmountSpentLabel(
+          objective: widget.objective,
+          context: context,
+          showTotalSpent: showTotalSpent,
+          objectiveAmount: objectiveAmount,
+          totalAmount: totalAmount,
+          forceReveal: _isRevealed,
+        );
+        String amountRemainingLabel = objectiveRemainingAmountText(
+          objectiveAmount: objectiveAmount,
+          totalAmount: totalAmount,
+          context: context,
+          forceReveal: _isRevealed,
+        );
+        String differenceOnlyLoanLabel = getIsDifferenceOnlyLoan(widget.objective)
+            ? (percentageTowardsGoal == 1
+                ? "all-settled".tr()
+                : (getDifferenceOfLoan(
+                            widget.objective, totalAmount, objectiveAmount) >
+                        0)
+                    ? "to-pay".tr()
+                    : "to-collect".tr())
+            : "";
+
+        Widget textWidget = TextFont(
+          key: ValueKey(_isRevealed),
+          textAlign: TextAlign.start,
+          text: getIsDifferenceOnlyLoan(widget.objective)
+              ? (amountSpentLabel + " " + differenceOnlyLoanLabel.toLowerCase())
+              : (amountSpentLabel + amountRemainingLabel),
+          fontSize: 14,
+          textColor: getColor(context, "black").withOpacity(0.65),
+          maxLines: 2,
+        );
+
+        return Listener(
+          onPointerDown: (_) {
+            HapticFeedback.selectionClick();
+            setState(() => _isRevealed = true);
+            _revealTimer?.cancel();
+            _revealTimer = Timer(Duration(seconds: 2), () {
+              if (mounted) setState(() => _isRevealed = false);
+            });
+          },
+          onPointerUp: (_) {
+            _revealTimer?.cancel();
+            setState(() => _isRevealed = false);
+          },
+          onPointerCancel: (_) {
+            _revealTimer?.cancel();
+            setState(() => _isRevealed = false);
+          },
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            child: textWidget,
+          ),
+        );
+      },
+    );
+  }
 }
