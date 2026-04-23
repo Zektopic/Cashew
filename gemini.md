@@ -57,3 +57,8 @@
   - **Vulnerability/Gap:** User-generated fields exported to CSV files were unsanitized, posing a risk of CSV Injection (Formula Injection) if a user entered malicious payload formulas into the app.
   - **Learning:** Data that escapes the application's native environment must be sanitized according to the conventions of the destination format.
   - **Prevention:** Prefix any CSV fields that start with dangerous characters (`=`, `+`, `-`, `@`, `\t`, `\r`, `\n`) with a single quote (`'`) to ensure spreadsheet applications interpret them as text instead of executable formulas.
+
+- **2026-04-22 - Missing URL Validation for Google Drive Attachment Fetch:**
+  - **Vulnerability/Gap:** The `getFileIdFromUrl` function did not validate if the provided URL started with a safe Google Drive/Docs prefix, nor did it sanitize the extracted `fileId` for path traversal or malicious characters before passing it to `driveApi.files.get()`. This poses an SSRF/Path Traversal risk where a user could provide a crafted URL that causes the application to request arbitrary or malformed file IDs.
+  - **Learning:** Always strictly validate user-provided URLs and sanitize extracted identifiers before using them to request resources, even when using an SDK like `googleapis`.
+  - **Prevention:** Implement strict prefix checking for expected Google Drive URLs (`https://drive.google.com/file/d/`, etc.) and regex-based sanitization to reject IDs containing dangerous characters (`[/?#@\\]` or `..`).
