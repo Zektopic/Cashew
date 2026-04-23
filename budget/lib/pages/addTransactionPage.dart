@@ -4085,10 +4085,18 @@ class ReorderCategoriesPopup extends StatelessWidget {
 }
 
 String? getFileIdFromUrl(String url) {
+  if (!url.startsWith("https://drive.google.com/") &&
+      !url.startsWith("https://docs.google.com/")) {
+    return null;
+  }
   RegExp regExp = RegExp(r"/d/([a-zA-Z0-9_-]+)");
   Match? match = regExp.firstMatch(url);
   if (match != null && match.groupCount >= 1) {
-    return match.group(1)!;
+    String fileId = match.group(1)!;
+    if (RegExp(r'[/?#@\\]|\.\.').hasMatch(fileId)) {
+      return null;
+    }
+    return fileId;
   } else {
     return null;
   }

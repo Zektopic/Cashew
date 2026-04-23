@@ -463,14 +463,7 @@ class _ObjectiveContainerState extends State<ObjectiveContainer> {
             closedColor: containerColor,
             button: (openContainer()) {
               return Listener(
-                onPointerDown: (_) {
-                  HapticFeedback.selectionClick();
-                  setState(() => _isRevealed = true);
-                  _revealTimer?.cancel();
-                  _revealTimer = Timer(Duration(seconds: 2), () {
-                    if (mounted) setState(() => _isRevealed = false);
-                  });
-                },
+                onPointerDown: (_) => _triggerReveal(),
                 onPointerUp: (_) {
                   _revealTimer?.cancel();
                   setState(() => _isRevealed = false);
@@ -501,216 +494,235 @@ class _ObjectiveContainerState extends State<ObjectiveContainer> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Padding(
-                          padding: containerPadding,
-                          child: Column(children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      TextFont(
-                                        text: widget.objective.name,
-                                        fontSize: 24,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                      Row(
-                                        children: [
-                                          Flexible(
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsetsDirectional
-                                                      .only(end: 3),
+                        Listener(
+                          onPointerDown: (_) => _triggerReveal(),
+                          onPointerUp: (_) {
+                            _revealTimer?.cancel();
+                            setState(() => _isRevealed = false);
+                          },
+                          onPointerCancel: (_) {
+                            _revealTimer?.cancel();
+                            setState(() => _isRevealed = false);
+                          },
+                          child: Padding(
+                            padding: containerPadding,
+                            child: Column(children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        TextFont(
+                                          text: widget.objective.name,
+                                          fontSize: 24,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        Row(
+                                          children: [
+                                            Flexible(
                                               child: Padding(
                                                 padding:
                                                     const EdgeInsetsDirectional
-                                                        .only(bottom: 3),
-                                                child:
-                                                    Builder(builder: (context) {
-                                                  String content =
-                                                      getWordedDateShortMore(
-                                                    widget
-                                                        .objective.dateCreated,
-                                                    includeYear: widget
-                                                            .objective
-                                                            .dateCreated
-                                                            .year !=
-                                                        DateTime.now().year,
-                                                  );
-                                                  if (widget
-                                                          .objective.endDate !=
-                                                      null) {
-                                                    content =
-                                                        getObjectiveStatus(
-                                                      context,
-                                                      widget.objective,
-                                                      totalAmount,
-                                                      percentageTowardsGoal,
-                                                      objectiveAmount,
+                                                        .only(end: 3),
+                                                child: Padding(
+                                                  padding:
+                                                      const EdgeInsetsDirectional
+                                                          .only(bottom: 3),
+                                                  child: Builder(
+                                                      builder: (context) {
+                                                    String content =
+                                                        getWordedDateShortMore(
+                                                      widget.objective
+                                                          .dateCreated,
+                                                      includeYear: widget
+                                                              .objective
+                                                              .dateCreated
+                                                              .year !=
+                                                          DateTime.now().year,
                                                     );
-                                                  }
-                                                  return TextFont(
-                                                    text: content,
-                                                    fontSize: 15,
-                                                    textColor: getColor(
-                                                            context, "black")
-                                                        .withOpacity(0.65),
-                                                    maxLines: 1,
-                                                  );
-                                                }),
+                                                    if (widget.objective
+                                                            .endDate !=
+                                                        null) {
+                                                      content =
+                                                          getObjectiveStatus(
+                                                        context,
+                                                        widget.objective,
+                                                        totalAmount,
+                                                        percentageTowardsGoal,
+                                                        objectiveAmount,
+                                                      );
+                                                    }
+                                                    return TextFont(
+                                                      text: content,
+                                                      fontSize: 15,
+                                                      textColor: getColor(
+                                                              context, "black")
+                                                          .withOpacity(0.65),
+                                                      maxLines: 1,
+                                                    );
+                                                  }),
+                                                ),
                                               ),
                                             ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                SizedBox(width: 5),
-                                CategoryIcon(
-                                  categoryPk: "-1",
-                                  category: TransactionCategory(
-                                    categoryPk: "-1",
-                                    name: "",
-                                    dateCreated: DateTime.now(),
-                                    dateTimeModified: null,
-                                    order: 0,
-                                    income: false,
-                                    iconName: widget.objective.iconName,
-                                    colour: widget.objective.colour,
-                                    emojiIconName:
-                                        widget.objective.emojiIconName,
-                                  ),
-                                  size: 30,
-                                  sizePadding: 20,
-                                  borderRadius: 100,
-                                  canEditByLongPress: false,
-                                  margin: EdgeInsetsDirectional.zero,
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 4),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Flexible(
-                                  child: LayoutBuilder(
-                                    builder: (context, constraints) {
-                                      if (constraints.maxWidth <= 73) {
-                                        return SizedBox.shrink();
-                                      }
-                                      return StreamBuilder<int?>(
-                                        stream: database
-                                            .getTotalCountOfTransactionsInObjective(
-                                                widget.objective.objectivePk)
-                                            .$1,
-                                        builder: (context, snapshot) {
-                                          int numberTransactions =
-                                              widget.forcedNumberTransactions ??
-                                                  snapshot.data ??
-                                                  0;
-                                          return Padding(
-                                            padding: const EdgeInsetsDirectional
-                                                .only(bottom: 2),
-                                            child: TextFont(
-                                              textAlign: TextAlign.start,
-                                              text: (widget.objective.type ==
-                                                      ObjectiveType.loan
-                                                  ? (widget.objective.income
-                                                      ? "lent".tr()
-                                                      : "borrowed".tr())
-                                                  : (numberTransactions
-                                                          .toString() +
-                                                      " " +
-                                                      (numberTransactions == 1
-                                                          ? "transaction"
-                                                              .tr()
-                                                              .toLowerCase()
-                                                          : "transactions"
-                                                              .tr()
-                                                              .toLowerCase()))),
-                                              fontSize: 15,
-                                              textColor:
-                                                  getColor(context, "black")
-                                                      .withOpacity(0.65),
-                                            ),
-                                          );
-                                        },
-                                      );
-                                    },
-                                  ),
-                                ),
-                                Builder(builder: (context) {
-                                  String amountSpentLabel =
-                                      getObjectiveAmountSpentLabel(
-                                    context: context,
-                                    showTotalSpent: appStateSettings[
-                                        "showTotalSpentForObjective"],
-                                    objectiveAmount: objectiveAmount,
-                                    totalAmount: totalAmount,
-                                    objective: widget.objective,
-                                    forceReveal: _isRevealed,
-                                  );
-                                  return Row(
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    children: [
-                                      AnimatedSwitcher(
-                                        duration:
-                                            const Duration(milliseconds: 300),
-                                        child: TextFont(
-                                          key: ValueKey(_isRevealed),
-                                          fontWeight: FontWeight.bold,
-                                          text: amountSpentLabel,
-                                          fontSize: 24,
-                                          textColor: widget.objective.type ==
-                                                  ObjectiveType.loan
-                                              ? totalAmount >= objectiveAmount
-                                                  ? getColor(context, "black")
-                                                  : widget.objective.income
-                                                      ? getColor(context,
-                                                          "unPaidUpcoming")
-                                                      : getColor(context,
-                                                          "unPaidOverdue")
-                                              : totalAmount >= objectiveAmount
-                                                  ? getColor(
-                                                      context, "incomeAmount")
-                                                  : getColor(context, "black"),
+                                          ],
                                         ),
-                                      ),
-                                      Padding(
-                                        padding:
-                                            const EdgeInsetsDirectional.only(
-                                                bottom: 2),
-                                        child: AnimatedSwitcher(
+                                      ],
+                                    ),
+                                  ),
+                                  SizedBox(width: 5),
+                                  CategoryIcon(
+                                    categoryPk: "-1",
+                                    category: TransactionCategory(
+                                      categoryPk: "-1",
+                                      name: "",
+                                      dateCreated: DateTime.now(),
+                                      dateTimeModified: null,
+                                      order: 0,
+                                      income: false,
+                                      iconName: widget.objective.iconName,
+                                      colour: widget.objective.colour,
+                                      emojiIconName:
+                                          widget.objective.emojiIconName,
+                                    ),
+                                    size: 30,
+                                    sizePadding: 20,
+                                    borderRadius: 100,
+                                    canEditByLongPress: false,
+                                    margin: EdgeInsetsDirectional.zero,
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 4),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Flexible(
+                                    child: LayoutBuilder(
+                                      builder: (context, constraints) {
+                                        if (constraints.maxWidth <= 73) {
+                                          return SizedBox.shrink();
+                                        }
+                                        return StreamBuilder<int?>(
+                                          stream: database
+                                              .getTotalCountOfTransactionsInObjective(
+                                                  widget.objective.objectivePk)
+                                              .$1,
+                                          builder: (context, snapshot) {
+                                            int numberTransactions = widget
+                                                    .forcedNumberTransactions ??
+                                                snapshot.data ??
+                                                0;
+                                            return Padding(
+                                              padding:
+                                                  const EdgeInsetsDirectional
+                                                      .only(bottom: 2),
+                                              child: TextFont(
+                                                textAlign: TextAlign.start,
+                                                text: (widget.objective.type ==
+                                                        ObjectiveType.loan
+                                                    ? (widget.objective.income
+                                                        ? "lent".tr()
+                                                        : "borrowed".tr())
+                                                    : (numberTransactions
+                                                            .toString() +
+                                                        " " +
+                                                        (numberTransactions == 1
+                                                            ? "transaction"
+                                                                .tr()
+                                                                .toLowerCase()
+                                                            : "transactions"
+                                                                .tr()
+                                                                .toLowerCase()))),
+                                                fontSize: 15,
+                                                textColor:
+                                                    getColor(context, "black")
+                                                        .withOpacity(0.65),
+                                              ),
+                                            );
+                                          },
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                  Builder(builder: (context) {
+                                    String amountSpentLabel =
+                                        getObjectiveAmountSpentLabel(
+                                      context: context,
+                                      showTotalSpent: appStateSettings[
+                                          "showTotalSpentForObjective"],
+                                      objectiveAmount: objectiveAmount,
+                                      totalAmount: totalAmount,
+                                      objective: widget.objective,
+                                      forceReveal: _isRevealed,
+                                    );
+                                    return Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.end,
+                                      children: [
+                                        AnimatedSwitcher(
                                           duration:
                                               const Duration(milliseconds: 300),
                                           child: TextFont(
                                             key: ValueKey(_isRevealed),
-                                            text: objectiveRemainingAmountText(
-                                              objectiveAmount: objectiveAmount,
-                                              totalAmount: totalAmount,
-                                              context: context,
-                                              forceReveal: _isRevealed,
-                                            ),
-                                            fontSize: 15,
-                                            textColor:
-                                                getColor(context, "black")
-                                                    .withOpacity(0.3),
+                                            fontWeight: FontWeight.bold,
+                                            text: amountSpentLabel,
+                                            fontSize: 24,
+                                            textColor: widget.objective.type ==
+                                                    ObjectiveType.loan
+                                                ? totalAmount >= objectiveAmount
+                                                    ? getColor(context, "black")
+                                                    : widget.objective.income
+                                                        ? getColor(context,
+                                                            "unPaidUpcoming")
+                                                        : getColor(context,
+                                                            "unPaidOverdue")
+                                                : totalAmount >= objectiveAmount
+                                                    ? getColor(
+                                                        context, "incomeAmount")
+                                                    : getColor(
+                                                        context, "black"),
                                           ),
                                         ),
-                                      ),
-                                    ],
-                                  );
-                                }),
-                              ],
-                            ),
-                            SizedBox(height: 8),
-                          ]),
+                                        Padding(
+                                          padding:
+                                              const EdgeInsetsDirectional.only(
+                                                  bottom: 2),
+                                          child: AnimatedSwitcher(
+                                            duration: const Duration(
+                                                milliseconds: 300),
+                                            child: TextFont(
+                                              key: ValueKey(_isRevealed),
+                                              text:
+                                                  objectiveRemainingAmountText(
+                                                objectiveAmount:
+                                                    objectiveAmount,
+                                                totalAmount: totalAmount,
+                                                context: context,
+                                                forceReveal: _isRevealed,
+                                              ),
+                                              fontSize: 15,
+                                              textColor:
+                                                  getColor(context, "black")
+                                                      .withOpacity(0.3),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                                  }),
+                                ],
+                              ),
+                              SizedBox(height: 8),
+                            ]),
+                          ),
                         ),
                         Padding(
                           padding: widget.objective.endDate == null

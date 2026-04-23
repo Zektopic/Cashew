@@ -89,6 +89,7 @@ class NavigationBar extends StatelessWidget {
     this.indicatorShape,
     this.height,
     this.labelBehavior,
+    this.tooltipVerticalOffset,
   })  : assert(destinations.length >= 2),
         assert(0 <= selectedIndex && selectedIndex < destinations.length);
 
@@ -192,6 +193,11 @@ class NavigationBar extends StatelessWidget {
   /// [NavigationDestinationLabelBehavior.alwaysShow].
   final NavigationDestinationLabelBehavior? labelBehavior;
 
+  /// The vertical offset of the tooltip.
+  ///
+  /// If null, defaults to 42.
+  final double? tooltipVerticalOffset;
+
   VoidCallback _handleTap(int index) {
     return onDestinationSelected != null
         ? () => onDestinationSelected!(index)
@@ -243,6 +249,7 @@ class NavigationBar extends StatelessWidget {
                         labelBehavior: effectiveLabelBehavior,
                         indicatorColor: indicatorColor,
                         indicatorShape: indicatorShape,
+                        tooltipVerticalOffset: tooltipVerticalOffset,
                         onTap: _handleTap(i),
                         child: destinations[i],
                       );
@@ -273,6 +280,8 @@ class NavigationDestination extends StatelessWidget {
     this.selectedIcon,
     required this.label,
     this.tooltip,
+    this.indicatorColor,
+    this.tooltipVerticalOffset,
   });
 
   /// The [Widget] (usually an [Icon]) that's displayed for this
@@ -311,6 +320,16 @@ class NavigationDestination extends StatelessWidget {
   /// Defaults to null, in which case the [label] text will be used.
   final String? tooltip;
 
+  /// The color of the indicator when this destination is selected.
+  ///
+  /// If null, [NavigationBar.indicatorColor] is used.
+  final Color? indicatorColor;
+
+  /// The vertical offset of the tooltip.
+  ///
+  /// If null, [NavigationBar.tooltipVerticalOffset] is used.
+  final double? tooltipVerticalOffset;
+
   @override
   Widget build(BuildContext context) {
     final _NavigationDestinationInfo info =
@@ -328,6 +347,7 @@ class NavigationDestination extends StatelessWidget {
     return _NavigationDestinationBuilder(
       label: label,
       tooltip: tooltip,
+      tooltipVerticalOffset: tooltipVerticalOffset ?? info.tooltipVerticalOffset,
       buildIcon: (BuildContext context) {
         final Widget selectedIconWidget = IconTheme.merge(
           data: navigationBarTheme.iconTheme?.resolve(selectedState) ??
@@ -345,7 +365,8 @@ class NavigationDestination extends StatelessWidget {
           children: <Widget>[
             NavigationIndicator(
                 animation: animation,
-                color: info.indicatorColor ??
+                color: indicatorColor ??
+                    info.indicatorColor ??
                     navigationBarTheme.indicatorColor ??
                     defaults.indicatorColor!,
                 shape: info.indicatorShape ??
@@ -411,6 +432,7 @@ class _NavigationDestinationBuilder extends StatefulWidget {
     required this.buildLabel,
     required this.label,
     this.tooltip,
+    this.tooltipVerticalOffset,
   });
 
   /// Builds the icon for a destination in a [NavigationBar].
@@ -449,6 +471,9 @@ class _NavigationDestinationBuilder extends StatefulWidget {
   /// Defaults to null, in which case the [label] text will be used.
   final String? tooltip;
 
+  /// The vertical offset of the tooltip.
+  final double? tooltipVerticalOffset;
+
   @override
   State<_NavigationDestinationBuilder> createState() =>
       _NavigationDestinationBuilderState();
@@ -469,6 +494,7 @@ class _NavigationDestinationBuilderState
     return _NavigationBarDestinationSemantics(
       child: _NavigationBarDestinationTooltip(
         message: widget.tooltip ?? widget.label,
+        verticalOffset: widget.tooltipVerticalOffset,
         child: _IndicatorInkWell(
           iconKey: iconKey,
           labelBehavior: info.labelBehavior,
@@ -534,6 +560,7 @@ class _NavigationDestinationInfo extends InheritedWidget {
     required this.labelBehavior,
     required this.indicatorColor,
     required this.indicatorShape,
+    required this.tooltipVerticalOffset,
     required this.onTap,
     required super.child,
   });
@@ -600,6 +627,9 @@ class _NavigationDestinationInfo extends InheritedWidget {
   /// This is used by destinations to override the indicator shape.
   final ShapeBorder? indicatorShape;
 
+  /// The vertical offset of the tooltip.
+  final double? tooltipVerticalOffset;
+
   /// The callback that should be called when this destination is tapped.
   ///
   /// This is computed by calling [NavigationBar.onDestinationSelected]
@@ -630,6 +660,9 @@ class _NavigationDestinationInfo extends InheritedWidget {
         totalNumberOfDestinations != oldWidget.totalNumberOfDestinations ||
         selectedAnimation != oldWidget.selectedAnimation ||
         labelBehavior != oldWidget.labelBehavior ||
+        indicatorColor != oldWidget.indicatorColor ||
+        indicatorShape != oldWidget.indicatorShape ||
+        tooltipVerticalOffset != oldWidget.tooltipVerticalOffset ||
         onTap != oldWidget.onTap;
   }
 }
@@ -918,6 +951,7 @@ class _NavigationBarDestinationTooltip extends StatelessWidget {
   const _NavigationBarDestinationTooltip({
     required this.message,
     required this.child,
+    this.verticalOffset,
   });
 
   /// The text that is rendered in the tooltip when it appears.
@@ -926,12 +960,14 @@ class _NavigationBarDestinationTooltip extends StatelessWidget {
   /// The widget that, when pressed, will show a tooltip.
   final Widget child;
 
+  /// The vertical offset of the tooltip.
+  final double? verticalOffset;
+
   @override
   Widget build(BuildContext context) {
     return Tooltip(
       message: message,
-      // TODO(johnsonmh): Make this value configurable/themable.
-      verticalOffset: 42,
+      verticalOffset: verticalOffset ?? 42,
       excludeFromSemantics: true,
       preferBelow: false,
       child: child,

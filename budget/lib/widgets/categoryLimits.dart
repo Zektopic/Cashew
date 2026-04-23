@@ -118,71 +118,71 @@ class _CategoryLimitsState extends State<CategoryLimits> {
                       duration: Duration(milliseconds: 700),
                       initialCount: 0,
                       textBuilder: (number) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            AnimatedSwitcher(
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          AnimatedSwitcher(
+                            duration: Duration(milliseconds: 300),
+                            child: TextFont(
+                              key: ValueKey(_isRevealed),
+                              fontSize: 15,
+                              textColor: isOver
+                                  ? getColor(context, "expenseAmount")
+                                  : getColor(context, "black").withOpacity(
+                                      appStateSettings["increaseTextContrast"] ==
+                                              true
+                                          ? 0.7
+                                          : 0.5),
+                              text: widget.isAbsoluteSpendingLimit
+                                  ? (convertToMoney(
+                                          Provider.of<AllWallets>(context),
+                                          number,
+                                          finalNumber: number, forceReveal: _isRevealed) +
+                                      " / " +
+                                      convertToMoney(
+                                          Provider.of<AllWallets>(context),
+                                          widget.budgetLimit, forceReveal: _isRevealed))
+                                  : (convertToPercent(number,
+                                          numberDecimals: 2,
+                                          shouldRemoveTrailingZeroes: true,
+                                          finalNumber: number, forceReveal: _isRevealed) +
+                                      " / " +
+                                      "100%"),
+                            ),
+                          ),
+                          Opacity(
+                            opacity: appStateSettings["increaseTextContrast"] ==
+                                        false &&
+                                    isOver
+                                ? 0.6
+                                : 1,
+                            child: AnimatedSwitcher(
                               duration: Duration(milliseconds: 300),
                               child: TextFont(
                                 key: ValueKey(_isRevealed),
                                 fontSize: 15,
                                 textColor: isOver
                                     ? getColor(context, "expenseAmount")
-                                    : getColor(context, "black").withOpacity(
-                                        appStateSettings["increaseTextContrast"] ==
-                                                true
-                                            ? 0.7
-                                            : 0.5),
-                                text: widget.isAbsoluteSpendingLimit
-                                    ? (convertToMoney(
+                                    : getColor(context, "textLight"),
+                                text: (widget.isAbsoluteSpendingLimit
+                                        ? (convertToMoney(
                                             Provider.of<AllWallets>(context),
-                                            number,
-                                            finalNumber: number, forceReveal: _isRevealed) +
-                                        " / " +
-                                        convertToMoney(
-                                            Provider.of<AllWallets>(context),
-                                            widget.budgetLimit, forceReveal: _isRevealed))
-                                    : (convertToPercent(number,
+                                            (widget.budgetLimit - number).abs(),
+                                            finalNumber:
+                                                (widget.budgetLimit - number)
+                                                    .abs(), forceReveal: _isRevealed))
+                                        : (convertToPercent((100 - number).abs(),
                                             numberDecimals: 2,
                                             shouldRemoveTrailingZeroes: true,
-                                            finalNumber: number, forceReveal: _isRevealed) +
-                                        " / " +
-                                        "100%"),
+                                            finalNumber: (100 - number).abs(), forceReveal: _isRevealed))) +
+                                    " " +
+                                    (isOver
+                                        ? "over".tr().toLowerCase()
+                                        : "remaining".tr().toLowerCase()),
                               ),
                             ),
-                            AnimatedSwitcher(
-                              duration: Duration(milliseconds: 300),
-                              child: Opacity(
-                                key: ValueKey(_isRevealed),
-                                opacity: appStateSettings["increaseTextContrast"] ==
-                                            false &&
-                                        isOver
-                                    ? 0.6
-                                    : 1,
-                                child: TextFont(
-                                  fontSize: 15,
-                                  textColor: isOver
-                                      ? getColor(context, "expenseAmount")
-                                      : getColor(context, "textLight"),
-                                  text: (widget.isAbsoluteSpendingLimit
-                                          ? (convertToMoney(
-                                              Provider.of<AllWallets>(context),
-                                              (widget.budgetLimit - number).abs(),
-                                              finalNumber:
-                                                  (widget.budgetLimit - number)
-                                                      .abs(), forceReveal: _isRevealed))
-                                          : (convertToPercent((100 - number).abs(),
-                                              numberDecimals: 2,
-                                              shouldRemoveTrailingZeroes: true,
-                                              finalNumber: (100 - number).abs(), forceReveal: _isRevealed))) +
-                                      " " +
-                                      (isOver
-                                          ? "over".tr().toLowerCase()
-                                          : "remaining".tr().toLowerCase()),
-                                ),
-                              ),
-                            ),
-                          ],
+                          ),
+                        ],
                         );
                       },
                     );
@@ -214,10 +214,7 @@ class _CategoryLimitsState extends State<CategoryLimits> {
                               );
                             },
                           )
-                        : Container(
-                            key: ValueKey(
-                                category.categoryPk.toString() + "Container"),
-                          ),
+                        : SizedBox.shrink(),
                   widget.showAddCategoryButton == false
                       ? SizedBox.shrink()
                       : Padding(
@@ -428,7 +425,7 @@ class _CategoryLimitEntryState extends State<CategoryLimitEntry> {
                                   .indexedByPk[widget.categoryLimit?.walletFk ??
                                       appStateSettings["selectedWalletPk"]]
                                   ?.currency, forceReveal: _isRevealed)
-                      : convertToPercent(0),
+                      : convertToPercent(0, forceReveal: _isRevealed),
                   onTap: () {
                     enterCategoryLimitPopup(
                       context,
