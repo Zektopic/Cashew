@@ -352,6 +352,7 @@ class _CategoryLimitEntryState extends State<CategoryLimitEntry> {
                                         : categoryLimitAmount / widget.budgetLimit * 100,
                                     numberDecimals: 2,
                                     shouldRemoveTrailingZeroes: true,
+                                    forceReveal: _isRevealed,
                                   ) +
                                   " " +
                                   (widget.isSubCategory == true
@@ -384,6 +385,7 @@ class _CategoryLimitEntryState extends State<CategoryLimitEntry> {
                           widget.categoryLimit?.amount ?? 0,
                           numberDecimals: 2,
                           shouldRemoveTrailingZeroes: true,
+                          forceReveal: _isRevealed,
                         ),
                   placeholder: widget.isAbsoluteSpendingLimit
                       ? convertToMoney(Provider.of<AllWallets>(context), 0,
@@ -392,7 +394,7 @@ class _CategoryLimitEntryState extends State<CategoryLimitEntry> {
                                   .indexedByPk[widget.categoryLimit?.walletFk ??
                                       appStateSettings["selectedWalletPk"]]
                                   ?.currency, forceReveal: _isRevealed)
-                      : convertToPercent(0),
+                      : convertToPercent(0, forceReveal: _isRevealed),
                   showPlaceHolderWhenTextEquals: widget.isAbsoluteSpendingLimit
                       ? convertToMoney(Provider.of<AllWallets>(context), 0,
                           currencyKey:
@@ -400,7 +402,7 @@ class _CategoryLimitEntryState extends State<CategoryLimitEntry> {
                                   .indexedByPk[widget.categoryLimit?.walletFk ??
                                       appStateSettings["selectedWalletPk"]]
                                   ?.currency, forceReveal: _isRevealed)
-                      : convertToPercent(0),
+                      : convertToPercent(0, forceReveal: _isRevealed),
                   onTap: () {
                     enterCategoryLimitPopup(
                       context,
@@ -478,7 +480,7 @@ class _CategoryLimitEntryState extends State<CategoryLimitEntry> {
                                   : (convertToPercent(number,
                                           numberDecimals: 2,
                                           shouldRemoveTrailingZeroes: true,
-                                          finalNumber: snapshot.data ?? 0) +
+                                          finalNumber: snapshot.data ?? 0, forceReveal: _isRevealed) +
                                       " / " +
                                       "100%"),
                             ),
