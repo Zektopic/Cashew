@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'package:budget/database/tables.dart';
@@ -149,34 +150,13 @@ Future<Transaction?> processAddTransactionFromParams(
       allowReorder: false,
       extraWidgetBefore: Padding(
         padding: const EdgeInsetsDirectional.only(bottom: 18),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Expanded(
-              child: TableEntry(
-                padding: const EdgeInsetsDirectional.symmetric(horizontal: 18),
-                firstEntry: [
-                  convertToMoney(
-                      Provider.of<AllWallets>(context, listen: false), amount,
-                      currencyKey:
-                          Provider.of<AllWallets>(context, listen: false)
-                              .indexedByPk[walletPk]
-                              ?.currency),
-                  if (dateCreated != null) getWordedDate(dateCreated),
-                  if (title != "") title,
-                  if (note != "") note,
-                  if (wallet != null) wallet.name,
-                ],
-                headers: [
-                  "amount".tr(),
-                  if (dateCreated != null) "date".tr(),
-                  if (title != "") "title".tr(),
-                  if (note != "") "note".tr(),
-                  if (wallet != null) "account".tr(),
-                ],
-              ),
-            ),
-          ],
+        child: _AppLinkTableEntry(
+          amount: amount,
+          walletPk: walletPk,
+          dateCreated: dateCreated,
+          title: title,
+          note: note,
+          wallet: wallet,
         ),
       ),
     );
@@ -548,4 +528,98 @@ Map<String, String> parseAppLink(Uri uri) {
   });
 
   return params;
+}
+
+
+class _AppLinkTableEntry extends StatefulWidget {
+  final double amount;
+  final String walletPk;
+  final DateTime? dateCreated;
+  final String title;
+  final String note;
+  final TransactionWallet? wallet;
+
+  const _AppLinkTableEntry({
+    required this.amount,
+    required this.walletPk,
+    required this.dateCreated,
+    required this.title,
+    required this.note,
+    required this.wallet,
+  });
+
+  @override
+  State<_AppLinkTableEntry> createState() => _AppLinkTableEntryState();
+}
+
+class _AppLinkTableEntryState extends State<_AppLinkTableEntry> {
+  bool _isRevealed = false;
+  Timer? _hideTimer;
+
+  void _startHideTimer() {
+    _hideTimer?.cancel();
+    _hideTimer = Timer(const Duration(seconds: 2), () {
+      if (mounted) {
+        setState(() {
+          _isRevealed = false;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _hideTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        Expanded(
+          child: Listener(
+            onPointerDown: (event) {
+              HapticFeedback.selectionClick();
+              setState(() {
+                _isRevealed = true;
+              });
+              _hideTimer?.cancel();
+            },
+            onPointerUp: (event) {
+              _startHideTimer();
+            },
+            onPointerCancel: (event) {
+              _startHideTimer();
+            },
+            child: TableEntry(
+              padding: const EdgeInsetsDirectional.symmetric(horizontal: 18),
+              firstEntry: [
+                convertToMoney(
+                  Provider.of<AllWallets>(context, listen: false),
+                  widget.amount,
+                  currencyKey: Provider.of<AllWallets>(context, listen: false)
+                      .indexedByPk[widget.walletPk]
+                      ?.currency,
+                  forceReveal: _isRevealed,
+                ),
+                if (widget.dateCreated != null) getWordedDate(widget.dateCreated!),
+                if (widget.title != "") widget.title,
+                if (widget.note != "") widget.note,
+                if (widget.wallet != null) widget.wallet!.name,
+              ],
+              headers: [
+                "amount".tr(),
+                if (widget.dateCreated != null) "date".tr(),
+                if (widget.title != "") "title".tr(),
+                if (widget.note != "") "note".tr(),
+                if (widget.wallet != null) "account".tr(),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 }
