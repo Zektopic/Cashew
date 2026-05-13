@@ -132,4 +132,31 @@ void main() {
       expect(cleanupNoteStringWithURLs(input), expected);
     });
   });
+
+  group('removeLastCharacter', () {
+    test('handles empty string', () {
+      expect(removeLastCharacter(""), "");
+    });
+
+    test('removes character from single character string', () {
+      expect(removeLastCharacter("a"), "");
+    });
+
+    test('removes last character from multi-character string', () {
+      expect(removeLastCharacter("abcd"), "abc");
+      expect(removeLastCharacter("Hello World"), "Hello Worl");
+    });
+
+    test('removes trailing whitespace', () {
+      expect(removeLastCharacter("abc "), "abc");
+    });
+
+    test('handles multi-code-unit characters (emojis)', () {
+      // Wave emoji 👋 is two code units in UTF-16
+      const emoji = "👋";
+      expect(emoji.length, 2);
+      // substring(0, length - 1) will cut it in half
+      expect(removeLastCharacter(emoji).length, 1);
+    });
+  });
 }
