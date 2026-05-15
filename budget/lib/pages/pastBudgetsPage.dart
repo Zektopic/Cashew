@@ -28,6 +28,7 @@ import 'package:budget/widgets/viewAllTransactionsButton.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:budget/colors.dart';
 import 'package:async/async.dart' show StreamZip;
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
@@ -936,7 +937,7 @@ class _PastBudgetContainerListState extends State<PastBudgetContainerList> {
   }
 }
 
-class PastBudgetContainer extends StatelessWidget {
+class PastBudgetContainer extends StatefulWidget {
   PastBudgetContainer({
     Key? key,
     required this.budget,
@@ -955,7 +956,25 @@ class PastBudgetContainer extends StatelessWidget {
   final int dateForRangeIndex;
 
   @override
+  State<PastBudgetContainer> createState() => _PastBudgetContainerState();
+}
+
+class _PastBudgetContainerState extends State<PastBudgetContainer> {
+  bool _isRevealed = false;
+  Timer? _revealTimer;
+
+  @override
+  void dispose() {
+    _revealTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    Budget budget = this.widget.budget;
+    DateTime? dateForRange = this.widget.dateForRange;
+    Color backgroundColor = this.widget.backgroundColor;
+    int dateForRangeIndex = this.widget.dateForRangeIndex;
     Color progressForegroundColor = dynamicPastel(
         context, Theme.of(context).colorScheme.primary,
         amountLight: 0.4, amountDark: 0.2);
@@ -965,7 +984,7 @@ class PastBudgetContainer extends StatelessWidget {
     double budgetAmount = budgetAmountToPrimaryCurrency(
         Provider.of<AllWallets>(context, listen: true), budget);
     DateTime dateForRangeLocal =
-        dateForRange == null ? DateTime.now() : dateForRange!;
+        dateForRange == null ? DateTime.now() : dateForRange;
     DateTimeRange budgetRange = getBudgetDate(budget, dateForRangeLocal);
     var widget = StreamBuilder<List<CategoryWithTotal>>(
       stream: database.watchTotalSpentInEachCategoryInTimeRangeFromCategories(
@@ -1051,19 +1070,23 @@ class PastBudgetContainer extends StatelessWidget {
                                           duration: Duration(milliseconds: 700),
                                           initialCount: (0),
                                           textBuilder: (number) {
-                                            return TextFont(
-                                              text: convertToMoney(
-                                                  Provider.of<AllWallets>(
-                                                      context),
-                                                  number,
-                                                  finalNumber: appStateSettings[
-                                                          "showTotalSpentForBudget"]
-                                                      ? totalSpent
-                                                      : budgetAmount -
-                                                          totalSpent),
-                                              fontSize: 16,
-                                              textAlign: TextAlign.start,
-                                              fontWeight: FontWeight.bold,
+                                            return AnimatedSwitcher(
+                                              duration: Duration(milliseconds: 300),
+                                              child: TextFont(
+                                                key: ValueKey(_isRevealed),
+                                                text: convertToMoney(
+                                                    Provider.of<AllWallets>(
+                                                        context),
+                                                    number,
+                                                    finalNumber: appStateSettings[
+                                                            "showTotalSpentForBudget"]
+                                                        ? totalSpent
+                                                        : budgetAmount -
+                                                            totalSpent, forceReveal: _isRevealed),
+                                                fontSize: 16,
+                                                textAlign: TextAlign.start,
+                                                fontWeight: FontWeight.bold,
+                                              ),
                                             );
                                           },
                                         ),
@@ -1073,15 +1096,19 @@ class PastBudgetContainer extends StatelessWidget {
                                             const EdgeInsetsDirectional.only(
                                                 bottom: 0.5),
                                         child: Container(
-                                          child: TextFont(
-                                            text: getBudgetSpentText(
-                                                    budget.income) +
-                                                convertToMoney(
-                                                    Provider.of<AllWallets>(
-                                                        context),
-                                                    budgetAmount),
-                                            fontSize: 12,
-                                            textAlign: TextAlign.start,
+                                          child: AnimatedSwitcher(
+                                            duration: Duration(milliseconds: 300),
+                                            child: TextFont(
+                                              key: ValueKey('spent_$_isRevealed'),
+                                              text: getBudgetSpentText(
+                                                      budget.income) +
+                                                  convertToMoney(
+                                                      Provider.of<AllWallets>(
+                                                          context),
+                                                      budgetAmount, forceReveal: _isRevealed),
+                                              fontSize: 12,
+                                              textAlign: TextAlign.start,
+                                            ),
                                           ),
                                         ),
                                       ),
@@ -1101,17 +1128,21 @@ class PastBudgetContainer extends StatelessWidget {
                                       duration: Duration(milliseconds: 700),
                                       initialCount: (0),
                                       textBuilder: (number) {
-                                        return TextFont(
-                                          text: convertToMoney(
-                                              Provider.of<AllWallets>(context),
-                                              number,
-                                              finalNumber: appStateSettings[
-                                                      "showTotalSpentForBudget"]
-                                                  ? totalSpent
-                                                  : totalSpent - budgetAmount),
-                                          fontSize: 16,
-                                          textAlign: TextAlign.start,
-                                          fontWeight: FontWeight.bold,
+                                        return AnimatedSwitcher(
+                                          duration: Duration(milliseconds: 300),
+                                          child: TextFont(
+                                            key: ValueKey(_isRevealed),
+                                            text: convertToMoney(
+                                                Provider.of<AllWallets>(context),
+                                                number,
+                                                finalNumber: appStateSettings[
+                                                        "showTotalSpentForBudget"]
+                                                    ? totalSpent
+                                                    : totalSpent - budgetAmount, forceReveal: _isRevealed),
+                                            fontSize: 16,
+                                            textAlign: TextAlign.start,
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                         );
                                       },
                                     ),
@@ -1120,15 +1151,19 @@ class PastBudgetContainer extends StatelessWidget {
                                     child: Container(
                                       padding: const EdgeInsetsDirectional.only(
                                           bottom: 0),
-                                      child: TextFont(
-                                        text: getBudgetOverSpentText(
-                                                budget.income) +
-                                            convertToMoney(
-                                                Provider.of<AllWallets>(
-                                                    context),
-                                                budgetAmount),
-                                        fontSize: 12,
-                                        textAlign: TextAlign.start,
+                                      child: AnimatedSwitcher(
+                                        duration: Duration(milliseconds: 300),
+                                        child: TextFont(
+                                          key: ValueKey('overspent_$_isRevealed'),
+                                          text: getBudgetOverSpentText(
+                                                  budget.income) +
+                                              convertToMoney(
+                                                  Provider.of<AllWallets>(
+                                                      context),
+                                                  budgetAmount, forceReveal: _isRevealed),
+                                          fontSize: 12,
+                                          textAlign: TextAlign.start,
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -1153,16 +1188,20 @@ class PastBudgetContainer extends StatelessWidget {
                           duration: Duration(milliseconds: 1000),
                           initialCount: (0),
                           textBuilder: (value) {
-                            return TextFont(
-                              autoSizeText: true,
-                              text: convertToPercent(value,
-                                  numberDecimals: 0, useLessThanZero: true),
-                              fontSize: 16,
-                              textAlign: TextAlign.center,
-                              fontWeight: FontWeight.bold,
-                              overflow: TextOverflow.fade,
-                              softWrap: false,
-                              maxLines: 1,
+                            return AnimatedSwitcher(
+                              duration: Duration(milliseconds: 300),
+                              child: TextFont(
+                                key: ValueKey(_isRevealed),
+                                autoSizeText: true,
+                                text: convertToPercent(value,
+                                    numberDecimals: 0, useLessThanZero: true, forceReveal: _isRevealed),
+                                fontSize: 16,
+                                textAlign: TextAlign.center,
+                                fontWeight: FontWeight.bold,
+                                overflow: TextOverflow.fade,
+                                softWrap: false,
+                                maxLines: 1,
+                              ),
                             );
                           },
                         ),
@@ -1172,7 +1211,7 @@ class PastBudgetContainer extends StatelessWidget {
                       height: 60,
                       width: 60,
                       child: AnimatedCircularProgress(
-                        percent: (totalSpent / budgetAmount).abs(),
+                        percent: appStateSettings["obscureAmounts"] == true && !_isRevealed ? 0 : (totalSpent / budgetAmount).abs(),
                         backgroundColor: progressBackgroundColor,
                         foregroundColor: progressForegroundColor,
                         overageColor: progressOverageColor,
@@ -1190,8 +1229,25 @@ class PastBudgetContainer extends StatelessWidget {
       },
     );
     return Container(
-      child: OpenContainerNavigation(
-        borderRadius: getPlatform() == PlatformOS.isIOS ? 0 : 18,
+      child: Listener(
+        onPointerDown: (_) {
+          HapticFeedback.selectionClick();
+          setState(() => _isRevealed = true);
+          _revealTimer?.cancel();
+          _revealTimer = Timer(Duration(seconds: 2), () {
+            if (mounted) setState(() => _isRevealed = false);
+          });
+        },
+        onPointerUp: (_) {
+          _revealTimer?.cancel();
+          setState(() => _isRevealed = false);
+        },
+        onPointerCancel: (_) {
+          _revealTimer?.cancel();
+          setState(() => _isRevealed = false);
+        },
+        child: OpenContainerNavigation(
+          borderRadius: getPlatform() == PlatformOS.isIOS ? 0 : 18,
         closedColor: getPlatform() == PlatformOS.isIOS
             ? backgroundColor
             : appStateSettings["materialYou"]
@@ -1233,6 +1289,7 @@ class PastBudgetContainer extends StatelessWidget {
           dateForRange: dateForRangeLocal,
           dateForRangeIndex: dateForRangeIndex,
           openedFromHistory: true,
+        ),
         ),
       ),
     );
