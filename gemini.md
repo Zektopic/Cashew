@@ -31,7 +31,8 @@
 - 2026-05-02: Iterative Enhancement - Secured the custom `ThinProgress` progress bars and percentage text inside `CategoryEntry`. Extracted this functionality into a new `_CategoryEntryProgressAndPercent` `StatefulWidget` that uses a `Listener` to capture temporary reveal events. Added haptic feedback, a 2-second auto-collapse timer, and tied the local `_isRevealed` state to the `ThinProgress` (forcing progress to 0 when obscured) and `convertToPercent` (using `forceReveal`), bringing full privacy obfuscation support to category list views.
 - 2026-05-13: Iterative Enhancement - Secured standard `ProgressBar` widgets and `ObjectivePage` progress indicators (`AnimatedCircularProgress`). Refactored `ProgressBar` into a `StatefulWidget` and updated `_ObjectivePageContentState` to handle the local `_isRevealed` state via `Listener`. Added haptic feedback and a 2-second auto-collapse timer to both, forcing progress values to 0 and passing `forceReveal` to underlying percentage text formatting, bringing privacy obfuscation to completion across these visualization widgets.
 - 2026-05-14: Iterative Enhancement - Secured remaining `AnimatedCircularProgress` and related percentage text widgets in `PastBudgetsPage`. Refactored `PastBudgetContainer` into a `StatefulWidget`, added a `Listener` for touch events, and managed an `_isRevealed` local state. Configured `AnimatedCircularProgress` to force progress to 0 when obfuscated and passed `forceReveal` to internal percentage formatters, completing the privacy obfuscation feature for these graphical components.
-**Next Planned Step:** Audit any remaining charts or progress components that may have been missed and finalize the temporary obfuscation privacy feature, followed by reviewing `gemini.md` for completeness.
+- 2026-06-01: Iterative Enhancement - Secured IndeterminateProgressBar to support privacy mode by wrapping it in a StatefulWidget, adding touch gesture Listeners for temporary reveals, and forcing the indicator to a value of 0.0 when obfuscated. This completes the implementation across all major and minor progress and charting widgets.
+**Next Planned Step:** The privacy mode iterative enhancement cycle is now fully complete.
 
 ## 🚨 Critical Security Learnings
 *Only add entries here for unique, repo-specific security gaps, unexpected side effects, or reusable patterns.*
@@ -72,3 +73,8 @@
   - **Vulnerability/Gap:** When a user accessed the application via the web platform, the application silently and persistently updated the global `requireAuth` setting to `false` via `updateSettings("requireAuth", false)`. This bypassed the user's intent to require authentication and disabled this protection across all their devices moving forward simply by them logging in on the web.
   - **Learning:** Temporary platform-specific overrides (like skipping biometrics on the web) should never persistently modify the user's core security configuration settings. This creates an unexpected and dangerous state change.
   - **Prevention:** Differentiate between "session state" (e.g., returning `AuthResult.authenticated` for the current web session) and "persistent settings" (modifying the underlying `requireAuth` preference). Never override security preferences persistently based on a platform limitation.
+
+- **2026-06-01 - Unbounded String Rendering DoS:**
+  - **Vulnerability/Gap:** The TableEntry widget rendered unbounded string lengths from imported CSV files within an IntrinsicColumnWidth Table, risking layout exceptions and potential DoS.
+  - **Learning:** UI components displaying externally sourced data must enforce maximum string limits to ensure rendering stability.
+  - **Prevention:** Truncate text content before rendering in widgets that enforce intrinsic dimensions.

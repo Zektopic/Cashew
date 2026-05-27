@@ -15,6 +15,9 @@ class TableEntry extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    String _truncate(String text) =>
+        text.length > 500 ? text.substring(0, 500) + '...' : text;
+
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       padding: padding,
@@ -36,7 +39,7 @@ class TableEntry extends StatelessWidget {
                     padding: const EdgeInsetsDirectional.only(
                         start: 11.0, end: 11, top: 6, bottom: 3),
                     child: Text(
-                      header,
+                      _truncate(header),
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -58,7 +61,7 @@ class TableEntry extends StatelessWidget {
                     padding: const EdgeInsetsDirectional.only(
                         start: 11.0, end: 11, top: 6, bottom: 3),
                     child: Text(
-                      entry,
+                      _truncate(entry),
                       style: TextStyle(
                         fontSize: 15,
                         color:
