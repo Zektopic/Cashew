@@ -100,7 +100,8 @@ void main() {
     });
 
     test('removes multiple URLs', () {
-      final input = "Read this https://example.com/ first, then go to http://test.org/page";
+      final input =
+          "Read this https://example.com/ first, then go to http://test.org/page";
       final expected = "Read this example.com first, then go to test.org";
       expect(cleanupNoteStringWithURLs(input), expected);
     });

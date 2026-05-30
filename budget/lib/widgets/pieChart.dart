@@ -65,7 +65,7 @@ class PieChartWrapper extends StatelessWidget {
   final List<CategoryWithTotal> data;
   final double totalSpent;
   final Function(String categoryPk, TransactionCategory? category)
-  setSelectedCategory;
+      setSelectedCategory;
   final GlobalKey<PieChartDisplayState>? pieChartDisplayStateKey;
   final Color? middleColor;
   final bool disableLarge;
@@ -121,8 +121,7 @@ class PieChartWrapper extends StatelessWidget {
                     ? 105
                     : 130,
                 decoration: BoxDecoration(
-                  color:
-                      middleColor?.withOpacity(0.2) ??
+                  color: middleColor?.withOpacity(0.2) ??
                       getColor(context, "white").withOpacity(0.2),
                   shape: BoxShape.circle,
                 ),
@@ -165,7 +164,7 @@ class PieChartDisplay extends StatefulWidget {
   final List<CategoryWithTotal> data;
   final double totalSpent;
   final Function(String categoryPk, TransactionCategory? category)
-  setSelectedCategory;
+      setSelectedCategory;
   final bool disableLarge;
   @override
   State<StatefulWidget> createState() => PieChartDisplayState();
@@ -263,8 +262,7 @@ class PieChartDisplayState extends State<PieChartDisplay> {
                   if (event.runtimeType == FlTapDownEvent &&
                       touchedIndex !=
                           pieTouchResponse
-                              .touchedSection!
-                              .touchedSectionIndex) {
+                              .touchedSection!.touchedSectionIndex) {
                     touchedIndex =
                         pieTouchResponse.touchedSection!.touchedSectionIndex;
                     // print("TOUCHED");
@@ -306,12 +304,12 @@ class PieChartDisplayState extends State<PieChartDisplay> {
       final bool isTouched = i == touchedIndex;
       final double radius =
           enableDoubleColumn(context) == false || widget.disableLarge
-          ? isTouched
-                ? 106.0
-                : 100.0
-          : isTouched
-          ? 146.0
-          : 136.0;
+              ? isTouched
+                  ? 106.0
+                  : 100.0
+              : isTouched
+                  ? 146.0
+                  : 136.0;
       final double widgetScale = isTouched ? 1.3 : 1.0;
       bool isTouchingSameColorSection = false;
       if (nullIfIndexOutOfRange(widget.data, i - 1)?.category?.colour ==
@@ -326,12 +324,10 @@ class PieChartDisplayState extends State<PieChartDisplay> {
           widget.data[i].category.colour,
           defaultColor: Theme.of(context).colorScheme.primary,
         ),
-        amountLight:
-            0.3 +
+        amountLight: 0.3 +
             (isTouchingSameColorSection && i % 3 == 0 ? 0.2 : 0) +
             (isTouchingSameColorSection && i % 3 == 1 ? 0.35 : 0),
-        amountDark:
-            0.1 +
+        amountDark: 0.1 +
             (isTouchingSameColorSection && i % 3 == 0 ? 0.2 : 0) +
             (isTouchingSameColorSection && i % 3 == 1 ? 0.35 : 0),
       );
@@ -399,9 +395,8 @@ class _Badge extends StatelessWidget {
     bool showIcon = percent.abs() < 5;
     return AnimatedScale(
       curve: showIcon ? Curves.easeInOutCubicEmphasized : ElasticOutCurve(0.6),
-      duration: showIcon
-          ? Duration(milliseconds: 700)
-          : Duration(milliseconds: 1300),
+      duration:
+          showIcon ? Duration(milliseconds: 700) : Duration(milliseconds: 1300),
       scale: showIcon && isTouched == false
           ? 0
           : (showLabels || isTouched ? (showIcon ? 1 : scale) : 0),

@@ -1,6 +1,8 @@
 import 'package:budget/database/tables.dart';
 import 'package:budget/functions.dart';
 import 'package:budget/pages/addBudgetPage.dart';
+import 'dart:async';
+import 'package:flutter/services.dart';
 import 'package:budget/pages/addTransactionPage.dart';
 import 'package:budget/pages/addWalletPage.dart';
 import 'package:budget/pages/creditDebtTransactionsPage.dart';
@@ -2195,6 +2197,38 @@ class _AllSpendingPastSpendingGraphState
   List<DateTimeRange> dateTimeRanges = [];
   int amountLoaded = 8;
   bool amountLoadedPressedOnce = false;
+
+  bool _isRevealed = false;
+  Timer? _revealTimer;
+
+  void _setRevealed(bool reveal) {
+    if (appStateSettings["obscureAmounts"] != true) return;
+
+    setState(() {
+      _isRevealed = reveal;
+    });
+
+    if (reveal) {
+      HapticFeedback.selectionClick();
+      _revealTimer?.cancel();
+    } else {
+      _revealTimer?.cancel();
+      _revealTimer = Timer(const Duration(seconds: 2), () {
+        if (mounted) {
+          setState(() {
+            _isRevealed = false;
+          });
+        }
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _revealTimer?.cancel();
+    super.dispose();
+  }
+
   initState() {
     Future.delayed(Duration.zero, () async {
       loadLines(amountLoaded);
@@ -2271,162 +2305,175 @@ class _AllSpendingPastSpendingGraphState
   }) {
     return FadeIn(
       duration: Duration(milliseconds: 400),
-      child: Container(
-        decoration: BoxDecoration(
-          boxShadow: getPlatform() == PlatformOS.isIOS ||
-                  appStateSettings["materialYou"]
-              ? []
-              : boxShadowCheck(boxShadowGeneral(context)),
-        ),
-        margin: getPlatform() == PlatformOS.isIOS
-            ? EdgeInsetsDirectional.zero
-            : EdgeInsetsDirectional.only(
-                start: getHorizontalPaddingConstrained(
-                      context,
-                      enabled: enableDoubleColumn(context) == false,
-                    ) +
-                    13,
-                end: getHorizontalPaddingConstrained(
-                      context,
-                      enabled: enableDoubleColumn(context) == false,
-                    ) +
-                    13,
-                bottom: 10,
-              ),
-        child: AddTopAndBottomBorderIfIOS(
-          enabled: getPlatform() == PlatformOS.isIOS,
-          child: ClipRRect(
-            borderRadius: BorderRadiusDirectional.circular(
-                getPlatform() == PlatformOS.isIOS ? 0 : 18),
-            child: Stack(
-              children: [
-                Tappable(
-                  color: containerColor,
-                  onTap: () {
-                    widget.onEntryTapped(budgetRange, index);
-                  },
-                  child: Padding(
-                    padding: EdgeInsetsDirectional.symmetric(
-                        horizontal: (getPlatform() == PlatformOS.isIOS
-                                ? getHorizontalPaddingConstrained(
-                                    context,
-                                    enabled:
-                                        enableDoubleColumn(context) == false,
-                                  )
-                                : 0) +
-                            30,
-                        vertical: 15),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            mainAxisSize: MainAxisSize.max,
-                            children: [
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  Flexible(
-                                    child: TextFont(
-                                      text: getPercentBetweenDates(budgetRange,
-                                                  DateTime.now()) <=
-                                              100
-                                          ? "current-period".tr()
-                                          : getWordedDateShortMore(
-                                              budgetRange.start),
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
+      child: Listener(
+        onPointerDown: (_) => _setRevealed(true),
+        onPointerUp: (_) => _setRevealed(false),
+        onPointerCancel: (_) => _setRevealed(false),
+        child: Container(
+          decoration: BoxDecoration(
+            boxShadow: getPlatform() == PlatformOS.isIOS ||
+                    appStateSettings["materialYou"]
+                ? []
+                : boxShadowCheck(boxShadowGeneral(context)),
+          ),
+          margin: getPlatform() == PlatformOS.isIOS
+              ? EdgeInsetsDirectional.zero
+              : EdgeInsetsDirectional.only(
+                  start: getHorizontalPaddingConstrained(
+                        context,
+                        enabled: enableDoubleColumn(context) == false,
+                      ) +
+                      13,
+                  end: getHorizontalPaddingConstrained(
+                        context,
+                        enabled: enableDoubleColumn(context) == false,
+                      ) +
+                      13,
+                  bottom: 10,
+                ),
+          child: AddTopAndBottomBorderIfIOS(
+            enabled: getPlatform() == PlatformOS.isIOS,
+            child: ClipRRect(
+              borderRadius: BorderRadiusDirectional.circular(
+                  getPlatform() == PlatformOS.isIOS ? 0 : 18),
+              child: Stack(
+                children: [
+                  Tappable(
+                    color: containerColor,
+                    onTap: () {
+                      widget.onEntryTapped(budgetRange, index);
+                    },
+                    child: Padding(
+                      padding: EdgeInsetsDirectional.symmetric(
+                          horizontal: (getPlatform() == PlatformOS.isIOS
+                                  ? getHorizontalPaddingConstrained(
+                                      context,
+                                      enabled:
+                                          enableDoubleColumn(context) == false,
+                                    )
+                                  : 0) +
+                              30,
+                          vertical: 15),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.max,
+                              children: [
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Flexible(
+                                      child: TextFont(
+                                        text: getPercentBetweenDates(
+                                                    budgetRange,
+                                                    DateTime.now()) <=
+                                                100
+                                            ? "current-period".tr()
+                                            : getWordedDateShortMore(
+                                                budgetRange.start),
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsetsDirectional.only(
-                                      bottom: 2,
-                                      start: 5,
+                                    Padding(
+                                      padding: const EdgeInsetsDirectional.only(
+                                        bottom: 2,
+                                        start: 5,
+                                      ),
+                                      child: TextFont(
+                                        text: budgetRange.start.year !=
+                                                DateTime.now().year
+                                            ? budgetRange.start.year.toString()
+                                            : "",
+                                        fontSize: 12,
+                                      ),
                                     ),
-                                    child: TextFont(
-                                      text: budgetRange.start.year !=
-                                              DateTime.now().year
-                                          ? budgetRange.start.year.toString()
-                                          : "",
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: 2),
-                              TextFont(
-                                text: convertToMoney(
-                                  Provider.of<AllWallets>(context),
-                                  netSpending,
+                                  ],
                                 ),
+                                SizedBox(height: 2),
+                                AnimatedSwitcher(
+                                  duration: Duration(milliseconds: 300),
+                                  child: TextFont(
+                                    key: ValueKey('netSpending-$_isRevealed'),
+                                    text: convertToMoney(
+                                      Provider.of<AllWallets>(context),
+                                      netSpending,
+                                      forceReveal: _isRevealed,
+                                    ),
+                                    fontSize: 16,
+                                    textAlign: TextAlign.start,
+                                    fontWeight: FontWeight.bold,
+                                    textColor:
+                                        appStateSettings["netTotalsColorful"] ==
+                                                true
+                                            ? (netSpending == 0
+                                                ? getColor(context, "black")
+                                                : netSpending > 0
+                                                    ? getColor(
+                                                        context, "incomeAmount")
+                                                    : getColor(context,
+                                                        "expenseAmount"))
+                                            : getColor(context, "black"),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              AmountWithColorAndArrow(
+                                showIncomeArrow: true,
+                                alwaysShowArrow: true,
+                                totalSpent: expenseSpending.abs(),
+                                isIncome: false,
                                 fontSize: 16,
-                                textAlign: TextAlign.start,
-                                fontWeight: FontWeight.bold,
-                                textColor:
-                                    appStateSettings["netTotalsColorful"] ==
-                                            true
-                                        ? (netSpending == 0
-                                            ? getColor(context, "black")
-                                            : netSpending > 0
-                                                ? getColor(
-                                                    context, "incomeAmount")
-                                                : getColor(
-                                                    context, "expenseAmount"))
-                                        : getColor(context, "black"),
+                                iconSize: 20,
+                                iconWidth: 17,
+                                textColor: getColor(context, "expenseAmount"),
+                                bold: false,
+                                countNumber: false,
+                                forceReveal: _isRevealed,
+                              ),
+                              SizedBox(height: 3),
+                              AmountWithColorAndArrow(
+                                showIncomeArrow: true,
+                                alwaysShowArrow: true,
+                                totalSpent: incomeSpending.abs(),
+                                isIncome: true,
+                                fontSize: 16,
+                                iconSize: 20,
+                                iconWidth: 17,
+                                textColor: getColor(context, "incomeAmount"),
+                                bold: false,
+                                countNumber: false,
+                                forceReveal: _isRevealed,
                               ),
                             ],
                           ),
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            AmountWithColorAndArrow(
-                              showIncomeArrow: true,
-                              alwaysShowArrow: true,
-                              totalSpent: expenseSpending.abs(),
-                              isIncome: false,
-                              fontSize: 16,
-                              iconSize: 20,
-                              iconWidth: 17,
-                              textColor: getColor(context, "expenseAmount"),
-                              bold: false,
-                              countNumber: false,
-                            ),
-                            SizedBox(height: 3),
-                            AmountWithColorAndArrow(
-                              showIncomeArrow: true,
-                              alwaysShowArrow: true,
-                              totalSpent: incomeSpending.abs(),
-                              isIncome: true,
-                              fontSize: 16,
-                              iconSize: 20,
-                              iconWidth: 17,
-                              textColor: getColor(context, "incomeAmount"),
-                              bold: false,
-                              countNumber: false,
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                if (getPlatform() != PlatformOS.isIOS)
-                  PositionedDirectional(
-                    top: 0,
-                    bottom: 0,
-                    child: AnimatedExpanded(
-                      expand: widget.selectedDateTimeRange == budgetRange,
-                      axis: Axis.horizontal,
-                      child: Container(
-                        width: 5,
-                        color: Theme.of(context).colorScheme.primary,
+                        ],
                       ),
                     ),
                   ),
-              ],
+                  if (getPlatform() != PlatformOS.isIOS)
+                    PositionedDirectional(
+                      top: 0,
+                      bottom: 0,
+                      child: AnimatedExpanded(
+                        expand: widget.selectedDateTimeRange == budgetRange,
+                        axis: Axis.horizontal,
+                        child: Container(
+                          width: 5,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
             ),
           ),
         ),

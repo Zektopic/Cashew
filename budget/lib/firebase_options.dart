@@ -49,30 +49,41 @@ class DefaultFirebaseOptions {
   static const FirebaseOptions web = FirebaseOptions(
     apiKey: String.fromEnvironment('FIREBASE_API_KEY_WEB', defaultValue: ''),
     appId: String.fromEnvironment('FIREBASE_APP_ID_WEB', defaultValue: ''),
-    messagingSenderId: String.fromEnvironment('FIREBASE_MESSAGING_SENDER_ID', defaultValue: ''),
+    messagingSenderId: String.fromEnvironment('FIREBASE_MESSAGING_SENDER_ID',
+        defaultValue: ''),
     projectId: String.fromEnvironment('FIREBASE_PROJECT_ID', defaultValue: ''),
-    authDomain: String.fromEnvironment('FIREBASE_AUTH_DOMAIN', defaultValue: ''),
-    storageBucket: String.fromEnvironment('FIREBASE_STORAGE_BUCKET', defaultValue: ''),
-    measurementId: String.fromEnvironment('FIREBASE_MEASUREMENT_ID', defaultValue: ''),
+    authDomain:
+        String.fromEnvironment('FIREBASE_AUTH_DOMAIN', defaultValue: ''),
+    storageBucket:
+        String.fromEnvironment('FIREBASE_STORAGE_BUCKET', defaultValue: ''),
+    measurementId:
+        String.fromEnvironment('FIREBASE_MEASUREMENT_ID', defaultValue: ''),
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: String.fromEnvironment('FIREBASE_API_KEY_ANDROID', defaultValue: ''),
+    apiKey:
+        String.fromEnvironment('FIREBASE_API_KEY_ANDROID', defaultValue: ''),
     appId: String.fromEnvironment('FIREBASE_APP_ID_ANDROID', defaultValue: ''),
-    messagingSenderId: String.fromEnvironment('FIREBASE_MESSAGING_SENDER_ID', defaultValue: ''),
+    messagingSenderId: String.fromEnvironment('FIREBASE_MESSAGING_SENDER_ID',
+        defaultValue: ''),
     projectId: String.fromEnvironment('FIREBASE_PROJECT_ID', defaultValue: ''),
-    storageBucket: String.fromEnvironment('FIREBASE_STORAGE_BUCKET', defaultValue: ''),
+    storageBucket:
+        String.fromEnvironment('FIREBASE_STORAGE_BUCKET', defaultValue: ''),
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: String.fromEnvironment('FIREBASE_API_KEY_IOS', defaultValue: ''),
     appId: String.fromEnvironment('FIREBASE_APP_ID_IOS', defaultValue: ''),
-    messagingSenderId: String.fromEnvironment('FIREBASE_MESSAGING_SENDER_ID', defaultValue: ''),
+    messagingSenderId: String.fromEnvironment('FIREBASE_MESSAGING_SENDER_ID',
+        defaultValue: ''),
     projectId: String.fromEnvironment('FIREBASE_PROJECT_ID', defaultValue: ''),
-    storageBucket: String.fromEnvironment('FIREBASE_STORAGE_BUCKET', defaultValue: ''),
-    androidClientId: String.fromEnvironment('FIREBASE_ANDROID_CLIENT_ID_IOS', defaultValue: ''),
-    iosClientId: String.fromEnvironment('FIREBASE_IOS_CLIENT_ID_IOS', defaultValue: ''),
-    iosBundleId: String.fromEnvironment('FIREBASE_IOS_BUNDLE_ID', defaultValue: ''),
+    storageBucket:
+        String.fromEnvironment('FIREBASE_STORAGE_BUCKET', defaultValue: ''),
+    androidClientId: String.fromEnvironment('FIREBASE_ANDROID_CLIENT_ID_IOS',
+        defaultValue: ''),
+    iosClientId:
+        String.fromEnvironment('FIREBASE_IOS_CLIENT_ID_IOS', defaultValue: ''),
+    iosBundleId:
+        String.fromEnvironment('FIREBASE_IOS_BUNDLE_ID', defaultValue: ''),
   );
-
 }

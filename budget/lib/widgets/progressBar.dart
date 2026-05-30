@@ -40,7 +40,8 @@ class _ProgressBarState extends State<ProgressBar> {
   @override
   Widget build(BuildContext context) {
     bool obscureAmounts = appStateSettings["obscureAmounts"] == true;
-    double effectivePercent = obscureAmounts && !_isRevealed ? 0 : widget.currentPercent;
+    double effectivePercent =
+        obscureAmounts && !_isRevealed ? 0 : widget.currentPercent;
 
     return Listener(
       onPointerDown: (event) {

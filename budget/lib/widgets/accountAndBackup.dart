@@ -196,8 +196,8 @@ Future<bool> signInGoogle(
     await updateSettings("currentUserEmail", "", updateGlobalState: false);
     // DEVELOPER_ERROR (ApiException: 10) means SHA-1 is not registered — it
     // will never succeed until fixed, so disable auto sign-in persistently.
-    final bool isDeveloperError =
-        e is PlatformException && e.message?.contains("ApiException: 10") == true;
+    final bool isDeveloperError = e is PlatformException &&
+        e.message?.contains("ApiException: 10") == true;
     if (runningCloudFunctions && !isDeveloperError) {
       errorSigningInDuringCloud = true;
     } else {

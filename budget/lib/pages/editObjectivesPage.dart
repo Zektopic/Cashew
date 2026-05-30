@@ -585,7 +585,6 @@ List<double> getInstallmentPaymentCalculations({
   ];
 }
 
-
 class ObjectiveRowAmountDisplay extends StatefulWidget {
   final Objective objective;
 
@@ -595,7 +594,8 @@ class ObjectiveRowAmountDisplay extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<ObjectiveRowAmountDisplay> createState() => _ObjectiveRowAmountDisplayState();
+  State<ObjectiveRowAmountDisplay> createState() =>
+      _ObjectiveRowAmountDisplayState();
 }
 
 class _ObjectiveRowAmountDisplayState extends State<ObjectiveRowAmountDisplay> {
@@ -629,15 +629,16 @@ class _ObjectiveRowAmountDisplayState extends State<ObjectiveRowAmountDisplay> {
           context: context,
           forceReveal: _isRevealed,
         );
-        String differenceOnlyLoanLabel = getIsDifferenceOnlyLoan(widget.objective)
-            ? (percentageTowardsGoal == 1
-                ? "all-settled".tr()
-                : (getDifferenceOfLoan(
-                            widget.objective, totalAmount, objectiveAmount) >
-                        0)
-                    ? "to-pay".tr()
-                    : "to-collect".tr())
-            : "";
+        String differenceOnlyLoanLabel =
+            getIsDifferenceOnlyLoan(widget.objective)
+                ? (percentageTowardsGoal == 1
+                    ? "all-settled".tr()
+                    : (getDifferenceOfLoan(widget.objective, totalAmount,
+                                objectiveAmount) >
+                            0)
+                        ? "to-pay".tr()
+                        : "to-collect".tr())
+                : "";
 
         Widget textWidget = TextFont(
           key: ValueKey(_isRevealed),

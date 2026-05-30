@@ -412,9 +412,9 @@ class _AmountAccountState extends State<AmountAccount> {
                     finalNumber: finalTotal,
                     currencyKey: widget.walletWithDetails.wallet.currency,
                     decimals: widget.walletWithDetails.wallet.decimals,
-                    addCurrencyName:
-                        Provider.of<AllWallets>(context).allContainSameCurrency() ==
-                            false,
+                    addCurrencyName: Provider.of<AllWallets>(context)
+                            .allContainSameCurrency() ==
+                        false,
                     forceReveal: _isRevealed,
                   ),
                   textColor: textColor,

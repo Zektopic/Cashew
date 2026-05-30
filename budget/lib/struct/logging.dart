@@ -26,9 +26,8 @@ class LogService {
           !filterKeywords.any((keyword) => message.contains(keyword));
       if (shouldLog) {
         // Prevent log forging/injection by sanitizing newlines
-        String sanitizedMessage = message
-            .replaceAll('\r', '\\r')
-            .replaceAll('\n', '\\n');
+        String sanitizedMessage =
+            message.replaceAll('\r', '\\r').replaceAll('\n', '\\n');
         _logs.insert(0, "[${DateTime.now()}] : $sanitizedMessage");
       }
 

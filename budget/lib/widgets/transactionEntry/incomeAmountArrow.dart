@@ -69,6 +69,7 @@ class AmountWithColorAndArrow extends StatelessWidget {
     this.absoluteValueWhenNoArrow = false,
     this.customTextBuilder,
     this.currencyKey,
+    this.forceReveal = false,
     super.key,
   });
   final bool showIncomeArrow;
@@ -87,6 +88,7 @@ class AmountWithColorAndArrow extends StatelessWidget {
   final bool absoluteValueWhenNoArrow;
   final Widget Function(double amount, Color textColor)? customTextBuilder;
   final String? currencyKey;
+  final bool forceReveal;
 
   @override
   Widget build(BuildContext context) {
@@ -109,16 +111,21 @@ class AmountWithColorAndArrow extends StatelessWidget {
     Widget textBuilder(double number) {
       if (customTextBuilder != null)
         return customTextBuilder!(number, finalColor);
-      return TextFont(
-        text: convertToMoney(
-          Provider.of<AllWallets>(context),
-          number,
-          currencyKey: currencyKey,
-          finalNumber: finalNumber,
+      return AnimatedSwitcher(
+        duration: Duration(milliseconds: 300),
+        child: TextFont(
+          key: ValueKey('AmountWithColorAndArrow-$forceReveal-$number'),
+          text: convertToMoney(
+            Provider.of<AllWallets>(context),
+            number,
+            currencyKey: currencyKey,
+            finalNumber: finalNumber,
+            forceReveal: forceReveal,
+          ),
+          fontSize: fontSize,
+          textColor: finalColor,
+          fontWeight: bold ? FontWeight.bold : FontWeight.normal,
         ),
-        fontSize: fontSize,
-        textColor: finalColor,
-        fontWeight: bold ? FontWeight.bold : FontWeight.normal,
       );
     }
 

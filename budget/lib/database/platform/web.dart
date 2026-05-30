@@ -78,12 +78,11 @@ class InMemoryWebStorage implements DriftWebStorage {
   }
 }
 
-
 // Notes:
 // While looking for a solution to sync the web database without making a copy in local storage
 // https://github.com/simolus3/drift/discussions/1082
 // InMemoryWebStorage is the solution!
-// And 
+// And
 // https://github.com/simolus3/drift/discussions/2120
 // DriftWebStorage storage = await DriftWebStorage.indexedDbIfSupported('db');
 // await storage.open();

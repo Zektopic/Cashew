@@ -168,25 +168,25 @@ class BarGraphState extends State<BarGraph> {
                         child: TextFont(
                           textAlign: TextAlign.center,
                           fontSize: 13,
-                          text:
-                              widget.budget.reoccurrence ==
+                          text: widget.budget.reoccurrence ==
                                   BudgetReoccurence.monthly
                               ? DateFormat(
                                   'MMM',
                                   context.locale.toString(),
                                 ).format(widget.dateRanges[value.toInt()].start)
                               : widget.budget.reoccurrence ==
-                                    BudgetReoccurence.yearly
-                              ? DateFormat(
-                                  'yyyy',
-                                  context.locale.toString(),
-                                ).format(widget.dateRanges[value.toInt()].start)
-                              : DateFormat(
-                                  'MMM\nd',
-                                  context.locale.toString(),
-                                ).format(
-                                  widget.dateRanges[value.toInt()].start,
-                                ),
+                                      BudgetReoccurence.yearly
+                                  ? DateFormat(
+                                      'yyyy',
+                                      context.locale.toString(),
+                                    ).format(
+                                      widget.dateRanges[value.toInt()].start)
+                                  : DateFormat(
+                                      'MMM\nd',
+                                      context.locale.toString(),
+                                    ).format(
+                                      widget.dateRanges[value.toInt()].start,
+                                    ),
                           textColor: dynamicPastel(
                             context,
                             widget.color,
