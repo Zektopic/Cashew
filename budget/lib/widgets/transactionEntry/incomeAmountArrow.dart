@@ -7,6 +7,8 @@ import 'package:budget/widgets/countNumber.dart';
 import 'package:budget/widgets/textWidgets.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'dart:async';
+import 'package:flutter/services.dart';
 
 class IncomeOutcomeArrow extends StatelessWidget {
   const IncomeOutcomeArrow({
@@ -51,7 +53,7 @@ class IncomeOutcomeArrow extends StatelessWidget {
   }
 }
 
-class AmountWithColorAndArrow extends StatelessWidget {
+class AmountWithColorAndArrow extends StatefulWidget {
   const AmountWithColorAndArrow({
     required this.showIncomeArrow,
     required this.totalSpent,
@@ -89,68 +91,108 @@ class AmountWithColorAndArrow extends StatelessWidget {
   final String? currencyKey;
 
   @override
+  State<AmountWithColorAndArrow> createState() => _AmountWithColorAndArrowState();
+}
+
+class _AmountWithColorAndArrowState extends State<AmountWithColorAndArrow> {
+  bool _isRevealed = false;
+  Timer? _revealTimer;
+
+  void _setRevealed(bool reveal) {
+    setState(() {
+      _isRevealed = reveal;
+    });
+
+    if (reveal) {
+      HapticFeedback.selectionClick();
+      _revealTimer?.cancel();
+      _revealTimer = Timer(const Duration(seconds: 2), () {
+        if (mounted) {
+          setState(() {
+            _isRevealed = false;
+          });
+        }
+      });
+    } else {
+      _revealTimer?.cancel();
+    }
+  }
+
+  @override
+  void dispose() {
+    _revealTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    Color finalColor = (getTextColor != null
-            ? (getTextColor!(totalSpent) ?? textColor)
-            : textColor) ??
-        (totalSpent == 0
+    Color finalColor = (widget.getTextColor != null
+            ? (widget.getTextColor!(widget.totalSpent) ?? widget.textColor)
+            : widget.textColor) ??
+        (widget.totalSpent == 0
             ? getColor(context, "black")
-            : totalSpent > 0
+            : widget.totalSpent > 0
                 ? getColor(context, "incomeAmount")
                 : getColor(context, "expenseAmount"));
 
-    bool finalShowIncomeArrow = showIncomeArrow || alwaysShowArrow;
+    bool finalShowIncomeArrow = widget.showIncomeArrow || widget.alwaysShowArrow;
     double finalNumber = finalShowIncomeArrow
-        ? totalSpent.abs()
-        : absoluteValueWhenNoArrow
-            ? totalSpent.abs()
-            : totalSpent;
+        ? widget.totalSpent.abs()
+        : widget.absoluteValueWhenNoArrow
+            ? widget.totalSpent.abs()
+            : widget.totalSpent;
 
     Widget textBuilder(double number) {
-      if (customTextBuilder != null)
-        return customTextBuilder!(number, finalColor);
+      if (widget.customTextBuilder != null)
+        return widget.customTextBuilder!(number, finalColor);
       return TextFont(
         text: convertToMoney(
           Provider.of<AllWallets>(context),
           number,
-          currencyKey: currencyKey,
+          currencyKey: widget.currencyKey,
           finalNumber: finalNumber,
+          forceReveal: _isRevealed,
         ),
-        fontSize: fontSize,
+        fontSize: widget.fontSize,
         textColor: finalColor,
-        fontWeight: bold ? FontWeight.bold : FontWeight.normal,
+        fontWeight: widget.bold ? FontWeight.bold : FontWeight.normal,
       );
     }
 
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: mainAxisAlignment,
-      children: [
-        if (finalShowIncomeArrow)
-          AnimatedSizeSwitcher(
-            child: finalNumber.abs() == 0 && alwaysShowArrow == false
-                ? Container(
-                    key: ValueKey(1),
-                  )
-                : IncomeOutcomeArrow(
-                    key: ValueKey(2),
-                    color: finalColor,
-                    isIncome: isIncome ?? (totalSpent > 0),
-                    iconSize: iconSize,
-                    width: iconWidth,
-                  ),
-          ),
-        countNumber
-            ? CountNumber(
-                count: finalNumber,
-                duration: countNumberDuration,
-                initialCount: (0),
-                textBuilder: (number) {
-                  return textBuilder(number);
-                },
-              )
-            : textBuilder(finalNumber),
-      ],
+    return Listener(
+      onPointerDown: (_) => _setRevealed(true),
+      onPointerUp: (_) => _setRevealed(false),
+      onPointerCancel: (_) => _setRevealed(false),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: widget.mainAxisAlignment,
+        children: [
+          if (finalShowIncomeArrow)
+            AnimatedSizeSwitcher(
+              child: finalNumber.abs() == 0 && widget.alwaysShowArrow == false
+                  ? Container(
+                      key: ValueKey(1),
+                    )
+                  : IncomeOutcomeArrow(
+                      key: ValueKey(2),
+                      color: finalColor,
+                      isIncome: widget.isIncome ?? (widget.totalSpent > 0),
+                      iconSize: widget.iconSize,
+                      width: widget.iconWidth,
+                    ),
+            ),
+          widget.countNumber
+              ? CountNumber(
+                  count: finalNumber,
+                  duration: widget.countNumberDuration,
+                  initialCount: (0),
+                  textBuilder: (number) {
+                    return textBuilder(number);
+                  },
+                )
+              : textBuilder(finalNumber),
+        ],
+      ),
     );
   }
 }
