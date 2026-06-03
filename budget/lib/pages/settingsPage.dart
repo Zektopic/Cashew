@@ -897,8 +897,6 @@ class _BiometricsSettingToggleState extends State<BiometricsSettingToggle> {
                           ? "open-settings".tr()
                           : "ok".tr(),
                       onSubmit: () {
-                        updateSettings("requireAuth", false,
-                            updateGlobalState: false);
                         setState(() {
                           isLocked = false;
                         });

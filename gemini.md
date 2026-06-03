@@ -73,3 +73,8 @@
   - **Vulnerability/Gap:** When a user accessed the application via the web platform, the application silently and persistently updated the global `requireAuth` setting to `false` via `updateSettings("requireAuth", false)`. This bypassed the user's intent to require authentication and disabled this protection across all their devices moving forward simply by them logging in on the web.
   - **Learning:** Temporary platform-specific overrides (like skipping biometrics on the web) should never persistently modify the user's core security configuration settings. This creates an unexpected and dangerous state change.
   - **Prevention:** Differentiate between "session state" (e.g., returning `AuthResult.authenticated` for the current web session) and "persistent settings" (modifying the underlying `requireAuth` preference). Never override security preferences persistently based on a platform limitation.
+
+- **2026-05-28 - Removed Silent Disabling of Global Security Preferences on Web Access:**
+  - **Vulnerability/Gap:** The global `requireAuth` flag was being persistently overwritten to `false` when a biometric error popup occurred (which would happen automatically on web access in some contexts), effectively defeating security preferences across devices.
+  - **Learning:** Global state modification (`updateSettings`) should not be intertwined with error handling mechanisms for local session constraints or dialog cancellations.
+  - **Prevention:** Only update local UI state (`isLocked = false`) when an authentication error occurs, preserving the user's global configuration in the database.
