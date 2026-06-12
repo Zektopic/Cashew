@@ -24,6 +24,7 @@ bool authAvailable = false;
 Future<AuthResult> checkBiometrics({bool checkAlways = false}) async {
   try {
     if (kIsWeb) {
+      authAvailable = false;
       return AuthResult.authenticated;
     }
 

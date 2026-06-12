@@ -52,6 +52,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:budget/main.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:material_symbols_icons/material_symbols_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:budget/functions.dart';
@@ -869,7 +870,7 @@ class _BiometricsSettingToggleState extends State<BiometricsSettingToggle> {
               ? Icons.linear_scale_outlined
               : Icons.linear_scale_rounded,
         ),
-        authAvailable || isLocked
+        !kIsWeb && (authAvailable || isLocked)
             ? SettingsContainerSwitch(
                 title: "biometric-lock".tr(),
                 description: "biometric-lock-description".tr(),
