@@ -347,7 +347,8 @@ class NavigationDestination extends StatelessWidget {
     return _NavigationDestinationBuilder(
       label: label,
       tooltip: tooltip,
-      tooltipVerticalOffset: tooltipVerticalOffset ?? info.tooltipVerticalOffset,
+      tooltipVerticalOffset:
+          tooltipVerticalOffset ?? info.tooltipVerticalOffset,
       buildIcon: (BuildContext context) {
         final Widget selectedIconWidget = IconTheme.merge(
           data: navigationBarTheme.iconTheme?.resolve(selectedState) ??

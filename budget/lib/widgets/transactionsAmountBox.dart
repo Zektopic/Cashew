@@ -71,17 +71,18 @@ class _TransactionsAmountBoxState extends State<TransactionsAmountBox> {
               HapticFeedback.selectionClick();
               setState(() => _isRevealed = true);
               _revealTimer?.cancel();
+            },
+            onPointerUp: (_) {
+              _revealTimer?.cancel();
               _revealTimer = Timer(Duration(seconds: 2), () {
                 if (mounted) setState(() => _isRevealed = false);
               });
             },
-            onPointerUp: (_) {
-              _revealTimer?.cancel();
-              setState(() => _isRevealed = false);
-            },
             onPointerCancel: (_) {
               _revealTimer?.cancel();
-              setState(() => _isRevealed = false);
+              _revealTimer = Timer(Duration(seconds: 2), () {
+                if (mounted) setState(() => _isRevealed = false);
+              });
             },
             child: Tappable(
               color: getColor(context, "lightDarkAccentHeavyLight"),
@@ -117,11 +118,11 @@ class _TransactionsAmountBoxState extends State<TransactionsAmountBox> {
                           int totalCount = snapshot.data?.count ?? 0;
                           double finalAmount =
                               snapshot.hasData == false || snapshot.data == null
-                              ? 0
-                              : widget.absolute == true
-                              ? (totalSpent).abs()
-                              : totalSpent *
-                                    (widget.invertSign == true ? -1 : 1);
+                                  ? 0
+                                  : widget.absolute == true
+                                      ? (totalSpent).abs()
+                                      : totalSpent *
+                                          (widget.invertSign == true ? -1 : 1);
                           return Column(
                             children: [
                               CountNumber(
@@ -159,8 +160,7 @@ class _TransactionsAmountBoxState extends State<TransactionsAmountBox> {
                               SizedBox(height: 6),
                               TextFont(
                                 maxLines: 2,
-                                text:
-                                    totalCount.toString() +
+                                text: totalCount.toString() +
                                     " " +
                                     (totalCount == 1
                                         ? "transaction".tr().toLowerCase()

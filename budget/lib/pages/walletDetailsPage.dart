@@ -1,6 +1,8 @@
 import 'package:budget/database/tables.dart';
 import 'package:budget/functions.dart';
 import 'package:budget/pages/addBudgetPage.dart';
+import 'dart:async';
+import 'package:flutter/services.dart';
 import 'package:budget/pages/addTransactionPage.dart';
 import 'package:budget/pages/addWalletPage.dart';
 import 'package:budget/pages/creditDebtTransactionsPage.dart';
@@ -56,6 +58,8 @@ import 'package:async/async.dart' show StreamZip;
 import 'package:sliver_tools/sliver_tools.dart';
 import 'package:budget/widgets/util/fullPageDoubleColumnLayout.dart';
 import 'package:budget/widgets/util/contextMenu.dart';
+import 'package:flutter/services.dart';
+import 'dart:async';
 
 // Also known as the all spending page
 
@@ -2195,6 +2199,38 @@ class _AllSpendingPastSpendingGraphState
   List<DateTimeRange> dateTimeRanges = [];
   int amountLoaded = 8;
   bool amountLoadedPressedOnce = false;
+
+  bool _isRevealed = false;
+  Timer? _revealTimer;
+
+  void _setRevealed(bool reveal) {
+    if (appStateSettings["obscureAmounts"] != true) return;
+
+    setState(() {
+      _isRevealed = reveal;
+    });
+
+    if (reveal) {
+      HapticFeedback.selectionClick();
+      _revealTimer?.cancel();
+    } else {
+      _revealTimer?.cancel();
+      _revealTimer = Timer(const Duration(seconds: 2), () {
+        if (mounted) {
+          setState(() {
+            _isRevealed = false;
+          });
+        }
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _revealTimer?.cancel();
+    super.dispose();
+  }
+
   initState() {
     Future.delayed(Duration.zero, () async {
       loadLines(amountLoaded);
@@ -2271,162 +2307,175 @@ class _AllSpendingPastSpendingGraphState
   }) {
     return FadeIn(
       duration: Duration(milliseconds: 400),
-      child: Container(
-        decoration: BoxDecoration(
-          boxShadow: getPlatform() == PlatformOS.isIOS ||
-                  appStateSettings["materialYou"]
-              ? []
-              : boxShadowCheck(boxShadowGeneral(context)),
-        ),
-        margin: getPlatform() == PlatformOS.isIOS
-            ? EdgeInsetsDirectional.zero
-            : EdgeInsetsDirectional.only(
-                start: getHorizontalPaddingConstrained(
-                      context,
-                      enabled: enableDoubleColumn(context) == false,
-                    ) +
-                    13,
-                end: getHorizontalPaddingConstrained(
-                      context,
-                      enabled: enableDoubleColumn(context) == false,
-                    ) +
-                    13,
-                bottom: 10,
-              ),
-        child: AddTopAndBottomBorderIfIOS(
-          enabled: getPlatform() == PlatformOS.isIOS,
-          child: ClipRRect(
-            borderRadius: BorderRadiusDirectional.circular(
-                getPlatform() == PlatformOS.isIOS ? 0 : 18),
-            child: Stack(
-              children: [
-                Tappable(
-                  color: containerColor,
-                  onTap: () {
-                    widget.onEntryTapped(budgetRange, index);
-                  },
-                  child: Padding(
-                    padding: EdgeInsetsDirectional.symmetric(
-                        horizontal: (getPlatform() == PlatformOS.isIOS
-                                ? getHorizontalPaddingConstrained(
-                                    context,
-                                    enabled:
-                                        enableDoubleColumn(context) == false,
-                                  )
-                                : 0) +
-                            30,
-                        vertical: 15),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            mainAxisSize: MainAxisSize.max,
-                            children: [
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  Flexible(
-                                    child: TextFont(
-                                      text: getPercentBetweenDates(budgetRange,
-                                                  DateTime.now()) <=
-                                              100
-                                          ? "current-period".tr()
-                                          : getWordedDateShortMore(
-                                              budgetRange.start),
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
+      child: Listener(
+        onPointerDown: (_) => _setRevealed(true),
+        onPointerUp: (_) => _setRevealed(false),
+        onPointerCancel: (_) => _setRevealed(false),
+        child: Container(
+          decoration: BoxDecoration(
+            boxShadow: getPlatform() == PlatformOS.isIOS ||
+                    appStateSettings["materialYou"]
+                ? []
+                : boxShadowCheck(boxShadowGeneral(context)),
+          ),
+          margin: getPlatform() == PlatformOS.isIOS
+              ? EdgeInsetsDirectional.zero
+              : EdgeInsetsDirectional.only(
+                  start: getHorizontalPaddingConstrained(
+                        context,
+                        enabled: enableDoubleColumn(context) == false,
+                      ) +
+                      13,
+                  end: getHorizontalPaddingConstrained(
+                        context,
+                        enabled: enableDoubleColumn(context) == false,
+                      ) +
+                      13,
+                  bottom: 10,
+                ),
+          child: AddTopAndBottomBorderIfIOS(
+            enabled: getPlatform() == PlatformOS.isIOS,
+            child: ClipRRect(
+              borderRadius: BorderRadiusDirectional.circular(
+                  getPlatform() == PlatformOS.isIOS ? 0 : 18),
+              child: Stack(
+                children: [
+                  Tappable(
+                    color: containerColor,
+                    onTap: () {
+                      widget.onEntryTapped(budgetRange, index);
+                    },
+                    child: Padding(
+                      padding: EdgeInsetsDirectional.symmetric(
+                          horizontal: (getPlatform() == PlatformOS.isIOS
+                                  ? getHorizontalPaddingConstrained(
+                                      context,
+                                      enabled:
+                                          enableDoubleColumn(context) == false,
+                                    )
+                                  : 0) +
+                              30,
+                          vertical: 15),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.max,
+                              children: [
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Flexible(
+                                      child: TextFont(
+                                        text: getPercentBetweenDates(
+                                                    budgetRange,
+                                                    DateTime.now()) <=
+                                                100
+                                            ? "current-period".tr()
+                                            : getWordedDateShortMore(
+                                                budgetRange.start),
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsetsDirectional.only(
-                                      bottom: 2,
-                                      start: 5,
+                                    Padding(
+                                      padding: const EdgeInsetsDirectional.only(
+                                        bottom: 2,
+                                        start: 5,
+                                      ),
+                                      child: TextFont(
+                                        text: budgetRange.start.year !=
+                                                DateTime.now().year
+                                            ? budgetRange.start.year.toString()
+                                            : "",
+                                        fontSize: 12,
+                                      ),
                                     ),
-                                    child: TextFont(
-                                      text: budgetRange.start.year !=
-                                              DateTime.now().year
-                                          ? budgetRange.start.year.toString()
-                                          : "",
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: 2),
-                              TextFont(
-                                text: convertToMoney(
-                                  Provider.of<AllWallets>(context),
-                                  netSpending,
+                                  ],
                                 ),
+                                SizedBox(height: 2),
+                                AnimatedSwitcher(
+                                  duration: Duration(milliseconds: 300),
+                                  child: TextFont(
+                                    key: ValueKey('netSpending-$_isRevealed'),
+                                    text: convertToMoney(
+                                      Provider.of<AllWallets>(context),
+                                      netSpending,
+                                      forceReveal: _isRevealed,
+                                    ),
+                                    fontSize: 16,
+                                    textAlign: TextAlign.start,
+                                    fontWeight: FontWeight.bold,
+                                    textColor:
+                                        appStateSettings["netTotalsColorful"] ==
+                                                true
+                                            ? (netSpending == 0
+                                                ? getColor(context, "black")
+                                                : netSpending > 0
+                                                    ? getColor(
+                                                        context, "incomeAmount")
+                                                    : getColor(context,
+                                                        "expenseAmount"))
+                                            : getColor(context, "black"),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              AmountWithColorAndArrow(
+                                showIncomeArrow: true,
+                                alwaysShowArrow: true,
+                                totalSpent: expenseSpending.abs(),
+                                isIncome: false,
                                 fontSize: 16,
-                                textAlign: TextAlign.start,
-                                fontWeight: FontWeight.bold,
-                                textColor:
-                                    appStateSettings["netTotalsColorful"] ==
-                                            true
-                                        ? (netSpending == 0
-                                            ? getColor(context, "black")
-                                            : netSpending > 0
-                                                ? getColor(
-                                                    context, "incomeAmount")
-                                                : getColor(
-                                                    context, "expenseAmount"))
-                                        : getColor(context, "black"),
+                                iconSize: 20,
+                                iconWidth: 17,
+                                textColor: getColor(context, "expenseAmount"),
+                                bold: false,
+                                countNumber: false,
+                                forceReveal: _isRevealed,
+                              ),
+                              SizedBox(height: 3),
+                              AmountWithColorAndArrow(
+                                showIncomeArrow: true,
+                                alwaysShowArrow: true,
+                                totalSpent: incomeSpending.abs(),
+                                isIncome: true,
+                                fontSize: 16,
+                                iconSize: 20,
+                                iconWidth: 17,
+                                textColor: getColor(context, "incomeAmount"),
+                                bold: false,
+                                countNumber: false,
+                                forceReveal: _isRevealed,
                               ),
                             ],
                           ),
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            AmountWithColorAndArrow(
-                              showIncomeArrow: true,
-                              alwaysShowArrow: true,
-                              totalSpent: expenseSpending.abs(),
-                              isIncome: false,
-                              fontSize: 16,
-                              iconSize: 20,
-                              iconWidth: 17,
-                              textColor: getColor(context, "expenseAmount"),
-                              bold: false,
-                              countNumber: false,
-                            ),
-                            SizedBox(height: 3),
-                            AmountWithColorAndArrow(
-                              showIncomeArrow: true,
-                              alwaysShowArrow: true,
-                              totalSpent: incomeSpending.abs(),
-                              isIncome: true,
-                              fontSize: 16,
-                              iconSize: 20,
-                              iconWidth: 17,
-                              textColor: getColor(context, "incomeAmount"),
-                              bold: false,
-                              countNumber: false,
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                if (getPlatform() != PlatformOS.isIOS)
-                  PositionedDirectional(
-                    top: 0,
-                    bottom: 0,
-                    child: AnimatedExpanded(
-                      expand: widget.selectedDateTimeRange == budgetRange,
-                      axis: Axis.horizontal,
-                      child: Container(
-                        width: 5,
-                        color: Theme.of(context).colorScheme.primary,
+                        ],
                       ),
                     ),
                   ),
-              ],
+                  if (getPlatform() != PlatformOS.isIOS)
+                    PositionedDirectional(
+                      top: 0,
+                      bottom: 0,
+                      child: AnimatedExpanded(
+                        expand: widget.selectedDateTimeRange == budgetRange,
+                        axis: Axis.horizontal,
+                        child: Container(
+                          width: 5,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
             ),
           ),
         ),
@@ -2826,7 +2875,7 @@ class SelectedPeriodHeaderLabel extends StatelessWidget {
   }
 }
 
-class AmountSpentEntryRow extends StatelessWidget {
+class AmountSpentEntryRow extends StatefulWidget {
   const AmountSpentEntryRow({
     super.key,
     required this.openPage,
@@ -2852,14 +2901,28 @@ class AmountSpentEntryRow extends StatelessWidget {
   final bool invertSign;
 
   @override
+  State<AmountSpentEntryRow> createState() => _AmountSpentEntryRowState();
+}
+
+class _AmountSpentEntryRowState extends State<AmountSpentEntryRow> {
+  bool _isRevealed = false;
+  Timer? _revealTimer;
+
+  @override
+  void dispose() {
+    _revealTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return DoubleTotalWithCountStreamBuilder(
-      totalWithCountStream: totalWithCountStream,
-      totalWithCountStream2: totalWithCountStream2,
+      totalWithCountStream: widget.totalWithCountStream,
+      totalWithCountStream2: widget.totalWithCountStream2,
       builder: (context, snapshot) {
-        double totalSpent = absolute
+        double totalSpent = widget.absolute
             ? (snapshot.data?.total ?? 0).abs()
-            : (snapshot.data?.total ?? 0) * (invertSign == true ? -1 : 1);
+            : (snapshot.data?.total ?? 0) * (widget.invertSign == true ? -1 : 1);
         int totalCount = snapshot.data?.count ?? 0;
         return CustomContextMenu(
           buttonItems: [
@@ -2867,33 +2930,61 @@ class AmountSpentEntryRow extends StatelessWidget {
               type: ContextMenuButtonType.copy,
               onPressed: () {
                 ContextMenuController.removeAny();
-                copyToClipboard(label +
-                    addAmountToString("", totalCount, extraText: extraText) +
+                copyToClipboard(widget.label +
+                    addAmountToString("", totalCount, extraText: widget.extraText) +
                     " • " +
                     convertToMoney(
                       Provider.of<AllWallets>(context, listen: false),
                       totalSpent,
                       finalNumber: totalSpent.abs(),
+                      forceReveal: _isRevealed,
                     ));
               },
             ),
           ],
           tappableBuilder: (onLongPress) => AnimatedExpanded(
             axis: Axis.vertical,
-            expand: forceShow ||
-                ((totalCount > 0 || totalSpent != 0) && hide == false),
+            expand: widget.forceShow ||
+                ((totalCount > 0 || totalSpent != 0) && widget.hide == false),
             child: OpenContainerNavigation(
               borderRadius: 0,
-              openPage: openPage,
+              openPage: widget.openPage,
               closedColor: getColor(context, "lightDarkAccentHeavyLight"),
               button: (openContainer) {
-                return Tappable(
-                  color: getColor(context, "lightDarkAccentHeavyLight"),
-                  borderRadius: 0,
-                  child: Padding(
-                    padding: const EdgeInsetsDirectional.symmetric(
-                        horizontal: 20, vertical: 6),
-                    child: Container(
+                return Listener(
+                  onPointerDown: (_) {
+                    setState(() => _isRevealed = true);
+                    HapticFeedback.selectionClick();
+                    _revealTimer?.cancel();
+                    _revealTimer = Timer(Duration(seconds: 2), () {
+                      if (mounted) {
+                        setState(() => _isRevealed = false);
+                      }
+                    });
+                  },
+                  onPointerUp: (_) {
+                    _revealTimer?.cancel();
+                    _revealTimer = Timer(Duration(seconds: 2), () {
+                      if (mounted) setState(() => _isRevealed = false);
+                    });
+                  },
+                  onPointerCancel: (_) {
+                    _revealTimer?.cancel();
+                    _revealTimer = Timer(Duration(seconds: 2), () {
+                      if (mounted) setState(() => _isRevealed = false);
+                    });
+                  },
+                  child: Tappable(
+                    color: getColor(context, "lightDarkAccentHeavyLight"),
+                    borderRadius: 0,
+                    onTap: () async {
+                      openContainer();
+                    },
+                    onLongPress: onLongPress,
+                    child: Padding(
+                      padding: const EdgeInsetsDirectional.symmetric(
+                          horizontal: 20, vertical: 6),
+                      child: Container(
                       child: Row(
                         mainAxisSize: MainAxisSize.max,
                         crossAxisAlignment: CrossAxisAlignment.center,
@@ -2924,7 +3015,7 @@ class AmountSpentEntryRow extends StatelessWidget {
                                         textAlign: TextAlign.start,
                                         richTextSpan: [
                                           TextSpan(
-                                            text: label,
+                                            text: widget.label,
                                             style: TextStyle(
                                               fontSize: 18,
                                               color: getColor(context, "black"),
@@ -2937,7 +3028,7 @@ class AmountSpentEntryRow extends StatelessWidget {
                                           TextSpan(
                                             text: addAmountToString(
                                                 " ", totalCount,
-                                                extraText: extraText),
+                                                extraText: widget.extraText),
                                             style: TextStyle(
                                               fontSize: 15,
                                               color: getColor(
@@ -2978,21 +3069,19 @@ class AmountSpentEntryRow extends StatelessWidget {
                                   Provider.of<AllWallets>(context),
                                   number,
                                   finalNumber: totalSpent.abs(),
+                                  forceReveal: _isRevealed,
                                 ),
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
-                                textColor: textColor,
+                                textColor: widget.textColor,
                               );
                             },
                           ),
                         ],
                       ),
                     ),
+                    ),
                   ),
-                  onTap: () async {
-                    openContainer();
-                  },
-                  onLongPress: onLongPress,
                 );
               },
             ),

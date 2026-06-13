@@ -1,8 +1,11 @@
 import 'package:budget/colors.dart';
+import 'dart:async';
+import 'package:budget/struct/settings.dart';
 import 'package:budget/widgets/navigationSidebar.dart';
 import 'package:budget/widgets/openBottomSheet.dart';
 import 'package:budget/widgets/util/debouncer.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class GlobalLoadingProgress extends StatefulWidget {
   const GlobalLoadingProgress({
@@ -135,20 +138,70 @@ class GlobalLoadingIndeterminateState
   }
 }
 
-class IndeterminateProgressBar extends StatelessWidget {
+class IndeterminateProgressBar extends StatefulWidget {
   const IndeterminateProgressBar({super.key});
 
   @override
+  State<IndeterminateProgressBar> createState() =>
+      _IndeterminateProgressBarState();
+}
+
+class _IndeterminateProgressBarState extends State<IndeterminateProgressBar> {
+  bool _isRevealed = false;
+  Timer? _hideTimer;
+
+  void _startHideTimer() {
+    _hideTimer?.cancel();
+    _hideTimer = Timer(const Duration(seconds: 2), () {
+      if (mounted) {
+        setState(() {
+          _isRevealed = false;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _hideTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return LinearProgressIndicator(
-      color: dynamicPastel(context, Theme.of(context).colorScheme.primary,
-          amount: 0.5),
-      backgroundColor: getBottomNavbarBackgroundColor(
-        brightness: Theme.of(context).brightness,
-        colorScheme: Theme.of(context).colorScheme,
-        lightDarkAccent: getColor(context, "lightDarkAccent"),
+    return Listener(
+      onPointerDown: (event) {
+        if (appStateSettings["obscureAmounts"] == true) {
+          HapticFeedback.selectionClick();
+          setState(() {
+            _isRevealed = true;
+          });
+          _hideTimer?.cancel();
+        }
+      },
+      onPointerUp: (event) {
+        if (appStateSettings["obscureAmounts"] == true) {
+          _startHideTimer();
+        }
+      },
+      onPointerCancel: (event) {
+        if (appStateSettings["obscureAmounts"] == true) {
+          _startHideTimer();
+        }
+      },
+      child: LinearProgressIndicator(
+        value: (!_isRevealed && appStateSettings["obscureAmounts"] == true)
+            ? 0.0
+            : null,
+        color: dynamicPastel(context, Theme.of(context).colorScheme.primary,
+            amount: 0.5),
+        backgroundColor: getBottomNavbarBackgroundColor(
+          brightness: Theme.of(context).brightness,
+          colorScheme: Theme.of(context).colorScheme,
+          lightDarkAccent: getColor(context, "lightDarkAccent"),
+        ),
+        minHeight: 3,
       ),
-      minHeight: 3,
     );
   }
 }

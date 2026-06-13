@@ -596,6 +596,7 @@ class ThinProgress extends StatelessWidget {
     );
   }
 }
+
 class _CategoryEntryProgressAndPercent extends StatefulWidget {
   final CategoryBudgetLimit? categoryBudgetLimit;
   final bool selected;
@@ -705,8 +706,8 @@ class _CategoryEntryProgressAndPercentState
                         ? "of-category".tr().toLowerCase()
                         : widget.getPercentageAfterText == null
                             ? ""
-                            : widget.getPercentageAfterText!(
-                                widget.categorySpent));
+                            : widget
+                                .getPercentageAfterText!(widget.categorySpent));
 
                 return AnimatedSwitcher(
                   duration: Duration(milliseconds: 300),

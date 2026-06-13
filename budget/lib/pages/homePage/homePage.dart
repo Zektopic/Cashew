@@ -138,9 +138,9 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
       child: SlidingSelectorIncomeExpense(
         options:
             appStateSettings["homePageTransactionsListIncomeAndExpenseOnly"] ==
-                true
-            ? null
-            : ["all", "outgoing", "incoming"],
+                    true
+                ? null
+                : ["all", "outgoing", "incoming"],
         useHorizontalPaddingConstrained: false,
         onSelected: (index) {
           setState(() {
@@ -151,22 +151,22 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
     Widget? homePageTransactionsList =
         isHomeScreenSectionEnabled(context, "showTransactionsList") == true
-        ? Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              slidingSelector,
-              SizedBox(height: 8),
-              HomeTransactions(
-                selectedSlidingSelector: selectedSlidingSelector,
-              ),
-              SizedBox(height: 7),
-              Center(child: ViewAllTransactionsButton()),
-              if (enableDoubleColumn(context)) SizedBox(height: 35),
-            ],
-          )
-        : null;
+            ? Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  slidingSelector,
+                  SizedBox(height: 8),
+                  HomeTransactions(
+                    selectedSlidingSelector: selectedSlidingSelector,
+                  ),
+                  SizedBox(height: 7),
+                  Center(child: ViewAllTransactionsButton()),
+                  if (enableDoubleColumn(context)) SizedBox(height: 35),
+                ],
+              )
+            : null;
     if (homePageTransactionsList != null)
       homePageTransactionsList = enableDoubleColumn(context)
           ? KeepAliveClientMixin(child: homePageTransactionsList)
@@ -189,12 +189,12 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
           : null,
       "overdueUpcoming":
           isHomeScreenSectionEnabled(context, "showOverdueUpcoming")
-          ? HomePageUpcomingTransactions()
-          : null,
+              ? HomePageUpcomingTransactions()
+              : null,
       "allSpendingSummary":
           isHomeScreenSectionEnabled(context, "showAllSpendingSummary")
-          ? HomePageAllSpendingSummary()
-          : null,
+              ? HomePageAllSpendingSummary()
+              : null,
       "netWorth": isHomeScreenSectionEnabled(context, "showNetWorth")
           ? HomePageNetWorth()
           : null,
@@ -206,8 +206,8 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
           : null,
       "objectiveLoans":
           isHomeScreenSectionEnabled(context, "showObjectiveLoans")
-          ? HomePageObjectives(objectiveType: ObjectiveType.loan)
-          : null,
+              ? HomePageObjectives(objectiveType: ObjectiveType.loan)
+              : null,
       "spendingGraph": isHomeScreenSectionEnabled(context, "showSpendingGraph")
           ? HomePageLineGraph(selectedSlidingSelector: selectedSlidingSelector)
           : null,
@@ -303,8 +303,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                             children: [
                               ConstrainedBox(
                                 constraints: BoxConstraints(
-                                  minHeight:
-                                      getExpandedHeaderHeight(
+                                  minHeight: getExpandedHeaderHeight(
                                         context,
                                         null,
                                         isHomePageSpace: true,
@@ -316,7 +315,8 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                   alignment: AlignmentDirectional.bottomStart,
                                   padding: EdgeInsetsDirectional.only(
                                     start: 9,
-                                    bottom: enableDoubleColumn(context) ? 10 : 17,
+                                    bottom:
+                                        enableDoubleColumn(context) ? 10 : 17,
                                     end: 9,
                                   ),
                                   child: Row(
@@ -331,7 +331,8 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                             _animationControllerHeader2,
                                         showUsername: showUsername,
                                         showGreeting: showGreeting,
-                                        enterNameBottomSheet: enterNameBottomSheet,
+                                        enterNameBottomSheet:
+                                            enterNameBottomSheet,
                                         username:
                                             appStateSettings["username"] ?? "",
                                       ),
@@ -339,16 +340,16 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                         animation: _animationControllerHeader,
                                         builder: (_, child) {
                                           return Transform.scale(
-                                            alignment:
-                                                AlignmentDirectional.bottomStart,
-                                            scale:
-                                                _animationControllerHeader.value <
+                                            alignment: AlignmentDirectional
+                                                .bottomStart,
+                                            scale: _animationControllerHeader
+                                                        .value <
                                                     0.5
                                                 ? 0.5 * 0.4 + 0.6
                                                 : (_animationControllerHeader
-                                                              .value) *
-                                                          0.4 +
-                                                      0.6,
+                                                            .value) *
+                                                        0.4 +
+                                                    0.6,
                                             child: child ?? SizedBox.shrink(),
                                           );
                                         },
@@ -358,30 +359,38 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                           onPressed: () async {
                                             await updateSettings(
                                               "obscureAmounts",
-                                              !(appStateSettings["obscureAmounts"] ??
+                                              !(appStateSettings[
+                                                      "obscureAmounts"] ??
                                                   false),
                                               pagesNeedingRefresh: [0, 1, 2],
                                               updateGlobalState: true,
                                             );
                                             openSnackbar(SnackbarMessage(
-                                                title: (appStateSettings["obscureAmounts"] ?? false)
+                                                title: (appStateSettings[
+                                                            "obscureAmounts"] ??
+                                                        false)
                                                     ? "Amounts hidden"
                                                     : "Amounts shown",
-                                                icon: (appStateSettings["obscureAmounts"] ?? false)
+                                                icon: (appStateSettings[
+                                                            "obscureAmounts"] ??
+                                                        false)
                                                     ? Icons.visibility_off
                                                     : Icons.visibility));
                                           },
                                           icon: Icon(
-                                            appStateSettings["obscureAmounts"] ==
+                                            appStateSettings[
+                                                        "obscureAmounts"] ==
                                                     true
-                                                ? (appStateSettings["outlinedIcons"]
-                                                      ? Icons
-                                                            .visibility_off_outlined
-                                                      : Icons
-                                                            .visibility_off_rounded)
-                                                : (appStateSettings["outlinedIcons"]
-                                                      ? Icons.visibility_outlined
-                                                      : Icons.visibility_rounded),
+                                                ? (appStateSettings[
+                                                        "outlinedIcons"]
+                                                    ? Icons
+                                                        .visibility_off_outlined
+                                                    : Icons
+                                                        .visibility_off_rounded)
+                                                : (appStateSettings[
+                                                        "outlinedIcons"]
+                                                    ? Icons.visibility_outlined
+                                                    : Icons.visibility_rounded),
                                             size: 28,
                                             color: Theme.of(
                                               context,
@@ -440,8 +449,8 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                               Flexible(
                                 child: Column(
                                   children: [
-                                    for (String sectionKey
-                                        in appStateSettings["homePageOrderFullScreen"])
+                                    for (String sectionKey in appStateSettings[
+                                        "homePageOrderFullScreen"])
                                       if (homePageSectionsFullScreenLeft
                                           .contains(sectionKey))
                                         LinearGradientFadedEdges(
@@ -452,7 +461,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                             clipper: RightSideClipper(),
                                             child:
                                                 homePageSections[sectionKey] ??
-                                                SizedBox.shrink(),
+                                                    SizedBox.shrink(),
                                           ),
                                         ),
                                   ],
@@ -461,8 +470,8 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                               Flexible(
                                 child: Column(
                                   children: [
-                                    for (String sectionKey
-                                        in appStateSettings["homePageOrderFullScreen"])
+                                    for (String sectionKey in appStateSettings[
+                                        "homePageOrderFullScreen"])
                                       if (homePageSectionsFullScreenRight
                                           .contains(sectionKey))
                                         LinearGradientFadedEdges(
@@ -473,7 +482,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                             clipper: RightSideClipper(),
                                             child:
                                                 homePageSections[sectionKey] ??
-                                                SizedBox.shrink(),
+                                                    SizedBox.shrink(),
                                           ),
                                         ),
                                   ],
@@ -489,8 +498,8 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                           : areAllDisabledAfterTransactionsList(
                               homePageSections,
                             )
-                          ? 25
-                          : 73,
+                              ? 25
+                              : 73,
                     ),
                     // Wipe all remaining pixels off - sometimes graphics artifacts are left behind
                     Container(

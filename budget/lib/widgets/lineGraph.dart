@@ -115,241 +115,241 @@ class _LineChartState extends State<_LineChart> with WidgetsBindingObserver {
   }
 
   LineChartData get data => LineChartData(
-    lineTouchData: lineTouchData,
-    gridData: gridData,
-    borderData: borderData,
-    lineBarsData: lineBarsData,
-    minX: 0,
-    maxX: loaded ? widget.maxPair.x : widget.maxPair.x - widget.maxPair.x * 0.7,
-    minY: loaded
-        ?
-          // (widget.maxPair.y > 0 && widget.minPair.y > 0) ||
-          //         (widget.maxPair.y < 0 && widget.minPair.y < 0)
-          //     ? 0
-          //     : widget.minPair.y
-          widget.minPair.y == 0
-              ? -0.000001
-              : widget.minPair.y
-        : widget.minPair.y - (widget.minPair.y - widget.amountBefore) * 0.7,
-    maxY: loaded
-        ? widget.maxPair.y == 0
-              ? 0.000001
-              : widget.maxPair.y
-        : widget.maxPair.y + (widget.maxPair.y - widget.amountBefore) * 0.7,
-    // axisTitleData: axisTitleData,
-    titlesData: titlesData,
-    extraLinesData: extraLinesData,
-    // clipData: FlClipData.all(),
-  );
+        lineTouchData: lineTouchData,
+        gridData: gridData,
+        borderData: borderData,
+        lineBarsData: lineBarsData,
+        minX: 0,
+        maxX: loaded
+            ? widget.maxPair.x
+            : widget.maxPair.x - widget.maxPair.x * 0.7,
+        minY: loaded
+            ?
+            // (widget.maxPair.y > 0 && widget.minPair.y > 0) ||
+            //         (widget.maxPair.y < 0 && widget.minPair.y < 0)
+            //     ? 0
+            //     : widget.minPair.y
+            widget.minPair.y == 0
+                ? -0.000001
+                : widget.minPair.y
+            : widget.minPair.y - (widget.minPair.y - widget.amountBefore) * 0.7,
+        maxY: loaded
+            ? widget.maxPair.y == 0
+                ? 0.000001
+                : widget.maxPair.y
+            : widget.maxPair.y + (widget.maxPair.y - widget.amountBefore) * 0.7,
+        // axisTitleData: axisTitleData,
+        titlesData: titlesData,
+        extraLinesData: extraLinesData,
+        // clipData: FlClipData.all(),
+      );
 
   ExtraLinesData get extraLinesData => ExtraLinesData(
-    horizontalLines: [
-      ...(((widget.minPair.y > 0 && widget.maxPair.y > 0) ||
-              (widget.minPair.y < 0 && widget.maxPair.y < 0))
-          ? []
-          : [
-              HorizontalLine(
-                strokeWidth: 2,
-                y: 0,
-                color: dynamicPastel(
-                  context,
-                  widget.color,
-                  amount: 0.3,
-                ).withOpacity(0.4),
-              ),
-            ]),
-      HorizontalLine(
-        y: 0,
-        color: dynamicPastel(
-          context,
-          widget.color,
-          amount: 0.3,
-        ).withOpacity(0.4),
-      ),
-      ...(widget.horizontalLineAt == null
-          ? []
-          : [
-              HorizontalLine(
-                y: widget.horizontalLineAt!,
-                color: dynamicPastel(
-                  context,
-                  widget.color,
-                  amount: 0.3,
-                ).withOpacity(0.7),
-                dashArray: [2, 2],
-              ),
-            ]),
-    ],
-    verticalLines: [
-      VerticalLine(
-        x: 0.0001,
-        dashArray: [2, 5],
-        strokeWidth: 2,
-        color: dynamicPastel(
-          context,
-          widget.color,
-          amount: 0.3,
-        ).withOpacity(0.2),
-      ),
-      ...(widget.verticalLineAt != null
-          ? [
-              VerticalLine(
-                x: widget.maxPair.x - widget.verticalLineAt!,
-                dashArray: [2, 2],
-                strokeWidth: 2,
-                color: dynamicPastel(
-                  context,
-                  widget.color,
-                  amount: 0.3,
-                ).withOpacity(0.7),
-              ),
-            ]
-          : []),
-    ],
-  );
+        horizontalLines: [
+          ...(((widget.minPair.y > 0 && widget.maxPair.y > 0) ||
+                  (widget.minPair.y < 0 && widget.maxPair.y < 0))
+              ? []
+              : [
+                  HorizontalLine(
+                    strokeWidth: 2,
+                    y: 0,
+                    color: dynamicPastel(
+                      context,
+                      widget.color,
+                      amount: 0.3,
+                    ).withOpacity(0.4),
+                  ),
+                ]),
+          HorizontalLine(
+            y: 0,
+            color: dynamicPastel(
+              context,
+              widget.color,
+              amount: 0.3,
+            ).withOpacity(0.4),
+          ),
+          ...(widget.horizontalLineAt == null
+              ? []
+              : [
+                  HorizontalLine(
+                    y: widget.horizontalLineAt!,
+                    color: dynamicPastel(
+                      context,
+                      widget.color,
+                      amount: 0.3,
+                    ).withOpacity(0.7),
+                    dashArray: [2, 2],
+                  ),
+                ]),
+        ],
+        verticalLines: [
+          VerticalLine(
+            x: 0.0001,
+            dashArray: [2, 5],
+            strokeWidth: 2,
+            color: dynamicPastel(
+              context,
+              widget.color,
+              amount: 0.3,
+            ).withOpacity(0.2),
+          ),
+          ...(widget.verticalLineAt != null
+              ? [
+                  VerticalLine(
+                    x: widget.maxPair.x - widget.verticalLineAt!,
+                    dashArray: [2, 2],
+                    strokeWidth: 2,
+                    color: dynamicPastel(
+                      context,
+                      widget.color,
+                      amount: 0.3,
+                    ).withOpacity(0.7),
+                  ),
+                ]
+              : []),
+        ],
+      );
 
   FlTitlesData get titlesData => FlTitlesData(
-    show: true,
-    bottomTitles: AxisTitles(
-      axisNameSize: 25,
-      sideTitles: SideTitles(
-        showTitles: true,
-        getTitlesWidget: (value, titleMeta) {
-          if (value == widget.maxPair.x + 1) {
-            return SizedBox.shrink();
-          }
-          DateTime currentDate = widget.endDate == null
-              ? DateTime.now()
-              : widget.endDate!;
-          // double valueBefore = value - titleMeta.appliedInterval;
-          // print(valueBefore);
-          // print(value);
-          // print(titleMeta.max);
+        show: true,
+        bottomTitles: AxisTitles(
+          axisNameSize: 25,
+          sideTitles: SideTitles(
+            showTitles: true,
+            getTitlesWidget: (value, titleMeta) {
+              if (value == widget.maxPair.x + 1) {
+                return SizedBox.shrink();
+              }
+              DateTime currentDate =
+                  widget.endDate == null ? DateTime.now() : widget.endDate!;
+              // double valueBefore = value - titleMeta.appliedInterval;
+              // print(valueBefore);
+              // print(value);
+              // print(titleMeta.max);
 
-          String text = getWordedDateShort(
-            currentDate.justDay(
-              dayOffset: -widget.maxPair.x.toInt() + value.round(),
-            ),
-            showTodayTomorrow: false,
-          );
-
-          // String textBefore = getWordedDateShort(
-          //   currentDate.justDay(
-          //       dayOffset: -widget.maxPair.x.toInt() + valueBefore.round()),
-          //   showTodayTomorrow: false,
-          // );
-
-          return MediaQuery(
-            data: MediaQuery.of(
-              context,
-            ).copyWith(textScaler: TextScaler.linear(1.0)),
-            child: Padding(
-              padding: const EdgeInsets.only(top: 8.0),
-              child: TextFont(
-                maxLines: 1,
-                textAlign: TextAlign.center,
-                fontSize: 13,
-                text: text,
-                textColor: dynamicPastel(
-                  context,
-                  widget.color,
-                  amount: 0.8,
-                  inverse: true,
-                ).withOpacity(0.5),
-              ),
-            ),
-          );
-        },
-        reservedSize: 28,
-        interval: widget.maxPair.x / (getIsFullScreen(context) ? 6 : 4) == 0
-            ? 5
-            : widget.maxPair.x / (getIsFullScreen(context) ? 6 : 4),
-      ),
-    ),
-    leftTitles: AxisTitles(
-      sideTitles: SideTitles(
-        showTitles: true,
-        getTitlesWidget: (value, titleMeta) {
-          bool show = false;
-          if (value == titleMeta.max || value == titleMeta.min) {
-            return SizedBox.shrink();
-          } else if (value == 0) {
-            show = true;
-          } else if (value < widget.maxPair.y &&
-              value > 1 &&
-              value < titleMeta.max) {
-            show = true;
-          } else if (value > widget.minPair.y &&
-              value < 1 &&
-              value > titleMeta.min) {
-            show = true;
-          } else {
-            return SizedBox.shrink();
-          }
-
-          return Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: MediaQuery(
-              data: MediaQuery.of(
-                context,
-              ).copyWith(textScaler: TextScaler.linear(1.0)),
-              child: TextFont(
-                overflow: TextOverflow.fade,
-                maxLines: 1,
-                softWrap: false,
-                textAlign: TextAlign.end,
-                text: getWordedNumber(
-                  context,
-                  Provider.of<AllWallets>(context, listen: false),
-                  value,
-                  forceReveal: _isRevealed,
+              String text = getWordedDateShort(
+                currentDate.justDay(
+                  dayOffset: -widget.maxPair.x.toInt() + value.round(),
                 ),
-                textColor: dynamicPastel(
+                showTodayTomorrow: false,
+              );
+
+              // String textBefore = getWordedDateShort(
+              //   currentDate.justDay(
+              //       dayOffset: -widget.maxPair.x.toInt() + valueBefore.round()),
+              //   showTodayTomorrow: false,
+              // );
+
+              return MediaQuery(
+                data: MediaQuery.of(
                   context,
-                  widget.color,
-                  amount: 0.5,
-                  inverse: true,
-                ).withOpacity(0.3),
-                fontSize: 13,
-              ),
-            ),
-          );
-        },
-        // If the interval is equal to a really small number (almost 0, it freezes the app!)
-        interval:
-            double.parse(
-                  (widget.maxPair.y - widget.minPair.y).toStringAsFixed(5),
-                ) ==
-                0.0
-            ? 0.001
-            : ((widget.maxPair.y - widget.minPair.y) /
-                      (getIsFullScreen(context) ? 7 : 4))
-                  .abs(),
-        reservedSize:
-            7 +
-            (widget.minPair.y <= -10000
-                ? 55
-                : widget.minPair.y <= -1000
-                ? 45
-                : widget.minPair.y <= -100
-                ? 40 + widget.extraLeftPaddingIfSmall / 2
-                : (widget.maxPair.y >= 100
-                          ? (widget.maxPair.y >= 1000 ? 37 : 33)
-                          : 25 + widget.extraLeftPaddingIfSmall) +
-                      extraHorizontalPadding) +
-            10 +
-            measureCurrencyStringExtraWidth(Provider.of<AllWallets>(context)),
-        // This interval needs more work
-        // interval: ((((widget.maxPair.y).abs() + (widget.minPair.y).abs()) /
-        //                 (getIsFullScreen(context) ? 7 : 3.6)) /
-        //             5)
-        //         .ceil() *
-        //     5,
-      ),
-    ),
-    topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-    rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-  );
+                ).copyWith(textScaler: TextScaler.linear(1.0)),
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: TextFont(
+                    maxLines: 1,
+                    textAlign: TextAlign.center,
+                    fontSize: 13,
+                    text: text,
+                    textColor: dynamicPastel(
+                      context,
+                      widget.color,
+                      amount: 0.8,
+                      inverse: true,
+                    ).withOpacity(0.5),
+                  ),
+                ),
+              );
+            },
+            reservedSize: 28,
+            interval: widget.maxPair.x / (getIsFullScreen(context) ? 6 : 4) == 0
+                ? 5
+                : widget.maxPair.x / (getIsFullScreen(context) ? 6 : 4),
+          ),
+        ),
+        leftTitles: AxisTitles(
+          sideTitles: SideTitles(
+            showTitles: true,
+            getTitlesWidget: (value, titleMeta) {
+              bool show = false;
+              if (value == titleMeta.max || value == titleMeta.min) {
+                return SizedBox.shrink();
+              } else if (value == 0) {
+                show = true;
+              } else if (value < widget.maxPair.y &&
+                  value > 1 &&
+                  value < titleMeta.max) {
+                show = true;
+              } else if (value > widget.minPair.y &&
+                  value < 1 &&
+                  value > titleMeta.min) {
+                show = true;
+              } else {
+                return SizedBox.shrink();
+              }
+
+              return Padding(
+                padding: const EdgeInsets.only(right: 8.0),
+                child: MediaQuery(
+                  data: MediaQuery.of(
+                    context,
+                  ).copyWith(textScaler: TextScaler.linear(1.0)),
+                  child: TextFont(
+                    overflow: TextOverflow.fade,
+                    maxLines: 1,
+                    softWrap: false,
+                    textAlign: TextAlign.end,
+                    text: getWordedNumber(
+                      context,
+                      Provider.of<AllWallets>(context, listen: false),
+                      value,
+                      forceReveal: _isRevealed,
+                    ),
+                    textColor: dynamicPastel(
+                      context,
+                      widget.color,
+                      amount: 0.5,
+                      inverse: true,
+                    ).withOpacity(0.3),
+                    fontSize: 13,
+                  ),
+                ),
+              );
+            },
+            // If the interval is equal to a really small number (almost 0, it freezes the app!)
+            interval: double.parse(
+                      (widget.maxPair.y - widget.minPair.y).toStringAsFixed(5),
+                    ) ==
+                    0.0
+                ? 0.001
+                : ((widget.maxPair.y - widget.minPair.y) /
+                        (getIsFullScreen(context) ? 7 : 4))
+                    .abs(),
+            reservedSize: 7 +
+                (widget.minPair.y <= -10000
+                    ? 55
+                    : widget.minPair.y <= -1000
+                        ? 45
+                        : widget.minPair.y <= -100
+                            ? 40 + widget.extraLeftPaddingIfSmall / 2
+                            : (widget.maxPair.y >= 100
+                                    ? (widget.maxPair.y >= 1000 ? 37 : 33)
+                                    : 25 + widget.extraLeftPaddingIfSmall) +
+                                extraHorizontalPadding) +
+                10 +
+                measureCurrencyStringExtraWidth(
+                    Provider.of<AllWallets>(context)),
+            // This interval needs more work
+            // interval: ((((widget.maxPair.y).abs() + (widget.minPair.y).abs()) /
+            //                 (getIsFullScreen(context) ? 7 : 3.6)) /
+            //             5)
+            //         .ceil() *
+            //     5,
+          ),
+        ),
+        topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+        rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+      );
 
   // FlAxisTitleData get axisTitleData => FlAxisTitleData(
   //       bottomTitle: AxisTitle(
@@ -366,27 +366,28 @@ class _LineChartState extends State<_LineChart> with WidgetsBindingObserver {
   int? touchedValue = null;
 
   LineTouchData get lineTouchData => LineTouchData(
-    enabled: true,
-    touchSpotThreshold: 1000,
-    getTouchedSpotIndicator: (LineChartBarData barData, List<int> spotIndexes) {
-      // only show touch data for primary colored lines
-      bool transparent = false;
-      if (barData.color != lightenPastel(widget.color, amount: 0.3)) {
-        transparent = true;
-      }
-      return spotIndexes.map((index) {
-        return TouchedSpotIndicatorData(
-          FlLine(
-            color: transparent
-                ? Colors.transparent
-                : widget.color.withOpacity(0.9),
-            strokeWidth: 2,
-            dashArray: [2, 2],
-          ),
-          FlDotData(
-            show: true,
-            getDotPainter: (spot, percent, barData, index) =>
-                FlDotCirclePainter(
+        enabled: true,
+        touchSpotThreshold: 1000,
+        getTouchedSpotIndicator:
+            (LineChartBarData barData, List<int> spotIndexes) {
+          // only show touch data for primary colored lines
+          bool transparent = false;
+          if (barData.color != lightenPastel(widget.color, amount: 0.3)) {
+            transparent = true;
+          }
+          return spotIndexes.map((index) {
+            return TouchedSpotIndicatorData(
+              FlLine(
+                color: transparent
+                    ? Colors.transparent
+                    : widget.color.withOpacity(0.9),
+                strokeWidth: 2,
+                dashArray: [2, 2],
+              ),
+              FlDotData(
+                show: true,
+                getDotPainter: (spot, percent, barData, index) =>
+                    FlDotCirclePainter(
                   radius: 3,
                   color: transparent
                       ? Colors.transparent
@@ -396,136 +397,131 @@ class _LineChartState extends State<_LineChart> with WidgetsBindingObserver {
                       ? Colors.transparent
                       : widget.color.withOpacity(0.9),
                 ),
-          ),
-        );
-      }).toList();
-    },
-    touchCallback: (FlTouchEvent event, LineTouchResponse? touchResponse) {
-      if (!event.isInterestedForInteractions || touchResponse == null) {
-        touchedValue = null;
-        return;
-      }
-
-      // print(event.runtimeType);
-
-      double value = touchResponse.lineBarSpots![0].x;
-      if (event.runtimeType == FlLongPressStart) {
-        HapticFeedback.selectionClick();
-      } else if (touchedValue != value.toInt() &&
-          (event.runtimeType == FlLongPressMoveUpdate ||
-              event.runtimeType == FlPanUpdateEvent)) {
-        HapticFeedback.selectionClick();
-      }
-
-      touchedValue = value.toInt();
-    },
-    touchTooltipData: LineTouchTooltipData(
-      getTooltipColor: (_) => widget.color.withOpacity(0.7),
-      tooltipRoundedRadius: 8,
-      fitInsideVertically: true,
-      fitInsideHorizontally: true,
-      tooltipPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      getTooltipItems: (List<LineBarSpot> lineBarsSpot) {
-        return lineBarsSpot.map((LineBarSpot lineBarSpot) {
-          // only show touch data for primary colored lines
-          if (lineBarSpot.bar.color !=
-              lightenPastel(widget.color, amount: 0.3)) {
-            return null;
+              ),
+            );
+          }).toList();
+        },
+        touchCallback: (FlTouchEvent event, LineTouchResponse? touchResponse) {
+          if (!event.isInterestedForInteractions || touchResponse == null) {
+            touchedValue = null;
+            return;
           }
-          DateTime currentDate = widget.endDate == null
-              ? DateTime.now()
-              : widget.endDate!;
-          DateTime tooltipDate = currentDate.justDay(
-            dayOffset: -widget.maxPair.x.toInt() + lineBarSpot.x.toInt(),
-          );
-          return LineTooltipItem(
-            getWordedDateShort(
-                  tooltipDate,
-                  includeYear: DateTime.now().year != tooltipDate.year,
-                ) +
-                "\n" +
-                convertToMoney(
-                  Provider.of<AllWallets>(context, listen: false),
-                  lineBarSpot.y,
-                  forceReveal: _isRevealed,
+
+          // print(event.runtimeType);
+
+          double value = touchResponse.lineBarSpots![0].x;
+          if (event.runtimeType == FlLongPressStart) {
+            HapticFeedback.selectionClick();
+          } else if (touchedValue != value.toInt() &&
+              (event.runtimeType == FlLongPressMoveUpdate ||
+                  event.runtimeType == FlPanUpdateEvent)) {
+            HapticFeedback.selectionClick();
+          }
+
+          touchedValue = value.toInt();
+        },
+        touchTooltipData: LineTouchTooltipData(
+          getTooltipColor: (_) => widget.color.withOpacity(0.7),
+          tooltipRoundedRadius: 8,
+          fitInsideVertically: true,
+          fitInsideHorizontally: true,
+          tooltipPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          getTooltipItems: (List<LineBarSpot> lineBarsSpot) {
+            return lineBarsSpot.map((LineBarSpot lineBarSpot) {
+              // only show touch data for primary colored lines
+              if (lineBarSpot.bar.color !=
+                  lightenPastel(widget.color, amount: 0.3)) {
+                return null;
+              }
+              DateTime currentDate =
+                  widget.endDate == null ? DateTime.now() : widget.endDate!;
+              DateTime tooltipDate = currentDate.justDay(
+                dayOffset: -widget.maxPair.x.toInt() + lineBarSpot.x.toInt(),
+              );
+              return LineTooltipItem(
+                getWordedDateShort(
+                      tooltipDate,
+                      includeYear: DateTime.now().year != tooltipDate.year,
+                    ) +
+                    "\n" +
+                    convertToMoney(
+                      Provider.of<AllWallets>(context, listen: false),
+                      lineBarSpot.y,
+                      forceReveal: _isRevealed,
+                    ),
+                const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                  fontFamilyFallback: ['Inter'],
                 ),
-            const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 12,
-              fontFamilyFallback: ['Inter'],
-            ),
-          );
-        }).toList();
-      },
-    ),
-  );
+              );
+            }).toList();
+          },
+        ),
+      );
 
   List<LineChartBarData> get lineBarsData => [
-    for (
-      int spotsListIndex = 0;
-      spotsListIndex < widget.spots.length;
-      spotsListIndex++
-    )
-      lineChartBarData(widget.spots[spotsListIndex], spotsListIndex),
-  ];
+        for (int spotsListIndex = 0;
+            spotsListIndex < widget.spots.length;
+            spotsListIndex++)
+          lineChartBarData(widget.spots[spotsListIndex], spotsListIndex),
+      ];
 
   FlGridData get gridData => FlGridData(
-    show: true,
-    // If the interval is equal to a really small number (almost 0, it freezes the app!)
-    verticalInterval:
-        double.parse(
-              (((widget.maxPair.x).abs() + (widget.minPair.x).abs()) /
-                      (getIsFullScreen(context) ? 6 : 4))
-                  .toStringAsFixed(5),
-            ) ==
-            0
-        ? 5
-        : ((widget.maxPair.x).abs() + (widget.minPair.x).abs()) /
-              (getIsFullScreen(context) ? 6 : 4),
+        show: true,
+        // If the interval is equal to a really small number (almost 0, it freezes the app!)
+        verticalInterval: double.parse(
+                  (((widget.maxPair.x).abs() + (widget.minPair.x).abs()) /
+                          (getIsFullScreen(context) ? 6 : 4))
+                      .toStringAsFixed(5),
+                ) ==
+                0
+            ? 5
+            : ((widget.maxPair.x).abs() + (widget.minPair.x).abs()) /
+                (getIsFullScreen(context) ? 6 : 4),
 
-    // This interval needs more work, maybe follow the one from budgetHistoryLineGraph.dart
-    // horizontalInterval:
-    //     ((widget.maxPair.y).abs() + (widget.minPair.y).abs()) /
-    //         (getIsFullScreen(context) ? 6 : 3.5),
-    getDrawingVerticalLine: (value) {
-      // print((widget.maxPair.y) /
-      //     ((widget.maxPair.y).abs() + (widget.minPair.y).abs()));
-      // print(((widget.minPair.y)) /
-      //     ((widget.maxPair.y).abs() + (widget.minPair.y).abs()));
-      return FlLine(
-        color: dynamicPastel(
-          context,
-          widget.color,
-          amount: 0.3,
-        ).withOpacity(0.2),
-        // color: Colors.transparent,
-        strokeWidth: 2,
-        dashArray: [2, 8],
+        // This interval needs more work, maybe follow the one from budgetHistoryLineGraph.dart
+        // horizontalInterval:
+        //     ((widget.maxPair.y).abs() + (widget.minPair.y).abs()) /
+        //         (getIsFullScreen(context) ? 6 : 3.5),
+        getDrawingVerticalLine: (value) {
+          // print((widget.maxPair.y) /
+          //     ((widget.maxPair.y).abs() + (widget.minPair.y).abs()));
+          // print(((widget.minPair.y)) /
+          //     ((widget.maxPair.y).abs() + (widget.minPair.y).abs()));
+          return FlLine(
+            color: dynamicPastel(
+              context,
+              widget.color,
+              amount: 0.3,
+            ).withOpacity(0.2),
+            // color: Colors.transparent,
+            strokeWidth: 2,
+            dashArray: [2, 8],
+          );
+        },
+        // If the interval is equal to a really small number (almost 0, it freezes the app!)
+        horizontalInterval: double.parse(
+                  (widget.maxPair.y - widget.minPair.y).toStringAsFixed(5),
+                ) ==
+                0.0
+            ? 0.001
+            : ((widget.maxPair.y - widget.minPair.y) /
+                    (getIsFullScreen(context) ? 7 : 4))
+                .abs(),
+        getDrawingHorizontalLine: (value) {
+          return FlLine(
+            color: dynamicPastel(
+              context,
+              widget.color,
+              amount: 0.3,
+            ).withOpacity(0.2),
+            strokeWidth: 2,
+            dashArray: [2, 8],
+          );
+        },
       );
-    },
-    // If the interval is equal to a really small number (almost 0, it freezes the app!)
-    horizontalInterval:
-        double.parse(
-              (widget.maxPair.y - widget.minPair.y).toStringAsFixed(5),
-            ) ==
-            0.0
-        ? 0.001
-        : ((widget.maxPair.y - widget.minPair.y) /
-                  (getIsFullScreen(context) ? 7 : 4))
-              .abs(),
-    getDrawingHorizontalLine: (value) {
-      return FlLine(
-        color: dynamicPastel(
-          context,
-          widget.color,
-          amount: 0.3,
-        ).withOpacity(0.2),
-        strokeWidth: 2,
-        dashArray: [2, 8],
-      );
-    },
-  );
 
   FlBorderData get borderData => FlBorderData(show: false);
 
@@ -538,9 +534,8 @@ class _LineChartState extends State<_LineChart> with WidgetsBindingObserver {
       isStrokeCapRound: true,
       dotData: FlDotData(show: false),
       isCurved: widget.isCurved,
-      curveSmoothness: appStateSettings["removeZeroTransactionEntries"]
-          ? 0.1
-          : 0.3,
+      curveSmoothness:
+          appStateSettings["removeZeroTransactionEntries"] ? 0.1 : 0.3,
       preventCurveOverShooting: true,
       preventCurveOvershootingThreshold: 8,
       aboveBarData: BarAreaData(
@@ -549,8 +544,8 @@ class _LineChartState extends State<_LineChart> with WidgetsBindingObserver {
         show: widget.minPair.y >= 0 && widget.maxPair.y >= 0
             ? false
             : index != 0
-            ? false
-            : true,
+                ? false
+                : true,
         gradient: LinearGradient(
           colors: [
             index == 0
@@ -563,7 +558,7 @@ class _LineChartState extends State<_LineChart> with WidgetsBindingObserver {
             0,
             widget.maxPair.y > 0
                 ? -(widget.minPair.y).abs() /
-                      ((widget.maxPair.y).abs() + (widget.minPair.y).abs())
+                    ((widget.maxPair.y).abs() + (widget.minPair.y).abs())
                 : -1,
           ),
         ),

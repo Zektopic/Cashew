@@ -45,7 +45,8 @@ class SelectedTransactionsAppBar extends StatefulWidget {
       _SelectedTransactionsAppBarState();
 }
 
-class _SelectedTransactionsAppBarState extends State<SelectedTransactionsAppBar> {
+class _SelectedTransactionsAppBarState
+    extends State<SelectedTransactionsAppBar> {
   bool _isRevealed = false;
   Timer? _revealTimer;
 
@@ -93,12 +94,12 @@ class _SelectedTransactionsAppBarState extends State<SelectedTransactionsAppBar>
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
-      valueListenable: globalSelectedID
-          .select((controller) => (controller.value[widget.pageID] ?? []).length),
+      valueListenable: globalSelectedID.select(
+          (controller) => (controller.value[widget.pageID] ?? []).length),
       builder: (context, _, __) {
         List<String> listOfIDs = globalSelectedID.value[widget.pageID] ?? [];
-        bool animateIn =
-            globalSelectedID.value[widget.pageID] != null && listOfIDs.length > 0;
+        bool animateIn = globalSelectedID.value[widget.pageID] != null &&
+            listOfIDs.length > 0;
         return AnimatedPositionedDirectional(
           start: 0,
           end: 0,
@@ -202,8 +203,10 @@ class _SelectedTransactionsAppBarState extends State<SelectedTransactionsAppBar>
                                     HapticFeedback.selectionClick();
                                     setState(() => _isRevealed = true);
                                     _revealTimer?.cancel();
-                                    _revealTimer = Timer(Duration(seconds: 2), () {
-                                      if (mounted) setState(() => _isRevealed = false);
+                                    _revealTimer =
+                                        Timer(Duration(seconds: 2), () {
+                                      if (mounted)
+                                        setState(() => _isRevealed = false);
                                     });
                                   },
                                   onPointerUp: (_) {
@@ -215,7 +218,8 @@ class _SelectedTransactionsAppBarState extends State<SelectedTransactionsAppBar>
                                     setState(() => _isRevealed = false);
                                   },
                                   child: CountNumber(
-                                    count: snapshot.hasData ? snapshot.data! : 0,
+                                    count:
+                                        snapshot.hasData ? snapshot.data! : 0,
                                     duration: Duration(milliseconds: 250),
                                     initialCount: (0),
                                     textBuilder: (number) {
@@ -244,13 +248,13 @@ class _SelectedTransactionsAppBarState extends State<SelectedTransactionsAppBar>
                                                     10),
                                             child: TextFont(
                                               text: convertToMoney(
-                                                  Provider.of<AllWallets>(
-                                                      context),
-                                                  number,
-                                                  finalNumber: snapshot.hasData
-                                                      ? snapshot.data!
-                                                      : 0,
-                                                  forceReveal: _isRevealed,
+                                                Provider.of<AllWallets>(
+                                                    context),
+                                                number,
+                                                finalNumber: snapshot.hasData
+                                                    ? snapshot.data!
+                                                    : 0,
+                                                forceReveal: _isRevealed,
                                               ),
                                               fontSize: 17.5,
                                               textAlign: TextAlign.start,
