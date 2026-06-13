@@ -105,7 +105,6 @@ class _InitializeBiometricsState extends State<InitializeBiometrics> {
         description: "biometrics-error-description".tr(),
         onSubmitLabel: "ok".tr(),
         onSubmit: () {
-          updateSettings("requireAuth", false, updateGlobalState: false);
           popRoute(null);
         },
       );
