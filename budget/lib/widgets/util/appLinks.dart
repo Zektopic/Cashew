@@ -530,7 +530,6 @@ Map<String, String> parseAppLink(Uri uri) {
   return params;
 }
 
-
 class _AppLinkTableEntry extends StatefulWidget {
   final double amount;
   final String walletPk;
@@ -604,7 +603,8 @@ class _AppLinkTableEntryState extends State<_AppLinkTableEntry> {
                       ?.currency,
                   forceReveal: _isRevealed,
                 ),
-                if (widget.dateCreated != null) getWordedDate(widget.dateCreated!),
+                if (widget.dateCreated != null)
+                  getWordedDate(widget.dateCreated!),
                 if (widget.title != "") widget.title,
                 if (widget.note != "") widget.note,
                 if (widget.wallet != null) widget.wallet!.name,

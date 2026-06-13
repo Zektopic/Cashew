@@ -93,8 +93,8 @@ dependencies:
   image_picker: ^1.1.2
   flutter_displaymode: ^0.6.0
   notification_listener_service: ^0.3.3
-  home_widget: ^0.9.0
-  material_symbols_icons: ^4.2928.1
+  home_widget: ^0.8.0
+  material_symbols_icons: ^4.2768.0
   app_links: ^6.1.4
   expandable_page_view: ^1.0.17
   flutter_staggered_grid_view: ^0.7.0

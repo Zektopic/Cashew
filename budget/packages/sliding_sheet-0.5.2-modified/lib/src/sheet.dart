@@ -1128,7 +1128,7 @@ class _SlidingSheetState extends State<SlidingSheet>
             return 0.0;
           }
         }();
-        if(dismissUnderway && maxOpacity==null) maxOpacity = opacity;
+        if (dismissUnderway && maxOpacity == null) maxOpacity = opacity;
         opacity = math.min(maxOpacity ?? 1, opacity);
 
         final backDrop = IgnorePointer(

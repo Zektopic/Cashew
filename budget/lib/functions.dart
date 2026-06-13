@@ -209,7 +209,7 @@ String convertToMoney(
   bool forceAbsoluteZero = true,
   bool forceReveal = false,
   NumberFormat Function(int? decimalDigits, String? locale, String? symbol)?
-  getCustomNumberFormat,
+      getCustomNumberFormat,
 }) {
   if (forceReveal == false && appStateSettings["obscureAmounts"] == true) {
     String char = appStateSettings["obscureAmountsCharacter"] ?? "•";
@@ -223,16 +223,14 @@ String convertToMoney(
     return char * 3;
   }
 
-  int numberDecimals =
-      decimals ??
+  int numberDecimals = decimals ??
       allWallets.indexedByPk[appStateSettings["selectedWalletPk"]]?.decimals ??
       2;
-  numberDecimals =
-      numberDecimals > 2 &&
+  numberDecimals = numberDecimals > 2 &&
           (finalNumber ?? amount).toString().split('.').length > 1
       ? (finalNumber ?? amount).toString().split('.')[1].length < numberDecimals
-            ? (finalNumber ?? amount).toString().split('.')[1].length
-            : numberDecimals
+          ? (finalNumber ?? amount).toString().split('.')[1].length
+          : numberDecimals
       : numberDecimals;
 
   if (amount == double.infinity || amount == double.negativeInfinity) {
@@ -248,18 +246,17 @@ String convertToMoney(
   int? decimalDigits = forceAllDecimals
       ? decimals
       : allDecimals == true ||
-            hasDecimalPoints(finalNumber) ||
-            hasDecimalPoints(amount)
-      ? numberDecimals
-      : 0;
+              hasDecimalPoints(finalNumber) ||
+              hasDecimalPoints(amount)
+          ? numberDecimals
+          : 0;
   String? locale = appStateSettings["customNumberFormat"] == true
       ? "en-US"
       : Platform.localeName;
   String? symbol =
       customSymbol ?? getCurrencyString(allWallets, currencyKey: currencyKey);
 
-  bool useCustomNumberFormat =
-      forceCustomNumberFormat ||
+  bool useCustomNumberFormat = forceCustomNumberFormat ||
       (forceNonCustomNumberFormat == false &&
           appStateSettings["customNumberFormat"] == true);
 
@@ -300,10 +297,8 @@ String convertToMoney(
   if (addCurrencyName == true && currencyKey != null) {
     currencyName = " " + currencyKey.toUpperCase();
   } else if (addCurrencyName == true) {
-    currencyName =
-        " " +
-        (allWallets
-                    .indexedByPk[appStateSettings["selectedWalletPk"]]
+    currencyName = " " +
+        (allWallets.indexedByPk[appStateSettings["selectedWalletPk"]]
                     ?.currency ??
                 "")
             .toUpperCase();
@@ -537,10 +532,10 @@ getWordedDate(
     return checkYesterdayTodayTomorrow(date) +
         (includeMonthDate
             ? ", " +
-                  DateFormat.MMMMd(
-                    navigatorKey.currentContext?.locale.toString(),
-                  ).format(date).toString() +
-                  extraYear
+                DateFormat.MMMMd(
+                  navigatorKey.currentContext?.locale.toString(),
+                ).format(date).toString() +
+                extraYear
             : "");
   }
 
@@ -575,23 +570,19 @@ DateTime getDatePastToDetermineBudgetDate(
   int periodLength = budget.periodLength;
   if (reoccurrence == null) return DateTime.now();
 
-  int year =
-      DateTime.now().year -
+  int year = DateTime.now().year -
       (reoccurrence == BudgetReoccurence.yearly ? index * periodLength : 0);
-  int month =
-      DateTime.now().month -
+  int month = DateTime.now().month -
       (reoccurrence == BudgetReoccurence.monthly ? index * periodLength : 0);
   // This fixes a bug where if the currentDate is the 31 of a month, February for example won't be considered since it doesn't have 30 days
   // Every monthly budget will have a day that falls on the first!
   int day = reoccurrence == BudgetReoccurence.monthly
       ? 1
       : DateTime.now().day -
-            (reoccurrence == BudgetReoccurence.daily
-                ? index * periodLength
-                : 0) -
-            (reoccurrence == BudgetReoccurence.weekly
-                ? index * 7 * periodLength
-                : 0);
+          (reoccurrence == BudgetReoccurence.daily ? index * periodLength : 0) -
+          (reoccurrence == BudgetReoccurence.weekly
+              ? index * 7 * periodLength
+              : 0);
 
   // This ensures that there will always be a current period, since we start
   // on the first of the month, the current period may not be shown and we have to remove
@@ -788,24 +779,21 @@ String getWordedNumber(
       formatter.significantDigitsInUse = false;
       formatter.maximumFractionDigits = value.abs() < 1000
           ? value.abs() < 10
-                ? (decimalDigits ?? 2)
-                : 0
+              ? (decimalDigits ?? 2)
+              : 0
           : 1;
-      formatter.minimumFractionDigits = value.abs() < 10
-          ? (decimalDigits ?? 2)
-          : 0;
+      formatter.minimumFractionDigits =
+          value.abs() < 10 ? (decimalDigits ?? 2) : 0;
       return formatter;
     },
   );
 }
 
 double getPercentBetweenDates(DateTimeRange timeRange, DateTime currentTime) {
-  int millisecondDifference =
-      timeRange.end.millisecondsSinceEpoch -
+  int millisecondDifference = timeRange.end.millisecondsSinceEpoch -
       timeRange.start.millisecondsSinceEpoch +
       Duration(days: 1).inMilliseconds;
-  double percent =
-      (currentTime.millisecondsSinceEpoch -
+  double percent = (currentTime.millisecondsSinceEpoch -
           timeRange.start.millisecondsSinceEpoch) /
       millisecondDifference;
   return percent * 100;
@@ -898,8 +886,7 @@ getTotalSubscriptions(
   if (subscriptions != null) {
     for (Transaction subscription in subscriptions) {
       subscription = subscription.copyWith(
-        amount:
-            subscription.amount *
+        amount: subscription.amount *
             (amountRatioToPrimaryCurrencyGivenPk(
                   allWallets,
                   subscription.walletFk,
@@ -1067,11 +1054,11 @@ class CustomMaterialPageRoute extends MaterialPageRoute {
     bool maintainState = true,
     bool fullscreenDialog = false,
   }) : super(
-         builder: builder,
-         settings: settings,
-         maintainState: maintainState,
-         fullscreenDialog: fullscreenDialog,
-       );
+          builder: builder,
+          settings: settings,
+          maintainState: maintainState,
+          fullscreenDialog: fullscreenDialog,
+        );
 }
 
 popRoute<T extends Object?>(BuildContext? context, [T? result]) {
@@ -1155,10 +1142,10 @@ Brightness determineBrightnessTheme(context) {
   return getSettingConstants(appStateSettings)["theme"] == ThemeMode.system
       ? MediaQuery.platformBrightnessOf(context)
       : getSettingConstants(appStateSettings)["theme"] == ThemeMode.light
-      ? Brightness.light
-      : getSettingConstants(appStateSettings)["theme"] == ThemeMode.dark
-      ? Brightness.dark
-      : Brightness.light;
+          ? Brightness.light
+          : getSettingConstants(appStateSettings)["theme"] == ThemeMode.dark
+              ? Brightness.dark
+              : Brightness.light;
 }
 
 String getMemberNickname(member) {
@@ -1525,8 +1512,7 @@ String getWalletStringName(AllWallets allWallets, TransactionWallet? wallet) {
   if (wallet.name == wallet.currency.toString().toUpperCase()) {
     return wallet.currency.toString().toUpperCase();
   } else {
-    bool showCurrencyLabel =
-        appStateSettings["showCurrencyLabel"] == true &&
+    bool showCurrencyLabel = appStateSettings["showCurrencyLabel"] == true &&
         allWallets.allContainSameCurrency() == false;
     if (showCurrencyLabel) {
       return wallet.name +

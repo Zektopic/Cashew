@@ -95,7 +95,34 @@ class BarGraphState extends State<BarGraph> {
               maxY: widget.maxY,
               minY: -1,
               alignment: BarChartAlignment.spaceBetween,
-              barTouchData: BarTouchData(handleBuiltInTouches: false),
+              barTouchData: BarTouchData(
+                handleBuiltInTouches: true,
+                touchTooltipData: BarTouchTooltipData(
+                  getTooltipColor: (_) => dynamicPastel(
+                    context,
+                    getColor(context, "white"),
+                    inverse: true,
+                    amountLight: 0.2,
+                    amountDark: 0.05,
+                  ).withOpacity(0.8),
+                  tooltipRoundedRadius: 8,
+                  getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                    return BarTooltipItem(
+                      convertToMoney(
+                        Provider.of<AllWallets>(context, listen: false),
+                        rod.toY == -1e-14 ? 0 : rod.toY,
+                        forceReveal: _isRevealed,
+                      ),
+                      TextStyle(
+                        color: getColor(context, "black").withOpacity(0.8),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                        fontFamilyFallback: ['Inter'],
+                      ),
+                    );
+                  },
+                ),
+              ),
               gridData: FlGridData(
                 show: true,
                 horizontalInterval: 1,
@@ -168,25 +195,25 @@ class BarGraphState extends State<BarGraph> {
                         child: TextFont(
                           textAlign: TextAlign.center,
                           fontSize: 13,
-                          text:
-                              widget.budget.reoccurrence ==
+                          text: widget.budget.reoccurrence ==
                                   BudgetReoccurence.monthly
                               ? DateFormat(
                                   'MMM',
                                   context.locale.toString(),
                                 ).format(widget.dateRanges[value.toInt()].start)
                               : widget.budget.reoccurrence ==
-                                    BudgetReoccurence.yearly
-                              ? DateFormat(
-                                  'yyyy',
-                                  context.locale.toString(),
-                                ).format(widget.dateRanges[value.toInt()].start)
-                              : DateFormat(
-                                  'MMM\nd',
-                                  context.locale.toString(),
-                                ).format(
-                                  widget.dateRanges[value.toInt()].start,
-                                ),
+                                      BudgetReoccurence.yearly
+                                  ? DateFormat(
+                                      'yyyy',
+                                      context.locale.toString(),
+                                    ).format(
+                                      widget.dateRanges[value.toInt()].start)
+                                  : DateFormat(
+                                      'MMM\nd',
+                                      context.locale.toString(),
+                                    ).format(
+                                      widget.dateRanges[value.toInt()].start,
+                                    ),
                           textColor: dynamicPastel(
                             context,
                             widget.color,

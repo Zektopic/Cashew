@@ -365,17 +365,18 @@ class _AmountAccountState extends State<AmountAccount> {
         HapticFeedback.selectionClick();
         setState(() => _isRevealed = true);
         _revealTimer?.cancel();
+      },
+      onPointerUp: (_) {
+        _revealTimer?.cancel();
         _revealTimer = Timer(Duration(seconds: 2), () {
           if (mounted) setState(() => _isRevealed = false);
         });
       },
-      onPointerUp: (_) {
-        _revealTimer?.cancel();
-        setState(() => _isRevealed = false);
-      },
       onPointerCancel: (_) {
         _revealTimer?.cancel();
-        setState(() => _isRevealed = false);
+        _revealTimer = Timer(Duration(seconds: 2), () {
+          if (mounted) setState(() => _isRevealed = false);
+        });
       },
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -412,9 +413,9 @@ class _AmountAccountState extends State<AmountAccount> {
                     finalNumber: finalTotal,
                     currencyKey: widget.walletWithDetails.wallet.currency,
                     decimals: widget.walletWithDetails.wallet.decimals,
-                    addCurrencyName:
-                        Provider.of<AllWallets>(context).allContainSameCurrency() ==
-                            false,
+                    addCurrencyName: Provider.of<AllWallets>(context)
+                            .allContainSameCurrency() ==
+                        false,
                     forceReveal: _isRevealed,
                   ),
                   textColor: textColor,

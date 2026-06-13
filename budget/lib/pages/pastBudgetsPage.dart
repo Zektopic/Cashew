@@ -1071,7 +1071,8 @@ class _PastBudgetContainerState extends State<PastBudgetContainer> {
                                           initialCount: (0),
                                           textBuilder: (number) {
                                             return AnimatedSwitcher(
-                                              duration: Duration(milliseconds: 300),
+                                              duration:
+                                                  Duration(milliseconds: 300),
                                               child: TextFont(
                                                 key: ValueKey(_isRevealed),
                                                 text: convertToMoney(
@@ -1082,7 +1083,8 @@ class _PastBudgetContainerState extends State<PastBudgetContainer> {
                                                             "showTotalSpentForBudget"]
                                                         ? totalSpent
                                                         : budgetAmount -
-                                                            totalSpent, forceReveal: _isRevealed),
+                                                            totalSpent,
+                                                    forceReveal: _isRevealed),
                                                 fontSize: 16,
                                                 textAlign: TextAlign.start,
                                                 fontWeight: FontWeight.bold,
@@ -1097,15 +1099,18 @@ class _PastBudgetContainerState extends State<PastBudgetContainer> {
                                                 bottom: 0.5),
                                         child: Container(
                                           child: AnimatedSwitcher(
-                                            duration: Duration(milliseconds: 300),
+                                            duration:
+                                                Duration(milliseconds: 300),
                                             child: TextFont(
-                                              key: ValueKey('spent_$_isRevealed'),
+                                              key: ValueKey(
+                                                  'spent_$_isRevealed'),
                                               text: getBudgetSpentText(
                                                       budget.income) +
                                                   convertToMoney(
                                                       Provider.of<AllWallets>(
                                                           context),
-                                                      budgetAmount, forceReveal: _isRevealed),
+                                                      budgetAmount,
+                                                      forceReveal: _isRevealed),
                                               fontSize: 12,
                                               textAlign: TextAlign.start,
                                             ),
@@ -1133,12 +1138,14 @@ class _PastBudgetContainerState extends State<PastBudgetContainer> {
                                           child: TextFont(
                                             key: ValueKey(_isRevealed),
                                             text: convertToMoney(
-                                                Provider.of<AllWallets>(context),
+                                                Provider.of<AllWallets>(
+                                                    context),
                                                 number,
                                                 finalNumber: appStateSettings[
                                                         "showTotalSpentForBudget"]
                                                     ? totalSpent
-                                                    : totalSpent - budgetAmount, forceReveal: _isRevealed),
+                                                    : totalSpent - budgetAmount,
+                                                forceReveal: _isRevealed),
                                             fontSize: 16,
                                             textAlign: TextAlign.start,
                                             fontWeight: FontWeight.bold,
@@ -1154,13 +1161,15 @@ class _PastBudgetContainerState extends State<PastBudgetContainer> {
                                       child: AnimatedSwitcher(
                                         duration: Duration(milliseconds: 300),
                                         child: TextFont(
-                                          key: ValueKey('overspent_$_isRevealed'),
+                                          key: ValueKey(
+                                              'overspent_$_isRevealed'),
                                           text: getBudgetOverSpentText(
                                                   budget.income) +
                                               convertToMoney(
                                                   Provider.of<AllWallets>(
                                                       context),
-                                                  budgetAmount, forceReveal: _isRevealed),
+                                                  budgetAmount,
+                                                  forceReveal: _isRevealed),
                                           fontSize: 12,
                                           textAlign: TextAlign.start,
                                         ),
@@ -1194,7 +1203,9 @@ class _PastBudgetContainerState extends State<PastBudgetContainer> {
                                 key: ValueKey(_isRevealed),
                                 autoSizeText: true,
                                 text: convertToPercent(value,
-                                    numberDecimals: 0, useLessThanZero: true, forceReveal: _isRevealed),
+                                    numberDecimals: 0,
+                                    useLessThanZero: true,
+                                    forceReveal: _isRevealed),
                                 fontSize: 16,
                                 textAlign: TextAlign.center,
                                 fontWeight: FontWeight.bold,
@@ -1211,7 +1222,10 @@ class _PastBudgetContainerState extends State<PastBudgetContainer> {
                       height: 60,
                       width: 60,
                       child: AnimatedCircularProgress(
-                        percent: appStateSettings["obscureAmounts"] == true && !_isRevealed ? 0 : (totalSpent / budgetAmount).abs(),
+                        percent: appStateSettings["obscureAmounts"] == true &&
+                                !_isRevealed
+                            ? 0
+                            : (totalSpent / budgetAmount).abs(),
                         backgroundColor: progressBackgroundColor,
                         foregroundColor: progressForegroundColor,
                         overageColor: progressOverageColor,
@@ -1231,65 +1245,66 @@ class _PastBudgetContainerState extends State<PastBudgetContainer> {
     return Container(
       child: Listener(
         onPointerDown: (_) {
-          HapticFeedback.selectionClick();
-          setState(() => _isRevealed = true);
-          _revealTimer?.cancel();
-          _revealTimer = Timer(Duration(seconds: 2), () {
-            if (mounted) setState(() => _isRevealed = false);
-          });
-        },
-        onPointerUp: (_) {
-          _revealTimer?.cancel();
-          setState(() => _isRevealed = false);
-        },
-        onPointerCancel: (_) {
-          _revealTimer?.cancel();
-          setState(() => _isRevealed = false);
-        },
+        HapticFeedback.selectionClick();
+        setState(() => _isRevealed = true);
+        _revealTimer?.cancel();
+      },
+      onPointerUp: (_) {
+        _revealTimer?.cancel();
+        _revealTimer = Timer(Duration(seconds: 2), () {
+          if (mounted) setState(() => _isRevealed = false);
+        });
+      },
+      onPointerCancel: (_) {
+        _revealTimer?.cancel();
+        _revealTimer = Timer(Duration(seconds: 2), () {
+          if (mounted) setState(() => _isRevealed = false);
+        });
+      },
         child: OpenContainerNavigation(
           borderRadius: getPlatform() == PlatformOS.isIOS ? 0 : 18,
-        closedColor: getPlatform() == PlatformOS.isIOS
-            ? backgroundColor
-            : appStateSettings["materialYou"]
-                ? dynamicPastel(
-                    context,
-                    Theme.of(context).colorScheme.secondaryContainer,
-                    amount: 0.5,
-                  )
-                : getColor(context, "lightDarkAccentHeavyLight"),
-        button: (openContainer) {
-          return Tappable(
-            onTap: () {
-              openContainer();
-            },
-            onLongPress: () {
-              pushRoute(
-                context,
-                AddBudgetPage(
-                  budget: budget,
-                  routesToPopAfterDelete: RoutesToPopAfterDelete.All,
-                ),
-              );
-            },
-            borderRadius: getPlatform() == PlatformOS.isIOS ? 0 : 15,
-            child: widget,
-            color: getPlatform() == PlatformOS.isIOS
-                ? backgroundColor
-                : appStateSettings["materialYou"]
-                    ? dynamicPastel(
-                        context,
-                        Theme.of(context).colorScheme.secondaryContainer,
-                        amount: 0.3,
-                      )
-                    : getColor(context, "lightDarkAccentHeavyLight"),
-          );
-        },
-        openPage: BudgetPage(
-          budgetPk: budget.budgetPk,
-          dateForRange: dateForRangeLocal,
-          dateForRangeIndex: dateForRangeIndex,
-          openedFromHistory: true,
-        ),
+          closedColor: getPlatform() == PlatformOS.isIOS
+              ? backgroundColor
+              : appStateSettings["materialYou"]
+                  ? dynamicPastel(
+                      context,
+                      Theme.of(context).colorScheme.secondaryContainer,
+                      amount: 0.5,
+                    )
+                  : getColor(context, "lightDarkAccentHeavyLight"),
+          button: (openContainer) {
+            return Tappable(
+              onTap: () {
+                openContainer();
+              },
+              onLongPress: () {
+                pushRoute(
+                  context,
+                  AddBudgetPage(
+                    budget: budget,
+                    routesToPopAfterDelete: RoutesToPopAfterDelete.All,
+                  ),
+                );
+              },
+              borderRadius: getPlatform() == PlatformOS.isIOS ? 0 : 15,
+              child: widget,
+              color: getPlatform() == PlatformOS.isIOS
+                  ? backgroundColor
+                  : appStateSettings["materialYou"]
+                      ? dynamicPastel(
+                          context,
+                          Theme.of(context).colorScheme.secondaryContainer,
+                          amount: 0.3,
+                        )
+                      : getColor(context, "lightDarkAccentHeavyLight"),
+            );
+          },
+          openPage: BudgetPage(
+            budgetPk: budget.budgetPk,
+            dateForRange: dateForRangeLocal,
+            dateForRangeIndex: dateForRangeIndex,
+            openedFromHistory: true,
+          ),
         ),
       ),
     );

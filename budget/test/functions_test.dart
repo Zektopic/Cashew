@@ -86,6 +86,39 @@ void main() {
     });
   });
 
+  group('absoluteZero', () {
+    test('converts -0.0 to 0.0', () {
+      final result = absoluteZero(-0.0);
+      expect(result, 0.0);
+      expect(result.isNegative, isFalse);
+    });
+
+    test('keeps 0.0 as 0.0', () {
+      final result = absoluteZero(0.0);
+      expect(result, 0.0);
+      expect(result.isNegative, isFalse);
+    });
+
+    test('keeps positive numbers unchanged', () {
+      expect(absoluteZero(5.5), 5.5);
+      expect(absoluteZero(100.0), 100.0);
+    });
+
+    test('keeps negative numbers (other than -0.0) unchanged', () {
+      expect(absoluteZero(-5.5), -5.5);
+      expect(absoluteZero(-100.0), -100.0);
+    });
+
+    test('handles infinity', () {
+      expect(absoluteZero(double.infinity), double.infinity);
+      expect(absoluteZero(double.negativeInfinity), double.negativeInfinity);
+    });
+
+    test('handles NaN', () {
+      expect(absoluteZero(double.nan).isNaN, isTrue);
+    });
+  });
+
   group('cleanupNoteStringWithURLs', () {
     test('removes standard http URL', () {
       final input = "Check out this link: http://example.com/page";
@@ -100,7 +133,8 @@ void main() {
     });
 
     test('removes multiple URLs', () {
-      final input = "Read this https://example.com/ first, then go to http://test.org/page";
+      final input =
+          "Read this https://example.com/ first, then go to http://test.org/page";
       final expected = "Read this example.com first, then go to test.org";
       expect(cleanupNoteStringWithURLs(input), expected);
     });

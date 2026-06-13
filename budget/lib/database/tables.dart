@@ -174,9 +174,8 @@ class StringListInColumnConverter extends TypeConverter<List<String>, String> {
   @override
   List<String> fromSql(String string_from_db) {
     List<dynamic> dynamicList = List<dynamic>.from(json.decode(string_from_db));
-    List<String> stringList = dynamicList
-        .map((dynamic item) => item.toString())
-        .toList();
+    List<String> stringList =
+        dynamicList.map((dynamic item) => item.toString()).toList();
     return stringList;
   }
 
@@ -891,10 +890,10 @@ class FinanceDatabase extends _$FinanceDatabase {
                 TableMigration(
                   schema.deleteLogs,
                   columnTransformer: {
-                    schema.deleteLogs.deleteLogPk: schema.deleteLogs.deleteLogPk
-                        .cast<String>(),
-                    schema.deleteLogs.entryPk: schema.deleteLogs.entryPk
-                        .cast<String>(),
+                    schema.deleteLogs.deleteLogPk:
+                        schema.deleteLogs.deleteLogPk.cast<String>(),
+                    schema.deleteLogs.entryPk:
+                        schema.deleteLogs.entryPk.cast<String>(),
                   },
                 ),
               );
@@ -902,8 +901,8 @@ class FinanceDatabase extends _$FinanceDatabase {
                 TableMigration(
                   schema.wallets,
                   columnTransformer: {
-                    schema.wallets.walletPk: schema.wallets.walletPk
-                        .cast<String>(),
+                    schema.wallets.walletPk:
+                        schema.wallets.walletPk.cast<String>(),
                   },
                 ),
               );
@@ -911,19 +910,14 @@ class FinanceDatabase extends _$FinanceDatabase {
                 TableMigration(
                   schema.transactions,
                   columnTransformer: {
-                    schema.transactions.transactionPk: schema
-                        .transactions
-                        .transactionPk
-                        .cast<String>(),
-                    schema.transactions.categoryFk: schema
-                        .transactions
-                        .categoryFk
-                        .cast<String>(),
-                    schema.transactions.walletFk: schema.transactions.walletFk
-                        .cast<String>(),
+                    schema.transactions.transactionPk:
+                        schema.transactions.transactionPk.cast<String>(),
+                    schema.transactions.categoryFk:
+                        schema.transactions.categoryFk.cast<String>(),
+                    schema.transactions.walletFk:
+                        schema.transactions.walletFk.cast<String>(),
                     schema.transactions.sharedReferenceBudgetPk: schema
-                        .transactions
-                        .sharedReferenceBudgetPk
+                        .transactions.sharedReferenceBudgetPk
                         .cast<String>(),
                   },
                 ),
@@ -932,8 +926,8 @@ class FinanceDatabase extends _$FinanceDatabase {
                 TableMigration(
                   schema.categories,
                   columnTransformer: {
-                    schema.categories.categoryPk: schema.categories.categoryPk
-                        .cast<String>(),
+                    schema.categories.categoryPk:
+                        schema.categories.categoryPk.cast<String>(),
                   },
                 ),
               );
@@ -942,17 +936,12 @@ class FinanceDatabase extends _$FinanceDatabase {
                   schema.categoryBudgetLimits,
                   columnTransformer: {
                     schema.categoryBudgetLimits.categoryLimitPk: schema
-                        .categoryBudgetLimits
-                        .categoryLimitPk
+                        .categoryBudgetLimits.categoryLimitPk
                         .cast<String>(),
-                    schema.categoryBudgetLimits.categoryFk: schema
-                        .categoryBudgetLimits
-                        .categoryFk
-                        .cast<String>(),
-                    schema.categoryBudgetLimits.budgetFk: schema
-                        .categoryBudgetLimits
-                        .budgetFk
-                        .cast<String>(),
+                    schema.categoryBudgetLimits.categoryFk:
+                        schema.categoryBudgetLimits.categoryFk.cast<String>(),
+                    schema.categoryBudgetLimits.budgetFk:
+                        schema.categoryBudgetLimits.budgetFk.cast<String>(),
                   },
                 ),
               );
@@ -961,13 +950,10 @@ class FinanceDatabase extends _$FinanceDatabase {
                   schema.associatedTitles,
                   columnTransformer: {
                     schema.associatedTitles.associatedTitlePk: schema
-                        .associatedTitles
-                        .associatedTitlePk
+                        .associatedTitles.associatedTitlePk
                         .cast<String>(),
-                    schema.associatedTitles.categoryFk: schema
-                        .associatedTitles
-                        .categoryFk
-                        .cast<String>(),
+                    schema.associatedTitles.categoryFk:
+                        schema.associatedTitles.categoryFk.cast<String>(),
                   },
                 ),
               );
@@ -975,10 +961,10 @@ class FinanceDatabase extends _$FinanceDatabase {
                 TableMigration(
                   schema.budgets,
                   columnTransformer: {
-                    schema.budgets.budgetPk: schema.budgets.budgetPk
-                        .cast<String>(),
-                    schema.budgets.walletFk: schema.budgets.walletFk
-                        .cast<String>(),
+                    schema.budgets.budgetPk:
+                        schema.budgets.budgetPk.cast<String>(),
+                    schema.budgets.walletFk:
+                        schema.budgets.walletFk.cast<String>(),
                   },
                 ),
               );
@@ -987,17 +973,13 @@ class FinanceDatabase extends _$FinanceDatabase {
                   schema.scannerTemplates,
                   columnTransformer: {
                     schema.scannerTemplates.scannerTemplatePk: schema
-                        .scannerTemplates
-                        .scannerTemplatePk
+                        .scannerTemplates.scannerTemplatePk
                         .cast<String>(),
                     schema.scannerTemplates.defaultCategoryFk: schema
-                        .scannerTemplates
-                        .defaultCategoryFk
+                        .scannerTemplates.defaultCategoryFk
                         .cast<String>(),
-                    schema.scannerTemplates.walletFk: schema
-                        .scannerTemplates
-                        .walletFk
-                        .cast<String>(),
+                    schema.scannerTemplates.walletFk:
+                        schema.scannerTemplates.walletFk.cast<String>(),
                   },
                 ),
               );
@@ -1553,14 +1535,14 @@ class FinanceDatabase extends _$FinanceDatabase {
               (end == null
                   ? onlyShowBasedOnTimeRange(transactions, start, end, budget)
                   : budget == null
-                  // Does this need to be isSmallerThanValue?
-                  ? transactions.dateCreated.isSmallerOrEqualValue(end)
-                  : onlyShowBasedOnTimeRange(
-                      transactions,
-                      start,
-                      end,
-                      budget,
-                    )) &
+                      // Does this need to be isSmallerThanValue?
+                      ? transactions.dateCreated.isSmallerOrEqualValue(end)
+                      : onlyShowBasedOnTimeRange(
+                          transactions,
+                          start,
+                          end,
+                          budget,
+                        )) &
               // Should match that of getTransactionCategoryWithDay
               onlyShowTransactionBasedOnSearchQuery(
                 transactions,
@@ -1639,113 +1621,113 @@ class FinanceDatabase extends _$FinanceDatabase {
     final $ObjectivesTable objectiveLoans = alias(objectives, 'objectiveLoans');
     JoinedSelectStatement<HasResultSet, dynamic> query;
 
-    query =
-        select(transactions).join([
-            innerJoin(
-              categories,
-              categories.categoryPk.equalsExp(transactions.categoryFk),
-            ),
-            leftOuterJoin(
-              budgets,
-              budgets.budgetPk.equalsExp(transactions.sharedReferenceBudgetPk),
-            ),
-            leftOuterJoin(
-              objectives,
-              objectives.objectivePk.equalsExp(transactions.objectiveFk),
-            ),
-            leftOuterJoin(
-              objectiveLoans,
-              objectiveLoans.objectivePk.equalsExp(
-                transactions.objectiveLoanFk,
-              ),
-            ),
-            leftOuterJoin(
-              subCategories,
-              subCategories.categoryPk.equalsExp(transactions.subCategoryFk),
-            ),
-          ])
-          ..limit(limit ?? DEFAULT_LIMIT, offset: null)
-          ..orderBy([
-            // This will bring unpaid transactions to the top of the list
-            // Before it brought it to the top of the day, but now
-            // This returns all transactions within a time range
-            // (t) => OrderingTerm(
-            //       expression: (t.type
-            //                   .equalsValue(TransactionSpecialType.repetitive) |
-            //               t.type.equalsValue(
-            //                   TransactionSpecialType.subscription) |
-            //               t.type.equalsValue(TransactionSpecialType.upcoming)) &
-            //           t.paid.equals(false),
-            //       mode: OrderingMode.desc,
-            //     ),
-            OrderingTerm.desc(transactions.dateCreated),
-            OrderingTerm.desc(transactions.dateTimeModified),
-          ])
-          ..where(
-            // Should match that of getTransactionCategoryWithDay
-            onlyShowTransactionBasedOnSearchQuery(
+    query = select(transactions).join([
+      innerJoin(
+        categories,
+        categories.categoryPk.equalsExp(transactions.categoryFk),
+      ),
+      leftOuterJoin(
+        budgets,
+        budgets.budgetPk.equalsExp(transactions.sharedReferenceBudgetPk),
+      ),
+      leftOuterJoin(
+        objectives,
+        objectives.objectivePk.equalsExp(transactions.objectiveFk),
+      ),
+      leftOuterJoin(
+        objectiveLoans,
+        objectiveLoans.objectivePk.equalsExp(
+          transactions.objectiveLoanFk,
+        ),
+      ),
+      leftOuterJoin(
+        subCategories,
+        subCategories.categoryPk.equalsExp(transactions.subCategoryFk),
+      ),
+    ])
+      ..limit(limit ?? DEFAULT_LIMIT, offset: null)
+      ..orderBy([
+        // This will bring unpaid transactions to the top of the list
+        // Before it brought it to the top of the day, but now
+        // This returns all transactions within a time range
+        // (t) => OrderingTerm(
+        //       expression: (t.type
+        //                   .equalsValue(TransactionSpecialType.repetitive) |
+        //               t.type.equalsValue(
+        //                   TransactionSpecialType.subscription) |
+        //               t.type.equalsValue(TransactionSpecialType.upcoming)) &
+        //           t.paid.equals(false),
+        //       mode: OrderingMode.desc,
+        //     ),
+        OrderingTerm.desc(transactions.dateCreated),
+        OrderingTerm.desc(transactions.dateTimeModified),
+      ])
+      ..where(
+        // Should match that of getTransactionCategoryWithDay
+        onlyShowTransactionBasedOnSearchQuery(
+              transactions,
+              search,
+              withCategories: true,
+              joinedWithSubcategoriesTable: subCategories,
+              withBudgets: true,
+              withObjectives: true,
+              joinedWithObjectiveLoans: objectiveLoans,
+            ) &
+            // Pass in the subcategories table so we can search name based on subcategory
+            onlyShowIfFollowsSearchFilters(
+              transactions,
+              searchFilters,
+              joinedWithSubcategoriesTable: subCategories,
+              joinedWithBudgets: true,
+              joinedWithCategories: true,
+              joinedWithObjectives: true,
+              joinedWithObjectiveLoans: objectiveLoans,
+            ) &
+            onlyShowIfFollowsFilters(
+              transactions,
+              budget: budget,
+              budgetTransactionFilters: budgetTransactionFilters,
+              memberTransactionFilters: memberTransactionFilters,
+            ) &
+            onlyShowBasedOnTimeRange(transactions, start, end, budget) &
+            onlyShowBasedOnExcludedCategoryFks(
+              transactions,
+              categoryFksExclude,
+            ) &
+            (onlyShowBasedOnCategoryFks(
                   transactions,
-                  search,
-                  withCategories: true,
-                  joinedWithSubcategoriesTable: subCategories,
-                  withBudgets: true,
-                  withObjectives: true,
-                  joinedWithObjectiveLoans: objectiveLoans,
-                ) &
-                // Pass in the subcategories table so we can search name based on subcategory
-                onlyShowIfFollowsSearchFilters(
-                  transactions,
-                  searchFilters,
-                  joinedWithSubcategoriesTable: subCategories,
-                  joinedWithBudgets: true,
-                  joinedWithCategories: true,
-                  joinedWithObjectives: true,
-                  joinedWithObjectiveLoans: objectiveLoans,
-                ) &
-                onlyShowIfFollowsFilters(
-                  transactions,
-                  budget: budget,
-                  budgetTransactionFilters: budgetTransactionFilters,
-                  memberTransactionFilters: memberTransactionFilters,
-                ) &
-                onlyShowBasedOnTimeRange(transactions, start, end, budget) &
-                onlyShowBasedOnExcludedCategoryFks(
-                  transactions,
+                  categoryFks,
                   categoryFksExclude,
-                ) &
-                (onlyShowBasedOnCategoryFks(
-                      transactions,
-                      categoryFks,
-                      categoryFksExclude,
-                    ) |
-                    onlyShowBasedOnSubcategoryFks(transactions, categoryFks)) &
-                onlyShowBasedOnWalletFks(transactions, walletFks) &
-                onlyShowIfMember(transactions, member) &
-                //onlyShowIfNotExcludedFromBudget(transactions, budget?.budgetPk) &
-                onlyShowIfCertainBudget(
-                  transactions,
-                  onlyShowTransactionsBelongingToBudgetPk,
-                ),
-          );
+                ) |
+                onlyShowBasedOnSubcategoryFks(transactions, categoryFks)) &
+            onlyShowBasedOnWalletFks(transactions, walletFks) &
+            onlyShowIfMember(transactions, member) &
+            //onlyShowIfNotExcludedFromBudget(transactions, budget?.budgetPk) &
+            onlyShowIfCertainBudget(
+              transactions,
+              onlyShowTransactionsBelongingToBudgetPk,
+            ),
+      );
 
     return query.watch().map(
-      (rows) => rows.map((row) {
-        Transaction transaction = row.readTable(transactions);
-        if (budget?.budgetPk != null &&
-            transaction.budgetFksExclude != null &&
-            transaction.budgetFksExclude?.contains(budget?.budgetPk) == true) {
-          transaction = transaction.copyWith(paid: false);
-        }
-        return TransactionWithCategory(
-          category: row.readTable(categories),
-          transaction: transaction,
-          budget: row.readTableOrNull(budgets),
-          objective: row.readTableOrNull(objectives),
-          subCategory: row.readTableOrNull(subCategories),
-          objectiveLoan: row.readTableOrNull(objectiveLoans),
+          (rows) => rows.map((row) {
+            Transaction transaction = row.readTable(transactions);
+            if (budget?.budgetPk != null &&
+                transaction.budgetFksExclude != null &&
+                transaction.budgetFksExclude?.contains(budget?.budgetPk) ==
+                    true) {
+              transaction = transaction.copyWith(paid: false);
+            }
+            return TransactionWithCategory(
+              category: row.readTable(categories),
+              transaction: transaction,
+              budget: row.readTableOrNull(budgets),
+              objective: row.readTableOrNull(objectives),
+              subCategory: row.readTableOrNull(subCategories),
+              objectiveLoan: row.readTableOrNull(objectiveLoans),
+            );
+          }).toList(),
         );
-      }).toList(),
-    );
   }
 
   Expression<bool> isOnDay(
@@ -2046,7 +2028,7 @@ class FinanceDatabase extends _$FinanceDatabase {
 
   // This gets all overdue upcoming transactions
   (Stream<List<Transaction>>, Future<List<Transaction>>)
-  getAllOverdueUpcomingTransactions() {
+      getAllOverdueUpcomingTransactions() {
     final query = select(transactions)
       ..orderBy([(t) => OrderingTerm.asc(t.dateCreated)])
       ..where(
@@ -2060,7 +2042,7 @@ class FinanceDatabase extends _$FinanceDatabase {
 
   // This gets all overdue repetitive transactions
   (Stream<List<Transaction>>, Future<List<Transaction>>)
-  getAllOverdueRepetitiveTransactions() {
+      getAllOverdueRepetitiveTransactions() {
     final query = select(transactions)
       ..orderBy([(t) => OrderingTerm.asc(t.dateCreated)])
       ..where(
@@ -2142,47 +2124,46 @@ class FinanceDatabase extends _$FinanceDatabase {
     String? searchString,
   }) {
     final $CategoriesTable subCategories = alias(categories, 'subCategories');
-    final query =
-        select(transactions).join([
-            innerJoin(
-              categories,
-              categories.categoryPk.equalsExp(transactions.categoryFk),
-            ),
-            leftOuterJoin(
-              subCategories,
-              subCategories.categoryPk.equalsExp(transactions.subCategoryFk),
-            ),
-          ])
-          ..orderBy([OrderingTerm.asc(transactions.dateCreated)])
-          ..where(
-            onlyShowTransactionBasedOnSearchQuery(
-                  transactions,
-                  searchString,
-                  withCategories: true,
-                  joinedWithSubcategoriesTable: subCategories,
-                  joinedWithObjectiveLoans: null,
-                ) &
-                transactions.skipPaid.equals(false) &
-                transactions.paid.equals(false) &
-                (isOverdueTransactions == null
-                    ? Constant(true)
-                    : isOverdueTransactions == true
+    final query = select(transactions).join([
+      innerJoin(
+        categories,
+        categories.categoryPk.equalsExp(transactions.categoryFk),
+      ),
+      leftOuterJoin(
+        subCategories,
+        subCategories.categoryPk.equalsExp(transactions.subCategoryFk),
+      ),
+    ])
+      ..orderBy([OrderingTerm.asc(transactions.dateCreated)])
+      ..where(
+        onlyShowTransactionBasedOnSearchQuery(
+              transactions,
+              searchString,
+              withCategories: true,
+              joinedWithSubcategoriesTable: subCategories,
+              joinedWithObjectiveLoans: null,
+            ) &
+            transactions.skipPaid.equals(false) &
+            transactions.paid.equals(false) &
+            (isOverdueTransactions == null
+                ? Constant(true)
+                : isOverdueTransactions == true
                     ? transactions.dateCreated.isSmallerThanValue(
                         DateTime.now(),
                       )
                     : transactions.dateCreated.isBiggerThanValue(
                         DateTime.now(),
                       )) &
-                (transactions.type.equals(
-                      TransactionSpecialType.subscription.index,
-                    ) |
-                    transactions.type.equals(
-                      TransactionSpecialType.repetitive.index,
-                    ) |
-                    transactions.type.equals(
-                      TransactionSpecialType.upcoming.index,
-                    )),
-          );
+            (transactions.type.equals(
+                  TransactionSpecialType.subscription.index,
+                ) |
+                transactions.type.equals(
+                  TransactionSpecialType.repetitive.index,
+                ) |
+                transactions.type.equals(
+                  TransactionSpecialType.upcoming.index,
+                )),
+      );
 
     return query.map((row) => row.readTable(transactions)).watch();
   }
@@ -2234,8 +2215,8 @@ class FinanceDatabase extends _$FinanceDatabase {
                 (searchFor == null
                     ? Constant(true)
                     : b.name
-                          .collate(Collate.noCase)
-                          .like("%" + (searchFor) + "%")),
+                        .collate(Collate.noCase)
+                        .like("%" + (searchFor) + "%")),
           )
           ..orderBy([
             if (archivedLast) (b) => OrderingTerm.asc(b.archived),
@@ -2246,7 +2227,7 @@ class FinanceDatabase extends _$FinanceDatabase {
   }
 
   List<TransactionAssociatedTitleWithCategory>
-  removeDuplicateTransactionAssociatedTitleWithCategory(
+      removeDuplicateTransactionAssociatedTitleWithCategory(
     List<TransactionAssociatedTitleWithCategory> inputList,
   ) {
     Set<String> uniqueTitlePks = Set<String>();
@@ -2265,7 +2246,7 @@ class FinanceDatabase extends _$FinanceDatabase {
   }
 
   Future<List<TransactionAssociatedTitleWithCategory>>
-  getSimilarAssociatedTitles({
+      getSimilarAssociatedTitles({
     required String title,
     List<String> excludeTitles = const [],
     int? limit,
@@ -2277,13 +2258,13 @@ class FinanceDatabase extends _$FinanceDatabase {
 
     List<TransactionAssociatedTitleWithCategory> list =
         (await (select(associatedTitles).join([
-                    innerJoin(
-                      categories,
-                      categories.categoryPk.equalsExp(
-                        associatedTitles.categoryFk,
-                      ),
-                    ),
-                  ])
+      innerJoin(
+        categories,
+        categories.categoryPk.equalsExp(
+          associatedTitles.categoryFk,
+        ),
+      ),
+    ])
                   ..where(
                     associatedTitles.title
                             .collate(Collate.noCase)
@@ -2299,13 +2280,12 @@ class FinanceDatabase extends _$FinanceDatabase {
                   ..limit(limit, offset: offset ?? DEFAULT_OFFSET))
                 .get())
             .map((rows) {
-              return TransactionAssociatedTitleWithCategory(
-                title: rows.readTable(associatedTitles),
-                category: rows.readTable(categories),
-                type: TitleType.TitleExists,
-              );
-            })
-            .toList();
+      return TransactionAssociatedTitleWithCategory(
+        title: rows.readTable(associatedTitles),
+        category: rows.readTable(categories),
+        type: TitleType.TitleExists,
+      );
+    }).toList();
 
     if (list.length > limit) return list;
     if (limit - list.length < 0)
@@ -2317,13 +2297,13 @@ class FinanceDatabase extends _$FinanceDatabase {
     if (tryToCompleteSearch)
       list.addAll(
         (await (select(associatedTitles).join([
-                    innerJoin(
-                      categories,
-                      categories.categoryPk.equalsExp(
-                        associatedTitles.categoryFk,
-                      ),
-                    ),
-                  ])
+          innerJoin(
+            categories,
+            categories.categoryPk.equalsExp(
+              associatedTitles.categoryFk,
+            ),
+          ),
+        ])
                   ..where(
                     associatedTitles.title
                         .collate(Collate.noCase)
@@ -2333,19 +2313,18 @@ class FinanceDatabase extends _$FinanceDatabase {
                   ..limit(limit, offset: offset ?? DEFAULT_OFFSET))
                 .get())
             .map((rows) {
-              TransactionAssociatedTitle foundTitle = rows.readTable(
-                associatedTitles,
-              );
-              return TransactionAssociatedTitleWithCategory(
-                title: foundTitle.copyWith(
-                  title: completePartialTitle(title, foundTitle.title),
-                ),
-                category: rows.readTable(categories),
-                type: TitleType.PartialTitleExists,
-                partialTitleString: foundTitle.title,
-              );
-            })
-            .toList(),
+          TransactionAssociatedTitle foundTitle = rows.readTable(
+            associatedTitles,
+          );
+          return TransactionAssociatedTitleWithCategory(
+            title: foundTitle.copyWith(
+              title: completePartialTitle(title, foundTitle.title),
+            ),
+            category: rows.readTable(categories),
+            type: TitleType.PartialTitleExists,
+            partialTitleString: foundTitle.title,
+          );
+        }).toList(),
       );
 
     if (list.length > limit)
@@ -2402,22 +2381,21 @@ class FinanceDatabase extends _$FinanceDatabase {
                   ..limit(limit, offset: offset ?? DEFAULT_OFFSET))
                 .get())
             .map((TransactionCategory category) {
-              return TransactionAssociatedTitleWithCategory(
-                title: TransactionAssociatedTitle(
-                  associatedTitlePk: "-1",
-                  categoryFk: category.categoryPk,
-                  title: category.name,
-                  dateCreated: category.dateCreated,
-                  order: -1,
-                  isExactMatch: false,
-                ),
-                category: category,
-                type: category.mainCategoryPk == null
-                    ? TitleType.CategoryName
-                    : TitleType.SubCategoryName,
-              );
-            })
-            .toList(),
+          return TransactionAssociatedTitleWithCategory(
+            title: TransactionAssociatedTitle(
+              associatedTitlePk: "-1",
+              categoryFk: category.categoryPk,
+              title: category.name,
+              dateCreated: category.dateCreated,
+              order: -1,
+              isExactMatch: false,
+            ),
+            category: category,
+            type: category.mainCategoryPk == null
+                ? TitleType.CategoryName
+                : TitleType.SubCategoryName,
+          );
+        }).toList(),
       );
 
     return removeDuplicateTransactionAssociatedTitleWithCategory(list);
@@ -2439,7 +2417,7 @@ class FinanceDatabase extends _$FinanceDatabase {
   }
 
   (Stream<List<TransactionWallet>>, Future<List<TransactionWallet>>)
-  getAllPinnedWallets(HomePageWidgetDisplay homePageWidgetDisplay) {
+      getAllPinnedWallets(HomePageWidgetDisplay homePageWidgetDisplay) {
     final query = (select(wallets)
       ..where(
         (tbl) => tbl.homePageWidgetDisplay.contains(
@@ -2487,19 +2465,22 @@ class FinanceDatabase extends _$FinanceDatabase {
   Stream<Budget> getBudget(String budgetPk) {
     return (select(
       budgets,
-    )..where((b) => b.budgetPk.equals(budgetPk))).watchSingle();
+    )..where((b) => b.budgetPk.equals(budgetPk)))
+        .watchSingle();
   }
 
   Stream<Objective> getObjective(String objectivePk) {
     return (select(
       objectives,
-    )..where((o) => o.objectivePk.equals(objectivePk))).watchSingle();
+    )..where((o) => o.objectivePk.equals(objectivePk)))
+        .watchSingle();
   }
 
   Stream<TransactionWallet> getWallet(String walletPk) {
     return (select(
       wallets,
-    )..where((w) => w.walletPk.equals(walletPk))).watchSingle();
+    )..where((w) => w.walletPk.equals(walletPk)))
+        .watchSingle();
   }
 
   Future<int> getAmountOfBudgets() async {
@@ -2507,18 +2488,20 @@ class FinanceDatabase extends _$FinanceDatabase {
   }
 
   Future<List<Transaction>> getAllPreviewTransactions() {
-    return (select(transactions)..where(
-          (tbl) =>
-              tbl.methodAdded.equalsValue(MethodAdded.preview) &
-              tbl.methodAdded.isNotNull(),
-        ))
+    return (select(transactions)
+          ..where(
+            (tbl) =>
+                tbl.methodAdded.equalsValue(MethodAdded.preview) &
+                tbl.methodAdded.isNotNull(),
+          ))
         .get();
   }
 
   Future moveBudget(String budgetPk, int newPosition, int oldPosition) async {
     List<Budget> budgetsList = await (select(
       budgets,
-    )..orderBy([(b) => OrderingTerm.asc(b.order)])).get();
+    )..orderBy([(b) => OrderingTerm.asc(b.order)]))
+        .get();
 
     await batch((batch) {
       if (newPosition > oldPosition) {
@@ -2567,11 +2550,10 @@ class FinanceDatabase extends _$FinanceDatabase {
     int oldPosition, {
     required ObjectiveType objectiveType,
   }) async {
-    List<Objective> objectivesList =
-        await (select(objectives)
-              ..where((t) => t.type.equals(objectiveType.index))
-              ..orderBy([(b) => OrderingTerm.asc(b.order)]))
-            .get();
+    List<Objective> objectivesList = await (select(objectives)
+          ..where((t) => t.type.equals(objectiveType.index))
+          ..orderBy([(b) => OrderingTerm.asc(b.order)]))
+        .get();
 
     await batch((batch) {
       if (newPosition > oldPosition) {
@@ -2617,20 +2599,22 @@ class FinanceDatabase extends _$FinanceDatabase {
   Future<bool> shiftBudgets(int direction, int pastIndexIncluding) async {
     List<Budget> budgetsList = await (select(
       budgets,
-    )..orderBy([(b) => OrderingTerm.asc(b.order)])).get();
+    )..orderBy([(b) => OrderingTerm.asc(b.order)]))
+        .get();
     if (direction == -1 || direction == 1) {
       for (Budget budget in budgetsList) {
-        await (update(budgets)..where(
-              (b) =>
-                  b.order.isBiggerOrEqualValue(pastIndexIncluding) &
-                  b.budgetPk.equals(budget.budgetPk),
-            ))
+        await (update(budgets)
+              ..where(
+                (b) =>
+                    b.order.isBiggerOrEqualValue(pastIndexIncluding) &
+                    b.budgetPk.equals(budget.budgetPk),
+              ))
             .write(
-              BudgetsCompanion(
-                order: Value(budget.order + direction),
-                dateTimeModified: Value(DateTime.now()),
-              ),
-            );
+          BudgetsCompanion(
+            order: Value(budget.order + direction),
+            dateTimeModified: Value(DateTime.now()),
+          ),
+        );
       }
     } else {
       return false;
@@ -2643,24 +2627,24 @@ class FinanceDatabase extends _$FinanceDatabase {
     int pastIndexIncluding, {
     required ObjectiveType objectiveType,
   }) async {
-    List<Objective> objectivesList =
-        await (select(objectives)
-              ..where((t) => t.type.equals(objectiveType.index))
-              ..orderBy([(b) => OrderingTerm.asc(b.order)]))
-            .get();
+    List<Objective> objectivesList = await (select(objectives)
+          ..where((t) => t.type.equals(objectiveType.index))
+          ..orderBy([(b) => OrderingTerm.asc(b.order)]))
+        .get();
     if (direction == -1 || direction == 1) {
       for (Objective objective in objectivesList) {
-        await (update(objectives)..where(
-              (b) =>
-                  b.order.isBiggerOrEqualValue(pastIndexIncluding) &
-                  b.objectivePk.equals(objective.objectivePk),
-            ))
+        await (update(objectives)
+              ..where(
+                (b) =>
+                    b.order.isBiggerOrEqualValue(pastIndexIncluding) &
+                    b.objectivePk.equals(objective.objectivePk),
+              ))
             .write(
-              ObjectivesCompanion(
-                order: Value(objective.order + direction),
-                dateTimeModified: Value(DateTime.now()),
-              ),
-            );
+          ObjectivesCompanion(
+            order: Value(objective.order + direction),
+            dateTimeModified: Value(DateTime.now()),
+          ),
+        );
       }
     } else {
       return false;
@@ -2671,7 +2655,8 @@ class FinanceDatabase extends _$FinanceDatabase {
   Future<Map<String, TransactionCategory>> getAllCategoriesIndexed() async {
     List<TransactionCategory> allCategories = (await ((select(
       categories,
-    )..orderBy([(w) => OrderingTerm.asc(w.order)])).get()));
+    )..orderBy([(w) => OrderingTerm.asc(w.order)]))
+        .get()));
     Map<String, TransactionCategory> indexedByPk = {
       for (TransactionCategory category in allCategories)
         category.categoryPk: category,
@@ -2682,7 +2667,9 @@ class FinanceDatabase extends _$FinanceDatabase {
   Stream<AllWallets> watchAllWalletsIndexed() {
     return (select(
       wallets,
-    )..orderBy([(w) => OrderingTerm.asc(w.order)])).watch().map((wallets) {
+    )..orderBy([(w) => OrderingTerm.asc(w.order)]))
+        .watch()
+        .map((wallets) {
       Map<String, TransactionWallet> indexedByPk = {
         for (TransactionWallet wallet in wallets) wallet.walletPk: wallet,
       };
@@ -2716,51 +2703,49 @@ class FinanceDatabase extends _$FinanceDatabase {
     final totalSpent = transactions.amount.sum(
       filter: transactions.paid.equals(true),
     );
-    query =
-        (select(wallets)
-              ..where(
-                (w) =>
-                    ((homePageWidgetDisplay != null
-                        ? w.homePageWidgetDisplay.contains(
-                            homePageWidgetDisplay.index.toString(),
-                          )
-                        : Constant(true)) &
-                    (searchFor == null
-                        ? Constant(true)
-                        : w.name
-                              .collate(Collate.noCase)
-                              .like("%" + (searchFor) + "%"))),
-              )
-              ..orderBy([(w) => OrderingTerm.asc(w.order)]))
-            .join([
-              leftOuterJoin(
-                transactions,
-                transactions.walletFk.equalsExp(wallets.walletPk),
-              ),
-            ])
-          // ..where(transactions.walletFk.isNull() |
-          //     onlyShowIfFollowCustomPeriodCycle(
-          //         transactions, homePageWidgetDisplay != null,
-          //         cycleSettingsExtension: homePageWidgetDisplay ==
-          //                 HomePageWidgetDisplay.WalletSwitcher
-          //             ? "Wallets"
-          //             : homePageWidgetDisplay == HomePageWidgetDisplay.WalletList
-          //                 ? "WalletsList"
-          //                 : ""))
-          ..groupBy(
-            mergeLikeCurrencies ? [wallets.currency] : [wallets.walletPk],
+    query = (select(wallets)
+          ..where(
+            (w) => ((homePageWidgetDisplay != null
+                    ? w.homePageWidgetDisplay.contains(
+                        homePageWidgetDisplay.index.toString(),
+                      )
+                    : Constant(true)) &
+                (searchFor == null
+                    ? Constant(true)
+                    : w.name
+                        .collate(Collate.noCase)
+                        .like("%" + (searchFor) + "%"))),
           )
-          ..addColumns([totalCount, totalSpent]);
+          ..orderBy([(w) => OrderingTerm.asc(w.order)]))
+        .join([
+      leftOuterJoin(
+        transactions,
+        transactions.walletFk.equalsExp(wallets.walletPk),
+      ),
+    ])
+      // ..where(transactions.walletFk.isNull() |
+      //     onlyShowIfFollowCustomPeriodCycle(
+      //         transactions, homePageWidgetDisplay != null,
+      //         cycleSettingsExtension: homePageWidgetDisplay ==
+      //                 HomePageWidgetDisplay.WalletSwitcher
+      //             ? "Wallets"
+      //             : homePageWidgetDisplay == HomePageWidgetDisplay.WalletList
+      //                 ? "WalletsList"
+      //                 : ""))
+      ..groupBy(
+        mergeLikeCurrencies ? [wallets.currency] : [wallets.walletPk],
+      )
+      ..addColumns([totalCount, totalSpent]);
 
     return query.watch().map(
-      (rows) => rows.map((row) {
-        return WalletWithDetails(
-          wallet: row.readTable(wallets),
-          numberTransactions: row.read(totalCount),
-          totalSpent: row.read(totalSpent),
+          (rows) => rows.map((row) {
+            return WalletWithDetails(
+              wallet: row.readTable(wallets),
+              numberTransactions: row.read(totalCount),
+              totalSpent: row.read(totalSpent),
+            );
+          }).toList(),
         );
-      }).toList(),
-    );
   }
 
   Stream<List<ScannerTemplate>> watchAllScannerTemplates({
@@ -2791,63 +2776,64 @@ class FinanceDatabase extends _$FinanceDatabase {
   }
 
   Future<List<TransactionWallet>> getAllNewWallets(DateTime lastSynced) {
-    return (select(wallets)..where(
-          (tbl) =>
-              tbl.dateTimeModified.isBiggerOrEqualValue(lastSynced) |
-              tbl.dateTimeModified.isNull(),
-        ))
+    return (select(wallets)
+          ..where(
+            (tbl) =>
+                tbl.dateTimeModified.isBiggerOrEqualValue(lastSynced) |
+                tbl.dateTimeModified.isNull(),
+          ))
         .get();
   }
 
   Future<List<Transaction>> getAllNewTransactions(DateTime lastSynced) {
-    return (select(transactions)..where(
-          (tbl) =>
-              tbl.dateTimeModified.isBiggerOrEqualValue(lastSynced) |
-              tbl.dateTimeModified.isNull(),
-        ))
+    return (select(transactions)
+          ..where(
+            (tbl) =>
+                tbl.dateTimeModified.isBiggerOrEqualValue(lastSynced) |
+                tbl.dateTimeModified.isNull(),
+          ))
         .get();
   }
 
   Future<List<TransactionWithCategory>>
-  getAllTransactionsWithCategoryWalletBudgetObjectiveSubCategory(
+      getAllTransactionsWithCategoryWalletBudgetObjectiveSubCategory(
     Expression<bool> Function($TransactionsTable) filter,
   ) async {
     final subCategories = alias(categories, 'subCategories');
     final $ObjectivesTable objectiveLoans = alias(objectives, 'objectiveLoans');
-    final query =
-        (select(transactions)
-              ..where(filter)
-              ..orderBy([(t) => OrderingTerm.desc(t.dateCreated)]))
-            .join([
-              innerJoin(
-                categories,
-                categories.categoryPk.equalsExp(transactions.categoryFk),
-              ),
-              innerJoin(
-                wallets,
-                wallets.walletPk.equalsExp(transactions.walletFk),
-              ),
-              leftOuterJoin(
-                budgets,
-                budgets.budgetPk.equalsExp(
-                  transactions.sharedReferenceBudgetPk,
-                ),
-              ),
-              leftOuterJoin(
-                objectives,
-                objectives.objectivePk.equalsExp(transactions.objectiveFk),
-              ),
-              leftOuterJoin(
-                objectiveLoans,
-                objectiveLoans.objectivePk.equalsExp(
-                  transactions.objectiveLoanFk,
-                ),
-              ),
-              leftOuterJoin(
-                subCategories,
-                subCategories.categoryPk.equalsExp(transactions.subCategoryFk),
-              ),
-            ]);
+    final query = (select(transactions)
+          ..where(filter)
+          ..orderBy([(t) => OrderingTerm.desc(t.dateCreated)]))
+        .join([
+      innerJoin(
+        categories,
+        categories.categoryPk.equalsExp(transactions.categoryFk),
+      ),
+      innerJoin(
+        wallets,
+        wallets.walletPk.equalsExp(transactions.walletFk),
+      ),
+      leftOuterJoin(
+        budgets,
+        budgets.budgetPk.equalsExp(
+          transactions.sharedReferenceBudgetPk,
+        ),
+      ),
+      leftOuterJoin(
+        objectives,
+        objectives.objectivePk.equalsExp(transactions.objectiveFk),
+      ),
+      leftOuterJoin(
+        objectiveLoans,
+        objectiveLoans.objectivePk.equalsExp(
+          transactions.objectiveLoanFk,
+        ),
+      ),
+      leftOuterJoin(
+        subCategories,
+        subCategories.categoryPk.equalsExp(transactions.subCategoryFk),
+      ),
+    ]);
 
     final rows = await query.get();
 
@@ -2865,60 +2851,66 @@ class FinanceDatabase extends _$FinanceDatabase {
   }
 
   Future<List<TransactionCategory>> getAllNewCategories(DateTime lastSynced) {
-    return (select(categories)..where(
-          (tbl) =>
-              tbl.dateTimeModified.isBiggerOrEqualValue(lastSynced) |
-              tbl.dateTimeModified.isNull(),
-        ))
+    return (select(categories)
+          ..where(
+            (tbl) =>
+                tbl.dateTimeModified.isBiggerOrEqualValue(lastSynced) |
+                tbl.dateTimeModified.isNull(),
+          ))
         .get();
   }
 
   Future<List<CategoryBudgetLimit>> getAllNewCategoryBudgetLimits(
     DateTime lastSynced,
   ) {
-    return (select(categoryBudgetLimits)..where(
-          (tbl) =>
-              tbl.dateTimeModified.isBiggerOrEqualValue(lastSynced) |
-              tbl.dateTimeModified.isNull(),
-        ))
+    return (select(categoryBudgetLimits)
+          ..where(
+            (tbl) =>
+                tbl.dateTimeModified.isBiggerOrEqualValue(lastSynced) |
+                tbl.dateTimeModified.isNull(),
+          ))
         .get();
   }
 
   Future<List<TransactionAssociatedTitle>> getAllNewAssociatedTitles(
     DateTime lastSynced,
   ) {
-    return (select(associatedTitles)..where(
-          (tbl) =>
-              tbl.dateTimeModified.isBiggerOrEqualValue(lastSynced) |
-              tbl.dateTimeModified.isNull(),
-        ))
+    return (select(associatedTitles)
+          ..where(
+            (tbl) =>
+                tbl.dateTimeModified.isBiggerOrEqualValue(lastSynced) |
+                tbl.dateTimeModified.isNull(),
+          ))
         .get();
   }
 
   Future<List<Budget>> getAllNewBudgets(DateTime lastSynced) {
-    return (select(budgets)..where(
-          (tbl) =>
-              tbl.dateTimeModified.isBiggerOrEqualValue(lastSynced) |
-              tbl.dateTimeModified.isNull(),
-        ))
+    return (select(budgets)
+          ..where(
+            (tbl) =>
+                tbl.dateTimeModified.isBiggerOrEqualValue(lastSynced) |
+                tbl.dateTimeModified.isNull(),
+          ))
         .get();
   }
 
   Future<List<Objective>> getAllNewObjectives(DateTime lastSynced) {
-    return (select(objectives)..where(
-          (tbl) =>
-              tbl.dateTimeModified.isBiggerOrEqualValue(lastSynced) |
-              tbl.dateTimeModified.isNull(),
-        ))
+    return (select(objectives)
+          ..where(
+            (tbl) =>
+                tbl.dateTimeModified.isBiggerOrEqualValue(lastSynced) |
+                tbl.dateTimeModified.isNull(),
+          ))
         .get();
   }
 
   Future<List<ScannerTemplate>> getAllNewScannerTemplates(DateTime lastSynced) {
-    return (select(scannerTemplates)..where(
-          (tbl) =>
-              tbl.dateTimeModified.isBiggerOrEqualValue(lastSynced) |
-              tbl.dateTimeModified.isNull(),
-        ))
+    return (select(scannerTemplates)
+          ..where(
+            (tbl) =>
+                tbl.dateTimeModified.isBiggerOrEqualValue(lastSynced) |
+                tbl.dateTimeModified.isNull(),
+          ))
         .get();
   }
 
@@ -2929,7 +2921,8 @@ class FinanceDatabase extends _$FinanceDatabase {
   Future moveWallet(String walletPk, int newPosition, int oldPosition) async {
     List<TransactionWallet> walletsList = await (select(
       wallets,
-    )..orderBy([(w) => OrderingTerm.asc(w.order)])).get();
+    )..orderBy([(w) => OrderingTerm.asc(w.order)]))
+        .get();
     await batch((batch) {
       if (newPosition > oldPosition) {
         for (TransactionWallet wallet in walletsList) {
@@ -2974,20 +2967,22 @@ class FinanceDatabase extends _$FinanceDatabase {
   Future<bool> shiftWallets(int direction, int pastIndexIncluding) async {
     List<TransactionWallet> walletsList = await (select(
       wallets,
-    )..orderBy([(b) => OrderingTerm.asc(b.order)])).get();
+    )..orderBy([(b) => OrderingTerm.asc(b.order)]))
+        .get();
     if (direction == -1 || direction == 1) {
       for (TransactionWallet wallet in walletsList) {
-        await (update(wallets)..where(
-              (w) =>
-                  w.order.isBiggerOrEqualValue(pastIndexIncluding) &
-                  w.walletPk.equals(wallet.walletPk),
-            ))
+        await (update(wallets)
+              ..where(
+                (w) =>
+                    w.order.isBiggerOrEqualValue(pastIndexIncluding) &
+                    w.walletPk.equals(wallet.walletPk),
+              ))
             .write(
-              WalletsCompanion(
-                order: Value(wallet.order + direction),
-                dateTimeModified: Value(DateTime.now()),
-              ),
-            );
+          WalletsCompanion(
+            order: Value(wallet.order + direction),
+            dateTimeModified: Value(DateTime.now()),
+          ),
+        );
       }
     } else {
       return false;
@@ -2996,9 +2991,10 @@ class FinanceDatabase extends _$FinanceDatabase {
   }
 
   Future<List<DeleteLog>> getAllNewDeleteLogs(DateTime lastSynced) async {
-    return (select(deleteLogs)..where(
-          (tbl) => tbl.dateTimeModified.isBiggerOrEqualValue(lastSynced),
-        ))
+    return (select(deleteLogs)
+          ..where(
+            (tbl) => tbl.dateTimeModified.isBiggerOrEqualValue(lastSynced),
+          ))
         .get();
   }
 
@@ -3046,8 +3042,8 @@ class FinanceDatabase extends _$FinanceDatabase {
           ),
         );
         if (type == DeleteLogType.Transaction) {
-          Transaction? transactionToDelete = await database
-              .tryGetTransactionFromPk(deletePk);
+          Transaction? transactionToDelete =
+              await database.tryGetTransactionFromPk(deletePk);
           fetchedTransactions[deletePk] = transactionToDelete;
         }
       }),
@@ -3074,7 +3070,8 @@ class FinanceDatabase extends _$FinanceDatabase {
   Future<AppSetting> getSettings() {
     return (select(
       appSettings,
-    )..where((s) => s.settingsPk.equals(0))).getSingle();
+    )..where((s) => s.settingsPk.equals(0)))
+        .getSingle();
   }
 
   //create or update a new wallet
@@ -3214,22 +3211,22 @@ class FinanceDatabase extends _$FinanceDatabase {
     ).insert((companionToInsert), mode: InsertMode.insertOrReplace);
   }
 
-  Stream<List<TransactionAssociatedTitleWithCategory>>
-  watchAllAssociatedTitles({String? searchFor, int? limit, int? offset}) {
+  Stream<List<TransactionAssociatedTitleWithCategory>> watchAllAssociatedTitles(
+      {String? searchFor, int? limit, int? offset}) {
     return (select(associatedTitles).join([
-            // Inner instead of outer because transaction category is required
-            // If we do an outer join and the title does not have a category, the query will fail
-            innerJoin(
-              categories,
-              categories.categoryPk.equalsExp(associatedTitles.categoryFk),
-            ),
-          ])
+      // Inner instead of outer because transaction category is required
+      // If we do an outer join and the title does not have a category, the query will fail
+      innerJoin(
+        categories,
+        categories.categoryPk.equalsExp(associatedTitles.categoryFk),
+      ),
+    ])
           ..where(
             searchFor == null
                 ? Constant(true)
                 : associatedTitles.title
-                      .collate(Collate.noCase)
-                      .like("%" + (searchFor) + "%"),
+                    .collate(Collate.noCase)
+                    .like("%" + (searchFor) + "%"),
           )
           ..orderBy([OrderingTerm.desc(associatedTitles.order)])
         // ..limit(limit ?? DEFAULT_LIMIT, offset: offset ?? DEFAULT_OFFSET)
@@ -3370,7 +3367,8 @@ class FinanceDatabase extends _$FinanceDatabase {
   ) {
     return (select(
       categoryBudgetLimits,
-    )..where((t) => t.budgetFk.equals(budgetPk))).watch();
+    )..where((t) => t.budgetFk.equals(budgetPk)))
+        .watch();
   }
 
   Stream<List<CategoryWithTotal>> watchAllCategoryLimitsInBudgetWithCategory(
@@ -3383,7 +3381,9 @@ class FinanceDatabase extends _$FinanceDatabase {
         categoryBudgetLimits.categoryFk.equalsExp(categories.categoryPk) &
             categoryBudgetLimits.budgetFk.equals(budgetPk),
       ),
-    ])..groupBy([categories.categoryPk])).map((row) {
+    ])
+          ..groupBy([categories.categoryPk]))
+        .map((row) {
       final TransactionCategory category = row.readTable(categories);
       CategoryBudgetLimit? categoryBudgetLimit = row.readTableOrNull(
         categoryBudgetLimits,
@@ -3406,7 +3406,8 @@ class FinanceDatabase extends _$FinanceDatabase {
     List<CategoryBudgetLimit> limitsInserting = [];
     List<CategoryBudgetLimit> categorySpendingLimits = await (select(
       categoryBudgetLimits,
-    )..where((t) => t.budgetFk.equals(budgetPk))).get();
+    )..where((t) => t.budgetFk.equals(budgetPk)))
+        .get();
     for (CategoryBudgetLimit categorySpendingLimit in categorySpendingLimits) {
       TransactionCategory category = await getCategoryInstance(
         categorySpendingLimit.categoryFk,
@@ -3423,8 +3424,7 @@ class FinanceDatabase extends _$FinanceDatabase {
           convertedAmount = convertedAmount / budgetSetAmount * 100;
         } else {
           convertedAmount = convertedAmount / 100 * budgetSetAmount;
-          convertedAmount =
-              convertedAmount *
+          convertedAmount = convertedAmount *
               1 /
               amountRatioToPrimaryCurrencyGivenPk(
                 allWallets,
@@ -3437,8 +3437,7 @@ class FinanceDatabase extends _$FinanceDatabase {
             .where((e) => e.categoryFk == category.mainCategoryPk)
             .toList()
             .firstOrNull;
-        double convertedAmountMain =
-            categoryLimitMain?.amount ??
+        double convertedAmountMain = categoryLimitMain?.amount ??
             (absoluteToPercentage ? budgetSetAmount : 100);
         convertedAmount = categorySpendingLimit.amount;
         if (absoluteToPercentage) {
@@ -3448,12 +3447,10 @@ class FinanceDatabase extends _$FinanceDatabase {
           );
           convertedAmount = convertedAmount / convertedAmountMain * 100;
         } else {
-          convertedAmount =
-              (convertedAmount / 100) *
+          convertedAmount = (convertedAmount / 100) *
               (convertedAmountMain / 100) *
               (budgetSetAmount);
-          convertedAmount =
-              convertedAmount *
+          convertedAmount = convertedAmount *
               1 /
               amountRatioToPrimaryCurrencyGivenPk(
                 allWallets,
@@ -3485,8 +3482,8 @@ class FinanceDatabase extends _$FinanceDatabase {
     String? budgetPk,
     String? categoryPk,
   ) {
-    SimpleSelectStatement<$CategoryBudgetLimitsTable, CategoryBudgetLimit>
-    query = (select(categoryBudgetLimits)
+    SimpleSelectStatement<$CategoryBudgetLimitsTable,
+        CategoryBudgetLimit> query = (select(categoryBudgetLimits)
       ..where(
         (t) =>
             evaluateIfNull(t.budgetFk.equals(budgetPk ?? "0"), budgetPk, true) &
@@ -3500,23 +3497,25 @@ class FinanceDatabase extends _$FinanceDatabase {
   }
 
   (Stream<CategoryBudgetLimit>, Future<CategoryBudgetLimit>)
-  getCategoryBudgetLimitInstance(String categoryLimitPk) {
+      getCategoryBudgetLimitInstance(String categoryLimitPk) {
     final SimpleSelectStatement<$CategoryBudgetLimitsTable, CategoryBudgetLimit>
-    query = (select(categoryBudgetLimits)
-      ..where((t) => t.categoryLimitPk.equals(categoryLimitPk)));
+        query = (select(categoryBudgetLimits)
+          ..where((t) => t.categoryLimitPk.equals(categoryLimitPk)));
     return (query.watchSingle(), query.getSingle());
   }
 
   Stream<TransactionCategory> watchCategory(String categoryPk) {
     return (select(
       categories,
-    )..where((t) => t.categoryPk.equals(categoryPk))).watchSingle();
+    )..where((t) => t.categoryPk.equals(categoryPk)))
+        .watchSingle();
   }
 
   Stream<TransactionCategory?> watchBalanceCorrectionCategory() {
     return (select(
       categories,
-    )..where((t) => t.categoryPk.equals("0"))).watchSingleOrNull();
+    )..where((t) => t.categoryPk.equals("0")))
+        .watchSingleOrNull();
   }
 
   (Stream<TransactionCategory>, Future<TransactionCategory>) getCategory(
@@ -3528,20 +3527,17 @@ class FinanceDatabase extends _$FinanceDatabase {
   }
 
   (Stream<TransactionAssociatedTitle>, Future<TransactionAssociatedTitle>)
-  getAssociatedTitleInstance(String associatedTitlePk) {
-    final SimpleSelectStatement<
-      $AssociatedTitlesTable,
-      TransactionAssociatedTitle
-    >
-    query = (select(associatedTitles)
+      getAssociatedTitleInstance(String associatedTitlePk) {
+    final SimpleSelectStatement<$AssociatedTitlesTable,
+        TransactionAssociatedTitle> query = (select(associatedTitles)
       ..where((t) => t.associatedTitlePk.equals(associatedTitlePk)));
     return (query.watchSingle(), query.getSingle());
   }
 
   (Stream<List<CategoryBudgetLimit>>, Future<List<CategoryBudgetLimit>>)
-  getCategoryLimits() {
+      getCategoryLimits() {
     final SimpleSelectStatement<$CategoryBudgetLimitsTable, CategoryBudgetLimit>
-    query = (select(categoryBudgetLimits));
+        query = (select(categoryBudgetLimits));
     return (query.watch(), query.get());
   }
 
@@ -3579,7 +3575,8 @@ class FinanceDatabase extends _$FinanceDatabase {
   ) async {
     List<TransactionAssociatedTitle> associatedTitlesList = await (select(
       associatedTitles,
-    )..orderBy([(t) => OrderingTerm.asc(t.order)])).get();
+    )..orderBy([(t) => OrderingTerm.asc(t.order)]))
+        .get();
     await batch((batch) {
       if (newPosition > oldPosition) {
         for (TransactionAssociatedTitle associatedTitle
@@ -3626,7 +3623,8 @@ class FinanceDatabase extends _$FinanceDatabase {
   Future<bool> fixOrderBudgets() async {
     List<Budget> budgetsList = await (select(
       budgets,
-    )..orderBy([(t) => OrderingTerm.asc(t.order)])).get();
+    )..orderBy([(t) => OrderingTerm.asc(t.order)]))
+        .get();
     bool requiresUpdate = false;
     for (int i = 0; i < budgetsList.length; i++) {
       if (budgetsList[i].order != i && requiresUpdate == false)
@@ -3649,11 +3647,10 @@ class FinanceDatabase extends _$FinanceDatabase {
   Future<bool> fixOrderObjectives({
     required ObjectiveType objectiveType,
   }) async {
-    List<Objective> objectivesList =
-        await (select(objectives)
-              ..where((t) => t.type.equals(objectiveType.index))
-              ..orderBy([(t) => OrderingTerm.asc(t.order)]))
-            .get();
+    List<Objective> objectivesList = await (select(objectives)
+          ..where((t) => t.type.equals(objectiveType.index))
+          ..orderBy([(t) => OrderingTerm.asc(t.order)]))
+        .get();
     bool requiresUpdate = false;
     for (int i = 0; i < objectivesList.length; i++) {
       if (objectivesList[i].order != i && requiresUpdate == false)
@@ -3676,17 +3673,16 @@ class FinanceDatabase extends _$FinanceDatabase {
   Future<bool> fixOrderCategories({
     String? mainCategoryPkIfSubCategoryOrderFixing,
   }) async {
-    List<TransactionCategory> categoriesList =
-        await (select(categories)
-              ..where(
-                (c) => mainCategoryPkIfSubCategoryOrderFixing == null
-                    ? onlyShowMainCategoryListing(c)
-                    : c.mainCategoryPk.equals(
-                        mainCategoryPkIfSubCategoryOrderFixing,
-                      ),
-              )
-              ..orderBy([(t) => OrderingTerm.asc(t.order)]))
-            .get();
+    List<TransactionCategory> categoriesList = await (select(categories)
+          ..where(
+            (c) => mainCategoryPkIfSubCategoryOrderFixing == null
+                ? onlyShowMainCategoryListing(c)
+                : c.mainCategoryPk.equals(
+                    mainCategoryPkIfSubCategoryOrderFixing,
+                  ),
+          )
+          ..orderBy([(t) => OrderingTerm.asc(t.order)]))
+        .get();
     bool requiresUpdate = false;
     for (int i = 0; i < categoriesList.length; i++) {
       if (categoriesList[i].order != i && requiresUpdate == false)
@@ -3709,7 +3705,8 @@ class FinanceDatabase extends _$FinanceDatabase {
   Future<bool> fixOrderWallets() async {
     List<TransactionWallet> walletsList = await (select(
       wallets,
-    )..orderBy([(t) => OrderingTerm.asc(t.order)])).get();
+    )..orderBy([(t) => OrderingTerm.asc(t.order)]))
+        .get();
     bool requiresUpdate = false;
     for (int i = 0; i < walletsList.length; i++) {
       if (walletsList[i].order != i && requiresUpdate == false)
@@ -3730,16 +3727,16 @@ class FinanceDatabase extends _$FinanceDatabase {
   }
 
   Future<bool> fixDuplicateAssociatedTitles() async {
-    List<Map<String, String>> duplicatedTitles =
-        (await customSelect(
-          'SELECT associated_titles.* FROM (SELECT title, category_fk FROM associated_titles GROUP BY title, category_fk HAVING COUNT(*) >= 2) T1 JOIN associated_titles ON T1.title = associated_titles.title AND T1.category_fk = associated_titles.category_fk ORDER BY associated_titles.title, associated_titles."order" DESC',
-          readsFrom: {associatedTitles},
-        ).get()).map((row) {
-          return {
-            "associated_title_pk": row.read<String>('associated_title_pk'),
-            "title": row.read<String>('title'),
-          };
-        }).toList();
+    List<Map<String, String>> duplicatedTitles = (await customSelect(
+      'SELECT associated_titles.* FROM (SELECT title, category_fk FROM associated_titles GROUP BY title, category_fk HAVING COUNT(*) >= 2) T1 JOIN associated_titles ON T1.title = associated_titles.title AND T1.category_fk = associated_titles.category_fk ORDER BY associated_titles.title, associated_titles."order" DESC',
+      readsFrom: {associatedTitles},
+    ).get())
+        .map((row) {
+      return {
+        "associated_title_pk": row.read<String>('associated_title_pk'),
+        "title": row.read<String>('title'),
+      };
+    }).toList();
 
     Set<String> seenTitles = {};
     Set<String> titlesToDelete = {};
@@ -3769,7 +3766,8 @@ class FinanceDatabase extends _$FinanceDatabase {
   Future<bool> fixOrderAssociatedTitles() async {
     List<TransactionAssociatedTitle> associatedTitlesList = await (select(
       associatedTitles,
-    )..orderBy([(t) => OrderingTerm.asc(t.order)])).get();
+    )..orderBy([(t) => OrderingTerm.asc(t.order)]))
+        .get();
     bool requiresUpdate = false;
     for (int i = 0; i < associatedTitlesList.length; i++) {
       if (associatedTitlesList[i].order != i && requiresUpdate == false)
@@ -3800,7 +3798,8 @@ class FinanceDatabase extends _$FinanceDatabase {
   ) async {
     List<TransactionAssociatedTitle> associatedTitlesList = await (select(
       associatedTitles,
-    )..orderBy([(t) => OrderingTerm.asc(t.order)])).get();
+    )..orderBy([(t) => OrderingTerm.asc(t.order)]))
+        .get();
     if (direction == -1 || direction == 1) {
       List<TransactionAssociatedTitle> associatedTitlesNeedUpdating = [];
       for (TransactionAssociatedTitle associatedTitle in associatedTitlesList) {
@@ -3834,7 +3833,8 @@ class FinanceDatabase extends _$FinanceDatabase {
   Future<Transaction> getTransactionFromRowId(int rowId) {
     return (select(
       transactions,
-    )..where((t) => t.rowId.equals(rowId))).getSingle();
+    )..where((t) => t.rowId.equals(rowId)))
+        .getSingle();
   }
 
   Future<Budget> getBudgetFromRowId(int rowId) {
@@ -3848,13 +3848,15 @@ class FinanceDatabase extends _$FinanceDatabase {
   Future<TransactionCategory> getCategoryFromRowId(int rowId) {
     return (select(
       categories,
-    )..where((c) => c.rowId.equals(rowId))).getSingle();
+    )..where((c) => c.rowId.equals(rowId)))
+        .getSingle();
   }
 
   Future<Objective> getObjectiveFromRowId(int rowId) {
     return (select(
       objectives,
-    )..where((t) => t.rowId.equals(rowId))).getSingle();
+    )..where((t) => t.rowId.equals(rowId)))
+        .getSingle();
   }
 
   Transaction cleanseTransactionForLongTermLoan(Transaction transaction) {
@@ -4586,7 +4588,8 @@ class FinanceDatabase extends _$FinanceDatabase {
         // entry exists, update it
         List<Budget> sharedBudgets = await (select(
           budgets,
-        )..where((t) => t.sharedKey.equals(budget.sharedKey ?? ""))).get();
+        )..where((t) => t.sharedKey.equals(budget.sharedKey ?? "")))
+            .get();
         if (sharedBudgets.isEmpty) throw ("Need to make a new entry");
         sharedBudget = sharedBudgets.first;
         sharedBudget = budget.copyWith(
@@ -4621,7 +4624,9 @@ class FinanceDatabase extends _$FinanceDatabase {
   Future<Budget> getSharedBudget(String sharedKey) async {
     return (await (select(
       budgets,
-    )..where((t) => t.sharedKey.equals(sharedKey))).get()).first;
+    )..where((t) => t.sharedKey.equals(sharedKey)))
+            .get())
+        .first;
   }
 
   Future<List<Transaction>> getAllTransactionsFromCategory(String categoryPk) {
@@ -4668,9 +4673,10 @@ class FinanceDatabase extends _$FinanceDatabase {
   Future<List<Transaction>> getAllTransactionsBelongingToExcludedBudget(
     String budgetPk,
   ) {
-    return (select(transactions)..where((tbl) {
-          return tbl.budgetFksExclude.contains(budgetPk);
-        }))
+    return (select(transactions)
+          ..where((tbl) {
+            return tbl.budgetFksExclude.contains(budgetPk);
+          }))
         .get();
   }
 
@@ -4694,13 +4700,13 @@ class FinanceDatabase extends _$FinanceDatabase {
       Transaction sharedTransaction;
       try {
         // entry exists, update it
-        List<Transaction> sharedTransactions =
-            await (select(transactions)..where(
-                  (t) =>
-                      t.sharedKey.equals(transaction.sharedKey ?? "") |
-                      t.sharedOldKey.equals(transaction.sharedKey ?? ""),
-                ))
-                .get();
+        List<Transaction> sharedTransactions = await (select(transactions)
+              ..where(
+                (t) =>
+                    t.sharedKey.equals(transaction.sharedKey ?? "") |
+                    t.sharedOldKey.equals(transaction.sharedKey ?? ""),
+              ))
+            .get();
         if (sharedTransactions.isEmpty) throw ("Need to make a new entry");
         sharedTransaction = sharedTransactions[0];
         sharedTransaction = transaction.copyWith(
@@ -4732,14 +4738,17 @@ class FinanceDatabase extends _$FinanceDatabase {
   Future<int> deleteFromSharedTransaction(String sharedTransactionKey) async {
     Transaction transactionToDelete = (await (select(
       transactions,
-    )..where((t) => t.sharedKey.equals(sharedTransactionKey))).get()).first;
+    )..where((t) => t.sharedKey.equals(sharedTransactionKey)))
+            .get())
+        .first;
     await createDeleteLog(
       DeleteLogType.Transaction,
       transactionToDelete.transactionPk,
     );
-    return (delete(transactions)..where(
-          (t) => t.transactionPk.equals(transactionToDelete.transactionPk),
-        ))
+    return (delete(transactions)
+          ..where(
+            (t) => t.transactionPk.equals(transactionToDelete.transactionPk),
+          ))
         .go();
   }
 
@@ -4798,9 +4807,8 @@ class FinanceDatabase extends _$FinanceDatabase {
       if (db == null) {
         return -1;
       }
-      DocumentReference collectionRef = db
-          .collection('budgets')
-          .doc(budget.sharedKey);
+      DocumentReference collectionRef =
+          db.collection('budgets').doc(budget.sharedKey);
       collectionRef.update({
         "name": budget.name,
         "amount": budget.amount,
@@ -4841,26 +4849,30 @@ class FinanceDatabase extends _$FinanceDatabase {
   Future<TransactionCategory> getCategoryInstance(String categoryPk) {
     return (select(
       categories,
-    )..where((c) => c.categoryPk.equals(categoryPk))).getSingle();
+    )..where((c) => c.categoryPk.equals(categoryPk)))
+        .getSingle();
   }
 
   Future<TransactionCategory?> getCategoryInstanceOrNull(String categoryPk) {
     return (select(
       categories,
-    )..where((c) => c.categoryPk.equals(categoryPk))).getSingleOrNull();
+    )..where((c) => c.categoryPk.equals(categoryPk)))
+        .getSingleOrNull();
   }
 
   // get budget given key
   Future<Budget> getBudgetInstance(String budgetPk) {
     return (select(
       budgets,
-    )..where((t) => t.budgetPk.equals(budgetPk))).getSingle();
+    )..where((t) => t.budgetPk.equals(budgetPk)))
+        .getSingle();
   }
 
   Future<Objective> getObjectiveInstance(String objectivePk) {
     return (select(
       objectives,
-    )..where((t) => t.objectivePk.equals(objectivePk))).getSingle();
+    )..where((t) => t.objectivePk.equals(objectivePk)))
+        .getSingle();
   }
 
   // getIsDifferenceOnlyLoan(objective)
@@ -4874,12 +4886,13 @@ class FinanceDatabase extends _$FinanceDatabase {
   Future<Objective?> getPersonsLongTermDifferenceLoanInstance(
     String personName,
   ) {
-    return (select(objectives)..where(
-          (o) =>
-              (o.name.trim().lower().equals(personName.trim().toLowerCase()) |
-                  o.name.equals(personName)) &
-              getIsDifferenceOnlyLoanFromTable(o),
-        ))
+    return (select(objectives)
+          ..where(
+            (o) =>
+                (o.name.trim().lower().equals(personName.trim().toLowerCase()) |
+                    o.name.equals(personName)) &
+                getIsDifferenceOnlyLoanFromTable(o),
+          ))
         .getSingleOrNull();
   }
 
@@ -4888,16 +4901,19 @@ class FinanceDatabase extends _$FinanceDatabase {
   Future<TransactionCategory> getCategoryInstanceGivenName(String name) async {
     return (await (select(
       categories,
-    )..where((c) => c.name.equals(name))).get()).first;
+    )..where((c) => c.name.equals(name)))
+            .get())
+        .first;
   }
 
   // Returns either subcategory or category!
   Future<TransactionCategory> getCategoryInstanceGivenNameTrim(
     String name,
   ) async {
-    return (await (select(categories)..where(
-              (c) => c.name.lower().trim().equals(name.toLowerCase().trim()),
-            ))
+    return (await (select(categories)
+              ..where(
+                (c) => c.name.lower().trim().equals(name.toLowerCase().trim()),
+              ))
             .get())
         .first;
   }
@@ -4911,20 +4927,20 @@ class FinanceDatabase extends _$FinanceDatabase {
   }) {
     return (select(categories)
           ..where(
-            (c) =>
-                ((mainCategoryPks == null
+            (c) => ((mainCategoryPks == null
                     ? onlyShowMainCategoryListing(c)
                     : c.mainCategoryPk.isIn(mainCategoryPks)) &
                 (selectedIncome == true
                     ? c.income.equals(true) & c.categoryPk.equals("0").not()
                     : selectedIncome == false
-                    ? c.income.equals(false) & c.categoryPk.equals("0").not()
-                    : Constant(true)) &
+                        ? c.income.equals(false) &
+                            c.categoryPk.equals("0").not()
+                        : Constant(true)) &
                 (searchFor == null
                     ? Constant(true)
                     : c.name
-                          .collate(Collate.noCase)
-                          .like("%" + (searchFor) + "%"))),
+                        .collate(Collate.noCase)
+                        .like("%" + (searchFor) + "%"))),
           )
           ..orderBy([
             (c) => OrderingTerm.asc(c.mainCategoryPk),
@@ -4940,51 +4956,50 @@ class FinanceDatabase extends _$FinanceDatabase {
     final $CategoriesTable subCategories = alias(categories, 'subCategories');
     final $ObjectivesTable objectiveLoans = alias(objectives, 'objectiveLoans');
 
-    final query =
-        select(transactions).join([
-            innerJoin(
-              categories,
-              categories.categoryPk.equalsExp(transactions.categoryFk),
-            ),
-            leftOuterJoin(
-              budgets,
-              budgets.budgetPk.equalsExp(transactions.sharedReferenceBudgetPk),
-            ),
-            leftOuterJoin(
-              objectives,
-              objectives.objectivePk.equalsExp(transactions.objectiveFk),
-            ),
-            leftOuterJoin(
-              objectiveLoans,
-              objectiveLoans.objectivePk.equalsExp(
-                transactions.objectiveLoanFk,
-              ),
-            ),
-            leftOuterJoin(
-              subCategories,
-              subCategories.categoryPk.equalsExp(transactions.subCategoryFk),
-            ),
-          ])
-          ..limit(limit ?? DEFAULT_LIMIT)
-          ..orderBy([OrderingTerm.desc(transactions.dateTimeModified)]);
+    final query = select(transactions).join([
+      innerJoin(
+        categories,
+        categories.categoryPk.equalsExp(transactions.categoryFk),
+      ),
+      leftOuterJoin(
+        budgets,
+        budgets.budgetPk.equalsExp(transactions.sharedReferenceBudgetPk),
+      ),
+      leftOuterJoin(
+        objectives,
+        objectives.objectivePk.equalsExp(transactions.objectiveFk),
+      ),
+      leftOuterJoin(
+        objectiveLoans,
+        objectiveLoans.objectivePk.equalsExp(
+          transactions.objectiveLoanFk,
+        ),
+      ),
+      leftOuterJoin(
+        subCategories,
+        subCategories.categoryPk.equalsExp(transactions.subCategoryFk),
+      ),
+    ])
+      ..limit(limit ?? DEFAULT_LIMIT)
+      ..orderBy([OrderingTerm.desc(transactions.dateTimeModified)]);
 
     return query.watch().map(
-      (rows) => rows.map((row) {
-        return TransactionActivityLog(
-          dateTime:
-              row.readTable(transactions).dateTimeModified ?? DateTime.now(),
-          transaction: row.readTable(transactions),
-          transactionWithCategory: TransactionWithCategory(
-            category: row.readTable(categories),
-            transaction: row.readTable(transactions),
-            budget: row.readTableOrNull(budgets),
-            objective: row.readTableOrNull(objectives),
-            subCategory: row.readTableOrNull(subCategories),
-            objectiveLoan: row.readTableOrNull(objectiveLoans),
-          ),
+          (rows) => rows.map((row) {
+            return TransactionActivityLog(
+              dateTime: row.readTable(transactions).dateTimeModified ??
+                  DateTime.now(),
+              transaction: row.readTable(transactions),
+              transactionWithCategory: TransactionWithCategory(
+                category: row.readTable(categories),
+                transaction: row.readTable(transactions),
+                budget: row.readTableOrNull(budgets),
+                objective: row.readTableOrNull(objectives),
+                subCategory: row.readTableOrNull(subCategories),
+                objectiveLoan: row.readTableOrNull(objectiveLoans),
+              ),
+            );
+          }).toList(),
         );
-      }).toList(),
-    );
   }
 
   Stream<List<TransactionActivityLog>> watchAllTransactionDeleteActivityLog({
@@ -4996,23 +5011,24 @@ class FinanceDatabase extends _$FinanceDatabase {
       ..orderBy([(t) => OrderingTerm.desc(deleteLogs.dateTimeModified)]);
 
     return query.watch().map(
-      (rows) => rows.map((DeleteLog row) {
-        Transaction? transaction = getTransactionFromRecentlyDeleted(
-          row.entryPk,
+          (rows) => rows.map((DeleteLog row) {
+            Transaction? transaction = getTransactionFromRecentlyDeleted(
+              row.entryPk,
+            );
+            return TransactionActivityLog(
+              dateTime: row.dateTimeModified,
+              deleteLog: row,
+              transaction: transaction,
+            );
+          }).toList(),
         );
-        return TransactionActivityLog(
-          dateTime: row.dateTimeModified,
-          deleteLog: row,
-          transaction: transaction,
-        );
-      }).toList(),
-    );
   }
 
   Future deleteDeleteLog(String deleteLogPk) async {
     return (delete(
       deleteLogs,
-    )..where((t) => t.deleteLogPk.equals(deleteLogPk))).go();
+    )..where((t) => t.deleteLogPk.equals(deleteLogPk)))
+        .go();
   }
 
   Stream<List<CategoryWithDetails>> watchAllMainCategoriesWithDetails({
@@ -5020,41 +5036,41 @@ class FinanceDatabase extends _$FinanceDatabase {
   }) {
     JoinedSelectStatement<HasResultSet, dynamic> query;
     final totalCount = transactions.transactionPk.count();
-    query =
-        (select(categories)
-              ..where(
-                (c) =>
-                    (onlyShowMainCategoryListing(c) &
-                    (searchFor == null
-                        ? Constant(true)
-                        : c.name
-                              .collate(Collate.noCase)
-                              .like("%" + (searchFor) + "%"))),
-              )
-              ..orderBy([(c) => OrderingTerm.asc(c.order)]))
-            .join([
-              leftOuterJoin(
-                transactions,
-                transactions.categoryFk.equalsExp(categories.categoryPk),
-              ),
-            ])
-          ..groupBy([categories.categoryPk])
-          ..addColumns([totalCount]);
+    query = (select(categories)
+          ..where(
+            (c) => (onlyShowMainCategoryListing(c) &
+                (searchFor == null
+                    ? Constant(true)
+                    : c.name
+                        .collate(Collate.noCase)
+                        .like("%" + (searchFor) + "%"))),
+          )
+          ..orderBy([(c) => OrderingTerm.asc(c.order)]))
+        .join([
+      leftOuterJoin(
+        transactions,
+        transactions.categoryFk.equalsExp(categories.categoryPk),
+      ),
+    ])
+      ..groupBy([categories.categoryPk])
+      ..addColumns([totalCount]);
 
     return query.watch().map(
-      (rows) => rows.map((row) {
-        return CategoryWithDetails(
-          category: row.readTable(categories),
-          numberTransactions: row.read(totalCount),
+          (rows) => rows.map((row) {
+            return CategoryWithDetails(
+              category: row.readTable(categories),
+              numberTransactions: row.read(totalCount),
+            );
+          }).toList(),
         );
-      }).toList(),
-    );
   }
 
   Stream<Map<String, TransactionCategory>> watchAllCategoriesIndexed() {
     return (select(
       categories,
-    )..orderBy([(w) => OrderingTerm.asc(w.order)])).watch().map((categories) {
+    )..orderBy([(w) => OrderingTerm.asc(w.order)]))
+        .watch()
+        .map((categories) {
       Map<String, TransactionCategory> indexedByPk = {
         for (TransactionCategory category in categories)
           category.categoryPk: category,
@@ -5064,10 +5080,12 @@ class FinanceDatabase extends _$FinanceDatabase {
   }
 
   Stream<Map<String, List<TransactionCategory>>>
-  watchAllSubCategoriesIndexedByMainCategoryPk() {
+      watchAllSubCategoriesIndexedByMainCategoryPk() {
     return (select(
       categories,
-    )..orderBy([(w) => OrderingTerm.asc(w.order)])).watch().map((categories) {
+    )..orderBy([(w) => OrderingTerm.asc(w.order)]))
+        .watch()
+        .map((categories) {
       Map<String, List<TransactionCategory>> indexedByPk = {
         for (TransactionCategory category in categories)
           category.categoryPk: categories
@@ -5154,8 +5172,8 @@ class FinanceDatabase extends _$FinanceDatabase {
                 (searchFor == null
                     ? Constant(true)
                     : i.name
-                          .collate(Collate.noCase)
-                          .like("%" + (searchFor) + "%")),
+                        .collate(Collate.noCase)
+                        .like("%" + (searchFor) + "%")),
           )
           ..orderBy([
             if (archivedLast) (i) => OrderingTerm.asc(i.archived),
@@ -5189,8 +5207,7 @@ class FinanceDatabase extends _$FinanceDatabase {
   }) {
     return (select(categories)
           ..where(
-            (c) =>
-                ((includeSubCategories == false
+            (c) => ((includeSubCategories == false
                     ? onlyShowMainCategoryListing(c)
                     : Constant(true)) &
                 (allCategories != false
@@ -5224,8 +5241,8 @@ class FinanceDatabase extends _$FinanceDatabase {
             (b) => ((sharedBudgetsOnly == null
                 ? Constant(true)
                 : sharedBudgetsOnly == true
-                ? b.sharedKey.isNotNull()
-                : b.sharedKey.isNull())),
+                    ? b.sharedKey.isNotNull()
+                    : b.sharedKey.isNull())),
           )
           ..orderBy([(c) => OrderingTerm.asc(c.order)]))
         .get();
@@ -5240,7 +5257,8 @@ class FinanceDatabase extends _$FinanceDatabase {
   ) {
     return (select(
       categoryBudgetLimits,
-    )..where((l) => l.budgetFk.equals(budgetPk))).get();
+    )..where((l) => l.budgetFk.equals(budgetPk)))
+        .get();
   }
 
   Future<List<Objective>> getAllObjectives({
@@ -5268,14 +5286,14 @@ class FinanceDatabase extends _$FinanceDatabase {
   Future<List<Objective>> getAllObjectivesWithoutType() {
     return (select(
       objectives,
-    )..orderBy([(c) => OrderingTerm.asc(c.order)])).get();
+    )..orderBy([(c) => OrderingTerm.asc(c.order)]))
+        .get();
   }
 
   Stream<List<Budget>> watchAllAddableBudgets({bool archivedLast = true}) {
     return (select(budgets)
           ..where(
-            (b) =>
-                (b.sharedKey.isNotNull() |
+            (b) => (b.sharedKey.isNotNull() |
                 (b.addedTransactionsOnly.equals(true) & b.sharedKey.isNull())),
           )
           ..orderBy([
@@ -5315,7 +5333,9 @@ class FinanceDatabase extends _$FinanceDatabase {
   Future<int> getAmountOfCategories() async {
     return (await (select(
       categories,
-    )..where((c) => onlyShowMainCategoryListing(c))).get()).length;
+    )..where((c) => onlyShowMainCategoryListing(c)))
+            .get())
+        .length;
   }
 
   Future<int> getAmountOfSubCategories(String mainCategoryPk) async {
@@ -5336,15 +5356,14 @@ class FinanceDatabase extends _$FinanceDatabase {
     int oldPosition, {
     String? mainCategoryPk,
   }) async {
-    List<TransactionCategory> categoriesList =
-        await (select(categories)
-              ..where(
-                (c) => mainCategoryPk == null
-                    ? onlyShowMainCategoryListing(c)
-                    : c.mainCategoryPk.equals(mainCategoryPk),
-              )
-              ..orderBy([(c) => OrderingTerm.asc(c.order)]))
-            .get();
+    List<TransactionCategory> categoriesList = await (select(categories)
+          ..where(
+            (c) => mainCategoryPk == null
+                ? onlyShowMainCategoryListing(c)
+                : c.mainCategoryPk.equals(mainCategoryPk),
+          )
+          ..orderBy([(c) => OrderingTerm.asc(c.order)]))
+        .get();
     await batch((batch) {
       if (newPosition > oldPosition) {
         for (TransactionCategory category in categoriesList) {
@@ -5391,28 +5410,28 @@ class FinanceDatabase extends _$FinanceDatabase {
     int pastIndexIncluding, {
     String? mainCategoryPk,
   }) async {
-    List<TransactionCategory> categoryList =
-        await (select(categories)
-              ..where(
-                (c) => mainCategoryPk == null
-                    ? onlyShowMainCategoryListing(c)
-                    : c.mainCategoryPk.equals(mainCategoryPk),
-              )
-              ..orderBy([(c) => OrderingTerm.asc(c.order)]))
-            .get();
+    List<TransactionCategory> categoryList = await (select(categories)
+          ..where(
+            (c) => mainCategoryPk == null
+                ? onlyShowMainCategoryListing(c)
+                : c.mainCategoryPk.equals(mainCategoryPk),
+          )
+          ..orderBy([(c) => OrderingTerm.asc(c.order)]))
+        .get();
     if (direction == -1 || direction == 1) {
       for (TransactionCategory category in categoryList) {
-        await (update(categories)..where(
-              (c) =>
-                  c.order.isBiggerOrEqualValue(pastIndexIncluding) &
-                  c.categoryPk.equals(category.categoryPk),
-            ))
+        await (update(categories)
+              ..where(
+                (c) =>
+                    c.order.isBiggerOrEqualValue(pastIndexIncluding) &
+                    c.categoryPk.equals(category.categoryPk),
+              ))
             .write(
-              CategoriesCompanion(
-                order: Value(category.order + direction),
-                dateTimeModified: Value(DateTime.now()),
-              ),
-            );
+          CategoriesCompanion(
+            order: Value(category.order + direction),
+            dateTimeModified: Value(DateTime.now()),
+          ),
+        );
       }
     } else {
       return false;
@@ -5424,14 +5443,17 @@ class FinanceDatabase extends _$FinanceDatabase {
   Future<TransactionWallet> getWalletInstanceGivenName(String name) async {
     return (await (select(
       wallets,
-    )..where((w) => w.name.equals(name))).get()).first;
+    )..where((w) => w.name.equals(name)))
+            .get())
+        .first;
   }
 
   // get wallet given name, to lower and trim
   Future<TransactionWallet> getWalletInstanceGivenNameTrim(String name) async {
-    return (await (select(wallets)..where(
-              (w) => w.name.lower().trim().equals(name.toLowerCase().trim()),
-            ))
+    return (await (select(wallets)
+              ..where(
+                (w) => w.name.lower().trim().equals(name.toLowerCase().trim()),
+              ))
             .get())
         .first;
   }
@@ -5440,19 +5462,22 @@ class FinanceDatabase extends _$FinanceDatabase {
   Future<TransactionWallet> getWalletInstance(String walletPk) {
     return (select(
       wallets,
-    )..where((w) => w.walletPk.equals(walletPk))).getSingle();
+    )..where((w) => w.walletPk.equals(walletPk)))
+        .getSingle();
   }
 
   Future<TransactionWallet?> getWalletInstanceOrNull(String walletPk) {
     return (select(
       wallets,
-    )..where((w) => w.walletPk.equals(walletPk))).getSingleOrNull();
+    )..where((w) => w.walletPk.equals(walletPk)))
+        .getSingleOrNull();
   }
 
   Future<ScannerTemplate> getScannerTemplateInstance(String scannerTemplatePk) {
     return (select(
       scannerTemplates,
-    )..where((s) => s.scannerTemplatePk.equals(scannerTemplatePk))).getSingle();
+    )..where((s) => s.scannerTemplatePk.equals(scannerTemplatePk)))
+        .getSingle();
   }
 
   // delete budget given key
@@ -5496,7 +5521,8 @@ class FinanceDatabase extends _$FinanceDatabase {
     await createDeleteLog(DeleteLogType.Budget, budget.budgetPk);
     return (delete(
       budgets,
-    )..where((b) => b.budgetPk.equals(budget.budgetPk))).go();
+    )..where((b) => b.budgetPk.equals(budget.budgetPk)))
+        .go();
   }
 
   Future<int> deleteObjective(context, Objective objective) async {
@@ -5518,7 +5544,8 @@ class FinanceDatabase extends _$FinanceDatabase {
     await createDeleteLog(DeleteLogType.Objective, objective.objectivePk);
     return (delete(
       objectives,
-    )..where((b) => b.objectivePk.equals(objective.objectivePk))).go();
+    )..where((b) => b.objectivePk.equals(objective.objectivePk)))
+        .go();
   }
 
   //delete transaction given key
@@ -5544,7 +5571,8 @@ class FinanceDatabase extends _$FinanceDatabase {
     await createDeleteLog(DeleteLogType.Transaction, transactionPk);
     return (delete(
       transactions,
-    )..where((t) => t.transactionPk.equals(transactionPk))).go();
+    )..where((t) => t.transactionPk.equals(transactionPk)))
+        .go();
   }
 
   Future deleteTransactions(
@@ -5572,7 +5600,8 @@ class FinanceDatabase extends _$FinanceDatabase {
     await createDeleteLogs(DeleteLogType.Transaction, transactionPks);
     return (delete(
       transactions,
-    )..where((t) => t.transactionPk.isIn(transactionPks))).go();
+    )..where((t) => t.transactionPk.isIn(transactionPks)))
+        .go();
   }
 
   Future forceDeleteBudgets(List<String> budgetPks) async {
@@ -5582,14 +5611,16 @@ class FinanceDatabase extends _$FinanceDatabase {
   Future forceDeleteObjectives(List<String> objectivePks) async {
     return (delete(
       objectives,
-    )..where((t) => t.objectivePk.isIn(objectivePks))).go();
+    )..where((t) => t.objectivePk.isIn(objectivePks)))
+        .go();
   }
 
   Future deleteCategoryBudgetLimit(String categoryLimitPk) async {
     await createDeleteLog(DeleteLogType.CategoryBudgetLimit, categoryLimitPk);
     return (delete(
       categoryBudgetLimits,
-    )..where((t) => t.categoryLimitPk.equals(categoryLimitPk))).go();
+    )..where((t) => t.categoryLimitPk.equals(categoryLimitPk)))
+        .go();
   }
 
   Future unAssignSubCategoryFromTransactions(String categoryPk) async {
@@ -5648,18 +5679,21 @@ class FinanceDatabase extends _$FinanceDatabase {
     // print(categoryPk);
     await createDeleteLog(DeleteLogType.TransactionCategory, categoryPk);
     // Delete any category with same key, or subcategory with that key
-    return (delete(categories)..where(
-          (c) =>
-              c.categoryPk.equals(categoryPk) |
-              c.mainCategoryPk.equals(categoryPk),
-        ))
+    return (delete(categories)
+          ..where(
+            (c) =>
+                c.categoryPk.equals(categoryPk) |
+                c.mainCategoryPk.equals(categoryPk),
+          ))
         .go();
   }
 
   Future<List<Transaction>> getAllTransactionsSharedInCategory(categoryFk) {
-    return (select(transactions)..where((tbl) {
-          return tbl.sharedKey.isNotNull() & tbl.categoryFk.equals(categoryFk);
-        }))
+    return (select(transactions)
+          ..where((tbl) {
+            return tbl.sharedKey.isNotNull() &
+                tbl.categoryFk.equals(categoryFk);
+          }))
         .get();
   }
 
@@ -5667,28 +5701,31 @@ class FinanceDatabase extends _$FinanceDatabase {
   Future deleteCategoryTransactions(String categoryPk) async {
     List<Transaction> transactionsToDelete = await (select(
       transactions,
-    )..where((t) => t.categoryFk.equals(categoryPk))).get();
+    )..where((t) => t.categoryFk.equals(categoryPk)))
+        .get();
     List<String> transactionPks = transactionsToDelete
         .map((transaction) => transaction.transactionPk)
         .toList();
     await createDeleteLogs(DeleteLogType.Transaction, transactionPks);
     return (delete(
       transactions,
-    )..where((t) => t.categoryFk.equals(categoryPk))).go();
+    )..where((t) => t.categoryFk.equals(categoryPk)))
+        .go();
   }
 
   //delete associatedTitles that belong to specific category key
   Future deleteCategoryTitles(String categoryPk) async {
     List<TransactionAssociatedTitle> titlesToDelete = await (select(
       associatedTitles,
-    )..where((t) => t.categoryFk.equals(categoryPk))).get();
-    List<String> titlePks = titlesToDelete
-        .map((title) => title.associatedTitlePk)
-        .toList();
+    )..where((t) => t.categoryFk.equals(categoryPk)))
+        .get();
+    List<String> titlePks =
+        titlesToDelete.map((title) => title.associatedTitlePk).toList();
     await createDeleteLogs(DeleteLogType.TransactionAssociatedTitle, titlePks);
     await (delete(
       associatedTitles,
-    )..where((t) => t.categoryFk.equals(categoryPk))).go();
+    )..where((t) => t.categoryFk.equals(categoryPk)))
+        .go();
     await fixOrderAssociatedTitles();
     return;
   }
@@ -5696,27 +5733,29 @@ class FinanceDatabase extends _$FinanceDatabase {
   Future deleteCategoryBudgetLimitsInBudget(String budgetPk) async {
     List<CategoryBudgetLimit> limitsToDelete = await (select(
       categoryBudgetLimits,
-    )..where((t) => t.budgetFk.equals(budgetPk))).get();
-    List<String> limitPks = limitsToDelete
-        .map((limit) => limit.categoryLimitPk)
-        .toList();
+    )..where((t) => t.budgetFk.equals(budgetPk)))
+        .get();
+    List<String> limitPks =
+        limitsToDelete.map((limit) => limit.categoryLimitPk).toList();
     await createDeleteLogs(DeleteLogType.TransactionAssociatedTitle, limitPks);
     return (delete(
       categoryBudgetLimits,
-    )..where((t) => t.budgetFk.equals(budgetPk))).go();
+    )..where((t) => t.budgetFk.equals(budgetPk)))
+        .go();
   }
 
   Future deleteCategoryBudgetLimitsInCategory(String categoryPk) async {
     List<CategoryBudgetLimit> limitsToDelete = await (select(
       categoryBudgetLimits,
-    )..where((t) => t.categoryFk.equals(categoryPk))).get();
-    List<String> limitPks = limitsToDelete
-        .map((limit) => limit.categoryLimitPk)
-        .toList();
+    )..where((t) => t.categoryFk.equals(categoryPk)))
+        .get();
+    List<String> limitPks =
+        limitsToDelete.map((limit) => limit.categoryLimitPk).toList();
     await createDeleteLogs(DeleteLogType.TransactionAssociatedTitle, limitPks);
     return (delete(
       categoryBudgetLimits,
-    )..where((t) => t.categoryFk.equals(categoryPk))).go();
+    )..where((t) => t.categoryFk.equals(categoryPk)))
+        .go();
   }
 
   //delete wallet given key
@@ -5724,12 +5763,11 @@ class FinanceDatabase extends _$FinanceDatabase {
     TransactionWallet? newPrimaryCandidate;
 
     if (walletPk == "0") {
-      newPrimaryCandidate =
-          (await (select(wallets)
-                    ..where((w) => w.walletPk.isNotValue("0"))
-                    ..orderBy([(w) => OrderingTerm.asc(w.order)]))
-                  .get())
-              .firstOrNull;
+      newPrimaryCandidate = (await (select(wallets)
+                ..where((w) => w.walletPk.isNotValue("0"))
+                ..orderBy([(w) => OrderingTerm.asc(w.order)]))
+              .get())
+          .firstOrNull;
       if (newPrimaryCandidate == null)
         throw "Can't find another wallet to make default";
     }
@@ -5770,18 +5808,17 @@ class FinanceDatabase extends _$FinanceDatabase {
     String toWalletPk, {
     List<Transaction>? transactionsToMove,
   }) async {
-    List<Transaction> transactionsForMove =
-        transactionsToMove ??
-        (await (select(transactions)..where((tbl) {
-              return tbl.walletFk.equals(walletPk!);
-            }))
+    List<Transaction> transactionsForMove = transactionsToMove ??
+        (await (select(transactions)
+              ..where((tbl) {
+                return tbl.walletFk.equals(walletPk!);
+              }))
             .get());
     List<Transaction> allTransactionsToUpdate = [];
     for (Transaction transaction in transactionsForMove) {
       allTransactionsToUpdate.add(
         transaction.copyWith(
-          amount:
-              (amountRatioFromToCurrency(
+          amount: (amountRatioFromToCurrency(
                     allWallets.indexedByPk[transaction.walletFk]?.currency ??
                         "usd",
                     allWallets.indexedByPk[toWalletPk]?.currency ?? "usd",
@@ -5801,11 +5838,11 @@ class FinanceDatabase extends _$FinanceDatabase {
     String walletPk,
     String toWalletPk,
   ) async {
-    List<Transaction> transactionsForMove =
-        (await (select(transactions)..where((tbl) {
-              return tbl.walletFk.equals(walletPk);
-            }))
-            .get());
+    List<Transaction> transactionsForMove = (await (select(transactions)
+          ..where((tbl) {
+            return tbl.walletFk.equals(walletPk);
+          }))
+        .get());
     List<Transaction> allTransactionsToUpdate = [];
     for (Transaction transaction in transactionsForMove) {
       allTransactionsToUpdate.add(
@@ -5929,8 +5966,10 @@ class FinanceDatabase extends _$FinanceDatabase {
     if (clearSubcategory == false && subCategoryPk == null) {
       List<String> subCategories =
           (await database.getAllSubCategoriesOfMainCategory(
-            categoryPk,
-          )).map((c) => c.categoryPk).toList();
+        categoryPk,
+      ))
+              .map((c) => c.categoryPk)
+              .toList();
       for (Transaction transaction in transactionsToMove) {
         bool clearSubCategory = true;
         if (subCategories.contains(transaction.subCategoryFk)) {
@@ -5965,23 +6004,24 @@ class FinanceDatabase extends _$FinanceDatabase {
     await createDeleteLog(DeleteLogType.ScannerTemplate, scannerTemplatePk);
     return (delete(
       scannerTemplates,
-    )..where((s) => s.scannerTemplatePk.equals(scannerTemplatePk))).go();
+    )..where((s) => s.scannerTemplatePk.equals(scannerTemplatePk)))
+        .go();
   }
 
   //delete transactions that belong to specific wallet key
   Future deleteWalletsTransactions(String walletPk) async {
-    List<Transaction> transactionPkForDelete =
-        await (select(transactions)..where((tbl) {
-              return tbl.walletFk.equals(walletPk);
-            }))
-            .get();
-    List<String> transactionPks = transactionPkForDelete
-        .map((t) => t.transactionPk)
-        .toList();
+    List<Transaction> transactionPkForDelete = await (select(transactions)
+          ..where((tbl) {
+            return tbl.walletFk.equals(walletPk);
+          }))
+        .get();
+    List<String> transactionPks =
+        transactionPkForDelete.map((t) => t.transactionPk).toList();
     await createDeleteLogs(DeleteLogType.Transaction, transactionPks);
     return (delete(
       transactions,
-    )..where((t) => t.walletFk.equals(walletPk))).go();
+    )..where((t) => t.walletFk.equals(walletPk)))
+        .go();
   }
 
   //delete associated title given key
@@ -5993,7 +6033,8 @@ class FinanceDatabase extends _$FinanceDatabase {
     );
     return (delete(
       associatedTitles,
-    )..where((t) => t.associatedTitlePk.equals(associatedTitlePk))).go();
+    )..where((t) => t.associatedTitlePk.equals(associatedTitlePk)))
+        .go();
   }
 
   Future mergeAndDeleteSubCategory(
@@ -6153,20 +6194,18 @@ class FinanceDatabase extends _$FinanceDatabase {
         for (final item in list) {
           categoryTotals[item.category.categoryPk] = CategoryWithTotal(
             category: item.category,
-            total:
-                item.total +
+            total: item.total +
                 (categoryTotals[item.category.categoryPk]?.total ?? 0),
-            transactionCount:
-                item.transactionCount +
+            transactionCount: item.transactionCount +
                 (categoryTotals[item.category.categoryPk]?.transactionCount ??
                     0),
             categoryBudgetLimit: item.categoryBudgetLimit,
           );
         }
       }
-      List<CategoryWithTotal> categoryWithTotalsSorted =
-          categoryTotals.values.toList()
-            ..sort((a, b) => b.total.abs().compareTo(a.total.abs()));
+      List<CategoryWithTotal> categoryWithTotalsSorted = categoryTotals.values
+          .toList()
+        ..sort((a, b) => b.total.abs().compareTo(a.total.abs()));
       return categoryWithTotalsSorted;
     });
   }
@@ -6183,7 +6222,8 @@ class FinanceDatabase extends _$FinanceDatabase {
   }) async {
     List<CategoryBudgetLimit> wanderingLimits = await (select(
       categoryBudgetLimits,
-    )..where((t) => t.walletFk.isNotIn(allWallets.indexedByPk.keys))).get();
+    )..where((t) => t.walletFk.isNotIn(allWallets.indexedByPk.keys)))
+        .get();
     for (CategoryBudgetLimit limit in wanderingLimits) {
       await createOrUpdateCategoryLimit(
         limit.copyWith(walletFk: appStateSettings["selectedWalletPk"]),
@@ -6195,11 +6235,11 @@ class FinanceDatabase extends _$FinanceDatabase {
     List<String> categoryKeys = allCategories.map((e) => e.categoryPk).toList();
     List<CategoryBudgetLimit> wanderingCategoryLimits = await (select(
       categoryBudgetLimits,
-    )..where((t) => t.categoryFk.isNotIn(categoryKeys))).get();
+    )..where((t) => t.categoryFk.isNotIn(categoryKeys)))
+        .get();
     if (wanderingCategoryLimits.isNotEmpty) {
-      List<String> wanderingCategoryLimitsKeys = wanderingCategoryLimits
-          .map((e) => e.categoryLimitPk)
-          .toList();
+      List<String> wanderingCategoryLimitsKeys =
+          wanderingCategoryLimits.map((e) => e.categoryLimitPk).toList();
       await createDeleteLogs(
         DeleteLogType.CategoryBudgetLimit,
         wanderingCategoryLimitsKeys,
@@ -6215,18 +6255,19 @@ class FinanceDatabase extends _$FinanceDatabase {
     List<String> budgetKeys = allBudgets.map((e) => e.budgetPk).toList();
     List<CategoryBudgetLimit> wanderingBudgetLimits = await (select(
       categoryBudgetLimits,
-    )..where((t) => t.budgetFk.isNotIn(budgetKeys))).get();
+    )..where((t) => t.budgetFk.isNotIn(budgetKeys)))
+        .get();
     if (wanderingBudgetLimits.isNotEmpty) {
-      List<String> wanderingBudgetLimitsKeys = wanderingBudgetLimits
-          .map((e) => e.categoryLimitPk)
-          .toList();
+      List<String> wanderingBudgetLimitsKeys =
+          wanderingBudgetLimits.map((e) => e.categoryLimitPk).toList();
       await createDeleteLogs(
         DeleteLogType.CategoryBudgetLimit,
         wanderingBudgetLimitsKeys,
       );
       await (delete(
         categoryBudgetLimits,
-      )..where((t) => t.categoryLimitPk.isIn(wanderingBudgetLimitsKeys))).go();
+      )..where((t) => t.categoryLimitPk.isIn(wanderingBudgetLimitsKeys)))
+          .go();
       print("Deleted wandering spending limits with no budget");
     }
 
@@ -6247,7 +6288,8 @@ class FinanceDatabase extends _$FinanceDatabase {
       );
       await (delete(
         categoryBudgetLimits,
-      )..where((t) => t.categoryLimitPk.isIn(duplicatedCategoryLimits))).go();
+      )..where((t) => t.categoryLimitPk.isIn(duplicatedCategoryLimits)))
+          .go();
       print(
         "Deleted wandering spending limits that duplicate a budget AND category id",
       );
@@ -6266,7 +6308,7 @@ class FinanceDatabase extends _$FinanceDatabase {
     if (isAbsoluteSpendingLimit == false) {
       final totalAmt = categoryBudgetLimits.amount.sum();
       JoinedSelectStatement<$CategoryBudgetLimitsTable, CategoryBudgetLimit>
-      query;
+          query;
 
       query = selectOnly(categoryBudgetLimits)
         ..join([
@@ -6292,7 +6334,7 @@ class FinanceDatabase extends _$FinanceDatabase {
       for (TransactionWallet wallet in allWallets.list) {
         final totalAmt = categoryBudgetLimits.amount.sum();
         JoinedSelectStatement<$CategoryBudgetLimitsTable, CategoryBudgetLimit>
-        query;
+            query;
 
         query = selectOnly(categoryBudgetLimits)
           ..join([
@@ -6342,7 +6384,7 @@ class FinanceDatabase extends _$FinanceDatabase {
     if (isAbsoluteSpendingLimit == false) {
       final totalAmt = categoryBudgetLimits.amount.sum();
       JoinedSelectStatement<$CategoryBudgetLimitsTable, CategoryBudgetLimit>
-      query;
+          query;
 
       query = selectOnly(categoryBudgetLimits)
         ..join([
@@ -6368,7 +6410,7 @@ class FinanceDatabase extends _$FinanceDatabase {
       for (TransactionWallet wallet in allWallets.list) {
         final totalAmt = categoryBudgetLimits.amount.sum();
         JoinedSelectStatement<$CategoryBudgetLimitsTable, CategoryBudgetLimit>
-        query;
+            query;
 
         query = selectOnly(categoryBudgetLimits)
           ..join([
@@ -6641,10 +6683,9 @@ class FinanceDatabase extends _$FinanceDatabase {
 
     Expression<bool> isBalanceCorrectionAnd =
         searchFilters.categoryPks.contains("0")
-        ? Constant(true)
-        : tbl.categoryFk.equals("0").not();
-    Expression<bool> isNotLoan =
-        tbl.objectiveLoanFk.isNull() &
+            ? Constant(true)
+            : tbl.categoryFk.equals("0").not();
+    Expression<bool> isNotLoan = tbl.objectiveLoanFk.isNull() &
         tbl.type.isNotInValues([
           TransactionSpecialType.credit,
           TransactionSpecialType.debt,
@@ -6652,44 +6693,44 @@ class FinanceDatabase extends _$FinanceDatabase {
     Expression<bool> isIncome = searchFilters.expenseIncome.length <= 0
         ? Constant(true)
         : searchFilters.expenseIncome.contains(ExpenseIncome.income)
-        ? tbl.income.equals(true) & isBalanceCorrectionAnd & isNotLoan
-        : Constant(false);
+            ? tbl.income.equals(true) & isBalanceCorrectionAnd & isNotLoan
+            : Constant(false);
     Expression<bool> isExpense = searchFilters.expenseIncome.length <= 0
         ? Constant(true)
         : searchFilters.expenseIncome.contains(ExpenseIncome.expense)
-        ? tbl.income.equals(false) & isBalanceCorrectionAnd & isNotLoan
-        : Constant(false);
+            ? tbl.income.equals(false) & isBalanceCorrectionAnd & isNotLoan
+            : Constant(false);
     Expression<bool> isPositiveCashFlow =
         searchFilters.positiveCashFlow == true ||
-            searchFilters.positiveCashFlow == false
-        ? tbl.income.equals(searchFilters.positiveCashFlow == true)
-        : Constant(true);
+                searchFilters.positiveCashFlow == false
+            ? tbl.income.equals(searchFilters.positiveCashFlow == true)
+            : Constant(true);
 
     Expression<bool> isPaid = searchFilters.paidStatus.length <= 0
         ? Constant(true)
         : searchFilters.paidStatus.contains(PaidStatus.paid)
-        ? tbl.paid.equals(true) &
-              tbl.type.isNotNull() &
-              tbl.type.isNotInValues([
-                TransactionSpecialType.debt,
-                TransactionSpecialType.credit,
-              ])
-        : Constant(false);
+            ? tbl.paid.equals(true) &
+                tbl.type.isNotNull() &
+                tbl.type.isNotInValues([
+                  TransactionSpecialType.debt,
+                  TransactionSpecialType.credit,
+                ])
+            : Constant(false);
     Expression<bool> isNotPaid = searchFilters.paidStatus.length <= 0
         ? Constant(true)
         : searchFilters.paidStatus.contains(PaidStatus.notPaid)
-        ? tbl.paid.equals(false) &
-              tbl.type.isNotNull() &
-              tbl.type.isNotInValues([
-                TransactionSpecialType.debt,
-                TransactionSpecialType.credit,
-              ])
-        : Constant(false);
+            ? tbl.paid.equals(false) &
+                tbl.type.isNotNull() &
+                tbl.type.isNotInValues([
+                  TransactionSpecialType.debt,
+                  TransactionSpecialType.credit,
+                ])
+            : Constant(false);
     Expression<bool> isSkippedPaid = searchFilters.paidStatus.length <= 0
         ? Constant(true)
         : searchFilters.paidStatus.contains(PaidStatus.skipped)
-        ? tbl.skipPaid.equals(true) & tbl.type.isNotNull()
-        : Constant(false);
+            ? tbl.skipPaid.equals(true) & tbl.type.isNotNull()
+            : Constant(false);
 
     Expression<bool> isLongTermLoanBorrowed = Constant(false);
     Expression<bool> isLongTermLoanLent = Constant(false);
@@ -6704,38 +6745,38 @@ class FinanceDatabase extends _$FinanceDatabase {
     }
     if (searchFilters.transactionTypes.contains(TransactionSpecialType.debt)) {
       if (joinedWithObjectiveLoans != null)
-        isLongTermLoanBorrowed =
-            tbl.objectiveLoanFk.isNotNull() &
+        isLongTermLoanBorrowed = tbl.objectiveLoanFk.isNotNull() &
             joinedWithObjectiveLoans.income.not();
       else
         isLongTermLoanBorrowed = tbl.objectiveLoanFk.isNotNull() & tbl.income;
     }
     Expression<bool> isTransactionType =
         searchFilters.transactionTypes.length > 0
-        ? tbl.type.isInValues(searchFilters.transactionTypes) |
-              isLongTermLoanLent |
-              isLongTermLoanBorrowed
-        : Constant(true);
+            ? tbl.type.isInValues(searchFilters.transactionTypes) |
+                isLongTermLoanLent |
+                isLongTermLoanBorrowed
+            : Constant(true);
 
     Expression<bool> includeShared =
         searchFilters.budgetTransactionFilters.length <= 0
-        ? Constant(true)
-        : searchFilters.budgetTransactionFilters.contains(
-                BudgetTransactionFilters.sharedToOtherBudget,
-              ) ==
-              true
-        ? tbl.sharedKey.isNotNull()
-        : Constant(false);
+            ? Constant(true)
+            : searchFilters.budgetTransactionFilters.contains(
+                      BudgetTransactionFilters.sharedToOtherBudget,
+                    ) ==
+                    true
+                ? tbl.sharedKey.isNotNull()
+                : Constant(false);
 
-    Expression<bool> includeAdded =
-        searchFilters.budgetTransactionFilters.length <= 0
+    Expression<bool> includeAdded = searchFilters
+                .budgetTransactionFilters.length <=
+            0
         ? Constant(true)
         : searchFilters.budgetTransactionFilters.contains(
-                BudgetTransactionFilters.addedToOtherBudget,
-              ) ==
-              true
-        ? tbl.sharedReferenceBudgetPk.isNotNull() & tbl.sharedKey.isNull()
-        : Constant(false);
+                  BudgetTransactionFilters.addedToOtherBudget,
+                ) ==
+                true
+            ? tbl.sharedReferenceBudgetPk.isNotNull() & tbl.sharedKey.isNull()
+            : Constant(false);
 
     Expression<bool> isMethodAdded = onlyShowBasedOnMethodAdded(
       tbl,
@@ -6744,11 +6785,11 @@ class FinanceDatabase extends _$FinanceDatabase {
 
     Expression<bool> isInAmountRange = searchFilters.amountRange != null
         ? tbl.amount.isBiggerOrEqualValue(
-                searchFilters.amountRange?.start ?? 0,
-              ) &
-              tbl.amount.isSmallerOrEqualValue(
-                searchFilters.amountRange?.end ?? 0,
-              )
+              searchFilters.amountRange?.start ?? 0,
+            ) &
+            tbl.amount.isSmallerOrEqualValue(
+              searchFilters.amountRange?.end ?? 0,
+            )
         : Constant(true);
 
     Expression<bool> isInDateTimeRange = onlyShowBasedOnTimeRange(
@@ -6771,8 +6812,8 @@ class FinanceDatabase extends _$FinanceDatabase {
 
     Expression<bool> isInTitleContains =
         searchFilters.titleContains == null || searchFilters.titleContains == ""
-        ? Constant(true)
-        : Constant(false);
+            ? Constant(true)
+            : Constant(false);
 
     if (searchFilters.titleContains != null) {
       String stringToSplit = searchFilters.titleContains ?? "";
@@ -6780,9 +6821,8 @@ class FinanceDatabase extends _$FinanceDatabase {
         stringToSplit = stringToSplit.substring(0, stringToSplit.length - 1);
       }
       for (String titleContain in stringToSplit.split(", ")) {
-        isInTitleContains |= tbl.name
-            .collate(Collate.noCase)
-            .like("%" + titleContain + "%");
+        isInTitleContains |=
+            tbl.name.collate(Collate.noCase).like("%" + titleContain + "%");
       }
     }
 
@@ -6824,34 +6864,34 @@ class FinanceDatabase extends _$FinanceDatabase {
     return searchQuery == "" || searchQuery == null
         ? Constant(true)
         : (withCategories == true
-                  ? categories.name
-                        .collate(Collate.noCase)
-                        .like("%" + searchQuery + "%")
-                  : Constant(false)) |
-              (joinedWithSubcategoriesTable != null
-                  ? joinedWithSubcategoriesTable.name
-                        .collate(Collate.noCase)
-                        .like("%" + searchQuery + "%")
-                  : Constant(false)) |
-              (withBudgets == true
-                  ? budgets.name
-                        .collate(Collate.noCase)
-                        .like("%" + searchQuery + "%")
-                  : Constant(false)) |
-              (withObjectives == true
-                  ? objectives.name
-                        .collate(Collate.noCase)
-                        .like("%" + searchQuery + "%")
-                  : Constant(false)) |
-              (joinedWithObjectiveLoans != null
-                  ? joinedWithObjectiveLoans.name
-                        .collate(Collate.noCase)
-                        .like("%" + searchQuery + "%")
-                  : Constant(false)) |
-              tbl.name.collate(Collate.noCase).like("%" + searchQuery + "%") |
-              tbl.note.collate(Collate.noCase).like("%" + searchQuery + "%") |
-              onlyShowIfSearchQueryDateIsDate(searchQuery, tbl) |
-              onlyShowIfSearchQueryAmount(searchQuery, tbl.amount);
+                ? categories.name
+                    .collate(Collate.noCase)
+                    .like("%" + searchQuery + "%")
+                : Constant(false)) |
+            (joinedWithSubcategoriesTable != null
+                ? joinedWithSubcategoriesTable.name
+                    .collate(Collate.noCase)
+                    .like("%" + searchQuery + "%")
+                : Constant(false)) |
+            (withBudgets == true
+                ? budgets.name
+                    .collate(Collate.noCase)
+                    .like("%" + searchQuery + "%")
+                : Constant(false)) |
+            (withObjectives == true
+                ? objectives.name
+                    .collate(Collate.noCase)
+                    .like("%" + searchQuery + "%")
+                : Constant(false)) |
+            (joinedWithObjectiveLoans != null
+                ? joinedWithObjectiveLoans.name
+                    .collate(Collate.noCase)
+                    .like("%" + searchQuery + "%")
+                : Constant(false)) |
+            tbl.name.collate(Collate.noCase).like("%" + searchQuery + "%") |
+            tbl.note.collate(Collate.noCase).like("%" + searchQuery + "%") |
+            onlyShowIfSearchQueryDateIsDate(searchQuery, tbl) |
+            onlyShowIfSearchQueryAmount(searchQuery, tbl.amount);
   }
 
   Expression<bool> onlyShowIfSearchQueryAmount(
@@ -6865,9 +6905,9 @@ class FinanceDatabase extends _$FinanceDatabase {
 
     final Expression<bool> condition =
         (amount.isBiggerOrEqualValue(lowerBound.abs()) &
-            amount.isSmallerThanValue(upperBound.abs())) |
-        (amount.isSmallerOrEqualValue(-lowerBound.abs()) &
-            amount.isBiggerThanValue(-upperBound.abs()));
+                amount.isSmallerThanValue(upperBound.abs())) |
+            (amount.isSmallerOrEqualValue(-lowerBound.abs()) &
+                amount.isBiggerThanValue(-upperBound.abs()));
 
     return condition;
   }
@@ -6898,99 +6938,95 @@ class FinanceDatabase extends _$FinanceDatabase {
     Expression<bool> memberIncluded = memberTransactionFilters == null
         ? Constant(true)
         : (tbl.sharedKey.isNotNull() &
-                  tbl.transactionOwnerEmail.isIn(memberTransactionFilters) |
-              tbl.sharedKey.isNull());
+                tbl.transactionOwnerEmail.isIn(memberTransactionFilters) |
+            tbl.sharedKey.isNull());
 
-    Expression<bool> includeShared =
-        budgetTransactionFilters?.contains(
+    Expression<bool> includeShared = budgetTransactionFilters?.contains(
               BudgetTransactionFilters.sharedToOtherBudget,
             ) ==
             false
         ? Constant(
-                isFilterSelectedWithDefaults(
-                  budgetTransactionFilters,
-                  BudgetTransactionFilters.sharedToOtherBudget,
-                ),
-              ) |
-              (tbl.sharedKey.isNull())
+              isFilterSelectedWithDefaults(
+                budgetTransactionFilters,
+                BudgetTransactionFilters.sharedToOtherBudget,
+              ),
+            ) |
+            (tbl.sharedKey.isNull())
         : Constant(true);
 
-    Expression<bool> includeAdded =
-        budgetTransactionFilters?.contains(
+    Expression<bool> includeAdded = budgetTransactionFilters?.contains(
               BudgetTransactionFilters.addedToOtherBudget,
             ) ==
             false
         ? Constant(
-                isFilterSelectedWithDefaults(
-                  budgetTransactionFilters,
-                  BudgetTransactionFilters.addedToOtherBudget,
-                ),
-              ) |
-              (tbl.sharedReferenceBudgetPk.isNull() | tbl.sharedKey.isNotNull())
+              isFilterSelectedWithDefaults(
+                budgetTransactionFilters,
+                BudgetTransactionFilters.addedToOtherBudget,
+              ),
+            ) |
+            (tbl.sharedReferenceBudgetPk.isNull() | tbl.sharedKey.isNotNull())
         : Constant(true);
 
-    Expression<bool> includeIncome =
-        budgetTransactionFilters?.contains(
+    Expression<bool> includeIncome = budgetTransactionFilters?.contains(
               BudgetTransactionFilters.includeIncome,
             ) ==
             false
         ? Constant(
-                isFilterSelectedWithDefaults(
-                  budgetTransactionFilters,
-                  BudgetTransactionFilters.includeIncome,
-                ),
-              ) |
-              (budget?.income == true
-                  ? (tbl.income.equals(true))
-                  : (tbl.income.equals(false)))
+              isFilterSelectedWithDefaults(
+                budgetTransactionFilters,
+                BudgetTransactionFilters.includeIncome,
+              ),
+            ) |
+            (budget?.income == true
+                ? (tbl.income.equals(true))
+                : (tbl.income.equals(false)))
         : Constant(true);
 
-    Expression<bool> includeDebtAndCredit =
-        budgetTransactionFilters?.contains(
+    Expression<bool> includeDebtAndCredit = budgetTransactionFilters?.contains(
               BudgetTransactionFilters.includeDebtAndCredit,
             ) ==
             false
         ? Constant(
-                isFilterSelectedWithDefaults(
-                  budgetTransactionFilters,
-                  BudgetTransactionFilters.includeDebtAndCredit,
-                ),
-              ) |
-              (((tbl.type.isNotIn([
-                        TransactionSpecialType.credit.index,
-                        TransactionSpecialType.debt.index,
-                      ]) |
-                      tbl.type.isNull()) &
-                  (tbl.objectiveLoanFk.isNull())))
+              isFilterSelectedWithDefaults(
+                budgetTransactionFilters,
+                BudgetTransactionFilters.includeDebtAndCredit,
+              ),
+            ) |
+            (((tbl.type.isNotIn([
+                      TransactionSpecialType.credit.index,
+                      TransactionSpecialType.debt.index,
+                    ]) |
+                    tbl.type.isNull()) &
+                (tbl.objectiveLoanFk.isNull())))
         : Constant(true);
 
     Expression<bool> includeAddedToObjective =
         budgetTransactionFilters?.contains(
-              BudgetTransactionFilters.addedToObjective,
-            ) ==
-            false
-        ? Constant(
-                isFilterSelectedWithDefaults(
-                  budgetTransactionFilters,
                   BudgetTransactionFilters.addedToObjective,
-                ),
-              ) |
-              (tbl.objectiveFk.isNull())
-        : Constant(true);
+                ) ==
+                false
+            ? Constant(
+                  isFilterSelectedWithDefaults(
+                    budgetTransactionFilters,
+                    BudgetTransactionFilters.addedToObjective,
+                  ),
+                ) |
+                (tbl.objectiveFk.isNull())
+            : Constant(true);
 
     Expression<bool> includeBalanceCorrection =
         budgetTransactionFilters?.contains(
-              BudgetTransactionFilters.includeBalanceCorrection,
-            ) ==
-            false
-        ? Constant(
-                isFilterSelectedWithDefaults(
-                  budgetTransactionFilters,
                   BudgetTransactionFilters.includeBalanceCorrection,
-                ),
-              ) |
-              (tbl.categoryFk.equals("0").not())
-        : Constant(true);
+                ) ==
+                false
+            ? Constant(
+                  isFilterSelectedWithDefaults(
+                    budgetTransactionFilters,
+                    BudgetTransactionFilters.includeBalanceCorrection,
+                  ),
+                ) |
+                (tbl.categoryFk.equals("0").not())
+            : Constant(true);
 
     return memberIncluded &
         includeShared &
@@ -7133,11 +7169,11 @@ class FinanceDatabase extends _$FinanceDatabase {
     return categoryFks == null && categoryFksExclude == null
         ? tbl.categoryFk.isNotNull()
         : categoryFks != null && categoryFksExclude == null
-        ? tbl.categoryFk.isIn(categoryFks)
-        : categoryFks == null && categoryFksExclude != null
-        ? tbl.categoryFk.isNotIn(categoryFksExclude)
-        : tbl.categoryFk.isIn(categoryFks ?? []) &
-              tbl.categoryFk.isNotIn(categoryFksExclude ?? []);
+            ? tbl.categoryFk.isIn(categoryFks)
+            : categoryFks == null && categoryFksExclude != null
+                ? tbl.categoryFk.isNotIn(categoryFksExclude)
+                : tbl.categoryFk.isIn(categoryFks ?? []) &
+                    tbl.categoryFk.isNotIn(categoryFksExclude ?? []);
   }
 
   bool isInCategoryCheck(
@@ -7150,11 +7186,11 @@ class FinanceDatabase extends _$FinanceDatabase {
     return categoryFks == null && categoryFksExclude == null
         ? true
         : categoryFks != null && categoryFksExclude == null
-        ? categoryFks.contains(categoryFk)
-        : categoryFks == null && categoryFksExclude != null
-        ? categoryFksExclude.contains(categoryFk) == false
-        : (categoryFks ?? []).contains(categoryFk) &&
-              (categoryFksExclude ?? []).contains(categoryFk) == false;
+            ? categoryFks.contains(categoryFk)
+            : categoryFks == null && categoryFksExclude != null
+                ? categoryFksExclude.contains(categoryFk) == false
+                : (categoryFks ?? []).contains(categoryFk) &&
+                    (categoryFksExclude ?? []).contains(categoryFk) == false;
   }
 
   Expression<bool> onlyShowIfMember($TransactionsTable tbl, String? member) {
@@ -7200,9 +7236,8 @@ class FinanceDatabase extends _$FinanceDatabase {
         allTime: false,
       );
     }
-    CycleType selectedPeriodType =
-        CycleType.values[appStateSettings["selectedPeriodCycleType" +
-                cycleSettingsExtension] ??
+    CycleType selectedPeriodType = CycleType.values[
+        appStateSettings["selectedPeriodCycleType" + cycleSettingsExtension] ??
             0];
     if (followCustomPeriodCycle == false) {
       return Constant(true);
@@ -7222,7 +7257,7 @@ class FinanceDatabase extends _$FinanceDatabase {
     } else if (selectedPeriodType == CycleType.pastDays) {
       DateTime startDate =
           getStartDateOfSelectedCustomPeriod(cycleSettingsExtension) ??
-          DateTime.now();
+              DateTime.now();
       DateTime? endDate = getEndDateOfSelectedCustomPeriod(
         cycleSettingsExtension,
       );
@@ -7230,7 +7265,7 @@ class FinanceDatabase extends _$FinanceDatabase {
     } else if (selectedPeriodType == CycleType.dateRange) {
       DateTime startDate =
           getStartDateOfSelectedCustomPeriod(cycleSettingsExtension) ??
-          DateTime.now();
+              DateTime.now();
       DateTime? endDate = getEndDateOfSelectedCustomPeriod(
         cycleSettingsExtension,
       );
@@ -7271,8 +7306,8 @@ class FinanceDatabase extends _$FinanceDatabase {
     return subCategoryFks == null
         ? tbl.subCategoryFk.isNull()
         : subCategoryFks.isEmpty
-        ? Constant(true)
-        : tbl.subCategoryFk.isIn(subCategoryFks);
+            ? Constant(true)
+            : tbl.subCategoryFk.isIn(subCategoryFks);
   }
 
   Expression<bool> onlyShowBasedOnWalletFks(
@@ -7299,16 +7334,16 @@ class FinanceDatabase extends _$FinanceDatabase {
   ) {
     return budgetFks != null && budgetFks.contains(null) && budgetFks.length > 1
         ? tbl.sharedReferenceBudgetPk.isIn(
-                budgetFks.map((value) => value ?? "0").toList(),
-              ) |
-              tbl.sharedReferenceBudgetPk.isNull()
+              budgetFks.map((value) => value ?? "0").toList(),
+            ) |
+            tbl.sharedReferenceBudgetPk.isNull()
         : (budgetFks ?? []).contains(null)
-        ? tbl.sharedReferenceBudgetPk.isNull()
-        : (budgetFks != null && budgetFks.length > 0
-              ? tbl.sharedReferenceBudgetPk.isIn(
-                  budgetFks.map((value) => value ?? "0").toList(),
-                )
-              : Constant(true));
+            ? tbl.sharedReferenceBudgetPk.isNull()
+            : (budgetFks != null && budgetFks.length > 0
+                ? tbl.sharedReferenceBudgetPk.isIn(
+                    budgetFks.map((value) => value ?? "0").toList(),
+                  )
+                : Constant(true));
   }
 
   Expression<bool> onlyShowBasedOnExcludedBudgetFks(
@@ -7330,24 +7365,23 @@ class FinanceDatabase extends _$FinanceDatabase {
             objectiveFks.contains(null) &&
             objectiveFks.length > 1
         ? tbl.objectiveFk.isIn(
-                objectiveFks.map((value) => value ?? "0").toList(),
-              ) |
-              tbl.objectiveFk.isNull()
+              objectiveFks.map((value) => value ?? "0").toList(),
+            ) |
+            tbl.objectiveFk.isNull()
         : (objectiveFks ?? []).contains(null)
-        ? tbl.objectiveFk.isNull()
-        : (objectiveFks != null && objectiveFks.length > 0
-              ? tbl.objectiveFk.isIn(
-                  objectiveFks.map((value) => value ?? "0").toList(),
-                )
-              : Constant(true));
+            ? tbl.objectiveFk.isNull()
+            : (objectiveFks != null && objectiveFks.length > 0
+                ? tbl.objectiveFk.isIn(
+                    objectiveFks.map((value) => value ?? "0").toList(),
+                  )
+                : Constant(true));
   }
 
   Expression<bool> onlyShowBasedOnObjectiveLoanFks(
     $TransactionsTable tbl,
     List<String?>? objectiveLoanFks,
   ) {
-    final isNotLoanTransaction =
-        tbl.objectiveLoanFk.isNull() &
+    final isNotLoanTransaction = tbl.objectiveLoanFk.isNull() &
         (tbl.type.isNull() |
             (tbl.type
                     .equalsNullable(TransactionSpecialType.credit.index)
@@ -7360,16 +7394,16 @@ class FinanceDatabase extends _$FinanceDatabase {
             objectiveLoanFks.contains(null) &&
             objectiveLoanFks.length > 1
         ? tbl.objectiveLoanFk.isIn(
-                objectiveLoanFks.map((value) => value ?? "0").toList(),
-              ) |
-              isNotLoanTransaction
+              objectiveLoanFks.map((value) => value ?? "0").toList(),
+            ) |
+            isNotLoanTransaction
         : (objectiveLoanFks ?? []).contains(null)
-        ? isNotLoanTransaction
-        : (objectiveLoanFks != null && objectiveLoanFks.length > 0
-              ? tbl.objectiveLoanFk.isIn(
-                  objectiveLoanFks.map((value) => value ?? "0").toList(),
-                )
-              : Constant(true));
+            ? isNotLoanTransaction
+            : (objectiveLoanFks != null && objectiveLoanFks.length > 0
+                ? tbl.objectiveLoanFk.isIn(
+                    objectiveLoanFks.map((value) => value ?? "0").toList(),
+                  )
+                : Constant(true));
   }
 
   // Start date is in the past
@@ -7389,19 +7423,19 @@ class FinanceDatabase extends _$FinanceDatabase {
                 budget.reoccurrence == BudgetReoccurence.custom)
         ? Constant(true)
         : (allTime == true || (startDate == null && endDate == null)
-              ? Constant(true)
-              : startDate == null && endDate != null
-              ? isOnDay(transactions.dateCreated, endDate) |
+            ? Constant(true)
+            : startDate == null && endDate != null
+                ? isOnDay(transactions.dateCreated, endDate) |
                     transactions.dateCreated.isSmallerOrEqualValue(endDate)
-              : startDate != null && endDate == null
-              ? isOnDay(transactions.dateCreated, startDate) |
-                    transactions.dateCreated.isBiggerOrEqualValue(startDate)
-              : isOnDay(transactions.dateCreated, endDate!) |
-                    isOnDay(transactions.dateCreated, startDate!) |
-                    transactions.dateCreated.isBetweenValues(
-                      startDate,
-                      endDate,
-                    )));
+                : startDate != null && endDate == null
+                    ? isOnDay(transactions.dateCreated, startDate) |
+                        transactions.dateCreated.isBiggerOrEqualValue(startDate)
+                    : isOnDay(transactions.dateCreated, endDate!) |
+                        isOnDay(transactions.dateCreated, startDate!) |
+                        transactions.dateCreated.isBetweenValues(
+                          startDate,
+                          endDate,
+                        )));
   }
 
   Expression<bool> onlyShowMainCategoryListing($CategoriesTable tbl) {
@@ -7423,8 +7457,8 @@ class FinanceDatabase extends _$FinanceDatabase {
   ) {
     return (budgetPk != null
         ? tbl.budgetFksExclude.isNull() |
-              (tbl.budgetFksExclude.isNotNull() &
-                  tbl.budgetFksExclude.contains(budgetPk).not())
+            (tbl.budgetFksExclude.isNotNull() &
+                tbl.budgetFksExclude.contains(budgetPk).not())
         : Constant(true));
   }
 
@@ -7466,9 +7500,8 @@ class FinanceDatabase extends _$FinanceDatabase {
       if (walletPks != null && walletPks.contains(wallet.walletPk) == false)
         continue;
       final totalAmt = transactions.amount.sum(
-        filter: paidOnly == true
-            ? transactions.paid.equals(true)
-            : Constant(true),
+        filter:
+            paidOnly == true ? transactions.paid.equals(true) : Constant(true),
       );
       final query = selectOnly(transactions)
         ..addColumns([totalAmt])
@@ -7539,7 +7572,7 @@ class FinanceDatabase extends _$FinanceDatabase {
   // print(snapshot.data![0].rawData.data["transactions.category_fk"]);
   // print(snapshot.data![0].rawData.data["c" + (snapshot.data![0].rawData.data.length).toString()]);
   Stream<List<CategoryWithTotal>>
-  watchTotalSpentInEachCategoryInTimeRangeFromCategories({
+      watchTotalSpentInEachCategoryInTimeRangeFromCategories({
     required AllWallets allWallets,
     required DateTime start,
     required DateTime end,
@@ -7631,65 +7664,63 @@ class FinanceDatabase extends _$FinanceDatabase {
         ..orderBy([(c) => OrderingTerm.desc(c.dateCreated)]));
       mergedStreams.add(
         (query.join([
-                leftOuterJoin(
-                  categories,
-                  includeAllSubCategories == true
-                      ? ((categories.categoryPk.equalsExp(
-                                  transactions.subCategoryFk,
-                                ) &
-                                transactions.subCategoryFk.isNotNull()) |
-                            (countUnassignedTransactions == true
-                                ? categories.categoryPk.equalsExp(
-                                    transactions.categoryFk,
-                                  )
-                                : (categories.categoryPk.equalsExp(
-                                        transactions.categoryFk,
-                                      ) &
-                                      transactions.subCategoryFk.isNull())))
-                      : mainCategoryPkIfSubCategories == null
-                      ? categories.categoryPk.equalsExp(transactions.categoryFk)
-                      : (categories.categoryPk.equalsExp(
-                              transactions.subCategoryFk,
-                            ) |
-                            categories.categoryPk.equalsExp(
+          leftOuterJoin(
+            categories,
+            includeAllSubCategories == true
+                ? ((categories.categoryPk.equalsExp(
+                          transactions.subCategoryFk,
+                        ) &
+                        transactions.subCategoryFk.isNotNull()) |
+                    (countUnassignedTransactions == true
+                        ? categories.categoryPk.equalsExp(
+                            transactions.categoryFk,
+                          )
+                        : (categories.categoryPk.equalsExp(
                               transactions.categoryFk,
-                            )),
+                            ) &
+                            transactions.subCategoryFk.isNull())))
+                : mainCategoryPkIfSubCategories == null
+                    ? categories.categoryPk.equalsExp(transactions.categoryFk)
+                    : (categories.categoryPk.equalsExp(
+                          transactions.subCategoryFk,
+                        ) |
+                        categories.categoryPk.equalsExp(
+                          transactions.categoryFk,
+                        )),
+          ),
+          leftOuterJoin(
+            categoryBudgetLimits,
+            categoryBudgetLimits.categoryFk.equalsExp(
+                  categories.categoryPk,
+                ) &
+                evaluateIfNull(
+                  categoryBudgetLimits.budgetFk.equals(
+                    budget?.budgetPk ?? "0",
+                  ),
+                  budget,
+                  false,
                 ),
-                leftOuterJoin(
-                  categoryBudgetLimits,
-                  categoryBudgetLimits.categoryFk.equalsExp(
-                        categories.categoryPk,
-                      ) &
-                      evaluateIfNull(
-                        categoryBudgetLimits.budgetFk.equals(
-                          budget?.budgetPk ?? "0",
-                        ),
-                        budget,
-                        false,
-                      ),
-                ),
-              ])
+          ),
+        ])
               ..addColumns([totalAmt, totalCount])
               ..groupBy([categories.categoryPk]))
             // totalCategoryTotalStream takes care of the ordering!
             .map((row) {
-              final TransactionCategory category = row.readTable(categories);
-              CategoryBudgetLimit? categoryBudgetLimit = row.readTableOrNull(
-                categoryBudgetLimits,
-              );
+          final TransactionCategory category = row.readTable(categories);
+          CategoryBudgetLimit? categoryBudgetLimit = row.readTableOrNull(
+            categoryBudgetLimits,
+          );
 
-              final double? total =
-                  (row.read(totalAmt) ?? 0) *
-                  (amountRatioToPrimaryCurrency(allWallets, wallet.currency));
-              final int? transactionCount = row.read(totalCount);
-              return CategoryWithTotal(
-                category: category,
-                categoryBudgetLimit: categoryBudgetLimit,
-                total: total ?? 0,
-                transactionCount: transactionCount ?? -1,
-              );
-            })
-            .watch(),
+          final double? total = (row.read(totalAmt) ?? 0) *
+              (amountRatioToPrimaryCurrency(allWallets, wallet.currency));
+          final int? transactionCount = row.read(totalCount);
+          return CategoryWithTotal(
+            category: category,
+            categoryBudgetLimit: categoryBudgetLimit,
+            total: total ?? 0,
+            transactionCount: transactionCount ?? -1,
+          );
+        }).watch(),
       );
     }
 
@@ -7749,8 +7780,8 @@ class FinanceDatabase extends _$FinanceDatabase {
     for (TransactionWallet wallet in allWallets.list) {
       final totalAmt = useAbsoluteSum
           ? transactions.amount.abs().sum(
-              filter: transactions.paid.equals(true),
-            )
+                filter: transactions.paid.equals(true),
+              )
           : transactions.amount.sum(filter: transactions.paid.equals(true));
       final totalCount = transactions.transactionPk.count();
       final query = selectOnly(transactions)
@@ -7790,8 +7821,7 @@ class FinanceDatabase extends _$FinanceDatabase {
         query
             .map(
               (row) => TotalWithCount(
-                total:
-                    (row.read(totalAmt) ?? 0) *
+                total: (row.read(totalAmt) ?? 0) *
                     (amountRatioToPrimaryCurrency(allWallets, wallet.currency)),
                 count: row.read(totalCount) ?? 0,
               ),
@@ -7819,8 +7849,8 @@ class FinanceDatabase extends _$FinanceDatabase {
             (isIncome == null
                 ? Constant(true)
                 : isIncome == true
-                ? transactions.income.equals(true)
-                : transactions.income.equals(false)) &
+                    ? transactions.income.equals(true)
+                    : transactions.income.equals(false)) &
             transactions.walletFk.equals(walletPk) &
             onlyShowIfNotBalanceCorrection(transactions, isIncome),
       );
@@ -7883,10 +7913,11 @@ class FinanceDatabase extends _$FinanceDatabase {
               (isOverdueTransactions == null
                   ? Constant(true)
                   : isOverdueTransactions == true
-                  ? transactions.dateCreated.isSmallerThanValue(DateTime.now())
-                  : transactions.dateCreated.isBiggerThanValue(
-                      DateTime.now(),
-                    )) &
+                      ? transactions.dateCreated
+                          .isSmallerThanValue(DateTime.now())
+                      : transactions.dateCreated.isBiggerThanValue(
+                          DateTime.now(),
+                        )) &
               (transactions.type.equals(
                     TransactionSpecialType.subscription.index,
                   ) |
@@ -7901,8 +7932,7 @@ class FinanceDatabase extends _$FinanceDatabase {
         query
             .map(
               (row) => TotalWithCount(
-                total:
-                    (row.read(totalAmt) ?? 0) *
+                total: (row.read(totalAmt) ?? 0) *
                     (amountRatioToPrimaryCurrency(allWallets, wallet.currency)),
                 count: row.read(totalCount) ?? 0,
               ),
@@ -7986,8 +8016,8 @@ class FinanceDatabase extends _$FinanceDatabase {
               (selectedTab == 0 && searchString != null
                   ? transactions.objectiveLoanFk.isNull()
                   : selectedTab == 1 && searchString != null
-                  ? transactions.objectiveLoanFk.isNotNull()
-                  : Constant(true)) &
+                      ? transactions.objectiveLoanFk.isNotNull()
+                      : Constant(true)) &
               (selectedTab == 0 ||
                       selectedTab == null ||
                       searchString == null ||
@@ -8001,36 +8031,35 @@ class FinanceDatabase extends _$FinanceDatabase {
                     ))
                   // Only apply this tab specific total when searching
                   : ((objectives.name
-                        .collate(Collate.noCase)
-                        .like("%" + (searchString ?? "") + "%")))) &
+                      .collate(Collate.noCase)
+                      .like("%" + (searchString ?? "") + "%")))) &
               transactions.paid.equals(true) &
               transactions.walletFk.equals(wallet.walletPk) &
               (isCredit == null
                   ? transactions.type.equals(
-                          TransactionSpecialType.credit.index,
-                        ) |
-                        transactions.type.equals(
-                          TransactionSpecialType.debt.index,
-                        ) |
-                        transactions.objectiveLoanFk.isNotNull()
+                        TransactionSpecialType.credit.index,
+                      ) |
+                      transactions.type.equals(
+                        TransactionSpecialType.debt.index,
+                      ) |
+                      transactions.objectiveLoanFk.isNotNull()
                   : isCredit
-                  ? transactions.type.equals(
-                          TransactionSpecialType.credit.index,
-                        ) |
-                        (transactions.objectiveLoanFk.isNotNull() &
-                            objectives.income.equals(true))
-                  : transactions.type.equals(
-                          TransactionSpecialType.debt.index,
-                        ) |
-                        (transactions.objectiveLoanFk.isNotNull() &
-                            objectives.income.equals(false))),
+                      ? transactions.type.equals(
+                            TransactionSpecialType.credit.index,
+                          ) |
+                          (transactions.objectiveLoanFk.isNotNull() &
+                              objectives.income.equals(true))
+                      : transactions.type.equals(
+                            TransactionSpecialType.debt.index,
+                          ) |
+                          (transactions.objectiveLoanFk.isNotNull() &
+                              objectives.income.equals(false))),
         );
       mergedStreams.add(
         query.map((row) {
           // print(row.rawData.data);
           return TotalWithCount(
-            total:
-                (row.read(totalAmt) ?? 0) *
+            total: (row.read(totalAmt) ?? 0) *
                 (amountRatioToPrimaryCurrency(allWallets, wallet.currency)),
             count: row.read(totalCount) ?? 0,
           );
@@ -8076,20 +8105,19 @@ class FinanceDatabase extends _$FinanceDatabase {
                   ? Constant(true)
                   // Only apply this tab specific total when searching
                   : (objectives.name
-                        .collate(Collate.noCase)
-                        .like("%" + (searchString ?? "") + "%"))) &
+                      .collate(Collate.noCase)
+                      .like("%" + (searchString ?? "") + "%"))) &
               (isCredit == null
                   ? Constant(true)
                   : isCredit
-                  ? objectives.income.equals(true)
-                  : objectives.income.equals(false)),
+                      ? objectives.income.equals(true)
+                      : objectives.income.equals(false)),
         );
       mergedStreams.add(
         queryTotalObjectiveAmountOffset.map((row) {
           // print(row.rawData.data);
           return TotalWithCount(
-            total:
-                (row.read(totalAmtObjective) ?? 0).abs() *
+            total: (row.read(totalAmtObjective) ?? 0).abs() *
                 ((row.read(objectiveIncome) ?? true) ? -1 : 1) *
                 (amountRatioToPrimaryCurrency(allWallets, wallet.currency)),
             count: 0,
@@ -8105,44 +8133,43 @@ class FinanceDatabase extends _$FinanceDatabase {
     String? searchString,
   ) {
     final $CategoriesTable subCategories = alias(categories, 'subCategories');
-    final query =
-        select(transactions).join([
-            innerJoin(
-              categories,
-              categories.categoryPk.equalsExp(transactions.categoryFk),
-            ),
-            leftOuterJoin(
-              subCategories,
-              subCategories.categoryPk.equalsExp(transactions.subCategoryFk),
-            ),
-          ])
-          ..orderBy([
-            OrderingTerm.desc(transactions.paid),
-            OrderingTerm.desc(transactions.dateCreated),
-          ])
-          ..where(
-            onlyShowTransactionBasedOnSearchQuery(
-                  transactions,
-                  searchString,
-                  withCategories: true,
-                  joinedWithSubcategoriesTable: subCategories,
-                  joinedWithObjectiveLoans: null,
-                ) &
-                (isCredit == null
-                    ? transactions.type.equals(
-                            TransactionSpecialType.credit.index,
-                          ) |
-                          transactions.type.equals(
-                            TransactionSpecialType.debt.index,
-                          )
-                    : isCredit
+    final query = select(transactions).join([
+      innerJoin(
+        categories,
+        categories.categoryPk.equalsExp(transactions.categoryFk),
+      ),
+      leftOuterJoin(
+        subCategories,
+        subCategories.categoryPk.equalsExp(transactions.subCategoryFk),
+      ),
+    ])
+      ..orderBy([
+        OrderingTerm.desc(transactions.paid),
+        OrderingTerm.desc(transactions.dateCreated),
+      ])
+      ..where(
+        onlyShowTransactionBasedOnSearchQuery(
+              transactions,
+              searchString,
+              withCategories: true,
+              joinedWithSubcategoriesTable: subCategories,
+              joinedWithObjectiveLoans: null,
+            ) &
+            (isCredit == null
+                ? transactions.type.equals(
+                      TransactionSpecialType.credit.index,
+                    ) |
+                    transactions.type.equals(
+                      TransactionSpecialType.debt.index,
+                    )
+                : isCredit
                     ? transactions.type.equals(
                         TransactionSpecialType.credit.index,
                       )
                     : transactions.type.equals(
                         TransactionSpecialType.debt.index,
                       )),
-          );
+      );
     return query.map((row) => row.readTable(transactions)).watch();
   }
 
@@ -8199,8 +8226,7 @@ class FinanceDatabase extends _$FinanceDatabase {
         query.map((row) {
           // print(row.rawData.data);
           return TotalWithCount(
-            total:
-                (row.read(totalAmt) ?? 0) *
+            total: (row.read(totalAmt) ?? 0) *
                 (amountRatioToPrimaryCurrency(allWallets, wallet.currency)),
             count: row.read(totalCount) ?? 0,
           );
@@ -8500,19 +8526,22 @@ class FinanceDatabase extends _$FinanceDatabase {
   Future<Transaction> getTransactionFromPk(String transactionPk) {
     return (select(
       transactions,
-    )..where((t) => t.transactionPk.equals(transactionPk))).getSingle();
+    )..where((t) => t.transactionPk.equals(transactionPk)))
+        .getSingle();
   }
 
   Future<Transaction?> tryGetTransactionFromPk(String transactionPk) {
     return (select(
       transactions,
-    )..where((t) => t.transactionPk.equals(transactionPk))).getSingleOrNull();
+    )..where((t) => t.transactionPk.equals(transactionPk)))
+        .getSingleOrNull();
   }
 
   Future<List<Transaction>> getTransactionsFromPk(List<String> transactionPks) {
     return (select(
       transactions,
-    )..where((t) => t.transactionPk.isIn(transactionPks))).get();
+    )..where((t) => t.transactionPk.isIn(transactionPks)))
+        .get();
   }
 
   Future<List<Transaction>> getTransactionsSortedFromPk(
@@ -8542,12 +8571,12 @@ class FinanceDatabase extends _$FinanceDatabase {
   // transactions not belonging to a category should be deleted
   Future<bool> deleteWanderingTransactions() async {
     List<TransactionCategory> allCategories = await getAllCategories();
-    List<String> categoryPks = allCategories
-        .map((category) => category.categoryPk)
-        .toList();
+    List<String> categoryPks =
+        allCategories.map((category) => category.categoryPk).toList();
     List<Transaction> wanderingTransactions = await (select(
       transactions,
-    )..where((t) => t.categoryFk.isNotIn(categoryPks))).get();
+    )..where((t) => t.categoryFk.isNotIn(categoryPks)))
+        .get();
     if (wanderingTransactions.isNotEmpty) {
       await deleteTransactions(
         wanderingTransactions.map((t) => t.transactionPk).toList(),
@@ -8565,16 +8594,15 @@ class FinanceDatabase extends _$FinanceDatabase {
     List<TransactionCategory> allCategories = await getAllCategories(
       includeSubCategories: true,
     );
-    List<String> categoryPks = allCategories
-        .map((category) => category.categoryPk)
-        .toList();
+    List<String> categoryPks =
+        allCategories.map((category) => category.categoryPk).toList();
 
-    Set<String> wanderingTitles =
-        (await (select(
-              associatedTitles,
-            )..where((t) => t.categoryFk.isNotIn(categoryPks))).get())
-            .map((e) => e.associatedTitlePk)
-            .toSet();
+    Set<String> wanderingTitles = (await (select(
+      associatedTitles,
+    )..where((t) => t.categoryFk.isNotIn(categoryPks)))
+            .get())
+        .map((e) => e.associatedTitlePk)
+        .toSet();
 
     if (wanderingTitles.isNotEmpty) {
       await batch((batch) {
@@ -8604,7 +8632,7 @@ class FinanceDatabase extends _$FinanceDatabase {
     // Database dates stored in seconds since epoch
     final int threeMonthsAgo =
         DateTime.now().subtract(Duration(days: 60)).millisecondsSinceEpoch ~/
-        1000;
+            1000;
 
     return customSelect(
       // and name != \'\' (users may use subcategory transactions that are repeated, might not have a title)
@@ -8632,53 +8660,55 @@ class FinanceDatabase extends _$FinanceDatabase {
     DateTime otherDateTime = originalBalanceCorrection.dateCreated;
     try {
       // In the future can take advantage of pairedTransactionFk!
-      Transaction? pairedTransaction =
-          await (select(transactions)..where(
-                (t) =>
-                    t.pairedTransactionFk.equals(
-                      originalBalanceCorrection.transactionPk,
-                    ) |
-                    t.transactionPk.equals(
-                      originalBalanceCorrection.pairedTransactionFk ?? "",
-                    ),
-              ))
-              .getSingleOrNull();
+      Transaction? pairedTransaction = await (select(transactions)
+            ..where(
+              (t) =>
+                  t.pairedTransactionFk.equals(
+                    originalBalanceCorrection.transactionPk,
+                  ) |
+                  t.transactionPk.equals(
+                    originalBalanceCorrection.pairedTransactionFk ?? "",
+                  ),
+            ))
+          .getSingleOrNull();
       if (pairedTransaction != null) {
         print("Found related transaction with pairing!");
         return pairedTransaction;
       }
 
-      return (await (select(transactions)..where(
-                (t) =>
-                    t.categoryFk.equals("0") &
-                    evaluateIfNull(
-                      t.type.equals(originalBalanceCorrection.type?.index ?? 0),
-                      originalBalanceCorrection.type?.index,
-                      true,
-                    ) &
-                    t.transactionPk
-                        .equals(originalBalanceCorrection.transactionPk)
-                        .not() &
-                    t.income.equals(isOtherIncome) &
-                    t.dateCreated.isBetweenValues(
-                      DateTime(
-                        otherDateTime.year,
-                        otherDateTime.month,
-                        otherDateTime.day,
-                        otherDateTime.hour,
-                        otherDateTime.minute,
-                        otherDateTime.second - 1,
+      return (await (select(transactions)
+                ..where(
+                  (t) =>
+                      t.categoryFk.equals("0") &
+                      evaluateIfNull(
+                        t.type
+                            .equals(originalBalanceCorrection.type?.index ?? 0),
+                        originalBalanceCorrection.type?.index,
+                        true,
+                      ) &
+                      t.transactionPk
+                          .equals(originalBalanceCorrection.transactionPk)
+                          .not() &
+                      t.income.equals(isOtherIncome) &
+                      t.dateCreated.isBetweenValues(
+                        DateTime(
+                          otherDateTime.year,
+                          otherDateTime.month,
+                          otherDateTime.day,
+                          otherDateTime.hour,
+                          otherDateTime.minute,
+                          otherDateTime.second - 1,
+                        ),
+                        DateTime(
+                          otherDateTime.year,
+                          otherDateTime.month,
+                          otherDateTime.day,
+                          otherDateTime.hour,
+                          otherDateTime.minute,
+                          otherDateTime.second + 1,
+                        ),
                       ),
-                      DateTime(
-                        otherDateTime.year,
-                        otherDateTime.month,
-                        otherDateTime.day,
-                        otherDateTime.hour,
-                        otherDateTime.minute,
-                        otherDateTime.second + 1,
-                      ),
-                    ),
-              ))
+                ))
               .get())
           .firstOrNull;
     } catch (e) {
@@ -8704,8 +8734,7 @@ class FinanceDatabase extends _$FinanceDatabase {
       income: closeBalanceCorrection.income,
       objectiveFk: Value(closeBalanceCorrection.objectiveFk),
       objectiveLoanFk: Value(closeBalanceCorrection.objectiveLoanFk),
-      amount:
-          originalBalanceCorrection.amount.abs() *
+      amount: originalBalanceCorrection.amount.abs() *
           double.parse(
             (closeBalanceCorrection.income
                     ? getAmountRatioWalletTransferTo(

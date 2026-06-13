@@ -67,12 +67,10 @@ class _BudgetContainerState extends State<BudgetContainer> {
       Provider.of<AllWallets>(context, listen: true),
       widget.budget,
     );
-    DateTime dateForRangeLocal = widget.dateForRange == null
-        ? DateTime.now()
-        : widget.dateForRange!;
+    DateTime dateForRangeLocal =
+        widget.dateForRange == null ? DateTime.now() : widget.dateForRange!;
     DateTimeRange budgetRange = getBudgetDate(widget.budget, dateForRangeLocal);
-    bool isOutOfRange =
-        budgetRange.end.difference(DateTime.now()).inDays < 0 ||
+    bool isOutOfRange = budgetRange.end.difference(DateTime.now()).inDays < 0 ||
         budgetRange.start.difference(DateTime.now()).inDays > 0;
     var innerWidget = StreamBuilder<List<CategoryWithTotal>>(
       stream: database.watchTotalSpentInEachCategoryInTimeRangeFromCategories(
@@ -85,9 +83,9 @@ class _BudgetContainerState extends State<BudgetContainer> {
         memberTransactionFilters: widget.budget.memberTransactionFilters,
         onlyShowTransactionsBelongingToBudgetPk:
             widget.budget.sharedKey != null ||
-                widget.budget.addedTransactionsOnly == true
-            ? widget.budget.budgetPk
-            : null,
+                    widget.budget.addedTransactionsOnly == true
+                ? widget.budget.budgetPk
+                : null,
         budget: widget.budget,
       ),
       builder: (context, snapshot) {
@@ -145,8 +143,8 @@ class _BudgetContainerState extends State<BudgetContainer> {
                                     children: [
                                       Container(
                                         child: CountNumber(
-                                          count:
-                                              appStateSettings["showTotalSpentForBudget"]
+                                          count: appStateSettings[
+                                                  "showTotalSpentForBudget"]
                                               ? totalSpent
                                               : budgetAmount - totalSpent,
                                           duration: Duration(milliseconds: 700),
@@ -163,11 +161,11 @@ class _BudgetContainerState extends State<BudgetContainer> {
                                                     context,
                                                   ),
                                                   number,
-                                                  finalNumber:
-                                                      appStateSettings["showTotalSpentForBudget"]
+                                                  finalNumber: appStateSettings[
+                                                          "showTotalSpentForBudget"]
                                                       ? totalSpent
                                                       : budgetAmount -
-                                                            totalSpent,
+                                                          totalSpent,
                                                   forceReveal: _isRevealed,
                                                 ),
                                                 fontSize: 18,
@@ -182,8 +180,8 @@ class _BudgetContainerState extends State<BudgetContainer> {
                                         child: Padding(
                                           padding:
                                               const EdgeInsetsDirectional.only(
-                                                bottom: 1.4,
-                                              ),
+                                            bottom: 1.4,
+                                          ),
                                           child: Container(
                                             child: AnimatedSwitcher(
                                               duration: const Duration(
@@ -193,8 +191,7 @@ class _BudgetContainerState extends State<BudgetContainer> {
                                                 key: ValueKey(
                                                   'budget_1_${_isRevealed}',
                                                 ),
-                                                text:
-                                                    getBudgetSpentText(
+                                                text: getBudgetSpentText(
                                                       widget.budget.income,
                                                     ) +
                                                     convertToMoney(
@@ -219,8 +216,8 @@ class _BudgetContainerState extends State<BudgetContainer> {
                                     children: [
                                       Container(
                                         child: CountNumber(
-                                          count:
-                                              appStateSettings["showTotalSpentForBudget"]
+                                          count: appStateSettings[
+                                                  "showTotalSpentForBudget"]
                                               ? totalSpent
                                               : totalSpent - budgetAmount,
                                           duration: Duration(milliseconds: 700),
@@ -237,11 +234,11 @@ class _BudgetContainerState extends State<BudgetContainer> {
                                                     context,
                                                   ),
                                                   number,
-                                                  finalNumber:
-                                                      appStateSettings["showTotalSpentForBudget"]
+                                                  finalNumber: appStateSettings[
+                                                          "showTotalSpentForBudget"]
                                                       ? totalSpent
                                                       : totalSpent -
-                                                            budgetAmount,
+                                                          budgetAmount,
                                                   forceReveal: _isRevealed,
                                                 ),
                                                 fontSize: 18,
@@ -256,8 +253,8 @@ class _BudgetContainerState extends State<BudgetContainer> {
                                         child: Container(
                                           padding:
                                               const EdgeInsetsDirectional.only(
-                                                bottom: 1.4,
-                                              ),
+                                            bottom: 1.4,
+                                          ),
                                           child: AnimatedSwitcher(
                                             duration: const Duration(
                                               milliseconds: 300,
@@ -266,8 +263,7 @@ class _BudgetContainerState extends State<BudgetContainer> {
                                               key: ValueKey(
                                                 'budget_2_${_isRevealed}',
                                               ),
-                                              text:
-                                                  getBudgetOverSpentText(
+                                              text: getBudgetOverSpentText(
                                                     widget.budget.income,
                                                   ) +
                                                   convertToMoney(
@@ -296,8 +292,7 @@ class _BudgetContainerState extends State<BudgetContainer> {
                             end: 10,
                             start: 10,
                           ),
-                          child:
-                              widget.budget.reoccurrence ==
+                          child: widget.budget.reoccurrence ==
                                   BudgetReoccurence.custom
                               ? SizedBox.shrink()
                               : ButtonIcon(
@@ -345,18 +340,17 @@ class _BudgetContainerState extends State<BudgetContainer> {
                         ? EdgeInsetsDirectional.only(
                             start: 15,
                             end: 15,
-                            top:
-                                widget.squishInactiveBudgetContainerHeight ==
+                            top: widget.squishInactiveBudgetContainerHeight ==
                                         true &&
                                     isOutOfRange
                                 ? 8.5
                                 : 16.5,
                             bottom:
                                 widget.squishInactiveBudgetContainerHeight ==
-                                        true &&
-                                    isOutOfRange
-                                ? 0
-                                : 8.5,
+                                            true &&
+                                        isOutOfRange
+                                    ? 0
+                                    : 8.5,
                           )
                         : EdgeInsetsDirectional.symmetric(horizontal: 15),
                     child: StreamBuilder<double?>(
@@ -372,9 +366,9 @@ class _BudgetContainerState extends State<BudgetContainer> {
                             widget.budget.memberTransactionFilters,
                         onlyShowTransactionsBelongingToBudgetPk:
                             widget.budget.sharedKey != null ||
-                                widget.budget.addedTransactionsOnly == true
-                            ? widget.budget.budgetPk
-                            : null,
+                                    widget.budget.addedTransactionsOnly == true
+                                ? widget.budget.budgetPk
+                                : null,
                         budget: widget.budget,
                         searchFilters: SearchFilters(
                           paidStatus: [PaidStatus.notPaid],
@@ -396,11 +390,11 @@ class _BudgetContainerState extends State<BudgetContainer> {
                           ghostPercent: budgetAmount == 0
                               ? 0
                               : (((snapshot.data ?? 0) *
-                                            determineBudgetPolarity(
-                                              widget.budget,
-                                            )) /
-                                        budgetAmount) *
-                                    100,
+                                          determineBudgetPolarity(
+                                            widget.budget,
+                                          )) /
+                                      budgetAmount) *
+                                  100,
                         );
                       },
                     ),
@@ -414,9 +408,9 @@ class _BudgetContainerState extends State<BudgetContainer> {
                       end: 10,
                       bottom:
                           widget.squishInactiveBudgetContainerHeight == true &&
-                              isOutOfRange
-                          ? 4
-                          : 17,
+                                  isOutOfRange
+                              ? 4
+                              : 17,
                       top: 8,
                     ),
                   ),
@@ -438,29 +432,27 @@ class _BudgetContainerState extends State<BudgetContainer> {
     );
     Color backgroundColor = appStateSettings["materialYou"]
         ? widget.budget.colour == null
-              ? appStateSettings["accentSystemColor"] == true &&
-                        appStateSettings["materialYou"] &&
-                        appStateSettings["batterySaver"] == false
-                    ? dynamicPastel(
-                        context,
-                        Theme.of(context).colorScheme.primary,
-                        amountDark: 0.85,
-                        amountLight: 0.96,
-                      )
-                    : dynamicPastel(
-                        context,
-                        HexColor(appStateSettings["accentColor"]),
-                        amountDark: 0.8,
-                        amountLight: appStateSettings["batterySaver"]
-                            ? 0.8
-                            : 0.92,
-                      )
-              : dynamicPastel(
-                  context,
-                  budgetColorScheme.secondaryContainer,
-                  amountDark: 0.6,
-                  amountLight: 0.75,
-                )
+            ? appStateSettings["accentSystemColor"] == true &&
+                    appStateSettings["materialYou"] &&
+                    appStateSettings["batterySaver"] == false
+                ? dynamicPastel(
+                    context,
+                    Theme.of(context).colorScheme.primary,
+                    amountDark: 0.85,
+                    amountLight: 0.96,
+                  )
+                : dynamicPastel(
+                    context,
+                    HexColor(appStateSettings["accentColor"]),
+                    amountDark: 0.8,
+                    amountLight: appStateSettings["batterySaver"] ? 0.8 : 0.92,
+                  )
+            : dynamicPastel(
+                context,
+                budgetColorScheme.secondaryContainer,
+                amountDark: 0.6,
+                amountLight: 0.75,
+              )
         : getColor(context, "lightDarkAccentHeavyLight");
     return Container(
       decoration: BoxDecoration(
@@ -539,8 +531,7 @@ class DaySpending extends StatelessWidget {
       Provider.of<AllWallets>(context, listen: true),
       budget,
     );
-    bool isOutOfRange =
-        budgetRange.end.difference(DateTime.now()).inDays < 0 ||
+    bool isOutOfRange = budgetRange.end.difference(DateTime.now()).inDays < 0 ||
         budgetRange.start.difference(DateTime.now()).inDays > 0;
     Widget textWidget = Padding(
       padding: EdgeInsetsDirectional.symmetric(horizontal: 6),
@@ -549,8 +540,7 @@ class DaySpending extends StatelessWidget {
           : Builder(
               builder: (context) {
                 // Add one because if there are zero days left, we want to make it the last day
-                int remainingDays =
-                    budgetRange.end
+                int remainingDays = budgetRange.end
                         .difference(DateTime.now().justDay())
                         .inDays +
                     1;
@@ -591,19 +581,17 @@ String getAmountPerDayString(
   required int remainingDays,
 }) {
   bool isIncomeBudget = budget.income;
-  double amountPerDay =
-      ((totalAmount - budgetAmount) / remainingDays) *
+  double amountPerDay = ((totalAmount - budgetAmount) / remainingDays) *
       determineBudgetPolarity(budget);
-  String remainingDaysString =
-      "for".tr() +
+  String remainingDaysString = "for".tr() +
       " " +
       remainingDays.toString() +
       " " +
       (remainingDays == 1 ? "more-day".tr() : "more-days".tr());
   bool isOverBudget =
       amountPerDay > 0 && isIncomeBudget || amountPerDay < 0 && !isIncomeBudget
-      ? true
-      : false;
+          ? true
+          : false;
 
   if (isOverBudget) {
     return convertToMoney(
@@ -680,8 +668,8 @@ class AnimatedGooBackground extends StatelessWidget {
           variation1: 0,
           variation2: 0,
           variation3: 0,
-          rotation: (randomInt[0] % (randomOffset > 0 ? randomOffset : 1))
-              .toDouble(),
+          rotation:
+              (randomInt[0] % (randomOffset > 0 ? randomOffset : 1)).toDouble(),
         ),
       ),
     );
@@ -712,9 +700,8 @@ class BudgetTimeline extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    DateTime dateForRangeLocal = dateForRange == null
-        ? DateTime.now()
-        : dateForRange!;
+    DateTime dateForRangeLocal =
+        dateForRange == null ? DateTime.now() : dateForRange!;
     return Column(
       children: [
         Row(
@@ -858,55 +845,55 @@ class BudgetProgress extends StatelessWidget {
                     Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadiusDirectional.circular(50),
-                        color:
-                            backgroundColor ??
+                        color: backgroundColor ??
                             (appStateSettings["materialYou"]
                                 ? large
-                                      ? dynamicPastel(
+                                    ? dynamicPastel(
+                                        context,
+                                        color,
+                                        amountLight: 0.9,
+                                        amountDark: 0.8,
+                                      )
+                                    : dynamicPastel(
+                                        context,
+                                        dynamicPastel(
                                           context,
                                           color,
-                                          amountLight: 0.9,
-                                          amountDark: 0.8,
-                                        )
-                                      : dynamicPastel(
-                                          context,
-                                          dynamicPastel(
-                                            context,
-                                            color,
-                                            amount: 0.7,
-                                            inverse: true,
-                                          ),
-                                          amountLight: 0.87,
-                                          amountDark: 0.75,
-                                        )
+                                          amount: 0.7,
+                                          inverse: true,
+                                        ),
+                                        amountLight: 0.87,
+                                        amountDark: 0.75,
+                                      )
                                 : large
-                                ? getColor(context, "lightDarkAccent")
-                                : getColor(context, "lightDarkAccentHeavy")),
+                                    ? getColor(context, "lightDarkAccent")
+                                    : getColor(
+                                        context, "lightDarkAccentHeavy")),
                       ),
                     ),
                     if (ghostPercent > 0)
                       Opacity(
                         opacity:
                             Theme.of(context).brightness == Brightness.light
-                            ? appStateSettings["materialYou"]
-                                  ? large
+                                ? appStateSettings["materialYou"]
+                                    ? large
                                         ? 0.4
                                         : 0.3
-                                  : 0.2
-                            : appStateSettings["materialYou"]
-                            ? large
-                                  ? 0.1
-                                  : 0.13
-                            : 0.15,
+                                    : 0.2
+                                : appStateSettings["materialYou"]
+                                    ? large
+                                        ? 0.1
+                                        : 0.13
+                                    : 0.15,
                         child: ClipRRect(
                           borderRadius: directionalityReverse(context) == -1
                               ? BorderRadiusDirectional.circular(50)
                               : (percent < 50
-                                    ? BorderRadiusDirectional.only(
-                                        topEnd: Radius.circular(50),
-                                        bottomEnd: Radius.circular(50),
-                                      )
-                                    : BorderRadiusDirectional.circular(50)),
+                                  ? BorderRadiusDirectional.only(
+                                      topEnd: Radius.circular(50),
+                                      bottomEnd: Radius.circular(50),
+                                    )
+                                  : BorderRadiusDirectional.circular(50)),
                           child: Container(
                             child: AnimatedProgress(
                               percent: percent + ghostPercent,
@@ -922,11 +909,11 @@ class BudgetProgress extends StatelessWidget {
                       borderRadius: directionalityReverse(context) == -1
                           ? BorderRadiusDirectional.circular(50)
                           : (percent < 50
-                                ? BorderRadiusDirectional.only(
-                                    topEnd: Radius.circular(50),
-                                    bottomEnd: Radius.circular(50),
-                                  )
-                                : BorderRadiusDirectional.circular(50)),
+                              ? BorderRadiusDirectional.only(
+                                  topEnd: Radius.circular(50),
+                                  bottomEnd: Radius.circular(50),
+                                )
+                              : BorderRadiusDirectional.circular(50)),
                       child: Container(
                         child: AnimatedProgress(
                           percent: percent,
@@ -960,8 +947,8 @@ class BudgetProgress extends StatelessWidget {
         ),
         showToday == true
             ? todayPercent < 0 || todayPercent > 100
-                  ? Container(height: 39)
-                  : TodayIndicator(percent: todayPercent, large: large)
+                ? Container(height: 39)
+                : TodayIndicator(percent: todayPercent, large: large)
             : SizedBox.shrink(),
       ],
     );
@@ -1016,8 +1003,7 @@ class _AnimatedProgressState extends State<AnimatedProgress> {
 
   @override
   Widget build(BuildContext context) {
-    double percent =
-        widget.percent == double.infinity ||
+    double percent = widget.percent == double.infinity ||
             widget.percent == double.negativeInfinity ||
             widget.otherPercent == double.infinity ||
             widget.otherPercent == double.negativeInfinity ||
@@ -1049,8 +1035,8 @@ class _AnimatedProgressState extends State<AnimatedProgress> {
                   heightFactor: 1,
                   widthFactor: animateIn
                       ? (widget.otherPercent > 100
-                            ? 1
-                            : widget.otherPercent / 100)
+                          ? 1
+                          : widget.otherPercent / 100)
                       : 0,
                   child: Container(
                     decoration: BoxDecoration(
@@ -1069,8 +1055,8 @@ class _AnimatedProgressState extends State<AnimatedProgress> {
                 AnimatedOpacity(
                   opacity: percent > 40
                       ? fadeIn
-                            ? 1
-                            : 0
+                          ? 1
+                          : 0
                       : 0,
                   duration: Duration(milliseconds: 500),
                   child: widget.getPercentText!(
@@ -1088,10 +1074,10 @@ class _AnimatedProgressState extends State<AnimatedProgress> {
                 duration: Duration(milliseconds: 1500),
                 width: animateIn
                     ? percent / 100 <= 0
-                          ? 0
-                          : widget.large
-                          ? 15
-                          : 10
+                        ? 0
+                        : widget.large
+                            ? 15
+                            : 10
                     : 0,
                 color: lightenPastel(widget.color, amount: 0.6),
               )
@@ -1103,7 +1089,7 @@ class _AnimatedProgressState extends State<AnimatedProgress> {
 
 class TodayIndicator extends StatefulWidget {
   TodayIndicator({Key? key, required this.percent, this.large = false})
-    : super(key: key);
+      : super(key: key);
 
   final double percent;
   final bool large;
@@ -1163,13 +1149,12 @@ class _TodayIndicatorState extends State<TodayIndicator> {
             progressSize = size;
           },
           child: Align(
-            alignment:
-                (percent < percentThreshold
-                        ? FractionalOffset(0, 0)
-                        : indicatorOffsetPercent > 1
+            alignment: (percent < percentThreshold
+                    ? FractionalOffset(0, 0)
+                    : indicatorOffsetPercent > 1
                         ? FractionalOffset(1, 0)
                         : FractionalOffset(indicatorOffsetPercent, 0))
-                    .withDirectionality(context),
+                .withDirectionality(context),
             child: Column(
               children: [
                 WidgetSize(
@@ -1186,8 +1171,8 @@ class _TodayIndicatorState extends State<TodayIndicator> {
                           borderRadius: BorderRadiusDirectional.circular(6),
                           color:
                               Theme.of(context).brightness == Brightness.light
-                              ? Color(0xFF1F1F1F)
-                              : getColor(context, "black"),
+                                  ? Color(0xFF1F1F1F)
+                                  : getColor(context, "black"),
                         ),
                         child: Padding(
                           padding: EdgeInsetsDirectional.only(
@@ -1326,8 +1311,7 @@ class _BudgetSpenderSummaryState extends State<BudgetSpenderSummary> {
     // if (widget.budget.sharedTransactionsShow ==
     //     SharedTransactionsShow.onlyIfOwner) return SizedBox.shrink();
     if (widget.budget.memberTransactionFilters ==
-        [appStateSettings["currentUserEmail"]])
-      return SizedBox.shrink();
+        [appStateSettings["currentUserEmail"]]) return SizedBox.shrink();
     if (mergedStreams == null) return SizedBox.shrink();
     return StreamBuilder<List<double?>>(
       stream: mergedStreams,
@@ -1420,8 +1404,8 @@ class _BudgetSpenderSummaryState extends State<BudgetSpenderSummary> {
                               : spender.amount / totalSpent * 100,
                           progressBackgroundColor:
                               selectedMember == spender.member
-                              ? getColor(context, "white")
-                              : getColor(context, "lightDarkAccentHeavy"),
+                                  ? getColor(context, "white")
+                                  : getColor(context, "lightDarkAccentHeavy"),
                           color: Theme.of(context).colorScheme.primary,
                           size: widget.isLarge ? 28 : 28,
                           insetPadding: widget.isLarge ? 23 : 18,
@@ -1441,11 +1425,10 @@ class _BudgetSpenderSummaryState extends State<BudgetSpenderSummary> {
                                 SizedBox(height: widget.isLarge ? 3 : 1),
                                 TextFont(
                                   maxLines: 1,
-                                  text:
-                                      (totalSpent == 0
+                                  text: (totalSpent == 0
                                           ? "0"
                                           : (spender.amount / totalSpent * 100)
-                                                .toStringAsFixed(0)) +
+                                              .toStringAsFixed(0)) +
                                       "% of budget",
                                   fontSize: 14,
                                   textColor: selectedMember == spender.member
@@ -1484,14 +1467,13 @@ class _BudgetSpenderSummaryState extends State<BudgetSpenderSummary> {
                               builder: (context, snapshot) {
                                 if (snapshot.hasData) {
                                   return TextFont(
-                                    text:
-                                        snapshot.data!.length.toString() +
+                                    text: snapshot.data!.length.toString() +
                                         " " +
                                         (snapshot.data!.length == 1
                                             ? "transaction".tr().toLowerCase()
                                             : "transactions"
-                                                  .tr()
-                                                  .toLowerCase()),
+                                                .tr()
+                                                .toLowerCase()),
                                     fontSize: 14,
                                     textColor: selectedMember == spender.member
                                         ? getColor(
