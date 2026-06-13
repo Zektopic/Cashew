@@ -517,7 +517,7 @@ class _BudgetContainerState extends State<BudgetContainer> {
   }
 }
 
-class DaySpending extends StatelessWidget {
+class DaySpending extends StatefulWidget {
   const DaySpending({
     Key? key,
     required Budget this.budget,
@@ -534,48 +534,83 @@ class DaySpending extends StatelessWidget {
   final EdgeInsetsDirectional padding;
 
   @override
+  State<DaySpending> createState() => _DaySpendingState();
+}
+
+class _DaySpendingState extends State<DaySpending> {
+  bool _isRevealed = false;
+  Timer? _revealTimer;
+
+  @override
+  void dispose() {
+    _revealTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     double budgetAmount = budgetAmountToPrimaryCurrency(
       Provider.of<AllWallets>(context, listen: true),
-      budget,
+      widget.budget,
     );
     bool isOutOfRange =
-        budgetRange.end.difference(DateTime.now()).inDays < 0 ||
-        budgetRange.start.difference(DateTime.now()).inDays > 0;
-    Widget textWidget = Padding(
-      padding: EdgeInsetsDirectional.symmetric(horizontal: 6),
-      child: large && isOutOfRange
-          ? SizedBox(height: 1)
-          : Builder(
-              builder: (context) {
-                // Add one because if there are zero days left, we want to make it the last day
-                int remainingDays =
-                    budgetRange.end
-                        .difference(DateTime.now().justDay())
-                        .inDays +
-                    1;
-                return TextFont(
-                  textColor: getColor(context, "black").withAlpha(80),
-                  text: isOutOfRange
-                      ? ""
-                      : getAmountPerDayString(
-                          context,
-                          totalAmount: totalAmount,
-                          budgetAmount: budgetAmount,
-                          budget: budget,
-                          remainingDays: remainingDays,
-                        ),
-                  fontSize: large ? 14 : 13,
-                  textAlign: TextAlign.center,
-                  maxLines: 4,
-                );
-              },
-            ),
+        widget.budgetRange.end.difference(DateTime.now()).inDays < 0 ||
+        widget.budgetRange.start.difference(DateTime.now()).inDays > 0;
+    Widget textWidget = Listener(
+      onPointerDown: (_) {
+        setState(() {
+          _isRevealed = true;
+        });
+        HapticFeedback.selectionClick();
+        _revealTimer?.cancel();
+        _revealTimer = Timer(const Duration(seconds: 2), () {
+          if (mounted) {
+            setState(() {
+              _isRevealed = false;
+            });
+          }
+        });
+      },
+      child: Padding(
+        padding: EdgeInsetsDirectional.symmetric(horizontal: 6),
+        child: widget.large && isOutOfRange
+            ? SizedBox(height: 1)
+            : Builder(
+                builder: (context) {
+                  // Add one because if there are zero days left, we want to make it the last day
+                  int remainingDays =
+                      widget.budgetRange.end
+                          .difference(DateTime.now().justDay())
+                          .inDays +
+                      1;
+                  return AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    child: TextFont(
+                      key: ValueKey(_isRevealed),
+                      textColor: getColor(context, "black").withAlpha(80),
+                      text: isOutOfRange
+                          ? ""
+                          : getAmountPerDayString(
+                              context,
+                              totalAmount: widget.totalAmount,
+                              budgetAmount: budgetAmount,
+                              budget: widget.budget,
+                              remainingDays: remainingDays,
+                              forceReveal: _isRevealed,
+                            ),
+                      fontSize: widget.large ? 14 : 13,
+                      textAlign: TextAlign.center,
+                      maxLines: 4,
+                    ),
+                  );
+                },
+              ),
+      ),
     );
     return Padding(
-      padding: large && isOutOfRange ? EdgeInsetsDirectional.zero : padding,
+      padding: widget.large && isOutOfRange ? EdgeInsetsDirectional.zero : widget.padding,
       child: Center(
-        child: large
+        child: widget.large
             ? textWidget
             : FittedBox(fit: BoxFit.fitWidth, child: textWidget),
       ),
@@ -589,6 +624,7 @@ String getAmountPerDayString(
   required double budgetAmount,
   required Budget budget,
   required int remainingDays,
+  bool forceReveal = false,
 }) {
   bool isIncomeBudget = budget.income;
   double amountPerDay =
@@ -611,11 +647,12 @@ String getAmountPerDayString(
           !appStateSettings["showTotalSpentForBudget"]
               ? totalAmount
               : totalAmount - budgetAmount,
+          forceReveal: forceReveal,
         ) +
         (appStateSettings["showTotalSpentForBudget"]
             ? (" " + "over".tr() + " ")
             : " / ") +
-        convertToMoney(Provider.of<AllWallets>(context), budgetAmount) +
+        convertToMoney(Provider.of<AllWallets>(context), budgetAmount, forceReveal: forceReveal) +
         " " +
         remainingDaysString;
   }
@@ -624,7 +661,7 @@ String getAmountPerDayString(
           ? "saving-tracking".tr()
           : "spending-tracking".tr()) +
       " " +
-      convertToMoney(Provider.of<AllWallets>(context), amountPerDay.abs()) +
+      convertToMoney(Provider.of<AllWallets>(context), amountPerDay.abs(), forceReveal: forceReveal) +
       "/" +
       "day".tr() +
       " " +
