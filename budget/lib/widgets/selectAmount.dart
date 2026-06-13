@@ -1428,7 +1428,6 @@ class _SelectAmountValueState extends State<SelectAmountValue> {
     }
 
     if (input == "." && widget.enableDecimal == false) return;
-    String amountClone = amount;
     if (input == "." && amount.contains(".")) {
     } else {
       if (amount == "0" || amount == "") {
