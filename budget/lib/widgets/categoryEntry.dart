@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'package:flutter/services.dart';
 import 'dart:math';
 
 import 'package:budget/database/tables.dart';
@@ -253,65 +255,15 @@ class CategoryEntry extends StatelessWidget {
                         ),
                         Row(
                           children: [
-                            Expanded(
-                              child: categoryBudgetLimit != null
-                                  ? Padding(
-                                      padding: const EdgeInsetsDirectional.only(
-                                        top: 3,
-                                        end: 13,
-                                        bottom: 3,
-                                      ),
-                                      child: ThinProgress(
-                                        backgroundColor:
-                                            appStateSettings["materialYou"]
-                                                ? Theme.of(context)
-                                                    .colorScheme
-                                                    .secondaryContainer
-                                                : selected
-                                                    ? getColor(context, "white")
-                                                    : getColor(context,
-                                                        "lightDarkAccentHeavy"),
-                                        color: dynamicPastel(
-                                          context,
-                                          HexColor(
-                                            category.colour,
-                                            defaultColor: Theme.of(context)
-                                                .colorScheme
-                                                .primary,
-                                          ),
-                                          inverse: true,
-                                          amountLight: 0.1,
-                                          amountDark: 0.1,
-                                        ),
-                                        progress: percentSpent,
-                                        dotProgress: todayPercent == null
-                                            ? null
-                                            : (todayPercent ?? 0) / 100,
-                                      ),
-                                    )
-                                  : Builder(builder: (context) {
-                                      String percentString = convertToPercent(
-                                        percentSpent * 100,
-                                        useLessThanZero: true,
-                                      );
-                                      String text = percentString +
-                                          " " +
-                                          (isSubcategory
-                                              ? "of-category".tr().toLowerCase()
-                                              : getPercentageAfterText == null
-                                                  ? ""
-                                                  : getPercentageAfterText!(
-                                                      categorySpent));
-
-                                      return TextFont(
-                                        text: text,
-                                        fontSize: 14,
-                                        textColor: selected
-                                            ? getColor(context, "black")
-                                                .withOpacity(0.4)
-                                            : getColor(context, "textLight"),
-                                      );
-                                    }),
+                            _CategoryEntryProgressAndPercent(
+                              categoryBudgetLimit: categoryBudgetLimit,
+                              selected: selected,
+                              category: category,
+                              percentSpent: percentSpent,
+                              todayPercent: todayPercent,
+                              isSubcategory: isSubcategory,
+                              getPercentageAfterText: getPercentageAfterText,
+                              categorySpent: categorySpent,
                             ),
                             TextFont(
                               text: max(transactionCount, 0).toString() +
@@ -641,6 +593,134 @@ class ThinProgress extends StatelessWidget {
           ],
         );
       },
+    );
+  }
+}
+class _CategoryEntryProgressAndPercent extends StatefulWidget {
+  final CategoryBudgetLimit? categoryBudgetLimit;
+  final bool selected;
+  final TransactionCategory category;
+  final double percentSpent;
+  final double? todayPercent;
+  final bool isSubcategory;
+  final String Function(double)? getPercentageAfterText;
+  final double categorySpent;
+
+  const _CategoryEntryProgressAndPercent({
+    Key? key,
+    required this.categoryBudgetLimit,
+    required this.selected,
+    required this.category,
+    required this.percentSpent,
+    required this.todayPercent,
+    required this.isSubcategory,
+    required this.getPercentageAfterText,
+    required this.categorySpent,
+  }) : super(key: key);
+
+  @override
+  State<_CategoryEntryProgressAndPercent> createState() =>
+      _CategoryEntryProgressAndPercentState();
+}
+
+class _CategoryEntryProgressAndPercentState
+    extends State<_CategoryEntryProgressAndPercent> {
+  bool _isRevealed = false;
+  Timer? _hideTimer;
+
+  void _startHideTimer() {
+    _hideTimer?.cancel();
+    _hideTimer = Timer(const Duration(seconds: 2), () {
+      if (mounted) {
+        setState(() {
+          _isRevealed = false;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _hideTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Listener(
+        onPointerDown: (event) {
+          _hideTimer?.cancel();
+          setState(() {
+            _isRevealed = true;
+          });
+          HapticFeedback.selectionClick();
+        },
+        onPointerUp: (event) => _startHideTimer(),
+        onPointerCancel: (event) => _startHideTimer(),
+        child: widget.categoryBudgetLimit != null
+            ? Padding(
+                padding: const EdgeInsetsDirectional.only(
+                  top: 3,
+                  end: 13,
+                  bottom: 3,
+                ),
+                child: ThinProgress(
+                  backgroundColor: appStateSettings["materialYou"]
+                      ? Theme.of(context).colorScheme.secondaryContainer
+                      : widget.selected
+                          ? getColor(context, "white")
+                          : getColor(context, "lightDarkAccentHeavy"),
+                  color: dynamicPastel(
+                    context,
+                    HexColor(
+                      widget.category.colour,
+                      defaultColor: Theme.of(context).colorScheme.primary,
+                    ),
+                    inverse: true,
+                    amountLight: 0.1,
+                    amountDark: 0.1,
+                  ),
+                  progress: (!_isRevealed &&
+                          appStateSettings["obscureAmounts"] == true)
+                      ? 0.0
+                      : widget.percentSpent,
+                  dotProgress: (!_isRevealed &&
+                          appStateSettings["obscureAmounts"] == true)
+                      ? null
+                      : (widget.todayPercent == null
+                          ? null
+                          : (widget.todayPercent ?? 0) / 100),
+                ),
+              )
+            : Builder(builder: (context) {
+                String percentString = convertToPercent(
+                  widget.percentSpent * 100,
+                  useLessThanZero: true,
+                  forceReveal: _isRevealed,
+                );
+                String text = percentString +
+                    " " +
+                    (widget.isSubcategory
+                        ? "of-category".tr().toLowerCase()
+                        : widget.getPercentageAfterText == null
+                            ? ""
+                            : widget.getPercentageAfterText!(
+                                widget.categorySpent));
+
+                return AnimatedSwitcher(
+                  duration: Duration(milliseconds: 300),
+                  child: TextFont(
+                    key: ValueKey(_isRevealed),
+                    text: text,
+                    fontSize: 14,
+                    textColor: widget.selected
+                        ? getColor(context, "black")
+                        : getColor(context, "textLight"),
+                  ),
+                );
+              }),
+      ),
     );
   }
 }

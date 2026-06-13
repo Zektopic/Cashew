@@ -48,6 +48,7 @@ class _LineChart extends StatefulWidget {
 class _LineChartState extends State<_LineChart> with WidgetsBindingObserver {
   bool loaded = false;
   double extraHorizontalPadding = 10;
+<<<<<<< Updated upstream
 
   bool _isRevealed = false;
   Timer? _revealTimer;
@@ -72,6 +73,11 @@ class _LineChartState extends State<_LineChart> with WidgetsBindingObserver {
     }
   }
 
+=======
+  bool _isRevealed = false;
+  Timer? _revealTimer;
+
+>>>>>>> Stashed changes
   @override
   void dispose() {
     _revealTimer?.cancel();
@@ -92,6 +98,7 @@ class _LineChartState extends State<_LineChart> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+<<<<<<< Updated upstream
     return Listener(
       onPointerDown: (_) => _setRevealed(true),
       onPointerUp: (_) => _setRevealed(false),
@@ -102,6 +109,29 @@ class _LineChartState extends State<_LineChart> with WidgetsBindingObserver {
           top: 8,
           bottom: 0,
         ),
+=======
+    return Padding(
+      padding: EdgeInsets.only(
+          right: 15 + extraHorizontalPadding, top: 8, bottom: 0),
+      child: Listener(
+        onPointerDown: (_) {
+          HapticFeedback.selectionClick();
+          setState(() => _isRevealed = true);
+          _revealTimer?.cancel();
+        },
+        onPointerUp: (_) {
+          _revealTimer?.cancel();
+          _revealTimer = Timer(Duration(seconds: 2), () {
+            if (mounted) setState(() => _isRevealed = false);
+          });
+        },
+        onPointerCancel: (_) {
+          _revealTimer?.cancel();
+          _revealTimer = Timer(Duration(seconds: 2), () {
+            if (mounted) setState(() => _isRevealed = false);
+          });
+        },
+>>>>>>> Stashed changes
         child: GestureDetector(
           child: LineChart(
             data,
@@ -304,6 +334,7 @@ class _LineChartState extends State<_LineChart> with WidgetsBindingObserver {
                   value,
                   forceReveal: _isRevealed,
                 ),
+<<<<<<< Updated upstream
                 textColor: dynamicPastel(
                   context,
                   widget.color,
@@ -350,6 +381,98 @@ class _LineChartState extends State<_LineChart> with WidgetsBindingObserver {
     topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
     rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
   );
+=======
+              );
+            },
+            reservedSize: 28,
+            interval: widget.maxPair.x / (getIsFullScreen(context) ? 6 : 4) == 0
+                ? 5
+                : widget.maxPair.x / (getIsFullScreen(context) ? 6 : 4),
+          ),
+        ),
+        leftTitles: AxisTitles(
+          sideTitles: SideTitles(
+            showTitles: true,
+            getTitlesWidget: (
+              value,
+              titleMeta,
+            ) {
+              bool show = false;
+              if (value == titleMeta.max || value == titleMeta.min) {
+                return SizedBox.shrink();
+              } else if (value == 0) {
+                show = true;
+              } else if (value < widget.maxPair.y &&
+                  value > 1 &&
+                  value < titleMeta.max) {
+                show = true;
+              } else if (value > widget.minPair.y &&
+                  value < 1 &&
+                  value > titleMeta.min) {
+                show = true;
+              } else {
+                return SizedBox.shrink();
+              }
+
+              return Padding(
+                padding: const EdgeInsets.only(right: 8.0),
+                child: MediaQuery(
+                  data: MediaQuery.of(context)
+                      .copyWith(textScaler: TextScaler.linear(1.0)),
+                  child: TextFont(
+                    overflow: TextOverflow.fade,
+                    maxLines: 1,
+                    softWrap: false,
+                    textAlign: TextAlign.end,
+                    text: getWordedNumber(context,
+                        Provider.of<AllWallets>(context, listen: false), value,
+                        forceReveal: _isRevealed),
+                    textColor: dynamicPastel(context, widget.color,
+                            amount: 0.5, inverse: true)
+                        .withOpacity(0.3),
+                    fontSize: 13,
+                  ),
+                ),
+              );
+            },
+            // If the interval is equal to a really small number (almost 0, it freezes the app!)
+            interval: double.parse((widget.maxPair.y - widget.minPair.y)
+                        .toStringAsFixed(5)) ==
+                    0.0
+                ? 0.001
+                : ((widget.maxPair.y - widget.minPair.y) /
+                        (getIsFullScreen(context) ? 7 : 4))
+                    .abs(),
+            reservedSize: 7 +
+                (widget.minPair.y <= -10000
+                    ? 55
+                    : widget.minPair.y <= -1000
+                        ? 45
+                        : widget.minPair.y <= -100
+                            ? 40 + widget.extraLeftPaddingIfSmall / 2
+                            : (widget.maxPair.y >= 100
+                                    ? (widget.maxPair.y >= 1000 ? 37 : 33)
+                                    : 25 + widget.extraLeftPaddingIfSmall) +
+                                extraHorizontalPadding) +
+                10 +
+                measureCurrencyStringExtraWidth(
+                    Provider.of<AllWallets>(context)),
+            // This interval needs more work
+            // interval: ((((widget.maxPair.y).abs() + (widget.minPair.y).abs()) /
+            //                 (getIsFullScreen(context) ? 7 : 3.6)) /
+            //             5)
+            //         .ceil() *
+            //     5,
+          ),
+        ),
+        topTitles: AxisTitles(
+          sideTitles: SideTitles(showTitles: false),
+        ),
+        rightTitles: AxisTitles(
+          sideTitles: SideTitles(showTitles: false),
+        ),
+      );
+>>>>>>> Stashed changes
 
   // FlAxisTitleData get axisTitleData => FlAxisTitleData(
   //       bottomTitle: AxisTitle(
@@ -432,6 +555,7 @@ class _LineChartState extends State<_LineChart> with WidgetsBindingObserver {
               lightenPastel(widget.color, amount: 0.3)) {
             return null;
           }
+<<<<<<< Updated upstream
           DateTime currentDate = widget.endDate == null
               ? DateTime.now()
               : widget.endDate!;
@@ -448,6 +572,54 @@ class _LineChartState extends State<_LineChart> with WidgetsBindingObserver {
                   Provider.of<AllWallets>(context, listen: false),
                   lineBarSpot.y,
                   forceReveal: _isRevealed,
+=======
+
+          // print(event.runtimeType);
+
+          double value = touchResponse.lineBarSpots![0].x;
+          if (event.runtimeType == FlLongPressStart) {
+            HapticFeedback.selectionClick();
+          } else if (touchedValue != value.toInt() &&
+              (event.runtimeType == FlLongPressMoveUpdate ||
+                  event.runtimeType == FlPanUpdateEvent)) {
+            HapticFeedback.selectionClick();
+          }
+
+          touchedValue = value.toInt();
+        },
+        touchTooltipData: LineTouchTooltipData(
+          getTooltipColor: (_) => widget.color.withOpacity(0.7),
+          tooltipRoundedRadius: 8,
+          fitInsideVertically: true,
+          fitInsideHorizontally: true,
+          tooltipPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          getTooltipItems: (List<LineBarSpot> lineBarsSpot) {
+            return lineBarsSpot.map((LineBarSpot lineBarSpot) {
+              // only show touch data for primary colored lines
+              if (lineBarSpot.bar.color !=
+                  lightenPastel(widget.color, amount: 0.3)) {
+                return null;
+              }
+              DateTime currentDate =
+                  widget.endDate == null ? DateTime.now() : widget.endDate!;
+              DateTime tooltipDate = currentDate.justDay(
+                  dayOffset: -widget.maxPair.x.toInt() + lineBarSpot.x.toInt());
+              return LineTooltipItem(
+                getWordedDateShort(
+                      tooltipDate,
+                      includeYear: DateTime.now().year != tooltipDate.year,
+                    ) +
+                    "\n" +
+                    convertToMoney(
+                        Provider.of<AllWallets>(context, listen: false),
+                        lineBarSpot.y,
+                        forceReveal: _isRevealed),
+                const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                  fontFamilyFallback: ['Inter'],
+>>>>>>> Stashed changes
                 ),
             const TextStyle(
               color: Colors.white,
