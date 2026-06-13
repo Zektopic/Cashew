@@ -1311,7 +1311,7 @@ class _PastBudgetContainerState extends State<PastBudgetContainer> {
   }
 }
 
-class CategoryAverageSpent extends StatelessWidget {
+class CategoryAverageSpent extends StatefulWidget {
   const CategoryAverageSpent({
     required this.category,
     required this.amountPeriods,
@@ -1327,116 +1327,177 @@ class CategoryAverageSpent extends StatelessWidget {
   final bool isSavingsBudget;
 
   @override
+  State<CategoryAverageSpent> createState() => _CategoryAverageSpentState();
+}
+
+class _CategoryAverageSpentState extends State<CategoryAverageSpent> {
+  bool _isRevealed = false;
+  Timer? _revealTimer;
+
+  void _startRevealTimer() {
+    _revealTimer?.cancel();
+    _revealTimer = Timer(const Duration(seconds: 2), () {
+      if (mounted) setState(() => _isRevealed = false);
+    });
+  }
+
+  @override
+  void dispose() {
+    _revealTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Tappable(
-      onLongPress: () {
-        pushRoute(
-          context,
-          AddCategoryPage(
-            category: category,
-            routesToPopAfterDelete: RoutesToPopAfterDelete.One,
-          ),
-        );
+    return Listener(
+      onPointerDown: (event) {
+        if (appStateSettings["obscureAmounts"] == true) {
+          HapticFeedback.selectionClick();
+          setState(() => _isRevealed = true);
+          _revealTimer?.cancel();
+        }
       },
-      onTap: onTap,
-      color: Colors.transparent,
-      child: Padding(
-        padding: EdgeInsetsDirectional.symmetric(
-          horizontal: getHorizontalPaddingConstrained(context),
-        ),
+      onPointerUp: (event) {
+        if (appStateSettings["obscureAmounts"] == true) {
+          _startRevealTimer();
+        }
+      },
+      onPointerCancel: (event) {
+        if (appStateSettings["obscureAmounts"] == true) {
+          _startRevealTimer();
+        }
+      },
+      child: Tappable(
+        onLongPress: () {
+          pushRoute(
+            context,
+            AddCategoryPage(
+              category: widget.category,
+              routesToPopAfterDelete: RoutesToPopAfterDelete.One,
+            ),
+          );
+        },
+        onTap: widget.onTap,
+        color: Colors.transparent,
         child: Padding(
-          padding: const EdgeInsetsDirectional.symmetric(
-              horizontal: 16, vertical: 4),
-          child: Row(
-            children: [
-              CategoryIcon(
-                category: category,
-                size: 30,
-                margin: EdgeInsetsDirectional.zero,
-                borderRadius: 1000,
-              ),
-              SizedBox(
-                width: 12,
-              ),
-              Expanded(
-                child: Container(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      TextFont(
-                        text: category.name,
-                        fontSize: 17,
-                        maxLines: 1,
-                      ),
-                      SizedBox(
-                        height: 1,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: CountNumber(
-                              count: amountPeriods == 0
-                                  ? 0
-                                  : (amountSpent / amountPeriods).abs(),
-                              duration: Duration(milliseconds: 400),
-                              initialCount: amountPeriods == 0
-                                  ? 0
-                                  : (amountSpent / amountPeriods).abs(),
-                              textBuilder: (number) {
-                                return TextFont(
-                                  text: convertToMoney(
-                                          Provider.of<AllWallets>(context),
-                                          number,
-                                          finalNumber: amountPeriods == 0
-                                              ? 0
-                                              : (amountSpent / amountPeriods)
-                                                  .abs()) +
-                                      " " +
-                                      (isSavingsBudget
-                                          ? "average-saved".tr().toLowerCase()
-                                          : "average-spent".tr().toLowerCase()),
-                                  fontSize: 14,
-                                  textColor: getColor(context, "textLight"),
-                                );
-                              },
+          padding: EdgeInsetsDirectional.symmetric(
+            horizontal: getHorizontalPaddingConstrained(context),
+          ),
+          child: Padding(
+            padding: const EdgeInsetsDirectional.symmetric(
+                horizontal: 16, vertical: 4),
+            child: Row(
+              children: [
+                CategoryIcon(
+                  category: widget.category,
+                  size: 30,
+                  margin: EdgeInsetsDirectional.zero,
+                  borderRadius: 1000,
+                ),
+                SizedBox(
+                  width: 12,
+                ),
+                Expanded(
+                  child: Container(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextFont(
+                          text: widget.category.name,
+                          fontSize: 17,
+                          maxLines: 1,
+                        ),
+                        SizedBox(
+                          height: 1,
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: CountNumber(
+                                count: widget.amountPeriods == 0
+                                    ? 0
+                                    : (widget.amountSpent /
+                                            widget.amountPeriods)
+                                        .abs(),
+                                duration: Duration(milliseconds: 400),
+                                initialCount: widget.amountPeriods == 0
+                                    ? 0
+                                    : (widget.amountSpent /
+                                            widget.amountPeriods)
+                                        .abs(),
+                                textBuilder: (number) {
+                                  return AnimatedSwitcher(
+                                    duration: Duration(milliseconds: 300),
+                                    child: TextFont(
+                                      key: ValueKey(_isRevealed),
+                                      text: convertToMoney(
+                                              Provider.of<AllWallets>(context),
+                                              number,
+                                              finalNumber: widget
+                                                          .amountPeriods ==
+                                                      0
+                                                  ? 0
+                                                  : (widget.amountSpent /
+                                                          widget.amountPeriods)
+                                                      .abs(),
+                                              forceReveal: _isRevealed) +
+                                          " " +
+                                          (widget.isSavingsBudget
+                                              ? "average-saved"
+                                                  .tr()
+                                                  .toLowerCase()
+                                              : "average-spent"
+                                                  .tr()
+                                                  .toLowerCase()),
+                                      fontSize: 14,
+                                      textColor: getColor(context, "textLight"),
+                                    ),
+                                  );
+                                },
+                              ),
                             ),
-                          ),
-                          // TextFont(
-                          //   text: transactionCount.toString() +
-                          //       " " +
-                          //       (transactionCount == 1
-                          //           ? "transaction".tr().toLowerCase()
-                          //           : "transactions".tr().toLowerCase()),
-                          //   fontSize: 13,
-                          //   textColor: selected
-                          //       ? getColor(context, "black").withOpacity(0.4)
-                          //       : getColor(context, "textLight"),
-                          // ),
-                        ],
-                      ),
-                    ],
+                            // TextFont(
+                            //   text: transactionCount.toString() +
+                            //       " " +
+                            //       (transactionCount == 1
+                            //           ? "transaction".tr().toLowerCase()
+                            //           : "transactions".tr().toLowerCase()),
+                            //   fontSize: 13,
+                            //   textColor: selected
+                            //       ? getColor(context, "black").withOpacity(0.4)
+                            //       : getColor(context, "textLight"),
+                            // ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              SizedBox(width: 10),
-              CountNumber(
-                count: amountSpent.abs(),
-                duration: Duration(milliseconds: 400),
-                initialCount: amountSpent.abs(),
-                textBuilder: (number) {
-                  return TextFont(
-                    fontWeight: FontWeight.bold,
-                    text: convertToMoney(
-                        Provider.of<AllWallets>(context), number,
-                        finalNumber: amountSpent.abs()),
-                    fontSize: 20,
-                    textColor: getColor(context, "black"),
-                  );
-                },
-              ),
-            ],
+                SizedBox(width: 10),
+                CountNumber(
+                  count: widget.amountSpent.abs(),
+                  duration: Duration(milliseconds: 400),
+                  initialCount: widget.amountSpent.abs(),
+                  textBuilder: (number) {
+                    return AnimatedSwitcher(
+                      duration: Duration(milliseconds: 300),
+                      child: TextFont(
+                        key: ValueKey(_isRevealed),
+                        fontWeight: FontWeight.bold,
+                        text: convertToMoney(
+                            Provider.of<AllWallets>(context), number,
+                            finalNumber: widget.amountSpent.abs(),
+                            forceReveal: _isRevealed),
+                        fontSize: 20,
+                        textColor: getColor(context, "black"),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       ),
