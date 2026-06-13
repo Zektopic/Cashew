@@ -97,3 +97,10 @@ dependencies {
     implementation 'com.google.android.play:review:2.0.1'
     implementation 'com.google.android.play:review-ktx:2.0.1'
 }
+
+configurations.all {
+    resolutionStrategy {
+        force 'androidx.glance:glance-appwidget:1.1.0'
+        force 'androidx.compose.remote:remote-creation-android:1.0.0-alpha10'
+    }
+}

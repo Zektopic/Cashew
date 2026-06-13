@@ -236,6 +236,19 @@ class PieChartDisplayState extends State<PieChartDisplay> {
         });
         HapticFeedback.selectionClick();
         _revealTimer?.cancel();
+      },
+      onPointerUp: (event) {
+        _revealTimer?.cancel();
+        _revealTimer = Timer(Duration(seconds: 2), () {
+          if (mounted) {
+            setState(() {
+              _isRevealed = false;
+            });
+          }
+        });
+      },
+      onPointerCancel: (event) {
+        _revealTimer?.cancel();
         _revealTimer = Timer(Duration(seconds: 2), () {
           if (mounted) {
             setState(() {

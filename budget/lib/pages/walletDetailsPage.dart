@@ -58,6 +58,8 @@ import 'package:async/async.dart' show StreamZip;
 import 'package:sliver_tools/sliver_tools.dart';
 import 'package:budget/widgets/util/fullPageDoubleColumnLayout.dart';
 import 'package:budget/widgets/util/contextMenu.dart';
+import 'package:flutter/services.dart';
+import 'dart:async';
 
 // Also known as the all spending page
 
@@ -2873,7 +2875,7 @@ class SelectedPeriodHeaderLabel extends StatelessWidget {
   }
 }
 
-class AmountSpentEntryRow extends StatelessWidget {
+class AmountSpentEntryRow extends StatefulWidget {
   const AmountSpentEntryRow({
     super.key,
     required this.openPage,
@@ -2899,14 +2901,28 @@ class AmountSpentEntryRow extends StatelessWidget {
   final bool invertSign;
 
   @override
+  State<AmountSpentEntryRow> createState() => _AmountSpentEntryRowState();
+}
+
+class _AmountSpentEntryRowState extends State<AmountSpentEntryRow> {
+  bool _isRevealed = false;
+  Timer? _revealTimer;
+
+  @override
+  void dispose() {
+    _revealTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return DoubleTotalWithCountStreamBuilder(
-      totalWithCountStream: totalWithCountStream,
-      totalWithCountStream2: totalWithCountStream2,
+      totalWithCountStream: widget.totalWithCountStream,
+      totalWithCountStream2: widget.totalWithCountStream2,
       builder: (context, snapshot) {
-        double totalSpent = absolute
+        double totalSpent = widget.absolute
             ? (snapshot.data?.total ?? 0).abs()
-            : (snapshot.data?.total ?? 0) * (invertSign == true ? -1 : 1);
+            : (snapshot.data?.total ?? 0) * (widget.invertSign == true ? -1 : 1);
         int totalCount = snapshot.data?.count ?? 0;
         return CustomContextMenu(
           buttonItems: [
@@ -2914,33 +2930,61 @@ class AmountSpentEntryRow extends StatelessWidget {
               type: ContextMenuButtonType.copy,
               onPressed: () {
                 ContextMenuController.removeAny();
-                copyToClipboard(label +
-                    addAmountToString("", totalCount, extraText: extraText) +
+                copyToClipboard(widget.label +
+                    addAmountToString("", totalCount, extraText: widget.extraText) +
                     " • " +
                     convertToMoney(
                       Provider.of<AllWallets>(context, listen: false),
                       totalSpent,
                       finalNumber: totalSpent.abs(),
+                      forceReveal: _isRevealed,
                     ));
               },
             ),
           ],
           tappableBuilder: (onLongPress) => AnimatedExpanded(
             axis: Axis.vertical,
-            expand: forceShow ||
-                ((totalCount > 0 || totalSpent != 0) && hide == false),
+            expand: widget.forceShow ||
+                ((totalCount > 0 || totalSpent != 0) && widget.hide == false),
             child: OpenContainerNavigation(
               borderRadius: 0,
-              openPage: openPage,
+              openPage: widget.openPage,
               closedColor: getColor(context, "lightDarkAccentHeavyLight"),
               button: (openContainer) {
-                return Tappable(
-                  color: getColor(context, "lightDarkAccentHeavyLight"),
-                  borderRadius: 0,
-                  child: Padding(
-                    padding: const EdgeInsetsDirectional.symmetric(
-                        horizontal: 20, vertical: 6),
-                    child: Container(
+                return Listener(
+                  onPointerDown: (_) {
+                    setState(() => _isRevealed = true);
+                    HapticFeedback.selectionClick();
+                    _revealTimer?.cancel();
+                    _revealTimer = Timer(Duration(seconds: 2), () {
+                      if (mounted) {
+                        setState(() => _isRevealed = false);
+                      }
+                    });
+                  },
+                  onPointerUp: (_) {
+                    _revealTimer?.cancel();
+                    _revealTimer = Timer(Duration(seconds: 2), () {
+                      if (mounted) setState(() => _isRevealed = false);
+                    });
+                  },
+                  onPointerCancel: (_) {
+                    _revealTimer?.cancel();
+                    _revealTimer = Timer(Duration(seconds: 2), () {
+                      if (mounted) setState(() => _isRevealed = false);
+                    });
+                  },
+                  child: Tappable(
+                    color: getColor(context, "lightDarkAccentHeavyLight"),
+                    borderRadius: 0,
+                    onTap: () async {
+                      openContainer();
+                    },
+                    onLongPress: onLongPress,
+                    child: Padding(
+                      padding: const EdgeInsetsDirectional.symmetric(
+                          horizontal: 20, vertical: 6),
+                      child: Container(
                       child: Row(
                         mainAxisSize: MainAxisSize.max,
                         crossAxisAlignment: CrossAxisAlignment.center,
@@ -2971,7 +3015,7 @@ class AmountSpentEntryRow extends StatelessWidget {
                                         textAlign: TextAlign.start,
                                         richTextSpan: [
                                           TextSpan(
-                                            text: label,
+                                            text: widget.label,
                                             style: TextStyle(
                                               fontSize: 18,
                                               color: getColor(context, "black"),
@@ -2984,7 +3028,7 @@ class AmountSpentEntryRow extends StatelessWidget {
                                           TextSpan(
                                             text: addAmountToString(
                                                 " ", totalCount,
-                                                extraText: extraText),
+                                                extraText: widget.extraText),
                                             style: TextStyle(
                                               fontSize: 15,
                                               color: getColor(
@@ -3025,21 +3069,19 @@ class AmountSpentEntryRow extends StatelessWidget {
                                   Provider.of<AllWallets>(context),
                                   number,
                                   finalNumber: totalSpent.abs(),
+                                  forceReveal: _isRevealed,
                                 ),
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
-                                textColor: textColor,
+                                textColor: widget.textColor,
                               );
                             },
                           ),
                         ],
                       ),
                     ),
+                    ),
                   ),
-                  onTap: () async {
-                    openContainer();
-                  },
-                  onLongPress: onLongPress,
                 );
               },
             ),
