@@ -241,23 +241,24 @@ class _BudgetHistoryLineGraphState extends State<_BudgetHistoryLineGraph> {
   bool _isRevealed = false;
   Timer? _revealTimer;
 
-  void _setRevealed(bool reveal) {
-    setState(() {
-      _isRevealed = reveal;
+  void _startHideTimer() {
+    _revealTimer?.cancel();
+    _revealTimer = Timer(const Duration(seconds: 2), () {
+      if (mounted) {
+        setState(() {
+          _isRevealed = false;
+        });
+      }
     });
+  }
 
+  void _setRevealed(bool reveal) {
     if (reveal) {
       HapticFeedback.selectionClick();
+      setState(() => _isRevealed = true);
       _revealTimer?.cancel();
-      _revealTimer = Timer(const Duration(seconds: 2), () {
-        if (mounted) {
-          setState(() {
-            _isRevealed = false;
-          });
-        }
-      });
     } else {
-      _revealTimer?.cancel();
+      _startHideTimer();
     }
   }
 

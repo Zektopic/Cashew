@@ -90,17 +90,18 @@ class _CategoryLimitsState extends State<CategoryLimits> {
                       HapticFeedback.selectionClick();
                       setState(() => _isRevealed = true);
                       _revealTimer?.cancel();
+                    },
+                    onPointerUp: (_) {
+                      _revealTimer?.cancel();
                       _revealTimer = Timer(Duration(seconds: 2), () {
                         if (mounted) setState(() => _isRevealed = false);
                       });
                     },
-                    onPointerUp: (_) {
-                      _revealTimer?.cancel();
-                      setState(() => _isRevealed = false);
-                    },
                     onPointerCancel: (_) {
                       _revealTimer?.cancel();
-                      setState(() => _isRevealed = false);
+                      _revealTimer = Timer(Duration(seconds: 2), () {
+                        if (mounted) setState(() => _isRevealed = false);
+                      });
                     },
                     child: CountNumber(
                       count: snapshot.data ?? 0,
@@ -538,17 +539,18 @@ class _CategoryLimitEntryState extends State<CategoryLimitEntry> {
             HapticFeedback.selectionClick();
             setState(() => _isRevealed = true);
             _revealTimer?.cancel();
+          },
+          onPointerUp: (_) {
+            _revealTimer?.cancel();
             _revealTimer = Timer(Duration(seconds: 2), () {
               if (mounted) setState(() => _isRevealed = false);
             });
           },
-          onPointerUp: (_) {
-            _revealTimer?.cancel();
-            setState(() => _isRevealed = false);
-          },
           onPointerCancel: (_) {
             _revealTimer?.cancel();
-            setState(() => _isRevealed = false);
+            _revealTimer = Timer(Duration(seconds: 2), () {
+              if (mounted) setState(() => _isRevealed = false);
+            });
           },
           child: returnWidget,
         );
