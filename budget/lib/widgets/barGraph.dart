@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:async';
 import 'package:flutter/services.dart';
+import 'package:budget/functions.dart';
 
 class BarGraph extends StatefulWidget {
   BarGraph({
@@ -96,7 +97,41 @@ class BarGraphState extends State<BarGraph> {
               maxY: widget.maxY,
               minY: -1,
               alignment: BarChartAlignment.spaceBetween,
-              barTouchData: BarTouchData(handleBuiltInTouches: false),
+              barTouchData: BarTouchData(
+                handleBuiltInTouches: true,
+                touchTooltipData: BarTouchTooltipData(
+                  getTooltipColor: (_) => widget.color.withOpacity(0.7),
+                  tooltipRoundedRadius: 8,
+                  tooltipPadding:
+                      EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  getTooltipItem: (
+                    BarChartGroupData group,
+                    int groupIndex,
+                    BarChartRodData rod,
+                    int rodIndex,
+                  ) {
+                    return BarTooltipItem(
+                      convertToMoney(
+                        Provider.of<AllWallets>(context, listen: false),
+                        rod.toY,
+                        forceReveal: _isRevealed,
+                      ),
+                      const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                        fontFamilyFallback: ['Inter'],
+                      ),
+                    );
+                  },
+                ),
+                touchCallback:
+                    (FlTouchEvent event, BarTouchResponse? touchResponse) {
+                  if (event is FlLongPressStart || event is FlPanDownEvent) {
+                    HapticFeedback.selectionClick();
+                  }
+                },
+              ),
               gridData: FlGridData(
                 show: true,
                 horizontalInterval: 1,
@@ -169,25 +204,25 @@ class BarGraphState extends State<BarGraph> {
                         child: TextFont(
                           textAlign: TextAlign.center,
                           fontSize: 13,
-                          text:
-                              widget.budget.reoccurrence ==
+                          text: widget.budget.reoccurrence ==
                                   BudgetReoccurence.monthly
                               ? DateFormat(
                                   'MMM',
                                   context.locale.toString(),
                                 ).format(widget.dateRanges[value.toInt()].start)
                               : widget.budget.reoccurrence ==
-                                    BudgetReoccurence.yearly
-                              ? DateFormat(
-                                  'yyyy',
-                                  context.locale.toString(),
-                                ).format(widget.dateRanges[value.toInt()].start)
-                              : DateFormat(
-                                  'MMM\nd',
-                                  context.locale.toString(),
-                                ).format(
-                                  widget.dateRanges[value.toInt()].start,
-                                ),
+                                      BudgetReoccurence.yearly
+                                  ? DateFormat(
+                                      'yyyy',
+                                      context.locale.toString(),
+                                    ).format(
+                                      widget.dateRanges[value.toInt()].start)
+                                  : DateFormat(
+                                      'MMM\nd',
+                                      context.locale.toString(),
+                                    ).format(
+                                      widget.dateRanges[value.toInt()].start,
+                                    ),
                           textColor: dynamicPastel(
                             context,
                             widget.color,
