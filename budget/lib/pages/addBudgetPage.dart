@@ -364,7 +364,7 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
       if (widget.budget == null) {
         bool result = await premiumPopupBudgets(context);
         if (result == true && widget.isAddedOnlyBudget != true) {
-          dynamic result = await openBottomSheet(
+          await openBottomSheet(
             context,
             fullSnap: false,
             SelectBudgetTypePopup(setBudgetType: setSelectedBudgetType),
@@ -381,7 +381,7 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
           //     ),
           //   );
           // }
-          dynamic result2 = await openBottomSheet(
+          await openBottomSheet(
             context,
             fullSnap: false,
             SelectBudgetIncomeTypePopup(setBudgetIncome: setSelectedIncome),

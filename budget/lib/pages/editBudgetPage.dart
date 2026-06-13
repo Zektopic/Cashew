@@ -624,9 +624,7 @@ Future<dynamic> selectAddableBudgetPopup(BuildContext context,
     ),
   );
 
-  if (budget is Budget) return budget;
-  if (budget == "none") return "none";
-  return null;
+  return budget;
 }
 
 class NoResultsCreate extends StatelessWidget {

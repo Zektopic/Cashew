@@ -21,13 +21,10 @@ enum AuthResult {
 
 bool authAvailable = false;
 
-Future<AuthResult> checkBiometrics({
-  bool checkAlways = false,
-}) async {
+Future<AuthResult> checkBiometrics({bool checkAlways = false}) async {
   try {
     if (kIsWeb) {
       authAvailable = false;
-      await updateSettings("requireAuth", false, updateGlobalState: false);
       return AuthResult.authenticated;
     }
 
@@ -44,9 +41,9 @@ Future<AuthResult> checkBiometrics({
     if (authAvailable) {
       //bool biometricsOnly = (await auth.canCheckBiometrics);
       return (await auth.authenticate(
-        localizedReason: "verify-identity".tr(),
-        options: AuthenticationOptions(biometricOnly: false),
-      ))
+            localizedReason: "verify-identity".tr(),
+            options: AuthenticationOptions(biometricOnly: false),
+          ))
           ? AuthResult.authenticated
           : AuthResult.unauthenticated;
     }
@@ -108,7 +105,6 @@ class _InitializeBiometricsState extends State<InitializeBiometrics> {
         description: "biometrics-error-description".tr(),
         onSubmitLabel: "ok".tr(),
         onSubmit: () {
-          updateSettings("requireAuth", false, updateGlobalState: false);
           popRoute(null);
         },
       );
@@ -142,9 +138,11 @@ class _InitializeBiometricsState extends State<InitializeBiometrics> {
                   switchOutCurve: Curves.easeInOut,
                   transitionBuilder:
                       (Widget child, Animation<double> animation) {
-                    return FadeScaleTransition(
-                        animation: animation, child: child);
-                  },
+                        return FadeScaleTransition(
+                          animation: animation,
+                          child: child,
+                        );
+                      },
                   child: authResult != AuthResult.waiting
                       ? Icon(
                           Icons.lock,
@@ -156,13 +154,17 @@ class _InitializeBiometricsState extends State<InitializeBiometrics> {
               ),
             ),
             AnimatedExpanded(
-              expand: authResult == AuthResult.error ||
+              expand:
+                  authResult == AuthResult.error ||
                   authResult == AuthResult.errorBackupRestoreLaunch,
               child: Padding(
                 padding: const EdgeInsetsDirectional.symmetric(
-                    horizontal: 18, vertical: 20),
+                  horizontal: 18,
+                  vertical: 20,
+                ),
                 child: TextFont(
-                  text: "biometrics-error-description".tr() +
+                  text:
+                      "biometrics-error-description".tr() +
                       "\n" +
                       "please-check-your-system-settings".tr(),
                   textAlign: TextAlign.center,
