@@ -78,23 +78,12 @@
 - 2026-05-29: Iterative Enhancement - Secured the `TransactionsEntriesSpendingSummary` component which displays the net spending overview above transaction lists. Refactored the component into a `StatefulWidget`, integrated a `Listener` to handle the hold-to-reveal gesture, and passed the local `_isRevealed` state (with a 2-second auto-collapse timer and haptic feedback) as `forceReveal` down into the internal `convertToMoney` method. Also audited `HomePageLineGraph`, `HeatMapMonthLabel`, and `BarGraph` tooltips and confirmed they are secure.
 **Next Planned Step:** Conclude the initial privacy mode phase and pivot to testing or refactoring the main application navigation menus, searching for components relying on outdated, less secure implementations.
 =======
-<<<<<<< HEAD
-- 2026-05-17: Iterative Enhancement - Secured remaining `BarGraph` chart tooltips and `HomePageHeatMap` cell tooltips. Refactored `HeatMap` into a `StatefulWidget`, mapped a `Listener` onto the component with haptic feedback and a 2-second auto-collapse timer, and passed the local `_isRevealed` state to the `Tooltip`. Similarly configured `BarTouchData` tooltips to format their Y values dynamically using `_isRevealed` in `BarGraph`.
-**Next Planned Step:** Finalize the Privacy Obfuscation feature iteration by conducting a holistic code review across the codebase to ensure no remaining dynamic labels, widgets, or components leak user financial amounts un-obfuscated when the feature is globally active.
-=======
-- $(date +%Y-%m-%d): Iterative Enhancement - Audited `HomePageLineGraph`, `HeatMapMonthLabel`, and `BarGraph` tooltips. Confirmed `HomePageLineGraph` is secure, `HeatMapMonthLabel` handles non-monetary dates, and refactored `BarGraph` to properly implement `BarTouchTooltipData` passing `forceReveal` on long press, ensuring tooltips reflect the privacy mode settings.
-**Next Planned Step:** Conclude the feature implementation by performing a full manual review of the privacy mode functionality across varying devices and consider implementing a global 'panic' gesture or screen-lock overlay.
 - 2026-05-16: Iterative Enhancement - Secured `TransactionEntries` list totals and `DateDivider` summaries. Implemented `_isRevealed` state and `Listener` in `_TransactionEntriesState`, passing the `forceReveal` flag to `convertToMoney` for daily total net spending and bottom list cash flow summaries, ensuring consistent privacy obfuscation on tap-and-hold.
-**Next Planned Step:** Target the remaining `ProgressBar` implementations or dynamic text in `appLinks.dart` for privacy obfuscation verification.
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
+- 2026-05-17: Iterative Enhancement - Secured remaining `BarGraph` chart tooltips and `HomePageHeatMap` cell tooltips. Refactored `HeatMap` into a `StatefulWidget`, mapped a `Listener` onto the component with haptic feedback and a 2-second auto-collapse timer, and passed the local `_isRevealed` state to the `Tooltip`. Similarly configured `BarTouchData` tooltips to format their Y values dynamically using `_isRevealed` in `BarGraph`.
+- 2026-05-18: Iterative Enhancement - Secured remaining un-obfuscated `convertToMoney` instances within `budgetContainer.dart`. Refactored `getAmountPerDayString` to accept a `forceReveal` parameter and applied it to internal amount formatters. Upgraded `DaySpending` to a `StatefulWidget` with a dedicated gesture `Listener`, 2-second auto-collapse timer, and `HapticFeedback` to manage a local `_isRevealed` state. Also updated the member spending text display (`_BudgetSpenderSummaryState`) with an `AnimatedSwitcher` and `_isRevealed` listener, ensuring the privacy obfuscation feature is fully consistent across budget dashboard views.
+
+- 2026-05-19: Iterative Enhancement - Continued Privacy Obfuscation roll-out by auditing `budgetContainer.dart`. Applied obfuscation to dynamic labels by upgrading `DaySpending` into a `StatefulWidget` to maintain `_isRevealed` local state. Configured gesture listeners with `HapticFeedback` and 2-second auto-collapse timers around amounts and extended `getAmountPerDayString` to accept a `forceReveal` parameter for localized formatting. Also wrapped the `BudgetSpenderSummary` component with `Listener` logic and dynamically passed the state flag to the formatted string.
+**Next Planned Step:** Audit the `budgetContainer.dart` architecture to lift the local `_isRevealed` states from sub-widgets (like `DaySpending`) up to the parent `BudgetContainer` to ensure a single, synchronous reveal interaction across the entire dashboard component.
 
 ## 🚨 Critical Security Learnings
 *Only add entries here for unique, repo-specific security gaps, unexpected side effects, or reusable patterns.*
@@ -130,26 +119,17 @@
   - **Vulnerability/Gap:** The `getFileIdFromUrl` function did not validate if the provided URL started with a safe Google Drive/Docs prefix, nor did it sanitize the extracted `fileId` for path traversal or malicious characters before passing it to `driveApi.files.get()`. This poses an SSRF/Path Traversal risk where a user could provide a crafted URL that causes the application to request arbitrary or malformed file IDs.
   - **Learning:** Always strictly validate user-provided URLs and sanitize extracted identifiers before using them to request resources, even when using an SDK like `googleapis`.
   - **Prevention:** Implement strict prefix checking for expected Google Drive URLs (`https://drive.google.com/file/d/`, etc.) and regex-based sanitization to reject IDs containing dangerous characters (`[/?#@\\]` or `..`).
-<<<<<<< HEAD
-=======
-
 - **2026-05-16 - Silent Disabling of Global Security Preferences on Web Access:**
   - **Vulnerability/Gap:** When a user accessed the application via the web platform, the application silently and persistently updated the global `requireAuth` setting to `false` via `updateSettings("requireAuth", false)`. This bypassed the user's intent to require authentication and disabled this protection across all their devices moving forward simply by them logging in on the web.
   - **Learning:** Temporary platform-specific overrides (like skipping biometrics on the web) should never persistently modify the user's core security configuration settings. This creates an unexpected and dangerous state change.
   - **Prevention:** Differentiate between "session state" (e.g., returning `AuthResult.authenticated` for the current web session) and "persistent settings" (modifying the underlying `requireAuth` preference). Never override security preferences persistently based on a platform limitation.
-<<<<<<< HEAD
 
 - **2026-06-01 - Unbounded String Rendering DoS:**
   - **Vulnerability/Gap:** The TableEntry widget rendered unbounded string lengths from imported CSV files within an IntrinsicColumnWidth Table, risking layout exceptions and potential DoS.
   - **Learning:** UI components displaying externally sourced data must enforce maximum string limits to ensure rendering stability.
   - **Prevention:** Truncate text content before rendering in widgets that enforce intrinsic dimensions.
-=======
-- 2026-05-18: Iterative Enhancement - Secured remaining un-obfuscated `convertToMoney` instances within `budgetContainer.dart`. Refactored `getAmountPerDayString` to accept a `forceReveal` parameter and applied it to internal amount formatters. Upgraded `DaySpending` to a `StatefulWidget` with a dedicated gesture `Listener`, 2-second auto-collapse timer, and `HapticFeedback` to manage a local `_isRevealed` state. Also updated the member spending text display (`_BudgetSpenderSummaryState`) with an `AnimatedSwitcher` and `_isRevealed` listener, ensuring the privacy obfuscation feature is fully consistent across budget dashboard views.
-**Next Planned Step:** Audit the `budgetContainer.dart` architecture to lift the local `_isRevealed` states from sub-widgets (like `DaySpending`) up to the parent `BudgetContainer` to ensure a single, synchronous reveal interaction across the entire dashboard component.
 
 - **2026-05-28 - Removed Silent Disabling of Global Security Preferences on Web Access:**
   - **Vulnerability/Gap:** The global `requireAuth` flag was being persistently overwritten to `false` when a biometric error popup occurred (which would happen automatically on web access in some contexts), effectively defeating security preferences across devices.
   - **Learning:** Global state modification (`updateSettings`) should not be intertwined with error handling mechanisms for local session constraints or dialog cancellations.
   - **Prevention:** Only update local UI state (`isLocked = false`) when an authentication error occurs, preserving the user's global configuration in the database.
->>>>>>> main
->>>>>>> main
