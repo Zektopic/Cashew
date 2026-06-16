@@ -579,6 +579,7 @@ String getAmountPerDayString(
   required double budgetAmount,
   required Budget budget,
   required int remainingDays,
+  bool forceReveal = false,
 }) {
   bool isIncomeBudget = budget.income;
   double amountPerDay = ((totalAmount - budgetAmount) / remainingDays) *
@@ -599,11 +600,12 @@ String getAmountPerDayString(
           !appStateSettings["showTotalSpentForBudget"]
               ? totalAmount
               : totalAmount - budgetAmount,
+          forceReveal: forceReveal,
         ) +
         (appStateSettings["showTotalSpentForBudget"]
             ? (" " + "over".tr() + " ")
             : " / ") +
-        convertToMoney(Provider.of<AllWallets>(context), budgetAmount) +
+        convertToMoney(Provider.of<AllWallets>(context), budgetAmount, forceReveal: forceReveal) +
         " " +
         remainingDaysString;
   }
@@ -612,7 +614,7 @@ String getAmountPerDayString(
           ? "saving-tracking".tr()
           : "spending-tracking".tr()) +
       " " +
-      convertToMoney(Provider.of<AllWallets>(context), amountPerDay.abs()) +
+      convertToMoney(Provider.of<AllWallets>(context), amountPerDay.abs(), forceReveal: forceReveal) +
       "/" +
       "day".tr() +
       " " +
@@ -1274,6 +1276,15 @@ class BudgetSpenderSummary extends StatefulWidget {
 
 class _BudgetSpenderSummaryState extends State<BudgetSpenderSummary> {
   Stream<List<double?>>? mergedStreams;
+  bool _isRevealed = false;
+  Timer? _revealTimer;
+
+  @override
+  void dispose() {
+    _revealTimer?.cancel();
+    super.dispose();
+  }
+
   Set<String> members = {};
   String? selectedMember = null;
 
@@ -1351,9 +1362,26 @@ class _BudgetSpenderSummaryState extends State<BudgetSpenderSummary> {
                   }
                   return true;
                 },
-                child: Tappable(
-                  onTap: () {
-                    if (widget.disableMemberSelection == false) {
+                child: Listener(
+                  onPointerDown: (_) {
+                    HapticFeedback.selectionClick();
+                    setState(() => _isRevealed = true);
+                    _revealTimer?.cancel();
+                    _revealTimer = Timer(Duration(seconds: 2), () {
+                      if (mounted) setState(() => _isRevealed = false);
+                    });
+                  },
+                  onPointerUp: (_) {
+                    _revealTimer?.cancel();
+                    setState(() => _isRevealed = false);
+                  },
+                  onPointerCancel: (_) {
+                    _revealTimer?.cancel();
+                    setState(() => _isRevealed = false);
+                  },
+                  child: Tappable(
+                    onTap: () {
+                      if (widget.disableMemberSelection == false) {
                       if (selectedMember == spender.member ||
                           spender.amount == 0) {
                         widget.setSelectedMember(null);
@@ -1446,13 +1474,18 @@ class _BudgetSpenderSummaryState extends State<BudgetSpenderSummary> {
                           crossAxisAlignment: CrossAxisAlignment.end,
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            TextFont(
-                              fontWeight: FontWeight.bold,
-                              text: convertToMoney(
-                                Provider.of<AllWallets>(context),
-                                spender.amount,
+                            AnimatedSwitcher(
+                              duration: Duration(milliseconds: 200),
+                              child: TextFont(
+                                key: ValueKey(_isRevealed),
+                                fontWeight: FontWeight.bold,
+                                text: convertToMoney(
+                                  Provider.of<AllWallets>(context),
+                                  spender.amount,
+                                  forceReveal: _isRevealed,
+                                ),
+                                fontSize: widget.isLarge ? 21 : 20,
                               ),
-                              fontSize: widget.isLarge ? 21 : 20,
                             ),
                             SizedBox(height: 1),
                             StreamBuilder<List<Transaction>>(
@@ -1491,6 +1524,7 @@ class _BudgetSpenderSummaryState extends State<BudgetSpenderSummary> {
                       ],
                     ),
                   ),
+                ),
                 ),
               ),
             );
