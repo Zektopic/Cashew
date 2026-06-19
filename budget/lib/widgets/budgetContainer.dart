@@ -403,6 +403,7 @@ class _BudgetContainerState extends State<BudgetContainer> {
                     budget: widget.budget,
                     totalAmount: totalSpent,
                     budgetRange: budgetRange,
+                    forceReveal: _isRevealed,
                     padding: EdgeInsetsDirectional.only(
                       start: 10,
                       end: 10,
@@ -517,6 +518,7 @@ class DaySpending extends StatelessWidget {
     bool this.large = false,
     required this.budgetRange,
     required this.padding,
+    this.forceReveal = false,
   }) : super(key: key);
 
   final Budget budget;
@@ -524,6 +526,7 @@ class DaySpending extends StatelessWidget {
   final double totalAmount;
   final DateTimeRange budgetRange;
   final EdgeInsetsDirectional padding;
+  final bool forceReveal;
 
   @override
   Widget build(BuildContext context) {
@@ -554,6 +557,7 @@ class DaySpending extends StatelessWidget {
                           budgetAmount: budgetAmount,
                           budget: budget,
                           remainingDays: remainingDays,
+                          forceReveal: forceReveal,
                         ),
                   fontSize: large ? 14 : 13,
                   textAlign: TextAlign.center,
