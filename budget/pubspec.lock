@@ -825,10 +825,10 @@ packages:
     dependency: "direct main"
     description:
       name: home_widget
-      sha256: "7a32f7d6a3afd542126fb0004acba939a41ee57d874172926212774fbce684d3"
+      sha256: "908d033514a981f829fd98213909e11a428104327be3b422718aa643ac9d084a"
       url: "https://pub.dev"
     source: hosted
-    version: "0.9.2"
+    version: "0.8.1"
   hooks:
     dependency: transitive
     description:
