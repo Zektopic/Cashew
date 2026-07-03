@@ -409,6 +409,7 @@ class _BudgetContainerState extends State<BudgetContainer> {
                     budget: widget.budget,
                     totalAmount: totalSpent,
                     budgetRange: budgetRange,
+                    forceReveal: _isRevealed,
                     padding: EdgeInsetsDirectional.only(
                       start: 10,
                       end: 10,
@@ -526,6 +527,7 @@ class DaySpending extends StatelessWidget {
     bool this.large = false,
     required this.budgetRange,
     required this.padding,
+    this.forceReveal = false,
   }) : super(key: key);
 
   final Budget budget;
@@ -533,6 +535,7 @@ class DaySpending extends StatelessWidget {
   final double totalAmount;
   final DateTimeRange budgetRange;
   final EdgeInsetsDirectional padding;
+  final bool forceReveal;
 
   @override
   Widget build(BuildContext context) {
@@ -565,6 +568,7 @@ class DaySpending extends StatelessWidget {
                           budgetAmount: budgetAmount,
                           budget: budget,
                           remainingDays: remainingDays,
+                          forceReveal: forceReveal,
                         ),
                   fontSize: large ? 14 : 13,
                   textAlign: TextAlign.center,
@@ -1284,6 +1288,7 @@ class BudgetSpenderSummary extends StatefulWidget {
     this.allTime = false,
     this.disableMemberSelection = false,
     this.isLarge = false,
+    this.forceReveal = false,
     super.key,
   });
 
@@ -1293,6 +1298,7 @@ class BudgetSpenderSummary extends StatefulWidget {
   final bool allTime;
   final bool disableMemberSelection;
   final bool isLarge;
+  final bool forceReveal;
 
   @override
   State<BudgetSpenderSummary> createState() => _BudgetSpenderSummaryState();
@@ -1506,12 +1512,15 @@ class _BudgetSpenderSummaryState extends State<BudgetSpenderSummary> {
                               AnimatedSwitcher(
                                 duration: Duration(milliseconds: 200),
                                 child: TextFont(
-                                  key: ValueKey(_isRevealed),
+                                  key: ValueKey(
+                                    widget.forceReveal || _isRevealed,
+                                  ),
                                   fontWeight: FontWeight.bold,
                                   text: convertToMoney(
                                     Provider.of<AllWallets>(context),
                                     spender.amount,
-                                    forceReveal: _isRevealed,
+                                    forceReveal:
+                                        widget.forceReveal || _isRevealed,
                                   ),
                                   fontSize: widget.isLarge ? 21 : 20,
                                 ),
