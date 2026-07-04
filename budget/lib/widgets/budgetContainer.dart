@@ -1288,6 +1288,7 @@ class BudgetSpenderSummary extends StatefulWidget {
     this.allTime = false,
     this.disableMemberSelection = false,
     this.isLarge = false,
+    this.forceReveal = false,
     super.key,
   });
 
@@ -1297,6 +1298,7 @@ class BudgetSpenderSummary extends StatefulWidget {
   final bool allTime;
   final bool disableMemberSelection;
   final bool isLarge;
+  final bool forceReveal;
 
   @override
   State<BudgetSpenderSummary> createState() => _BudgetSpenderSummaryState();
@@ -1510,12 +1512,15 @@ class _BudgetSpenderSummaryState extends State<BudgetSpenderSummary> {
                               AnimatedSwitcher(
                                 duration: Duration(milliseconds: 200),
                                 child: TextFont(
-                                  key: ValueKey(_isRevealed),
+                                  key: ValueKey(
+                                    widget.forceReveal || _isRevealed,
+                                  ),
                                   fontWeight: FontWeight.bold,
                                   text: convertToMoney(
                                     Provider.of<AllWallets>(context),
                                     spender.amount,
-                                    forceReveal: _isRevealed,
+                                    forceReveal:
+                                        widget.forceReveal || _isRevealed,
                                   ),
                                   fontSize: widget.isLarge ? 21 : 20,
                                 ),
