@@ -71,7 +71,8 @@
 - 2026-05-21: Iterative Enhancement - Audited `budgetContainer.dart` architecture and lifted local `_isRevealed` control. Added `forceReveal` parameters to `DaySpending` and `BudgetSpenderSummary`, allowing the parent `BudgetContainer` to propagate its hold-to-reveal state downward. This ensures a single, synchronous reveal interaction across the dashboard widget without conflicting localized listeners.
 **Next Planned Step:** Conclude the initial privacy mode phase and pivot to addressing security vulnerabilities (like SSRF and Path Traversal) in URL parsing components, specifically targeting `getFileIdFromUrl`.
 - 2026-07-04: Iterative Enhancement - Secured `DaySpending` widget across the budget dashboard. Refactored `DaySpending` to accept a `forceReveal` parameter and lifted its temporary reveal state up to the parent `BudgetContainer`. This unifies the hold-to-reveal gesture, preventing sub-components from having fragmented or missing privacy obfuscation logic.
-**Next Planned Step:** Audit `budgetPage.dart` and `pastBudgetsPage.dart` to lift the `_isRevealed` state from `BudgetSpenderSummary` up to their respective parents, completely unifying the dashboard's temporary reveal gesture.
+- 2026-07-05: Iterative Enhancement - Audited `budgetPage.dart` and `pastBudgetsPage.dart` to lift the `_isRevealed` state from `BudgetSpenderSummary` up to their respective parents (`_BudgetPageContentState` and `__PastBudgetsPageContentState`), unifying the dashboard's temporary reveal gesture.
+**Next Planned Step:** Conclude the privacy obfuscation track for dashboard components and verify all charts/graphs respond correctly to `forceReveal` states.
 
 ## 🚨 Critical Security Learnings
 *Only add entries here for unique, repo-specific security gaps, unexpected side effects, or reusable patterns.*

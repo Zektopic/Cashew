@@ -112,6 +112,14 @@ class _BudgetPageContentState extends State<_BudgetPageContent> {
   bool budgetHistoryDismissedPremium = false;
   bool get isPastBudget => dateForRangeIndex != 0;
   bool get isPastBudgetButCurrentPeriod => dateForRangeIndex == 0;
+  bool _isRevealed = false;
+  Timer? _revealTimer;
+
+  @override
+  void dispose() {
+    _revealTimer?.cancel();
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -738,17 +746,37 @@ class _BudgetPageContentState extends State<_BudgetPageContent> {
                         SliverToBoxAdapter(
                             child: Column(children: [
                           appStateSettings["sharedBudgets"]
-                              ? BudgetSpenderSummary(
-                                  budget: widget.budget,
-                                  budgetRange: budgetRange,
-                                  setSelectedMember: (member) {
-                                    setState(() {
-                                      selectedMember = member;
-                                      selectedCategory = null;
-                                    });
-                                    _pieChartDisplayStateKey.currentState
-                                        ?.setTouchedIndex(-1);
+                              ? Listener(
+                                  onPointerDown: (_) {
+                                    HapticFeedback.selectionClick();
+                                    setState(() => _isRevealed = true);
+                                    _revealTimer?.cancel();
                                   },
+                                  onPointerUp: (_) {
+                                    _revealTimer?.cancel();
+                                    _revealTimer = Timer(Duration(seconds: 2), () {
+                                      if (mounted) setState(() => _isRevealed = false);
+                                    });
+                                  },
+                                  onPointerCancel: (_) {
+                                    _revealTimer?.cancel();
+                                    _revealTimer = Timer(Duration(seconds: 2), () {
+                                      if (mounted) setState(() => _isRevealed = false);
+                                    });
+                                  },
+                                  child: BudgetSpenderSummary(
+                                    budget: widget.budget,
+                                    budgetRange: budgetRange,
+                                    forceReveal: _isRevealed,
+                                    setSelectedMember: (member) {
+                                      setState(() {
+                                        selectedMember = member;
+                                        selectedCategory = null;
+                                      });
+                                      _pieChartDisplayStateKey.currentState
+                                          ?.setTouchedIndex(-1);
+                                    },
+                                  ),
                                 )
                               : SizedBox.shrink(),
                           if (categoryWithTotals.length > 0)
