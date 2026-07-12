@@ -71,6 +71,15 @@ class _PastBudgetsPageContent extends StatefulWidget {
 }
 
 class __PastBudgetsPageContentState extends State<_PastBudgetsPageContent> {
+  bool _isRevealed = false;
+  Timer? _revealTimer;
+
+  @override
+  void dispose() {
+    _revealTimer?.cancel();
+    super.dispose();
+  }
+
   Stream<List<double?>>? mergedStreamsBudgetTotal;
   Stream<List<double?>>? mergedStreamsCategoriesTotal;
   List<DateTimeRange> dateTimeRanges = [];
@@ -254,10 +263,6 @@ class __PastBudgetsPageContentState extends State<_PastBudgetsPageContent> {
   }
 
   @override
-  void dispose() {
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     DateTimeRange budgetRange = getBudgetDate(widget.budget, DateTime.now());
@@ -577,13 +582,39 @@ class __PastBudgetsPageContentState extends State<_PastBudgetsPageContent> {
             children: [
               SliverToBoxAdapter(
                 child: appStateSettings["sharedBudgets"]
-                    ? BudgetSpenderSummary(
-                        budget: widget.budget,
-                        budgetRange: budgetRange,
-                        setSelectedMember: (member) {},
-                        disableMemberSelection: true,
-                        allTime: true,
-                        isLarge: true,
+                    ? Listener(
+                        onPointerDown: (_) {
+                          if (appStateSettings["obscureAmounts"] == true) {
+                            HapticFeedback.selectionClick();
+                            setState(() => _isRevealed = true);
+                            _revealTimer?.cancel();
+                          }
+                        },
+                        onPointerUp: (_) {
+                          if (appStateSettings["obscureAmounts"] == true) {
+                            _revealTimer?.cancel();
+                            _revealTimer = Timer(Duration(seconds: 2), () {
+                              if (mounted) setState(() => _isRevealed = false);
+                            });
+                          }
+                        },
+                        onPointerCancel: (_) {
+                          if (appStateSettings["obscureAmounts"] == true) {
+                            _revealTimer?.cancel();
+                            _revealTimer = Timer(Duration(seconds: 2), () {
+                              if (mounted) setState(() => _isRevealed = false);
+                            });
+                          }
+                        },
+                        child: BudgetSpenderSummary(
+                          budget: widget.budget,
+                          budgetRange: budgetRange,
+                          forceReveal: _isRevealed,
+                          setSelectedMember: (member) {},
+                          disableMemberSelection: true,
+                          allTime: true,
+                          isLarge: true,
+                        ),
                       )
                     : SizedBox.shrink(),
               ),
@@ -1245,22 +1276,22 @@ class _PastBudgetContainerState extends State<PastBudgetContainer> {
     return Container(
       child: Listener(
         onPointerDown: (_) {
-        HapticFeedback.selectionClick();
-        setState(() => _isRevealed = true);
-        _revealTimer?.cancel();
-      },
-      onPointerUp: (_) {
-        _revealTimer?.cancel();
-        _revealTimer = Timer(Duration(seconds: 2), () {
-          if (mounted) setState(() => _isRevealed = false);
-        });
-      },
-      onPointerCancel: (_) {
-        _revealTimer?.cancel();
-        _revealTimer = Timer(Duration(seconds: 2), () {
-          if (mounted) setState(() => _isRevealed = false);
-        });
-      },
+          HapticFeedback.selectionClick();
+          setState(() => _isRevealed = true);
+          _revealTimer?.cancel();
+        },
+        onPointerUp: (_) {
+          _revealTimer?.cancel();
+          _revealTimer = Timer(Duration(seconds: 2), () {
+            if (mounted) setState(() => _isRevealed = false);
+          });
+        },
+        onPointerCancel: (_) {
+          _revealTimer?.cancel();
+          _revealTimer = Timer(Duration(seconds: 2), () {
+            if (mounted) setState(() => _isRevealed = false);
+          });
+        },
         child: OpenContainerNavigation(
           borderRadius: getPlatform() == PlatformOS.isIOS ? 0 : 18,
           closedColor: getPlatform() == PlatformOS.isIOS

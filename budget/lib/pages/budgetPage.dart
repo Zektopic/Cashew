@@ -98,6 +98,15 @@ class _BudgetPageContent extends StatefulWidget {
 }
 
 class _BudgetPageContentState extends State<_BudgetPageContent> {
+  bool _isRevealed = false;
+  Timer? _revealTimer;
+
+  @override
+  void dispose() {
+    _revealTimer?.cancel();
+    super.dispose();
+  }
+
   String? selectedMember = null;
   bool showAllSubcategories = appStateSettings["showAllSubcategories"] == true;
   TransactionCategory? selectedCategory =
@@ -738,17 +747,50 @@ class _BudgetPageContentState extends State<_BudgetPageContent> {
                         SliverToBoxAdapter(
                             child: Column(children: [
                           appStateSettings["sharedBudgets"]
-                              ? BudgetSpenderSummary(
-                                  budget: widget.budget,
-                                  budgetRange: budgetRange,
-                                  setSelectedMember: (member) {
-                                    setState(() {
-                                      selectedMember = member;
-                                      selectedCategory = null;
-                                    });
-                                    _pieChartDisplayStateKey.currentState
-                                        ?.setTouchedIndex(-1);
+                              ? Listener(
+                                  onPointerDown: (_) {
+                                    if (appStateSettings["obscureAmounts"] ==
+                                        true) {
+                                      HapticFeedback.selectionClick();
+                                      setState(() => _isRevealed = true);
+                                      _revealTimer?.cancel();
+                                    }
                                   },
+                                  onPointerUp: (_) {
+                                    if (appStateSettings["obscureAmounts"] ==
+                                        true) {
+                                      _revealTimer?.cancel();
+                                      _revealTimer =
+                                          Timer(Duration(seconds: 2), () {
+                                        if (mounted)
+                                          setState(() => _isRevealed = false);
+                                      });
+                                    }
+                                  },
+                                  onPointerCancel: (_) {
+                                    if (appStateSettings["obscureAmounts"] ==
+                                        true) {
+                                      _revealTimer?.cancel();
+                                      _revealTimer =
+                                          Timer(Duration(seconds: 2), () {
+                                        if (mounted)
+                                          setState(() => _isRevealed = false);
+                                      });
+                                    }
+                                  },
+                                  child: BudgetSpenderSummary(
+                                    budget: widget.budget,
+                                    budgetRange: budgetRange,
+                                    forceReveal: _isRevealed,
+                                    setSelectedMember: (member) {
+                                      setState(() {
+                                        selectedMember = member;
+                                        selectedCategory = null;
+                                      });
+                                      _pieChartDisplayStateKey.currentState
+                                          ?.setTouchedIndex(-1);
+                                    },
+                                  ),
                                 )
                               : SizedBox.shrink(),
                           if (categoryWithTotals.length > 0)
