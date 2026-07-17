@@ -121,6 +121,14 @@ class _BudgetPageContentState extends State<_BudgetPageContent> {
   bool budgetHistoryDismissedPremium = false;
   bool get isPastBudget => dateForRangeIndex != 0;
   bool get isPastBudgetButCurrentPeriod => dateForRangeIndex == 0;
+  bool _isRevealed = false;
+  Timer? _revealTimer;
+
+  @override
+  void dispose() {
+    _revealTimer?.cancel();
+    super.dispose();
+  }
 
   @override
   void initState() {
