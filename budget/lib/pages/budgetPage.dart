@@ -17,6 +17,7 @@ import 'package:budget/struct/spendingSummaryHelper.dart';
 import 'package:budget/widgets/animatedExpanded.dart';
 import 'package:budget/widgets/dropdownSelect.dart';
 import 'package:budget/widgets/extraInfoBoxes.dart';
+import 'package:budget/widgets/holdToRevealListener.dart';
 import 'package:budget/widgets/iconButtonScaled.dart';
 import 'package:budget/widgets/openPopup.dart';
 import 'package:budget/widgets/selectedTransactionsAppBar.dart';
@@ -98,15 +99,6 @@ class _BudgetPageContent extends StatefulWidget {
 }
 
 class _BudgetPageContentState extends State<_BudgetPageContent> {
-  bool _isRevealed = false;
-  Timer? _revealTimer;
-
-  @override
-  void dispose() {
-    _revealTimer?.cancel();
-    super.dispose();
-  }
-
   String? selectedMember = null;
   bool showAllSubcategories = appStateSettings["showAllSubcategories"] == true;
   TransactionCategory? selectedCategory =
@@ -121,14 +113,6 @@ class _BudgetPageContentState extends State<_BudgetPageContent> {
   bool budgetHistoryDismissedPremium = false;
   bool get isPastBudget => dateForRangeIndex != 0;
   bool get isPastBudgetButCurrentPeriod => dateForRangeIndex == 0;
-  bool _isRevealed = false;
-  Timer? _revealTimer;
-
-  @override
-  void dispose() {
-    _revealTimer?.cancel();
-    super.dispose();
-  }
 
   @override
   void initState() {
@@ -755,41 +739,12 @@ class _BudgetPageContentState extends State<_BudgetPageContent> {
                         SliverToBoxAdapter(
                             child: Column(children: [
                           appStateSettings["sharedBudgets"]
-                              ? Listener(
-                                  onPointerDown: (_) {
-                                    if (appStateSettings["obscureAmounts"] ==
-                                        true) {
-                                      HapticFeedback.selectionClick();
-                                      setState(() => _isRevealed = true);
-                                      _revealTimer?.cancel();
-                                    }
-                                  },
-                                  onPointerUp: (_) {
-                                    if (appStateSettings["obscureAmounts"] ==
-                                        true) {
-                                      _revealTimer?.cancel();
-                                      _revealTimer =
-                                          Timer(Duration(seconds: 2), () {
-                                        if (mounted)
-                                          setState(() => _isRevealed = false);
-                                      });
-                                    }
-                                  },
-                                  onPointerCancel: (_) {
-                                    if (appStateSettings["obscureAmounts"] ==
-                                        true) {
-                                      _revealTimer?.cancel();
-                                      _revealTimer =
-                                          Timer(Duration(seconds: 2), () {
-                                        if (mounted)
-                                          setState(() => _isRevealed = false);
-                                      });
-                                    }
-                                  },
-                                  child: BudgetSpenderSummary(
+                              ? HoldToRevealListener(
+                                  builder: (context, isRevealed) =>
+                                      BudgetSpenderSummary(
                                     budget: widget.budget,
                                     budgetRange: budgetRange,
-                                    forceReveal: _isRevealed,
+                                    forceReveal: isRevealed,
                                     setSelectedMember: (member) {
                                       setState(() {
                                         selectedMember = member;
@@ -1358,14 +1313,6 @@ class TotalSpent extends StatefulWidget {
 
 class _TotalSpentState extends State<TotalSpent> {
   bool showTotalSpent = appStateSettings["showTotalSpentForBudget"];
-  bool _isRevealed = false;
-  Timer? _revealTimer;
-
-  @override
-  void dispose() {
-    _revealTimer?.cancel();
-    super.dispose();
-  }
 
   _swapTotalSpentDisplay() {
     setState(() {
@@ -1380,25 +1327,8 @@ class _TotalSpentState extends State<TotalSpent> {
     double budgetAmount = budgetAmountToPrimaryCurrency(
         Provider.of<AllWallets>(context, listen: true), widget.budget);
 
-    return Listener(
-      onPointerDown: (_) {
-        HapticFeedback.selectionClick();
-        setState(() => _isRevealed = true);
-        _revealTimer?.cancel();
-      },
-      onPointerUp: (_) {
-        _revealTimer?.cancel();
-        _revealTimer = Timer(Duration(seconds: 2), () {
-          if (mounted) setState(() => _isRevealed = false);
-        });
-      },
-      onPointerCancel: (_) {
-        _revealTimer?.cancel();
-        _revealTimer = Timer(Duration(seconds: 2), () {
-          if (mounted) setState(() => _isRevealed = false);
-        });
-      },
-      child: GestureDetector(
+    return HoldToRevealListener(
+      builder: (context, isRevealed) => GestureDetector(
         onTap: () {
           _swapTotalSpentDisplay();
         },
@@ -1428,7 +1358,7 @@ class _TotalSpentState extends State<TotalSpent> {
                                   finalNumber: showTotalSpent
                                       ? widget.totalSpent
                                       : budgetAmount - widget.totalSpent,
-                                  forceReveal: _isRevealed),
+                                  forceReveal: isRevealed),
                               fontSize: 22,
                               textAlign: TextAlign.start,
                               fontWeight: FontWeight.bold,
@@ -1445,7 +1375,7 @@ class _TotalSpentState extends State<TotalSpent> {
                           text: getBudgetSpentText(widget.budget.income) +
                               convertToMoney(Provider.of<AllWallets>(context),
                                   budgetAmount,
-                                  forceReveal: _isRevealed),
+                                  forceReveal: isRevealed),
                           fontSize: 15,
                           textAlign: TextAlign.start,
                           textColor: Theme.of(context)
@@ -1473,7 +1403,7 @@ class _TotalSpentState extends State<TotalSpent> {
                                   finalNumber: showTotalSpent
                                       ? widget.totalSpent
                                       : widget.totalSpent - budgetAmount,
-                                  forceReveal: _isRevealed),
+                                  forceReveal: isRevealed),
                               fontSize: 22,
                               textAlign: TextAlign.start,
                               fontWeight: FontWeight.bold,
@@ -1490,7 +1420,7 @@ class _TotalSpentState extends State<TotalSpent> {
                           text: getBudgetOverSpentText(widget.budget.income) +
                               convertToMoney(Provider.of<AllWallets>(context),
                                   budgetAmount,
-                                  forceReveal: _isRevealed),
+                                  forceReveal: isRevealed),
                           fontSize: 15,
                           textAlign: TextAlign.start,
                           textColor: Theme.of(context)
