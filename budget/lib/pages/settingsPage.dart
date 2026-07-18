@@ -617,6 +617,7 @@ class SettingsPageContent extends StatelessWidget {
         SettingsHeader(title: "backups".tr()),
 
         ExportDB(),
+        ExportEncryptedDB(),
 
         ImportDB(),
 

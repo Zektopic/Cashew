@@ -1,6 +1,8 @@
 import 'package:budget/database/tables.dart';
 import 'package:budget/functions.dart';
+import 'package:budget/struct/encryptedBackup.dart';
 import 'package:budget/struct/settings.dart';
+import 'package:budget/widgets/exportDB.dart';
 import 'package:budget/struct/syncClient.dart';
 import 'package:budget/widgets/globalSnackbar.dart';
 import 'package:budget/widgets/openPopup.dart';
@@ -28,7 +30,8 @@ Future<String?> importDBFileFromDevice(BuildContext context) async {
 
   String fileName = result.files.single.name;
   if (fileName.endsWith('.sql') == false &&
-      fileName.endsWith('.sqlite') == false) {
+      fileName.endsWith('.sqlite') == false &&
+      fileName.endsWith('.cashew') == false) {
     openSnackbar(SnackbarMessage(
       title: "import-warning".tr(),
       description: "import-warning-description".tr(),
@@ -38,16 +41,40 @@ Future<String?> importDBFileFromDevice(BuildContext context) async {
     ));
   }
 
-  await cancelAndPreventSyncOperation();
-
+  Uint8List fileBytes;
   if (kIsWeb) {
-    Uint8List fileBytes = result.files.single.bytes!;
-    await overwriteDefaultDB(fileBytes);
+    fileBytes = result.files.single.bytes!;
   } else {
     File file = File(result.files.single.path ?? "");
-    Uint8List fileBytes = await file.readAsBytes();
-    await overwriteDefaultDB(fileBytes);
+    fileBytes = await file.readAsBytes();
   }
+
+  // Password-encrypted backups (.cashew) are decrypted before import
+  if (isEncryptedBackupData(fileBytes)) {
+    String? password = await promptBackupPassword(
+      context,
+      title: "Enter Backup Password",
+    );
+    if (password == null) return null;
+    dynamic decrypted = await openLoadingPopupTryCatch(() async {
+      return await decryptBackupData(fileBytes, password);
+    }, onError: (_) {});
+    if (decrypted == null) {
+      openSnackbar(SnackbarMessage(
+        title: "error-importing".tr(),
+        description: "Wrong password or corrupted backup",
+        icon: appStateSettings["outlinedIcons"]
+            ? Icons.warning_outlined
+            : Icons.warning_rounded,
+      ));
+      return null;
+    }
+    fileBytes = decrypted;
+  }
+
+  await cancelAndPreventSyncOperation();
+
+  await overwriteDefaultDB(fileBytes);
   await resetLanguageToSystem(context);
   await updateSettings("databaseJustImported", true,
       pagesNeedingRefresh: [], updateGlobalState: false);
