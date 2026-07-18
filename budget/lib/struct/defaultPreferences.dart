@@ -159,6 +159,10 @@ Future<Map<String, dynamic>> getDefaultPreferences() async {
     "obscureAmountsMagnitude": false,
     // Android FLAG_SECURE: block screenshots and blank the recents thumbnail
     "secureScreen": false,
+    // Notify when a category's month-to-date spending is far above its
+    // 3-month average pace (checked once per day on app open)
+    "spendingAnomalyAlerts": false,
+    "spendingAnomalyLastCheck": "",
     // Minutes in background before biometric re-lock (-1 = off, 0 = instant)
     "autoLockAfterMinutes": -1,
     "sendTransactionsToServerQueue": {},

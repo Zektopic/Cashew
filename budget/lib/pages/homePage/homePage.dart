@@ -19,6 +19,8 @@ import 'package:budget/pages/settingsPage.dart';
 import 'package:budget/pages/homePage/homePageCreditDebts.dart';
 import 'package:budget/struct/initializeBiometrics.dart';
 import 'package:budget/struct/settings.dart';
+import 'package:budget/struct/spendingAnomalies.dart';
+import 'package:provider/provider.dart';
 import 'package:budget/widgets/holdToRevealListener.dart';
 import 'package:budget/widgets/animatedExpanded.dart';
 import 'package:budget/widgets/button.dart';
@@ -89,6 +91,14 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
     _scrollController = ScrollController();
     _scrollController.addListener(_scrollListener);
+
+    // Once-per-day spending anomaly check (opt-in, see settings)
+    Future.delayed(Duration(seconds: 3), () {
+      if (mounted) {
+        runSpendingAnomalyCheckIfEnabled(
+            Provider.of<AllWallets>(context, listen: false));
+      }
+    });
   }
 
   _scrollListener() {

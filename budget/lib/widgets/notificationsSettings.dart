@@ -213,6 +213,26 @@ class _UpcomingTransactionsNotificationsSettingsState
               ? Icons.calendar_month_outlined
               : Icons.calendar_month_rounded,
         ),
+        SettingsContainerSwitch(
+          title: "Spending Alerts",
+          description:
+              "Notify when a category is well above its usual monthly pace",
+          onSwitched: (value) async {
+            updateSettings("spendingAnomalyAlerts", value,
+                updateGlobalState: false);
+            if (value == true) {
+              await initializeNotificationsPlatform();
+              // Allow an immediate check on next app open
+              updateSettings("spendingAnomalyLastCheck", "",
+                  updateGlobalState: false);
+            }
+            return true;
+          },
+          initialValue: appStateSettings["spendingAnomalyAlerts"] == true,
+          icon: appStateSettings["outlinedIcons"]
+              ? Icons.trending_up_outlined
+              : Icons.trending_up_rounded,
+        ),
         IgnorePointer(
           ignoring: !notificationsEnabled,
           child: AnimatedOpacity(
