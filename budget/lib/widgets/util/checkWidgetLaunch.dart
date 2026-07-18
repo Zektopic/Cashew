@@ -3,6 +3,9 @@ import 'package:budget/colors.dart';
 import 'package:budget/database/tables.dart';
 import 'package:budget/functions.dart';
 import 'package:budget/pages/addTransactionPage.dart';
+import 'package:budget/pages/budgetPage.dart' show determineBudgetPolarity;
+import 'package:budget/struct/budgetRollover.dart';
+import 'package:budget/struct/currencyFunctions.dart';
 import 'package:budget/pages/transactionFilters.dart';
 import 'package:budget/pages/walletDetailsPage.dart';
 import 'package:budget/struct/databaseGlobal.dart';
@@ -155,9 +158,101 @@ Future updateWidgetColorsAndText(BuildContext context) async {
     await HomeWidget.updateWidget(
       name: 'TransferWidgetProvider',
     );
+    await HomeWidget.updateWidget(
+      name: 'BudgetWidgetProvider',
+    );
   });
 
   return;
+}
+
+// Feeds the "Budget Remaining" home-screen widget with the first pinned
+// budget's remaining amount. Amounts go through convertToMoney, so when
+// "Hide Balances" (obscureAmounts) is enabled the widget shows the
+// obscured characters instead of real amounts.
+class RenderBudgetWidget extends StatelessWidget {
+  const RenderBudgetWidget({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    if (getPlatform(ignoreEmulation: true) != PlatformOS.isAndroid)
+      return const SizedBox.shrink();
+    return StreamBuilder<List<Budget>>(
+      stream: database.getAllPinnedBudgets(limit: 1).$1,
+      builder: (context, snapshot) {
+        final List<Budget> budgets = snapshot.data ?? [];
+        if (snapshot.hasData && budgets.isEmpty) {
+          Future.delayed(Duration.zero, () async {
+            await HomeWidget.saveWidgetData<String>(
+                'budgetWidgetTitle', "Budget");
+            await HomeWidget.saveWidgetData<String>('budgetWidgetAmount', "-");
+            await HomeWidget.saveWidgetData<String>(
+                'budgetWidgetSubtitle', "Pin a budget to display it here");
+            await HomeWidget.updateWidget(name: 'BudgetWidgetProvider');
+          });
+          return const SizedBox.shrink();
+        }
+        if (budgets.isEmpty) return const SizedBox.shrink();
+        return RolloverAdjustedBudget(
+          budget: budgets.first,
+          builder: (budget) {
+            final DateTimeRange budgetRange =
+                getBudgetDate(budget, DateTime.now());
+            return StreamBuilder<List<CategoryWithTotal>>(
+              stream:
+                  database.watchTotalSpentInEachCategoryInTimeRangeFromCategories(
+                allWallets: Provider.of<AllWallets>(context),
+                start: budgetRange.start,
+                end: budgetRange.end,
+                categoryFks: budget.categoryFks,
+                categoryFksExclude: budget.categoryFksExclude,
+                budgetTransactionFilters: budget.budgetTransactionFilters,
+                memberTransactionFilters: budget.memberTransactionFilters,
+                onlyShowTransactionsBelongingToBudgetPk:
+                    budget.sharedKey != null ||
+                            budget.addedTransactionsOnly == true
+                        ? budget.budgetPk
+                        : null,
+                budget: budget,
+              ),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  final AllWallets allWallets =
+                      Provider.of<AllWallets>(context, listen: false);
+                  double totalSpent = 0;
+                  for (final CategoryWithTotal categoryWithTotal
+                      in snapshot.data!) {
+                    totalSpent += categoryWithTotal.total;
+                  }
+                  totalSpent = totalSpent * determineBudgetPolarity(budget);
+                  final double budgetAmount =
+                      budgetAmountToPrimaryCurrency(allWallets, budget);
+                  final double remaining = budgetAmount - totalSpent;
+                  final String amountString =
+                      convertToMoney(allWallets, remaining);
+                  final String subtitleString =
+                      convertToMoney(allWallets, totalSpent) +
+                          " spent of " +
+                          convertToMoney(allWallets, budgetAmount);
+                  Future.delayed(Duration.zero, () async {
+                    await HomeWidget.saveWidgetData<String>(
+                        'budgetWidgetTitle', budget.name);
+                    await HomeWidget.saveWidgetData<String>(
+                        'budgetWidgetAmount', amountString);
+                    await HomeWidget.saveWidgetData<String>(
+                        'budgetWidgetSubtitle', subtitleString);
+                    await HomeWidget.updateWidget(
+                        name: 'BudgetWidgetProvider');
+                  });
+                }
+                return const SizedBox.shrink();
+              },
+            );
+          },
+        );
+      },
+    );
+  }
 }
 
 class RenderHomePageWidgetsState extends State<RenderHomePageWidgets> {
