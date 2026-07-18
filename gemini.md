@@ -1,8 +1,8 @@
 # Sentinel Evolution Ledger 🛡️
 
 ## 📈 Feature Iteration Track
-**Currently Improving:** Privacy Obfuscation (Hide Balances)
-**Growth Context:** As the app scales and users carry their devices into more public spaces, they need a way to protect sensitive financial data from shoulder surfers. Competitors often offer a "Privacy Mode" or "Hide Balances" toggle.
+**Currently Improving:** URL Parsing and Integrations Security
+**Growth Context:** As the app scales with complex external integrations (like syncing with Google Drive and parsing exported sheets), dynamically parsing user-supplied URLs becomes a security bottleneck. Without strict validation, these functions expose the application to SSRF and Path Traversal risks.
 **Iteration History:**
 - 2024-03-24: Implementing initial base: added `obscureAmounts` setting and tied it to the `convertToMoney` core formatting function so that global balances and amounts display as "•••". Added a basic toggle in the settings.
 - 2024-05-14: Iterative Enhancement - Added an eye-icon quick-toggle button on the main dashboard. This allows users to quickly obscure balances in public spaces without opening settings, reducing the window of exposure.
@@ -73,7 +73,9 @@
 **Next Planned Step:** Conclude the initial privacy mode phase and pivot to addressing security vulnerabilities (like SSRF and Path Traversal) in URL parsing components, specifically targeting `getFileIdFromUrl`.
 - 2026-07-04: Iterative Enhancement - Secured `DaySpending` widget across the budget dashboard. Refactored `DaySpending` to accept a `forceReveal` parameter and lifted its temporary reveal state up to the parent `BudgetContainer`. This unifies the hold-to-reveal gesture, preventing sub-components from having fragmented or missing privacy obfuscation logic.
 - 2026-07-05: Iterative Enhancement - Secured `BudgetSpenderSummary` widget across the budget dashboard. Refactored `BudgetSpenderSummary` to accept a `forceReveal` parameter and lifted its temporary reveal state up to the parent `BudgetPage` and `PastBudgetsPage` (`_BudgetPageContentState` and `__PastBudgetsPageContentState`), completely unifying the hold-to-reveal gesture on the dashboard view.
-**Next Planned Step:** Conclude the initial privacy mode phase and pivot to addressing security vulnerabilities (like SSRF and Path Traversal) in URL parsing components, specifically targeting `getFileIdFromUrl`.
+- 2026-07-06: Iterative Enhancement - Secured `getFileIdFromUrl` in `budget/lib/pages/addTransactionPage.dart`. Replaced broad matching of `https://drive.google.com/` and `https://docs.google.com/` with strict prefix checks (`https://drive.google.com/file/d/`, `https://docs.google.com/document/d/`, `https://docs.google.com/spreadsheets/d/`, `https://docs.google.com/presentation/d/`) to mitigate SSRF and Path Traversal vulnerabilities when fetching Google Drive attachments.
+
+**Next Planned Step:** Audit and secure `convertGoogleSheetsUrlToCsvUrl` in `importCSV.dart` to ensure strict prefix matching and sanitization for spreadsheet URLs.
 
 ## 🚨 Critical Security Learnings
 *Only add entries here for unique, repo-specific security gaps, unexpected side effects, or reusable patterns.*
