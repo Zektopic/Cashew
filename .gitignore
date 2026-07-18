@@ -1,2 +1,18 @@
 # Miscellaneous
 /.vscode/
+
+# Build/tool output logs — never commit these
+budget/build_out*.txt
+*.orig
+*.rej
+
+# AI-agent scratch files
+plan.md
+gemini.md.orig
+gemini_patch.diff
+fix_*.patch
+patch_*.sh
+fix_*.sh
+
+# Firebase client config — provide your own (see google-services.json.example)
+budget/android/app/google-services.json

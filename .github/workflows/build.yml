@@ -2,12 +2,38 @@ name: Build Binaries
 
 on:
   push:
+  pull_request:
   workflow_dispatch:
 
 jobs:
+  analyze-and-test:
+    name: Analyze & Test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - name: Install dependencies
+        run: cd budget && flutter pub get
+
+      # Gate on errors only: pre-existing warnings/infos are tracked but must
+      # not block builds. Compile errors (e.g. duplicate fields from a bad
+      # merge) fail this job.
+      - name: Analyze
+        run: cd budget && flutter analyze --no-fatal-warnings --no-fatal-infos
+
+      - name: Test
+        run: cd budget && flutter test
+
   build-apk:
     name: Build APK
     runs-on: ubuntu-latest
+    needs: analyze-and-test
     permissions:
       contents: read
     steps:
@@ -24,6 +50,19 @@ jobs:
 
       - name: Install dependencies
         run: cd budget && flutter pub get
+
+      # google-services.json is not committed. Use the repo secret if
+      # configured, otherwise fall back to the placeholder so debug builds
+      # still compile.
+      - name: Provide google-services.json
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        run: |
+          if [ -n "$GOOGLE_SERVICES_JSON" ]; then
+            echo "$GOOGLE_SERVICES_JSON" > budget/android/app/google-services.json
+          else
+            cp budget/android/app/google-services.json.example budget/android/app/google-services.json
+          fi
 
       - name: Build APK
         run: cd budget && flutter build apk --debug
