@@ -929,7 +929,7 @@ class AboutLinks extends StatelessWidget {
                   ? Icons.delete_sweep_outlined
                   : Icons.delete_sweep_rounded,
               text: "delete-all-data".tr(),
-              color: Colors.red.withOpacity(0.4),
+              color: Colors.red.withValues(alpha: 0.4),
             ),
           ],
         ),
@@ -975,7 +975,7 @@ class AboutLinks extends StatelessWidget {
                       ? Icons.keyboard_arrow_right_outlined
                       : Icons.keyboard_arrow_right_rounded,
               size: 22,
-              color: getColor(context, "black").withOpacity(0.3),
+              color: getColor(context, "black").withValues(alpha: 0.3),
             ),
           ],
         ),
@@ -1025,7 +1025,7 @@ class TranslationInfoBox extends StatelessWidget {
     return AboutInfoBox(
       title: title,
       list: list,
-      listTextColor: getColor(context, "black").withOpacity(0.5),
+      listTextColor: getColor(context, "black").withValues(alpha: 0.5),
       padding: EdgeInsetsDirectional.symmetric(horizontal: 7.5, vertical: 5),
     );
   }

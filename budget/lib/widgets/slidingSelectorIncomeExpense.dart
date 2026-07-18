@@ -55,7 +55,7 @@ class SlidingSelectorIncomeExpense extends StatelessWidget {
               child: Material(
                 borderRadius: borderRadius,
                 color: appStateSettings["materialYou"]
-                    ? Theme.of(context).colorScheme.primary.withOpacity(0.1)
+                    ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.1)
                     : getColor(context, "lightDarkAccentHeavyLight"),
                 child: TabBar(
                   splashFactory: getPlatform() == PlatformOS.isIOS
@@ -70,8 +70,8 @@ class SlidingSelectorIncomeExpense extends StatelessWidget {
                   indicatorSize: TabBarIndicatorSize.tab,
                   indicator: BoxDecoration(
                     color: appStateSettings["materialYou"]
-                        ? Theme.of(context).colorScheme.primary.withOpacity(0.3)
-                        : getColor(context, "black").withOpacity(0.15),
+                        ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.3)
+                        : getColor(context, "black").withValues(alpha: 0.15),
                     borderRadius: borderRadius,
                   ),
                   labelColor: getColor(context, "black"),

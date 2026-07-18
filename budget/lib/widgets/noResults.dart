@@ -45,13 +45,13 @@ class NoResults extends StatelessWidget {
                       ? ColorFiltered(
                           colorFilter: ColorFilter.mode(
                             !appStateSettings["materialYou"]
-                                ? getColor(context, "black").withOpacity(0.1)
+                                ? getColor(context, "black").withValues(alpha: 0.1)
                                 : tintColor == null
                                     ? Theme.of(context)
                                         .colorScheme
                                         .primary
-                                        .withOpacity(0.7)
-                                    : tintColor!.withOpacity(0.7),
+                                        .withValues(alpha: 0.7)
+                                    : tintColor!.withValues(alpha: 0.7),
                             BlendMode.srcATop,
                           ),
                           child: ColorFiltered(

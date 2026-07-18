@@ -22,9 +22,8 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart'
     hide SliverReorderableList, ReorderableDelayedDragStartListener;
 import 'package:provider/provider.dart';
-import 'dart:async';
-import 'package:flutter/services.dart';
 import 'addButton.dart';
+import 'package:budget/widgets/holdToRevealListener.dart';
 
 // This defines what a difference only loan can be
 bool getIsDifferenceOnlyLoan(Objective objective) {
@@ -213,7 +212,7 @@ class ObjectiveList extends StatelessWidget {
                       padding: const EdgeInsetsDirectional.only(bottom: 8.0),
                       child: TextFont(
                         text: "example-goals".tr(),
-                        textColor: getColor(context, "black").withOpacity(0.25),
+                        textColor: getColor(context, "black").withValues(alpha: 0.25),
                         fontSize: 16,
                         textAlign: TextAlign.center,
                       ),
@@ -396,30 +395,6 @@ class ObjectiveContainer extends StatefulWidget {
 }
 
 class _ObjectiveContainerState extends State<ObjectiveContainer> {
-  bool _isRevealed = false;
-  Timer? _revealTimer;
-
-  void _triggerReveal() {
-    HapticFeedback.selectionClick();
-    setState(() {
-      _isRevealed = true;
-    });
-
-    _revealTimer?.cancel();
-    _revealTimer = Timer(const Duration(seconds: 2), () {
-      if (mounted) {
-        setState(() {
-          _isRevealed = false;
-        });
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _revealTimer?.cancel();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -462,17 +437,8 @@ class _ObjectiveContainerState extends State<ObjectiveContainer> {
             borderRadius: borderRadius,
             closedColor: containerColor,
             button: (openContainer()) {
-              return Listener(
-                onPointerDown: (_) => _triggerReveal(),
-                onPointerUp: (_) {
-                  _revealTimer?.cancel();
-                  setState(() => _isRevealed = false);
-                },
-                onPointerCancel: (_) {
-                  _revealTimer?.cancel();
-                  setState(() => _isRevealed = false);
-                },
-                child: Tappable(
+              return HoldToRevealListener(
+                builder: (context, isRevealed) => Tappable(
                   onLongPress: () {
                     pushRoute(
                       context,
@@ -494,17 +460,8 @@ class _ObjectiveContainerState extends State<ObjectiveContainer> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Listener(
-                          onPointerDown: (_) => _triggerReveal(),
-                          onPointerUp: (_) {
-                            _revealTimer?.cancel();
-                            setState(() => _isRevealed = false);
-                          },
-                          onPointerCancel: (_) {
-                            _revealTimer?.cancel();
-                            setState(() => _isRevealed = false);
-                          },
-                          child: Padding(
+                        HoldToRevealListener(
+                          builder: (context, isRevealed) => Padding(
                             padding: containerPadding,
                             child: Column(children: [
                               Row(
@@ -563,7 +520,7 @@ class _ObjectiveContainerState extends State<ObjectiveContainer> {
                                                       fontSize: 15,
                                                       textColor: getColor(
                                                               context, "black")
-                                                          .withOpacity(0.65),
+                                                          .withValues(alpha: 0.65),
                                                       maxLines: 1,
                                                     );
                                                   }),
@@ -644,7 +601,7 @@ class _ObjectiveContainerState extends State<ObjectiveContainer> {
                                                 fontSize: 15,
                                                 textColor:
                                                     getColor(context, "black")
-                                                        .withOpacity(0.65),
+                                                        .withValues(alpha: 0.65),
                                               ),
                                             );
                                           },
@@ -661,7 +618,7 @@ class _ObjectiveContainerState extends State<ObjectiveContainer> {
                                       objectiveAmount: objectiveAmount,
                                       totalAmount: totalAmount,
                                       objective: widget.objective,
-                                      forceReveal: _isRevealed,
+                                      forceReveal: isRevealed,
                                     );
                                     return Row(
                                       crossAxisAlignment:
@@ -671,7 +628,7 @@ class _ObjectiveContainerState extends State<ObjectiveContainer> {
                                           duration:
                                               const Duration(milliseconds: 300),
                                           child: TextFont(
-                                            key: ValueKey(_isRevealed),
+                                            key: ValueKey(isRevealed),
                                             fontWeight: FontWeight.bold,
                                             text: amountSpentLabel,
                                             fontSize: 24,
@@ -699,19 +656,19 @@ class _ObjectiveContainerState extends State<ObjectiveContainer> {
                                             duration: const Duration(
                                                 milliseconds: 300),
                                             child: TextFont(
-                                              key: ValueKey(_isRevealed),
+                                              key: ValueKey(isRevealed),
                                               text:
                                                   objectiveRemainingAmountText(
                                                 objectiveAmount:
                                                     objectiveAmount,
                                                 totalAmount: totalAmount,
                                                 context: context,
-                                                forceReveal: _isRevealed,
+                                                forceReveal: isRevealed,
                                               ),
                                               fontSize: 15,
                                               textColor:
                                                   getColor(context, "black")
-                                                      .withOpacity(0.3),
+                                                      .withValues(alpha: 0.3),
                                             ),
                                           ),
                                         ),
@@ -746,7 +703,7 @@ class _ObjectiveContainerState extends State<ObjectiveContainer> {
                                     ),
                                     fontSize: 12,
                                     textColor: getColor(context, "black")
-                                        .withOpacity(0.3),
+                                        .withValues(alpha: 0.3),
                                   ),
                                 ),
                               Expanded(
@@ -789,7 +746,7 @@ class _ObjectiveContainerState extends State<ObjectiveContainer> {
                                     ),
                                     fontSize: 12,
                                     textColor: getColor(context, "black")
-                                        .withOpacity(0.3),
+                                        .withValues(alpha: 0.3),
                                   ),
                                 ),
                             ],
@@ -850,30 +807,6 @@ class ObjectiveContainerDifferenceLoan extends StatefulWidget {
 
 class _ObjectiveContainerDifferenceLoanState
     extends State<ObjectiveContainerDifferenceLoan> {
-  bool _isRevealed = false;
-  Timer? _revealTimer;
-
-  void _triggerReveal() {
-    HapticFeedback.selectionClick();
-    setState(() {
-      _isRevealed = true;
-    });
-
-    _revealTimer?.cancel();
-    _revealTimer = Timer(const Duration(seconds: 2), () {
-      if (mounted) {
-        setState(() {
-          _isRevealed = false;
-        });
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _revealTimer?.cancel();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -889,13 +822,14 @@ class _ObjectiveContainerDifferenceLoanState
     Widget child = WatchTotalAndAmountOfObjective(
       objective: widget.objective,
       builder: (objectiveAmount, totalAmount, percentageTowardsGoal) {
+        return HoldToRevealListener(builder: (context, isRevealed) {
         String amountSpentLabel = getObjectiveAmountSpentLabel(
           objective: widget.objective,
           context: context,
           showTotalSpent: appStateSettings["showTotalSpentForObjective"],
           objectiveAmount: objectiveAmount,
           totalAmount: totalAmount,
-          forceReveal: _isRevealed,
+          forceReveal: isRevealed,
         );
         return Container(
           decoration: BoxDecoration(
@@ -910,17 +844,7 @@ class _ObjectiveContainerDifferenceLoanState
             borderRadius: borderRadius,
             closedColor: containerColor,
             button: (openContainer()) {
-              return Listener(
-                onPointerDown: (_) => _triggerReveal(),
-                onPointerUp: (_) {
-                  _revealTimer?.cancel();
-                  setState(() => _isRevealed = false);
-                },
-                onPointerCancel: (_) {
-                  _revealTimer?.cancel();
-                  setState(() => _isRevealed = false);
-                },
-                child: Tappable(
+              return Tappable(
                   onLongPress: () {
                     pushRoute(
                       context,
@@ -999,7 +923,7 @@ class _ObjectiveContainerDifferenceLoanState
                                                       .toLowerCase()),
                                           fontSize: 14,
                                           textColor: getColor(context, "black")
-                                              .withOpacity(0.65),
+                                              .withValues(alpha: 0.65),
                                         );
                                       },
                                     ),
@@ -1016,7 +940,7 @@ class _ObjectiveContainerDifferenceLoanState
                             AnimatedSwitcher(
                               duration: const Duration(milliseconds: 300),
                               child: TextFont(
-                                key: ValueKey(_isRevealed),
+                                key: ValueKey(isRevealed),
                                 fontWeight: FontWeight.bold,
                                 text: amountSpentLabel,
                                 fontSize: 20,
@@ -1056,7 +980,7 @@ class _ObjectiveContainerDifferenceLoanState
                                         .capitalizeFirst,
                                 fontSize: 14,
                                 textColor: getColor(context, "black")
-                                    .withOpacity(0.65),
+                                    .withValues(alpha: 0.65),
                               ),
                             ),
                           ],
@@ -1064,11 +988,11 @@ class _ObjectiveContainerDifferenceLoanState
                       ],
                     ),
                   ),
-                ),
               );
             },
           ),
         );
+        });
       },
     );
     return child;

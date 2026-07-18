@@ -219,7 +219,7 @@ Map<String, dynamic> getSettingConstants(Map<String, dynamic> userSettings) {
   Map<String, dynamic> userSettingsNew = {...userSettings};
   userSettingsNew["theme"] = themeSetting[userSettings["theme"]];
   userSettingsNew["accentColor"] =
-      HexColor(userSettings["accentColor"]).withOpacity(1);
+      HexColor(userSettings["accentColor"]).withValues(alpha: 1);
   return userSettingsNew;
 }
 
@@ -354,7 +354,7 @@ class TranslationsHelp extends StatelessWidget {
         copyToClipboard("dapperappdeveloper@gmail.com");
       },
       color: backgroundColor ??
-          Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.7),
+          Theme.of(context).colorScheme.secondaryContainer.withValues(alpha: 0.7),
       borderRadius: getPlatform() == PlatformOS.isIOS ? 10 : 15,
       child: Padding(
         padding:
@@ -393,9 +393,9 @@ class TranslationsHelp extends StatelessWidget {
                       decoration: TextDecoration.underline,
                       decorationStyle: TextDecorationStyle.solid,
                       decorationColor:
-                          getColor(context, "unPaidOverdue").withOpacity(0.8),
+                          getColor(context, "unPaidOverdue").withValues(alpha: 0.8),
                       color:
-                          getColor(context, "unPaidOverdue").withOpacity(0.8),
+                          getColor(context, "unPaidOverdue").withValues(alpha: 0.8),
                       fontFamily: appStateSettings["font"],
                       fontFamilyFallback: ['Inter'],
                     ),

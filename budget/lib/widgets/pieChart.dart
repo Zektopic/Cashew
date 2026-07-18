@@ -10,7 +10,7 @@ import 'package:budget/functions.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'package:flutter/services.dart';
+import 'package:budget/widgets/holdToRevealListener.dart';
 
 class CategoryTotal {
   CategoryTotal(this.categoryPk, this.total);
@@ -100,7 +100,7 @@ class PieChartWrapper extends StatelessWidget {
                       shape: BoxShape.circle,
                       color: Theme.of(
                         context,
-                      ).colorScheme.secondaryContainer.withOpacity(0.3),
+                      ).colorScheme.secondaryContainer.withValues(alpha: 0.3),
                     ),
                   )
                 : PieChartDisplay(
@@ -121,8 +121,8 @@ class PieChartWrapper extends StatelessWidget {
                     ? 105
                     : 130,
                 decoration: BoxDecoration(
-                  color: middleColor?.withOpacity(0.2) ??
-                      getColor(context, "white").withOpacity(0.2),
+                  color: middleColor?.withValues(alpha: 0.2) ??
+                      getColor(context, "white").withValues(alpha: 0.2),
                   shape: BoxShape.circle,
                 ),
               ),
@@ -175,14 +175,6 @@ class PieChartDisplayState extends State<PieChartDisplay> {
   bool scaleIn = false;
   int showLabels = 0;
 
-  bool _isRevealed = false;
-  Timer? _revealTimer;
-
-  @override
-  void dispose() {
-    _revealTimer?.cancel();
-    super.dispose();
-  }
 
   @override
   void initState() {
@@ -229,35 +221,8 @@ class PieChartDisplayState extends State<PieChartDisplay> {
 
   @override
   Widget build(BuildContext context) {
-    return Listener(
-      onPointerDown: (event) {
-        setState(() {
-          _isRevealed = true;
-        });
-        HapticFeedback.selectionClick();
-        _revealTimer?.cancel();
-      },
-      onPointerUp: (event) {
-        _revealTimer?.cancel();
-        _revealTimer = Timer(Duration(seconds: 2), () {
-          if (mounted) {
-            setState(() {
-              _isRevealed = false;
-            });
-          }
-        });
-      },
-      onPointerCancel: (event) {
-        _revealTimer?.cancel();
-        _revealTimer = Timer(Duration(seconds: 2), () {
-          if (mounted) {
-            setState(() {
-              _isRevealed = false;
-            });
-          }
-        });
-      },
-      child: PinWheelReveal(
+    return HoldToRevealListener(
+      builder: (context, isRevealed) => PinWheelReveal(
         delay: Duration(milliseconds: 0),
         duration: Duration(milliseconds: 850),
         child: PieChart(
@@ -302,7 +267,7 @@ class PieChartDisplayState extends State<PieChartDisplay> {
             borderData: FlBorderData(show: false),
             sectionsSpace: 0,
             centerSpaceRadius: 0,
-            sections: showingSections(),
+            sections: showingSections(isRevealed),
           ),
           swapAnimationDuration: Duration(milliseconds: 1300),
           swapAnimationCurve: ElasticOutCurve(0.6),
@@ -311,7 +276,7 @@ class PieChartDisplayState extends State<PieChartDisplay> {
     );
   }
 
-  List<PieChartSectionData> showingSections() {
+  List<PieChartSectionData> showingSections(bool isRevealed) {
     double totalPercentAccumulated = 0;
     return List.generate(widget.data.length, (i) {
       final bool isTouched = i == touchedIndex;
@@ -368,7 +333,7 @@ class PieChartDisplayState extends State<PieChartDisplay> {
           emojiIconName: widget.data[i].category.emojiIconName,
           percent: percent,
           isTouched: isTouched,
-          isRevealed: _isRevealed,
+          isRevealed: isRevealed,
         ),
         titlePositionPercentageOffset: 1.4,
         badgePositionPercentageOffset: .98,

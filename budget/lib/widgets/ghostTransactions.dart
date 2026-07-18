@@ -33,8 +33,8 @@ class GhostTransactions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Color color = appStateSettings["materialYou"]
-        ? Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.4)
-        : getColor(context, "lightDarkAccentHeavy").withOpacity(0.3);
+        ? Theme.of(context).colorScheme.secondaryContainer.withValues(alpha: 0.4)
+        : getColor(context, "lightDarkAccentHeavy").withValues(alpha: 0.3);
     return Padding(
       padding:
           const EdgeInsetsDirectional.symmetric(horizontal: 20, vertical: 0),

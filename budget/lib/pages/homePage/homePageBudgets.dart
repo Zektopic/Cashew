@@ -220,7 +220,7 @@ class EditHomePagePinnedBudgetsPopup extends StatelessWidget {
                         return HexColor(budget.colour,
                                 defaultColor:
                                     Theme.of(context).colorScheme.primary)
-                            .withOpacity(selected == true ? 0.7 : 0.5);
+                            .withValues(alpha: selected == true ? 0.7 : 0.5);
                       }
                     return null;
                   },

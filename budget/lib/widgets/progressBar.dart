@@ -1,8 +1,7 @@
-import 'dart:async';
 import 'package:budget/colors.dart';
 import 'package:budget/struct/settings.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:budget/widgets/holdToRevealListener.dart';
 
 class ProgressBar extends StatefulWidget {
   final double currentPercent;
@@ -21,48 +20,16 @@ class ProgressBar extends StatefulWidget {
 }
 
 class _ProgressBarState extends State<ProgressBar> {
-  bool _isRevealed = false;
-  Timer? _revealTimer;
-
-  void _startRevealTimer() {
-    _revealTimer?.cancel();
-    _revealTimer = Timer(const Duration(seconds: 2), () {
-      if (mounted) setState(() => _isRevealed = false);
-    });
-  }
-
-  @override
-  void dispose() {
-    _revealTimer?.cancel();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
     bool obscureAmounts = appStateSettings["obscureAmounts"] == true;
-    double effectivePercent =
-        obscureAmounts && !_isRevealed ? 0 : widget.currentPercent;
 
-    return Listener(
-      onPointerDown: (event) {
-        if (obscureAmounts) {
-          HapticFeedback.selectionClick();
-          setState(() => _isRevealed = true);
-          _revealTimer?.cancel();
-        }
-      },
-      onPointerUp: (event) {
-        if (obscureAmounts) {
-          _startRevealTimer();
-        }
-      },
-      onPointerCancel: (event) {
-        if (obscureAmounts) {
-          _startRevealTimer();
-        }
-      },
-      child: LayoutBuilder(
+    return HoldToRevealListener(
+      builder: (context, isRevealed) => LayoutBuilder(
         builder: (_, boxConstraints) {
+          double effectivePercent =
+              obscureAmounts && !isRevealed ? 0 : widget.currentPercent;
           double x = boxConstraints.maxWidth;
           double progressWidth = (effectivePercent / 100) * x;
           return Stack(

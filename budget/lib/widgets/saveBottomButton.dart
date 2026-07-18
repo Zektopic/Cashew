@@ -59,7 +59,7 @@ class AddGradientOnTop extends StatelessWidget {
               foregroundDecoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    Theme.of(context).colorScheme.background.withOpacity(0),
+                    Theme.of(context).colorScheme.background.withValues(alpha: 0),
                     Theme.of(context).colorScheme.background,
                   ],
                   begin: AlignmentDirectional.topCenter,

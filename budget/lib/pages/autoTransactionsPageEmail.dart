@@ -959,12 +959,12 @@ class EmailsList extends StatelessWidget {
                       ? Theme.of(context)
                           .colorScheme
                           .selectableColorRed
-                          .withOpacity(0.5)
+                          .withValues(alpha: 0.5)
                       : doesEmailContain
                           ? Theme.of(context)
                               .colorScheme
                               .selectableColorGreen
-                              .withOpacity(0.5)
+                              .withValues(alpha: 0.5)
                           : backgroundColor ??
                               getColor(context, "lightDarkAccent"),
                   onTap: () {

@@ -581,7 +581,7 @@ class HighlightStringInList extends TextEditingController {
               color: Theme.of(context).colorScheme.onPrimary,
               backgroundColor: dynamicPastel(
                 context,
-                Theme.of(context).colorScheme.primary.withOpacity(0.5),
+                Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
                 inverse: true,
                 amountDark: 0.1,
                 amountLight: 0.25,

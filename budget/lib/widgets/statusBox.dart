@@ -35,7 +35,7 @@ class StatusBox extends StatelessWidget {
       child: Tappable(
         borderRadius: 12,
         onTap: onTap,
-        color: color.withOpacity(0.4),
+        color: color.withValues(alpha: 0.4),
         child: Padding(
           padding:
               EdgeInsetsDirectional.symmetric(horizontal: 17, vertical: 10),

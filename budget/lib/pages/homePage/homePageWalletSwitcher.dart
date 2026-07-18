@@ -156,7 +156,7 @@ class EditHomePagePinnedWalletsPopup extends StatelessWidget {
                   TransactionWallet? wallet = walletsIndexedByPk[walletPk];
                   return HexColor(wallet?.colour,
                           defaultColor: Theme.of(context).colorScheme.primary)
-                      .withOpacity(selected == true ? 0.7 : 0.5);
+                      .withValues(alpha: selected == true ? 0.7 : 0.5);
                 },
                 displayFilter: (walletPk) {
                   TransactionWallet? wallet = walletsIndexedByPk[walletPk];
@@ -252,7 +252,7 @@ class EditHomePagePinnedWalletsPopup extends StatelessWidget {
             //             text: "customize-period-for-account-totals".tr(),
             //             textAlign: TextAlign.center,
             //             fontSize: 16,
-            //             textColor: getColor(context, "black").withOpacity(0.8),
+            //             textColor: getColor(context, "black").withValues(alpha: 0.8),
             //           ),
             //         ),
             //         PeriodCyclePicker(

@@ -29,7 +29,6 @@ import 'package:budget/widgets/viewAllTransactionsButton.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:budget/colors.dart';
 import 'package:async/async.dart' show StreamZip;
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
@@ -522,7 +521,7 @@ class __PastBudgetsPageContentState extends State<_PastBudgetsPageContent> {
                           gradient: LinearGradient(
                             colors: [
                               pageBackgroundColor,
-                              pageBackgroundColor.withOpacity(0.0),
+                              pageBackgroundColor.withValues(alpha: 0.0),
                             ],
                             begin: AlignmentDirectional.topCenter,
                             end: AlignmentDirectional.bottomCenter,
@@ -557,7 +556,7 @@ class __PastBudgetsPageContentState extends State<_PastBudgetsPageContent> {
                       gradient: LinearGradient(
                         colors: [
                           pageBackgroundColor,
-                          pageBackgroundColor.withOpacity(0.0),
+                          pageBackgroundColor.withValues(alpha: 0.0),
                         ],
                         begin: AlignmentDirectional.topCenter,
                         end: AlignmentDirectional.bottomCenter,
@@ -740,7 +739,7 @@ class LoadMorePeriodsButton extends StatelessWidget {
                   ? Icons.history_outlined
                   : Icons.history_rounded,
               size: 22,
-              color: Theme.of(context).colorScheme.primary.withOpacity(0.8),
+              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.8),
             ),
             onPressed: onPressed,
           ),
@@ -1406,7 +1405,7 @@ class _CategoryAverageSpentState extends State<CategoryAverageSpent> {
                             //           : "transactions".tr().toLowerCase()),
                             //   fontSize: 13,
                             //   textColor: selected
-                            //       ? getColor(context, "black").withOpacity(0.4)
+                            //       ? getColor(context, "black").withValues(alpha: 0.4)
                             //       : getColor(context, "textLight"),
                             // ),
                           ],

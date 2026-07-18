@@ -931,7 +931,7 @@ class DangerousDebugFlag extends StatelessWidget {
   Widget build(BuildContext context) {
     if (allowDangerousDebugFlags) {
       return Container(
-        color: Colors.red.withOpacity(0.3),
+        color: Colors.red.withValues(alpha: 0.3),
         child: child,
       );
     } else {

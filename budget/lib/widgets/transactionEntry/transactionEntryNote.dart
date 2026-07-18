@@ -33,9 +33,9 @@ class TransactionEntryNote extends StatelessWidget {
                   BoxShadow(
                     color: Theme.of(context).brightness == Brightness.light
                         ? getColor(context, "shadowColorLight")
-                            .withOpacity(0.12)
+                            .withValues(alpha: 0.12)
                         : getColor(context, "shadowColorLight")
-                            .withOpacity(0.1),
+                            .withValues(alpha: 0.1),
                     blurRadius: 6,
                     offset: Offset(0, 4),
                     spreadRadius: 4,

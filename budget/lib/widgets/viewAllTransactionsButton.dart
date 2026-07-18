@@ -54,7 +54,7 @@ class LowKeyButton extends StatelessWidget {
       child: Tappable(
         color: color ??
             (appStateSettings["materialYou"]
-                ? Theme.of(context).colorScheme.primary.withOpacity(0.1)
+                ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.1)
                 : getColor(context, "lightDarkAccent")),
         child: Padding(
           padding: const EdgeInsetsDirectional.symmetric(
@@ -69,7 +69,7 @@ class LowKeyButton extends StatelessWidget {
                   textAlign: TextAlign.center,
                   fontSize: 14,
                   textColor:
-                      textColor ?? getColor(context, "black").withOpacity(0.5),
+                      textColor ?? getColor(context, "black").withValues(alpha: 0.5),
                   maxLines: 5,
                 ),
               ),

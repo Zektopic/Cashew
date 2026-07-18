@@ -49,7 +49,6 @@ class TransactionEntryTag extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsetsDirectional.only(top: 1.0),
         child: LayoutBuilder(builder: (context, constraints) {
-          double maxWidth = constraints.maxWidth;
           List<bool> tagsToShow = [
             appStateSettings["showAccountLabelTagInTransactionEntry"] ==
                 true, //0
@@ -59,7 +58,6 @@ class TransactionEntryTag extends StatelessWidget {
             transaction.objectiveFk != null, //4
             showExcludedBudgetTagCheck, //5
           ];
-          int tagCount = tagsToShow.where((element) => element == true).length;
           List<Widget> tags = [
             // 0
             TransactionTag(
@@ -285,7 +283,7 @@ class TransactionTag extends StatelessWidget {
   Widget build(BuildContext context) {
     Widget tagWidget = Container(
       decoration: BoxDecoration(
-        color: color.withOpacity(progress != null ? 0.15 : 0.25),
+        color: color.withValues(alpha: progress != null ? 0.15 : 0.25),
         borderRadius: BorderRadiusDirectional.circular(6),
       ),
       padding: padding,
@@ -297,7 +295,7 @@ class TransactionTag extends StatelessWidget {
             child: TextFont(
               text: name,
               fontSize: 11.5,
-              textColor: getColor(context, "black").withOpacity(0.7),
+              textColor: getColor(context, "black").withValues(alpha: 0.7),
               maxLines:
                   appStateSettings["fadeTransactionNameOverflows"] == false
                       ? null
@@ -338,7 +336,7 @@ class TransactionTag extends StatelessWidget {
                           heightFactor: 1,
                           child: Container(
                             decoration: BoxDecoration(
-                              color: color.withOpacity(0.2),
+                              color: color.withValues(alpha: 0.2),
                               borderRadius: BorderRadiusDirectional.circular(6),
                             ),
                           ),
@@ -385,7 +383,7 @@ class SharedBudgetLabel extends StatelessWidget {
                                   ? Icons.arrow_circle_up_outlined
                                   : Icons.arrow_circle_up_rounded,
                       size: 14,
-                      color: getColor(context, "black").withOpacity(0.7),
+                      color: getColor(context, "black").withValues(alpha: 0.7),
                     ),
                   ),
                 )
@@ -401,7 +399,7 @@ class SharedBudgetLabel extends StatelessWidget {
                             ? Icons.arrow_circle_up_outlined
                             : Icons.arrow_circle_up_rounded,
                     size: 14,
-                    color: getColor(context, "black").withOpacity(0.7),
+                    color: getColor(context, "black").withValues(alpha: 0.7),
                   ),
                 ),
           SizedBox(width: 2),
@@ -441,7 +439,7 @@ class SharedBudgetLabel extends StatelessWidget {
                                     snapshot.data!.name,
                                 fontSize: 12.5,
                                 textColor:
-                                    getColor(context, "black").withOpacity(0.7),
+                                    getColor(context, "black").withValues(alpha: 0.7),
                               );
                             }
                             return Container();

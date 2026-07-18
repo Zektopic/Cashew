@@ -38,17 +38,13 @@ import 'package:budget/struct/shareBudget.dart';
 import 'package:budget/struct/syncClient.dart';
 import 'package:budget/widgets/accountAndBackup.dart';
 import 'package:budget/widgets/bottomNavBar.dart';
-import 'package:budget/widgets/button.dart';
 import 'package:budget/widgets/categoryIcon.dart';
 import 'package:budget/widgets/fab.dart';
 import 'package:budget/widgets/framework/popupFramework.dart';
 import 'package:budget/widgets/iconButtonScaled.dart';
-import 'package:budget/widgets/importDB.dart';
-import 'package:budget/widgets/moreIcons.dart';
 import 'package:budget/widgets/navigationSidebar.dart';
 import 'package:budget/widgets/notificationsSettings.dart';
 import 'package:budget/widgets/openBottomSheet.dart';
-import 'package:budget/widgets/openContainerNavigation.dart';
 import 'package:budget/widgets/openPopup.dart';
 import 'package:budget/widgets/openSnackbar.dart';
 import 'package:budget/widgets/outlinedButtonStacked.dart';
@@ -62,7 +58,6 @@ import 'package:budget/widgets/globalLoadingProgress.dart';
 import 'package:budget/widgets/globalSnackbar.dart';
 import 'package:budget/pages/editCategoriesPage.dart';
 import 'package:budget/struct/upcomingTransactionsFunctions.dart';
-import 'package:budget/widgets/tappable.dart';
 import 'package:budget/widgets/transactionEntry/transactionEntry.dart';
 import 'package:budget/widgets/transactionEntry/transactionLabel.dart';
 import 'package:budget/widgets/util/checkWidgetLaunch.dart';
@@ -199,7 +194,7 @@ class PageNavigationFrameworkSafeArea extends StatelessWidget {
         //                 colors: [
         //                   Theme.of(context)
         //                       .colorScheme.background
-        //                       .withOpacity(0.0),
+        //                       .withValues(alpha: 0.0),
         //                   Theme.of(context).colorScheme.background,
         //                 ],
         //                 begin: Alignment.centerLeft,

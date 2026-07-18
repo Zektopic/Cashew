@@ -163,7 +163,7 @@ class GlobalSnackbarState extends State<GlobalSnackbar>
                   BoxShadow(
                     color: Theme.of(context).brightness == Brightness.light
                         ? getColor(context, "shadowColorLight")
-                        : getColor(context, "shadowColor").withOpacity(0.1),
+                        : getColor(context, "shadowColor").withValues(alpha: 0.1),
                     blurRadius: 15,
                     offset: Offset(0, 0),
                     spreadRadius: 2,

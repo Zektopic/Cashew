@@ -378,14 +378,14 @@ class ThemeColorIcon extends StatelessWidget {
                 ),
               ),
         child: Tappable(
-          color: Theme.of(context).colorScheme.primary.withOpacity(0.9),
+          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.9),
           onTap: onTap,
           borderRadius: 500,
           child: Icon(
             appStateSettings["outlinedIcons"]
                 ? Icons.color_lens_outlined
                 : Icons.color_lens_rounded,
-            color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.7),
+            color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.7),
           ),
         ),
       ),
@@ -508,11 +508,11 @@ class _ColorIconCustomState extends State<ColorIconCustom> {
               : BoxDecoration(
                   border: GradientBoxBorder(
                     gradient: LinearGradient(colors: [
-                      Colors.red.withOpacity(0.8),
-                      Colors.yellow.withOpacity(0.8),
-                      Colors.green.withOpacity(0.8),
-                      Colors.blue.withOpacity(0.8),
-                      Colors.purple.withOpacity(0.8),
+                      Colors.red.withValues(alpha: 0.8),
+                      Colors.yellow.withValues(alpha: 0.8),
+                      Colors.green.withValues(alpha: 0.8),
+                      Colors.blue.withValues(alpha: 0.8),
+                      Colors.purple.withValues(alpha: 0.8),
                     ]),
                     width: 3,
                   ),

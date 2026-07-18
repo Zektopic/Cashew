@@ -10,6 +10,7 @@ import 'package:budget/colors.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'dart:async';
+import 'package:budget/widgets/holdToRevealListener.dart';
 
 class _LineChart extends StatefulWidget {
   _LineChart({
@@ -49,34 +50,6 @@ class _LineChartState extends State<_LineChart> with WidgetsBindingObserver {
   bool loaded = false;
   double extraHorizontalPadding = 10;
 
-  bool _isRevealed = false;
-  Timer? _revealTimer;
-
-  void _setRevealed(bool reveal) {
-    setState(() {
-      _isRevealed = reveal;
-    });
-
-    if (reveal) {
-      HapticFeedback.selectionClick();
-      _revealTimer?.cancel();
-      _revealTimer = Timer(const Duration(seconds: 2), () {
-        if (mounted) {
-          setState(() {
-            _isRevealed = false;
-          });
-        }
-      });
-    } else {
-      _revealTimer?.cancel();
-    }
-  }
-
-  @override
-  void dispose() {
-    _revealTimer?.cancel();
-    super.dispose();
-  }
 
   @override
   void initState() {
@@ -92,11 +65,8 @@ class _LineChartState extends State<_LineChart> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    return Listener(
-      onPointerDown: (_) => _setRevealed(true),
-      onPointerUp: (_) => _setRevealed(false),
-      onPointerCancel: (_) => _setRevealed(false),
-      child: Padding(
+    return HoldToRevealListener(
+      builder: (context, isRevealed) => Padding(
         padding: EdgeInsets.only(
           right: 15 + extraHorizontalPadding,
           top: 8,
@@ -104,7 +74,7 @@ class _LineChartState extends State<_LineChart> with WidgetsBindingObserver {
         ),
         child: GestureDetector(
           child: LineChart(
-            data,
+            data(isRevealed),
             duration: const Duration(milliseconds: 2000),
             curve: Curves.fastLinearToSlowEaseIn,
             chartRendererKey: ValueKey(1),
@@ -114,8 +84,8 @@ class _LineChartState extends State<_LineChart> with WidgetsBindingObserver {
     );
   }
 
-  LineChartData get data => LineChartData(
-        lineTouchData: lineTouchData,
+  LineChartData data(bool isRevealed) => LineChartData(
+        lineTouchData: lineTouchData(isRevealed),
         gridData: gridData,
         borderData: borderData,
         lineBarsData: lineBarsData,
@@ -139,7 +109,7 @@ class _LineChartState extends State<_LineChart> with WidgetsBindingObserver {
                 : widget.maxPair.y
             : widget.maxPair.y + (widget.maxPair.y - widget.amountBefore) * 0.7,
         // axisTitleData: axisTitleData,
-        titlesData: titlesData,
+        titlesData: titlesData(isRevealed),
         extraLinesData: extraLinesData,
         // clipData: FlClipData.all(),
       );
@@ -157,7 +127,7 @@ class _LineChartState extends State<_LineChart> with WidgetsBindingObserver {
                       context,
                       widget.color,
                       amount: 0.3,
-                    ).withOpacity(0.4),
+                    ).withValues(alpha: 0.4),
                   ),
                 ]),
           HorizontalLine(
@@ -166,7 +136,7 @@ class _LineChartState extends State<_LineChart> with WidgetsBindingObserver {
               context,
               widget.color,
               amount: 0.3,
-            ).withOpacity(0.4),
+            ).withValues(alpha: 0.4),
           ),
           ...(widget.horizontalLineAt == null
               ? []
@@ -177,7 +147,7 @@ class _LineChartState extends State<_LineChart> with WidgetsBindingObserver {
                       context,
                       widget.color,
                       amount: 0.3,
-                    ).withOpacity(0.7),
+                    ).withValues(alpha: 0.7),
                     dashArray: [2, 2],
                   ),
                 ]),
@@ -191,7 +161,7 @@ class _LineChartState extends State<_LineChart> with WidgetsBindingObserver {
               context,
               widget.color,
               amount: 0.3,
-            ).withOpacity(0.2),
+            ).withValues(alpha: 0.2),
           ),
           ...(widget.verticalLineAt != null
               ? [
@@ -203,14 +173,14 @@ class _LineChartState extends State<_LineChart> with WidgetsBindingObserver {
                       context,
                       widget.color,
                       amount: 0.3,
-                    ).withOpacity(0.7),
+                    ).withValues(alpha: 0.7),
                   ),
                 ]
               : []),
         ],
       );
 
-  FlTitlesData get titlesData => FlTitlesData(
+  FlTitlesData titlesData(bool isRevealed) => FlTitlesData(
         show: true,
         bottomTitles: AxisTitles(
           axisNameSize: 25,
@@ -256,7 +226,7 @@ class _LineChartState extends State<_LineChart> with WidgetsBindingObserver {
                       widget.color,
                       amount: 0.8,
                       inverse: true,
-                    ).withOpacity(0.5),
+                    ).withValues(alpha: 0.5),
                   ),
                 ),
               );
@@ -271,20 +241,17 @@ class _LineChartState extends State<_LineChart> with WidgetsBindingObserver {
           sideTitles: SideTitles(
             showTitles: true,
             getTitlesWidget: (value, titleMeta) {
-              bool show = false;
               if (value == titleMeta.max || value == titleMeta.min) {
                 return SizedBox.shrink();
-              } else if (value == 0) {
-                show = true;
-              } else if (value < widget.maxPair.y &&
-                  value > 1 &&
-                  value < titleMeta.max) {
-                show = true;
-              } else if (value > widget.minPair.y &&
-                  value < 1 &&
-                  value > titleMeta.min) {
-                show = true;
-              } else {
+              }
+              bool show = value == 0 ||
+                  (value < widget.maxPair.y &&
+                      value > 1 &&
+                      value < titleMeta.max) ||
+                  (value > widget.minPair.y &&
+                      value < 1 &&
+                      value > titleMeta.min);
+              if (!show) {
                 return SizedBox.shrink();
               }
 
@@ -303,14 +270,14 @@ class _LineChartState extends State<_LineChart> with WidgetsBindingObserver {
                       context,
                       Provider.of<AllWallets>(context, listen: false),
                       value,
-                      forceReveal: _isRevealed,
+                      forceReveal: isRevealed,
                     ),
                     textColor: dynamicPastel(
                       context,
                       widget.color,
                       amount: 0.5,
                       inverse: true,
-                    ).withOpacity(0.3),
+                    ).withValues(alpha: 0.3),
                     fontSize: 13,
                   ),
                 ),
@@ -365,7 +332,7 @@ class _LineChartState extends State<_LineChart> with WidgetsBindingObserver {
 
   int? touchedValue = null;
 
-  LineTouchData get lineTouchData => LineTouchData(
+  LineTouchData lineTouchData(bool isRevealed) => LineTouchData(
         enabled: true,
         touchSpotThreshold: 1000,
         getTouchedSpotIndicator:
@@ -380,7 +347,7 @@ class _LineChartState extends State<_LineChart> with WidgetsBindingObserver {
               FlLine(
                 color: transparent
                     ? Colors.transparent
-                    : widget.color.withOpacity(0.9),
+                    : widget.color.withValues(alpha: 0.9),
                 strokeWidth: 2,
                 dashArray: [2, 2],
               ),
@@ -391,11 +358,11 @@ class _LineChartState extends State<_LineChart> with WidgetsBindingObserver {
                   radius: 3,
                   color: transparent
                       ? Colors.transparent
-                      : widget.color.withOpacity(0.9),
+                      : widget.color.withValues(alpha: 0.9),
                   strokeWidth: 2,
                   strokeColor: transparent
                       ? Colors.transparent
-                      : widget.color.withOpacity(0.9),
+                      : widget.color.withValues(alpha: 0.9),
                 ),
               ),
             );
@@ -421,7 +388,7 @@ class _LineChartState extends State<_LineChart> with WidgetsBindingObserver {
           touchedValue = value.toInt();
         },
         touchTooltipData: LineTouchTooltipData(
-          getTooltipColor: (_) => widget.color.withOpacity(0.7),
+          getTooltipColor: (_) => widget.color.withValues(alpha: 0.7),
           tooltipRoundedRadius: 8,
           fitInsideVertically: true,
           fitInsideHorizontally: true,
@@ -447,7 +414,7 @@ class _LineChartState extends State<_LineChart> with WidgetsBindingObserver {
                     convertToMoney(
                       Provider.of<AllWallets>(context, listen: false),
                       lineBarSpot.y,
-                      forceReveal: _isRevealed,
+                      forceReveal: isRevealed,
                     ),
                 const TextStyle(
                   color: Colors.white,
@@ -495,7 +462,7 @@ class _LineChartState extends State<_LineChart> with WidgetsBindingObserver {
               context,
               widget.color,
               amount: 0.3,
-            ).withOpacity(0.2),
+            ).withValues(alpha: 0.2),
             // color: Colors.transparent,
             strokeWidth: 2,
             dashArray: [2, 8],
@@ -516,7 +483,7 @@ class _LineChartState extends State<_LineChart> with WidgetsBindingObserver {
               context,
               widget.color,
               amount: 0.3,
-            ).withOpacity(0.2),
+            ).withValues(alpha: 0.2),
             strokeWidth: 2,
             dashArray: [2, 8],
           );

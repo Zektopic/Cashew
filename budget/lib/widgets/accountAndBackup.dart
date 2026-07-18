@@ -220,7 +220,7 @@ Future<bool> testIfHasGmailAccess() async {
     final authHeaders = await googleUser!.authHeaders;
     final authenticateClient = GoogleAuthClient(authHeaders);
     gMail.GmailApi gmailApi = gMail.GmailApi(authenticateClient);
-    gMail.ListMessagesResponse results = await gmailApi.users.messages
+    await gmailApi.users.messages
         .list(googleUser!.id.toString(), maxResults: 1);
   } catch (e) {
     print(e.toString());
@@ -430,8 +430,6 @@ Future<void> createBackup(
         currentDBFileInfo.mediaStream, currentDBFileInfo.dbFileBytes.length);
 
     var driveFile = new drive.File();
-    final timestamp =
-        DateFormat("yyyy-MM-dd-hhmmss").format(DateTime.now().toUtc());
     // -$timestamp
     driveFile.name =
         "db-v$schemaVersionGlobal-${getCurrentDeviceName()}.sqlite";
@@ -1123,7 +1121,7 @@ class _BackupManagementState extends State<BackupManagement> {
                                 ? Theme.of(context)
                                     .colorScheme
                                     .primary
-                                    .withOpacity(0.4)
+                                    .withValues(alpha: 0.4)
                                 : appStateSettings["materialYou"]
                                     ? Theme.of(context)
                                         .colorScheme
@@ -1223,11 +1221,11 @@ class _BackupManagementState extends State<BackupManagement> {
                                                             ? Theme.of(context)
                                                                 .colorScheme
                                                                 .onSecondaryContainer
-                                                                .withOpacity(
+                                                                .withValues(alpha: 
                                                                     0.08)
                                                             : getColor(context,
                                                                     "lightDarkAccentHeavy")
-                                                                .withOpacity(
+                                                                .withValues(alpha: 
                                                                     0.7),
                                                         onTap: () {
                                                           saveDriveFileToDevice(
@@ -1254,10 +1252,10 @@ class _BackupManagementState extends State<BackupManagement> {
                                                     ? Theme.of(context)
                                                         .colorScheme
                                                         .onSecondaryContainer
-                                                        .withOpacity(0.08)
+                                                        .withValues(alpha: 0.08)
                                                     : getColor(context,
                                                             "lightDarkAccentHeavy")
-                                                        .withOpacity(0.7),
+                                                        .withValues(alpha: 0.7),
                                                 onTap: () {
                                                   openPopup(
                                                     context,
@@ -1424,7 +1422,7 @@ class LoadingShimmerDriveFiles extends StatelessWidget {
           ? Theme.of(context).colorScheme.secondaryContainer
           : getColor(context, "lightDarkAccentHeavyLight"),
       highlightColor: appStateSettings["materialYou"]
-          ? Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.2)
+          ? Theme.of(context).colorScheme.secondaryContainer.withValues(alpha: 0.2)
           : getColor(context, "lightDarkAccentHeavy").withAlpha(20),
       child: Padding(
         padding: const EdgeInsetsDirectional.only(bottom: 8.0),
@@ -1435,8 +1433,8 @@ class LoadingShimmerDriveFiles extends StatelessWidget {
               ? Theme.of(context)
                   .colorScheme
                   .secondaryContainer
-                  .withOpacity(0.5)
-              : getColor(context, "lightDarkAccentHeavy").withOpacity(0.5),
+                  .withValues(alpha: 0.5)
+              : getColor(context, "lightDarkAccentHeavy").withValues(alpha: 0.5),
           child: Container(
               padding:
                   EdgeInsetsDirectional.symmetric(horizontal: 20, vertical: 15),

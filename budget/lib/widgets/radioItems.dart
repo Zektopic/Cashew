@@ -48,9 +48,7 @@ class _RadioItemsState<T> extends State<RadioItems<T>> {
   @override
   Widget build(BuildContext context) {
     List<Widget> children = [];
-    int index = -1;
     for (T item in widget.items) {
-      index += 1;
       bool selected = false;
       if (currentValue == item ||
           (widget.getSelected != null && widget.getSelected!(item)))
@@ -219,7 +217,9 @@ class _CheckItemsState<T> extends State<CheckItems<T>> {
     });
   }
 
+  @override
   void didUpdateWidget(oldWidget) {
+    super.didUpdateWidget(oldWidget);
     if (oldWidget != widget && widget.syncWithInitial) {
       setState(() {
         currentValues = widget.initial ?? [];

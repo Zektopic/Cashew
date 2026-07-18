@@ -106,11 +106,11 @@ class _IncomeExpenseTabSelectorState extends State<IncomeExpenseTabSelector>
       child: Material(
         color: widget.unselectedColor == null
             ? appStateSettings["materialYou"]
-                ? Theme.of(context).colorScheme.primary.withOpacity(0.1)
+                ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.1)
                 : Theme.of(context).brightness == Brightness.dark
                     ? getColor(context, "lightDarkAccentHeavyLight")
-                        .withOpacity(0.5)
-                    : Colors.black.withOpacity(0.03)
+                        .withValues(alpha: 0.5)
+                    : Colors.black.withValues(alpha: 0.03)
             : widget.unselectedColor,
         child: TabBar(
           splashFactory:
@@ -123,14 +123,14 @@ class _IncomeExpenseTabSelectorState extends State<IncomeExpenseTabSelector>
             color: widget.color != null
                 ? widget.color
                 : (appStateSettings["materialYou"]
-                    ? Theme.of(context).colorScheme.primary.withOpacity(0.25)
+                    ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.25)
                     : Theme.of(context).brightness == Brightness.dark
-                        ? getColor(context, "black").withOpacity(0.15)
+                        ? getColor(context, "black").withValues(alpha: 0.15)
                         : Theme.of(context).colorScheme.secondaryContainer),
           ),
           labelColor: getColor(context, "black"),
           unselectedLabelColor: widget.unselectedLabelColor ??
-              getColor(context, "black").withOpacity(0.3),
+              getColor(context, "black").withValues(alpha: 0.3),
           onTap: (value) {
             widget.onTabChanged(value == 1);
             setState(() {

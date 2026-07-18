@@ -1,5 +1,3 @@
-import 'dart:async';
-import 'package:flutter/services.dart';
 import 'dart:math';
 
 import 'package:budget/database/tables.dart';
@@ -21,6 +19,7 @@ import 'package:flutter/material.dart';
 import 'package:budget/widgets/animatedCircularProgress.dart';
 import 'package:provider/provider.dart';
 import 'package:budget/colors.dart';
+import 'package:budget/widgets/holdToRevealListener.dart';
 
 class CategoryEntry extends StatelessWidget {
   CategoryEntry({
@@ -243,7 +242,7 @@ class CategoryEntry extends StatelessWidget {
                                                   getColor(
                                                       context, "expenseAmount")
                                               : getColor(context, "black")
-                                                  .withOpacity(0.3),
+                                                  .withValues(alpha: 0.3),
                                         ),
                                       ),
                               ],
@@ -273,7 +272,7 @@ class CategoryEntry extends StatelessWidget {
                                       : "transactions".tr().toLowerCase()),
                               fontSize: 14,
                               textColor: selected
-                                  ? getColor(context, "black").withOpacity(0.4)
+                                  ? getColor(context, "black").withValues(alpha: 0.4)
                                   : getColor(context, "textLight"),
                             ),
                           ],
@@ -626,40 +625,12 @@ class _CategoryEntryProgressAndPercent extends StatefulWidget {
 
 class _CategoryEntryProgressAndPercentState
     extends State<_CategoryEntryProgressAndPercent> {
-  bool _isRevealed = false;
-  Timer? _hideTimer;
-
-  void _startHideTimer() {
-    _hideTimer?.cancel();
-    _hideTimer = Timer(const Duration(seconds: 2), () {
-      if (mounted) {
-        setState(() {
-          _isRevealed = false;
-        });
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _hideTimer?.cancel();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: Listener(
-        onPointerDown: (event) {
-          _hideTimer?.cancel();
-          setState(() {
-            _isRevealed = true;
-          });
-          HapticFeedback.selectionClick();
-        },
-        onPointerUp: (event) => _startHideTimer(),
-        onPointerCancel: (event) => _startHideTimer(),
-        child: widget.categoryBudgetLimit != null
+      child: HoldToRevealListener(
+        builder: (context, isRevealed) => widget.categoryBudgetLimit != null
             ? Padding(
                 padding: const EdgeInsetsDirectional.only(
                   top: 3,
@@ -682,11 +653,11 @@ class _CategoryEntryProgressAndPercentState
                     amountLight: 0.1,
                     amountDark: 0.1,
                   ),
-                  progress: (!_isRevealed &&
+                  progress: (!isRevealed &&
                           appStateSettings["obscureAmounts"] == true)
                       ? 0.0
                       : widget.percentSpent,
-                  dotProgress: (!_isRevealed &&
+                  dotProgress: (!isRevealed &&
                           appStateSettings["obscureAmounts"] == true)
                       ? null
                       : (widget.todayPercent == null
@@ -698,7 +669,7 @@ class _CategoryEntryProgressAndPercentState
                 String percentString = convertToPercent(
                   widget.percentSpent * 100,
                   useLessThanZero: true,
-                  forceReveal: _isRevealed,
+                  forceReveal: isRevealed,
                 );
                 String text = percentString +
                     " " +
@@ -712,7 +683,7 @@ class _CategoryEntryProgressAndPercentState
                 return AnimatedSwitcher(
                   duration: Duration(milliseconds: 300),
                   child: TextFont(
-                    key: ValueKey(_isRevealed),
+                    key: ValueKey(isRevealed),
                     text: text,
                     fontSize: 14,
                     textColor: widget.selected

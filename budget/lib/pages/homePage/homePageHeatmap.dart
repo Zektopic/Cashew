@@ -17,9 +17,9 @@ import 'package:budget/widgets/textWidgets.dart';
 import 'package:budget/widgets/transactionEntries.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'dart:async';
-import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:budget/widgets/holdToRevealListener.dart';
 
 class HomePageHeatMap extends StatefulWidget {
   const HomePageHeatMap({super.key});
@@ -110,34 +110,6 @@ class HeatMap extends StatefulWidget {
 }
 
 class _HeatMapState extends State<HeatMap> {
-  bool _isRevealed = false;
-  Timer? _revealTimer;
-
-  void _setRevealed(bool reveal) {
-    setState(() {
-      _isRevealed = reveal;
-    });
-
-    if (reveal) {
-      HapticFeedback.selectionClick();
-      _revealTimer?.cancel();
-      _revealTimer = Timer(const Duration(seconds: 2), () {
-        if (mounted) {
-          setState(() {
-            _isRevealed = false;
-          });
-        }
-      });
-    } else {
-      _revealTimer?.cancel();
-    }
-  }
-
-  @override
-  void dispose() {
-    _revealTimer?.cancel();
-    super.dispose();
-  }
 
   double? getMaxY(List<Pair?> pairs, bool isIncome) {
     double? maxY;
@@ -196,11 +168,8 @@ class _HeatMapState extends State<HeatMap> {
 
     return Padding(
       padding: const EdgeInsetsDirectional.only(bottom: 13),
-      child: Listener(
-        onPointerDown: (_) => _setRevealed(true),
-        onPointerUp: (_) => _setRevealed(false),
-        onPointerCancel: (_) => _setRevealed(false),
-        child: Container(
+      child: HoldToRevealListener(
+        builder: (context, isRevealed) => Container(
           height: 12 +
               7 * widget.dayWidth +
               7 * 2 * widget.dayPadding +
@@ -308,7 +277,7 @@ class _HeatMapState extends State<HeatMap> {
                                                             listen: false),
                                                         amount,
                                                         forceReveal:
-                                                            _isRevealed,
+                                                            isRevealed,
                                                       )),
                                       child: Tappable(
                                         onTap: () {
@@ -325,9 +294,9 @@ class _HeatMapState extends State<HeatMap> {
                                                   ? Theme.of(context)
                                                               .brightness ==
                                                           Brightness.light
-                                                      ? color.withOpacity(0.05)
-                                                      : color.withOpacity(0.2)
-                                                  : color.withOpacity(0.3),
+                                                      ? color.withValues(alpha: 0.05)
+                                                      : color.withValues(alpha: 0.2)
+                                                  : color.withValues(alpha: 0.3),
                                               width: 1,
                                             ),
                                             borderRadius:
@@ -398,17 +367,17 @@ Color getHeatMapColor({
   } else if (amount == 0) {
     return defaultColor ??
         (appStateSettings["materialYou"]
-            ? Theme.of(context).colorScheme.onSecondary.withOpacity(0.6)
-            : getColor(context, "lightDarkAccent").withOpacity(0.6));
+            ? Theme.of(context).colorScheme.onSecondary.withValues(alpha: 0.6)
+            : getColor(context, "lightDarkAccent").withValues(alpha: 0.6));
   } else if (amount < 0) {
-    return getColor(context, "expenseAmount").withOpacity(
+    return getColor(context, "expenseAmount").withValues(alpha: 
       (minimumOpacityThreshold +
           (((1 - subtractedOpacityThreshold) / 4) *
                   (getRangeIndex(maxExpense, minExpense, amount) + 1))
               .clamp(0, 1)),
     );
   } else {
-    return getColor(context, "incomeAmount").withOpacity(
+    return getColor(context, "incomeAmount").withValues(alpha: 
       (minimumOpacityThreshold +
           (((1 - subtractedOpacityThreshold) / 4) *
                   (getRangeIndex(minIncome, maxIncome, amount) + 1))
@@ -494,7 +463,7 @@ class HeatMapMonthLabel extends StatelessWidget {
         text: label,
         textColor: dynamicPastel(context, Theme.of(context).colorScheme.primary,
                 amount: 0.8, inverse: true)
-            .withOpacity(0.5),
+            .withValues(alpha: 0.5),
       ),
     );
   }

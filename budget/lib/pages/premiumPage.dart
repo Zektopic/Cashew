@@ -187,7 +187,7 @@ class PremiumPage extends StatelessWidget {
                                   color: darkenPastel(
                                           Theme.of(context).colorScheme.primary,
                                           amount: 0.3)
-                                      .withOpacity(0.5),
+                                      .withValues(alpha: 0.5),
                                   borderRadius: 15,
                                   child: Padding(
                                     padding:
@@ -225,7 +225,7 @@ class PremiumPage extends StatelessWidget {
                                   ? Icons.arrow_back_outlined
                                   : Icons.arrow_back_rounded,
                           color:
-                              Colors.black.withOpacity(canDismiss ? 0.9 : 0.16),
+                              Colors.black.withValues(alpha: canDismiss ? 0.9 : 0.16),
                         ),
                         onPressed: () {
                           popRoute(context);
@@ -282,7 +282,7 @@ class PremiumPage extends StatelessWidget {
                             text: "in-app-subscription-terms-1".tr() + " ",
                             style: TextStyle(
                               fontSize: 12,
-                              color: Colors.white.withOpacity(0.3),
+                              color: Colors.white.withValues(alpha: 0.3),
                               fontFamily: appStateSettings["font"],
                               fontFamilyFallback: ['Inter'],
                             ),
@@ -291,12 +291,12 @@ class PremiumPage extends StatelessWidget {
                             text: "in-app-subscription-terms-2".tr(),
                             style: TextStyle(
                               fontSize: 12,
-                              color: Colors.white.withOpacity(0.3),
+                              color: Colors.white.withValues(alpha: 0.3),
                               fontFamily: appStateSettings["font"],
                               fontFamilyFallback: ['Inter'],
                               decoration: TextDecoration.underline,
                               decorationStyle: TextDecorationStyle.solid,
-                              decorationColor: Colors.white.withOpacity(0.3),
+                              decorationColor: Colors.white.withValues(alpha: 0.3),
                             ),
                           ),
                         ],
@@ -515,7 +515,7 @@ class ManageSubscription extends StatelessWidget {
         Theme.of(context).colorScheme.primaryContainer,
         amountDark: 0.2,
         amountLight: 0.6,
-      ).withOpacity(0.45),
+      ).withValues(alpha: 0.45),
       borderRadius: 15,
       child: Container(
         padding: EdgeInsetsDirectional.symmetric(horizontal: 35, vertical: 15),
@@ -550,7 +550,7 @@ class ManageSubscription extends StatelessWidget {
                         Theme.of(context).colorScheme.primaryContainer,
                         amountDark: 0.2,
                         amountLight: 0.6,
-                      ).withOpacity(0.45),
+                      ).withValues(alpha: 0.45),
                       onTap: () async {
                         openManagePurchase();
                       },
@@ -561,7 +561,7 @@ class ManageSubscription extends StatelessWidget {
                           text: "manage".tr(),
                           fontSize: 12,
                           textColor:
-                              getColor(context, "black").withOpacity(0.5),
+                              getColor(context, "black").withValues(alpha: 0.5),
                         ),
                       ),
                     ),
@@ -907,7 +907,7 @@ class ProductsState extends State<Products> {
                                 Theme.of(context).colorScheme.primaryContainer,
                                 amountDark: 0.2,
                                 amountLight: 0.6,
-                              ).withOpacity(0.45),
+                              ).withValues(alpha: 0.45),
                               child: Column(
                                 children: [
                                   Builder(
@@ -1009,7 +1009,7 @@ class ProductsState extends State<Products> {
                               Theme.of(context).colorScheme.primaryContainer,
                               amountDark: 0.2,
                               amountLight: 0.6,
-                            ).withOpacity(0.45),
+                            ).withValues(alpha: 0.45),
                             onTap: () async {
                               restorePurchases(context);
                             },
@@ -1020,7 +1020,7 @@ class ProductsState extends State<Products> {
                                 text: "restore-purchases".tr(),
                                 fontSize: 12,
                                 textColor:
-                                    getColor(context, "black").withOpacity(0.5),
+                                    getColor(context, "black").withValues(alpha: 0.5),
                               ),
                             ),
                           ),
@@ -1144,9 +1144,9 @@ class SubscriptionOption extends StatelessWidget {
                                 decoration: TextDecoration.lineThrough,
                                 decorationStyle: TextDecorationStyle.solid,
                                 decorationColor: getColor(context, "black")
-                                    .withOpacity(0.65),
+                                    .withValues(alpha: 0.65),
                                 color:
-                                    getColor(context, "black").withOpacity(0.7),
+                                    getColor(context, "black").withValues(alpha: 0.7),
                                 fontSize: 14,
                                 fontFamily: appStateSettings["font"],
                                 fontFamilyFallback: ['Inter'],
@@ -1306,7 +1306,7 @@ class _FadeOutAndLockFeatureState extends State<FadeOutAndLockFeature> {
                     context,
                     Theme.of(context).colorScheme.secondaryContainer,
                     amount: 0.4,
-                  ).withOpacity(0.8),
+                  ).withValues(alpha: 0.8),
                 )
               ],
             ),
@@ -1488,7 +1488,7 @@ class PremiumBanner extends StatelessWidget {
                                               textColor: Theme.of(context)
                                                   .colorScheme
                                                   .onSecondaryContainer
-                                                  .withOpacity(0.8),
+                                                  .withValues(alpha: 0.8),
                                               fontWeight: FontWeight.bold,
                                               fontSize: 15,
                                             ),

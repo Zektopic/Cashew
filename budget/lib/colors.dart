@@ -49,9 +49,9 @@ AppColors getAppColors(
             "white": Colors.white,
             "black": Colors.black,
             "textLight": appStateSettings["increaseTextContrast"]
-                ? Colors.black.withOpacity(0.7)
+                ? Colors.black.withValues(alpha: 0.7)
                 : appStateSettings["materialYou"]
-                    ? Colors.black.withOpacity(0.4)
+                    ? Colors.black.withValues(alpha: 0.4)
                     : Color(0xFF888888),
             "lightDarkAccent": appStateSettings["materialYou"]
                 ? lightenPastel(accentColor, amount: 0.6)
@@ -85,9 +85,9 @@ AppColors getAppColors(
             "white": Colors.black,
             "black": Colors.white,
             "textLight": appStateSettings["increaseTextContrast"]
-                ? Colors.white.withOpacity(0.65)
+                ? Colors.white.withValues(alpha: 0.65)
                 : appStateSettings["materialYou"]
-                    ? Colors.white.withOpacity(0.25)
+                    ? Colors.white.withValues(alpha: 0.25)
                     : Color(0xFF494949),
             "lightDarkAccent": appStateSettings["materialYou"]
                 ? darkenPastel(accentColor, amount: 0.83)
@@ -190,21 +190,21 @@ Color lighten(Color color, [double amount = .1]) {
 
 Color lightenPastel(Color color, {double amount = 0.1}) {
   return Color.alphaBlend(
-    Colors.white.withOpacity(amount),
+    Colors.white.withValues(alpha: amount),
     color,
   );
 }
 
 Color darkenPastel(Color color, {double amount = 0.1}) {
   return Color.alphaBlend(
-    Colors.black.withOpacity(amount),
+    Colors.black.withValues(alpha: amount),
     color,
   );
 }
 
 Color blend(Color colorToBlend, Color baseColor, {double amount = 0.1}) {
   return Color.alphaBlend(
-    baseColor.withOpacity(amount),
+    baseColor.withValues(alpha: amount),
     colorToBlend,
   );
 }
@@ -442,7 +442,7 @@ ColorScheme getGrayScaleColorScheme(Brightness brightness) {
       outline: Colors.grey[500]!,
       outlineVariant: Colors.grey[400],
       shadow: Colors.black,
-      scrim: Colors.black.withOpacity(0.5),
+      scrim: Colors.black.withValues(alpha: 0.5),
       inverseSurface: Colors.grey[800],
       onInverseSurface: Colors.white,
       inversePrimary: Colors.blueGrey[300],
@@ -480,7 +480,7 @@ ColorScheme getGrayScaleColorScheme(Brightness brightness) {
       outline: Colors.grey[600]!,
       outlineVariant: Colors.grey[500],
       shadow: Colors.black,
-      scrim: Colors.black.withOpacity(0.7),
+      scrim: Colors.black.withValues(alpha: 0.7),
       inverseSurface: Colors.grey[100],
       onInverseSurface: Colors.black,
       inversePrimary: Colors.blueGrey[800],
@@ -632,7 +632,7 @@ ThemeData getLightTheme() {
                         getSettingConstants(appStateSettings)["accentColor"],
                         amount: 0.8),
                     amount: 0.2)
-                .withOpacity(0.5)
+                .withValues(alpha: 0.5)
             : null,
   );
   return generateThemeDataWithExtension(
@@ -665,7 +665,7 @@ ThemeData getDarkTheme() {
                         getSettingConstants(appStateSettings)["accentColor"],
                         amount: 0.86),
                     amount: 0.1)
-                .withOpacity(0.2)
+                .withValues(alpha: 0.2)
             : null,
   );
   return generateThemeDataWithExtension(

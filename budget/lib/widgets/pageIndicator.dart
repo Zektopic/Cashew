@@ -25,11 +25,11 @@ class PageIndicator extends StatelessWidget {
                 builder: (BuildContext context) {
                   double scaleFactor = (index == currentPage) ? 1.3 : 1.0;
                   Color color = (index == currentPage)
-                      ? Theme.of(context).colorScheme.secondary.withOpacity(0.7)
+                      ? Theme.of(context).colorScheme.secondary.withValues(alpha: 0.7)
                       : Theme.of(context)
                           .colorScheme
                           .secondary
-                          .withOpacity(0.2);
+                          .withValues(alpha: 0.2);
                   return AnimatedScale(
                     duration: Duration(milliseconds: 900),
                     scale: scaleFactor,

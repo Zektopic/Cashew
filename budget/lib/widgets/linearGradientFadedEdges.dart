@@ -43,7 +43,7 @@ class LinearGradientFadedEdges extends StatelessWidget {
                     gradient: LinearGradient(
                       colors: [
                         gradientColorFiltered,
-                        gradientColorFiltered.withOpacity(0.0),
+                        gradientColorFiltered.withValues(alpha: 0.0),
                       ],
                       begin: AlignmentDirectional.centerStart,
                       end: AlignmentDirectional.centerEnd,
@@ -68,7 +68,7 @@ class LinearGradientFadedEdges extends StatelessWidget {
                     gradient: LinearGradient(
                       colors: [
                         gradientColorFiltered,
-                        gradientColorFiltered.withOpacity(0.0),
+                        gradientColorFiltered.withValues(alpha: 0.0),
                       ],
                       begin: AlignmentDirectional.centerEnd,
                       end: AlignmentDirectional.centerStart,
@@ -93,7 +93,7 @@ class LinearGradientFadedEdges extends StatelessWidget {
                     gradient: LinearGradient(
                       colors: [
                         gradientColorFiltered,
-                        gradientColorFiltered.withOpacity(0.0),
+                        gradientColorFiltered.withValues(alpha: 0.0),
                       ],
                       begin: AlignmentDirectional.topCenter,
                       end: AlignmentDirectional.bottomCenter,
@@ -118,7 +118,7 @@ class LinearGradientFadedEdges extends StatelessWidget {
                     gradient: LinearGradient(
                       colors: [
                         gradientColorFiltered,
-                        gradientColorFiltered.withOpacity(0.0),
+                        gradientColorFiltered.withValues(alpha: 0.0),
                       ],
                       begin: AlignmentDirectional.bottomCenter,
                       end: AlignmentDirectional.topCenter,

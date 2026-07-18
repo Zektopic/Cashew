@@ -105,7 +105,7 @@ class TappableTextEntry extends StatelessWidget {
                                   ? Theme.of(context)
                                       .colorScheme
                                       .primary
-                                      .withOpacity(0.2)
+                                      .withValues(alpha: 0.2)
                                   : getColor(context, "lightDarkAccentHeavy"))),
                 ),
                 child: IntrinsicWidth(

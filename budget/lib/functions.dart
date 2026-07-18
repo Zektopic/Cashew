@@ -971,7 +971,7 @@ List<BoxShadow> boxShadowCategoryPercent(context) {
   if (appStateSettings["disableShadows"] == true) return [];
   return [
     BoxShadow(
-      color: getColor(context, "shadowColor").withOpacity(0.4),
+      color: getColor(context, "shadowColor").withValues(alpha: 0.4),
       blurRadius: 3,
       offset: Offset(0, 0),
       spreadRadius: 2,

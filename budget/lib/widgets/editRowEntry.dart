@@ -526,7 +526,7 @@ class HasMoreOptionsIcon extends StatelessWidget {
           ? Icons.more_vert_outlined
           : Icons.more_vert_rounded,
       size: 22,
-      color: Theme.of(context).colorScheme.secondary.withOpacity(0.7),
+      color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.7),
     );
   }
 }

@@ -1,11 +1,10 @@
 import 'package:budget/colors.dart';
-import 'dart:async';
 import 'package:budget/struct/settings.dart';
 import 'package:budget/widgets/navigationSidebar.dart';
 import 'package:budget/widgets/openBottomSheet.dart';
 import 'package:budget/widgets/util/debouncer.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:budget/widgets/holdToRevealListener.dart';
 
 class GlobalLoadingProgress extends StatefulWidget {
   const GlobalLoadingProgress({
@@ -147,50 +146,12 @@ class IndeterminateProgressBar extends StatefulWidget {
 }
 
 class _IndeterminateProgressBarState extends State<IndeterminateProgressBar> {
-  bool _isRevealed = false;
-  Timer? _hideTimer;
-
-  void _startHideTimer() {
-    _hideTimer?.cancel();
-    _hideTimer = Timer(const Duration(seconds: 2), () {
-      if (mounted) {
-        setState(() {
-          _isRevealed = false;
-        });
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _hideTimer?.cancel();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
-    return Listener(
-      onPointerDown: (event) {
-        if (appStateSettings["obscureAmounts"] == true) {
-          HapticFeedback.selectionClick();
-          setState(() {
-            _isRevealed = true;
-          });
-          _hideTimer?.cancel();
-        }
-      },
-      onPointerUp: (event) {
-        if (appStateSettings["obscureAmounts"] == true) {
-          _startHideTimer();
-        }
-      },
-      onPointerCancel: (event) {
-        if (appStateSettings["obscureAmounts"] == true) {
-          _startHideTimer();
-        }
-      },
-      child: LinearProgressIndicator(
-        value: (!_isRevealed && appStateSettings["obscureAmounts"] == true)
+    return HoldToRevealListener(
+      builder: (context, isRevealed) => LinearProgressIndicator(
+        value: (!isRevealed && appStateSettings["obscureAmounts"] == true)
             ? 0.0
             : null,
         color: dynamicPastel(context, Theme.of(context).colorScheme.primary,

@@ -8,9 +8,9 @@ import 'dart:async';
 import 'package:budget/widgets/textWidgets.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:budget/widgets/countNumber.dart';
 import 'package:provider/provider.dart';
+import 'package:budget/widgets/holdToRevealListener.dart';
 
 // If you just added an upcoming transaction and mark it as paid, it will not show up here
 // This is because the query transactionsAmountStream needs to be updated to have the new DateTime.now(),
@@ -46,14 +46,6 @@ class TransactionsAmountBox extends StatefulWidget {
 }
 
 class _TransactionsAmountBoxState extends State<TransactionsAmountBox> {
-  bool _isRevealed = false;
-  Timer? _revealTimer;
-
-  @override
-  void dispose() {
-    _revealTimer?.cancel();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -66,25 +58,8 @@ class _TransactionsAmountBoxState extends State<TransactionsAmountBox> {
         openPage: widget.openPage ?? SizedBox.shrink(),
         borderRadius: 15,
         button: (openContainer) {
-          return Listener(
-            onPointerDown: (_) {
-              HapticFeedback.selectionClick();
-              setState(() => _isRevealed = true);
-              _revealTimer?.cancel();
-            },
-            onPointerUp: (_) {
-              _revealTimer?.cancel();
-              _revealTimer = Timer(Duration(seconds: 2), () {
-                if (mounted) setState(() => _isRevealed = false);
-              });
-            },
-            onPointerCancel: (_) {
-              _revealTimer?.cancel();
-              _revealTimer = Timer(Duration(seconds: 2), () {
-                if (mounted) setState(() => _isRevealed = false);
-              });
-            },
-            child: Tappable(
+          return HoldToRevealListener(
+            builder: (context, isRevealed) => Tappable(
               color: getColor(context, "lightDarkAccentHeavyLight"),
               onTap: () {
                 if (widget.openPage != null) openContainer();
@@ -133,7 +108,7 @@ class _TransactionsAmountBoxState extends State<TransactionsAmountBox> {
                                   return AnimatedSwitcher(
                                     duration: const Duration(milliseconds: 300),
                                     child: TextFont(
-                                      key: ValueKey(_isRevealed),
+                                      key: ValueKey(isRevealed),
                                       text: convertToMoney(
                                         Provider.of<AllWallets>(context),
                                         number,
@@ -141,7 +116,7 @@ class _TransactionsAmountBoxState extends State<TransactionsAmountBox> {
                                         addCurrencyName:
                                             widget.currencyKey != null,
                                         finalNumber: finalAmount,
-                                        forceReveal: _isRevealed,
+                                        forceReveal: isRevealed,
                                       ),
                                       textColor: widget.getTextColor != null
                                           ? widget.getTextColor!(totalSpent)

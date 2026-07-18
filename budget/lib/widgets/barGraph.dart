@@ -7,7 +7,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:async';
-import 'package:flutter/services.dart';
+import 'package:budget/widgets/holdToRevealListener.dart';
 
 class BarGraph extends StatefulWidget {
   BarGraph({
@@ -37,34 +37,6 @@ class BarGraph extends StatefulWidget {
 class BarGraphState extends State<BarGraph> {
   bool loaded = false;
 
-  bool _isRevealed = false;
-  Timer? _revealTimer;
-
-  void _setRevealed(bool reveal) {
-    setState(() {
-      _isRevealed = reveal;
-    });
-
-    if (reveal) {
-      HapticFeedback.selectionClick();
-      _revealTimer?.cancel();
-      _revealTimer = Timer(const Duration(seconds: 2), () {
-        if (mounted) {
-          setState(() {
-            _isRevealed = false;
-          });
-        }
-      });
-    } else {
-      _revealTimer?.cancel();
-    }
-  }
-
-  @override
-  void dispose() {
-    _revealTimer?.cancel();
-    super.dispose();
-  }
 
   @override
   void initState() {
@@ -80,11 +52,8 @@ class BarGraphState extends State<BarGraph> {
 
   @override
   Widget build(BuildContext context) {
-    return Listener(
-      onPointerDown: (_) => _setRevealed(true),
-      onPointerUp: (_) => _setRevealed(false),
-      onPointerCancel: (_) => _setRevealed(false),
-      child: Padding(
+    return HoldToRevealListener(
+      builder: (context, isRevealed) => Padding(
         padding: const EdgeInsetsDirectional.only(start: 10, end: 30, top: 5),
         child: Container(
           height: 190,
@@ -104,17 +73,17 @@ class BarGraphState extends State<BarGraph> {
                     inverse: true,
                     amountLight: 0.2,
                     amountDark: 0.05,
-                  ).withOpacity(0.8),
+                  ).withValues(alpha: 0.8),
                   tooltipRoundedRadius: 8,
                   getTooltipItem: (group, groupIndex, rod, rodIndex) {
                     return BarTooltipItem(
                       convertToMoney(
                         Provider.of<AllWallets>(context, listen: false),
                         rod.toY == -1e-14 ? 0 : rod.toY,
-                        forceReveal: _isRevealed,
+                        forceReveal: isRevealed,
                       ),
                       TextStyle(
-                        color: getColor(context, "black").withOpacity(0.8),
+                        color: getColor(context, "black").withValues(alpha: 0.8),
                         fontWeight: FontWeight.bold,
                         fontSize: 12,
                         fontFamilyFallback: ['Inter'],
@@ -145,7 +114,7 @@ class BarGraphState extends State<BarGraph> {
                         context,
                         widget.color,
                         amount: 0.3,
-                      ).withOpacity(0.7),
+                      ).withValues(alpha: 0.7),
                     );
                   } else if (value == 0) {
                     return FlLine(
@@ -153,7 +122,7 @@ class BarGraphState extends State<BarGraph> {
                         context,
                         widget.color,
                         amount: 0.3,
-                      ).withOpacity(0.2),
+                      ).withValues(alpha: 0.2),
                       strokeWidth: 2,
                     );
                   } else if (value % ((widget.maxY / 3.8).ceil()) == 1) {
@@ -162,7 +131,7 @@ class BarGraphState extends State<BarGraph> {
                         context,
                         widget.color,
                         amount: 0.3,
-                      ).withOpacity(0.2),
+                      ).withValues(alpha: 0.2),
                       strokeWidth: 2,
                       dashArray: [2, 8],
                     );
@@ -175,7 +144,7 @@ class BarGraphState extends State<BarGraph> {
                       context,
                       widget.color,
                       amount: 0.3,
-                    ).withOpacity(0.2),
+                    ).withValues(alpha: 0.2),
                     strokeWidth: 2,
                     dashArray: [2, 8],
                   );
@@ -219,7 +188,7 @@ class BarGraphState extends State<BarGraph> {
                             widget.color,
                             amount: 0.8,
                             inverse: true,
-                          ).withOpacity(0.5),
+                          ).withValues(alpha: 0.5),
                         ),
                       );
                     },
@@ -232,12 +201,9 @@ class BarGraphState extends State<BarGraph> {
                   sideTitles: SideTitles(
                     showTitles: true,
                     getTitlesWidget: (value, titleMeta) {
-                      bool show = false;
-                      if (value == 0) {
-                        show = true;
-                      } else if (value < widget.maxY && value > 1) {
-                        show = true;
-                      } else {
+                      bool show =
+                          value == 0 || (value < widget.maxY && value > 1);
+                      if (!show) {
                         return SizedBox.shrink();
                       }
                       return Padding(
@@ -248,14 +214,14 @@ class BarGraphState extends State<BarGraph> {
                             context,
                             Provider.of<AllWallets>(context),
                             value,
-                            forceReveal: _isRevealed,
+                            forceReveal: isRevealed,
                           ),
                           textColor: dynamicPastel(
                             context,
                             widget.color,
                             amount: 0.5,
                             inverse: true,
-                          ).withOpacity(0.3),
+                          ).withValues(alpha: 0.3),
                           fontSize: 13,
                         ),
                       );

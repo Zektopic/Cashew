@@ -14,7 +14,6 @@ import 'package:budget/widgets/timeDigits.dart';
 import 'package:budget/widgets/util/showDatePicker.dart';
 import 'package:budget/widgets/textWidgets.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:budget/colors.dart';
 import 'package:timer_builder/timer_builder.dart';
@@ -406,7 +405,7 @@ class SidebarClock extends StatelessWidget {
                               ],
                             ),
                       TextFont(
-                        textColor: getColor(context, "black").withOpacity(0.5),
+                        textColor: getColor(context, "black").withValues(alpha: 0.5),
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                         text: DateFormat('EEEE', context.locale.toString())
@@ -417,7 +416,7 @@ class SidebarClock extends StatelessWidget {
                       ),
                       SizedBox(height: 5),
                       TextFont(
-                        textColor: getColor(context, "black").withOpacity(0.5),
+                        textColor: getColor(context, "black").withValues(alpha: 0.5),
                         fontSize: 18,
                         text: DateFormat.yMMMMd(context.locale.toString())
                             .format(now),
@@ -518,7 +517,7 @@ class _SyncButtonState extends State<SyncButton> {
                                       ? Theme.of(context)
                                           .colorScheme
                                           .onErrorContainer
-                                          .withOpacity(0.5)
+                                          .withValues(alpha: 0.5)
                                       : getColor(context, "textLight"),
                                   fontSize: 13,
                                   maxLines: 3,

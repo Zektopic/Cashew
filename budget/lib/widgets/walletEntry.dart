@@ -17,11 +17,11 @@ import 'package:budget/widgets/transactionEntry/incomeAmountArrow.dart';
 import 'package:budget/widgets/watchAllWallets.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:budget/pages/walletDetailsPage.dart';
 import 'package:budget/colors.dart';
 import 'package:provider/provider.dart';
 import 'package:budget/widgets/countNumber.dart';
+import 'package:budget/widgets/holdToRevealListener.dart';
 
 class WalletEntry extends StatelessWidget {
   const WalletEntry(
@@ -54,7 +54,7 @@ class WalletEntry extends StatelessWidget {
                       ? HexColor(walletWithDetails.wallet.colour,
                               defaultColor:
                                   Theme.of(context).colorScheme.primary)
-                          .withOpacity(0.7)
+                          .withValues(alpha: 0.7)
                       : Colors.transparent,
                 ),
               ),
@@ -74,7 +74,7 @@ class WalletEntry extends StatelessWidget {
                           color: HexColor(walletWithDetails.wallet.colour,
                                   defaultColor:
                                       Theme.of(context).colorScheme.primary)
-                              .withOpacity(0.7),
+                              .withValues(alpha: 0.7),
                         ),
                         width: 20,
                         height: 20,
@@ -107,7 +107,7 @@ class WalletEntry extends StatelessWidget {
                                     : "transactions".tr().toLowerCase()),
                             fontSize: 14,
                             textColor:
-                                getColor(context, "black").withOpacity(0.65),
+                                getColor(context, "black").withValues(alpha: 0.65),
                           ),
                         ],
                       ),
@@ -200,7 +200,7 @@ class WalletEntryRow extends StatelessWidget {
                                       walletWithDetails.wallet.colour,
                                       defaultColor:
                                           Theme.of(context).colorScheme.primary,
-                                    ).withOpacity(0.7),
+                                    ).withValues(alpha: 0.7),
                                   ),
                                   width: 20,
                                   height: 20,
@@ -218,7 +218,7 @@ class WalletEntryRow extends StatelessWidget {
                                           defaultColor: Theme.of(context)
                                               .colorScheme
                                               .primary,
-                                        ).withOpacity(0.7),
+                                        ).withValues(alpha: 0.7),
                                       ),
                                     ),
                                     width: 20,
@@ -334,14 +334,6 @@ class AmountAccount extends StatefulWidget {
 }
 
 class _AmountAccountState extends State<AmountAccount> {
-  bool _isRevealed = false;
-  Timer? _revealTimer;
-
-  @override
-  void dispose() {
-    _revealTimer?.cancel();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -360,25 +352,8 @@ class _AmountAccountState extends State<AmountAccount> {
         appStateSettings["accountColorfulAmountsWithArrows"] == true
             ? (widget.walletWithDetails.totalSpent ?? 0).abs()
             : (absoluteZero(widget.walletWithDetails.totalSpent ?? 0));
-    return Listener(
-      onPointerDown: (_) {
-        HapticFeedback.selectionClick();
-        setState(() => _isRevealed = true);
-        _revealTimer?.cancel();
-      },
-      onPointerUp: (_) {
-        _revealTimer?.cancel();
-        _revealTimer = Timer(Duration(seconds: 2), () {
-          if (mounted) setState(() => _isRevealed = false);
-        });
-      },
-      onPointerCancel: (_) {
-        _revealTimer?.cancel();
-        _revealTimer = Timer(Duration(seconds: 2), () {
-          if (mounted) setState(() => _isRevealed = false);
-        });
-      },
-      child: Row(
+    return HoldToRevealListener(
+      builder: (context, isRevealed) => Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           if (appStateSettings["accountColorfulAmountsWithArrows"] == true)
@@ -405,7 +380,7 @@ class _AmountAccountState extends State<AmountAccount> {
               return AnimatedSwitcher(
                 duration: const Duration(milliseconds: 300),
                 child: TextFont(
-                  key: ValueKey(_isRevealed),
+                  key: ValueKey(isRevealed),
                   textAlign: widget.textAlign,
                   text: convertToMoney(
                     Provider.of<AllWallets>(context),
@@ -416,7 +391,7 @@ class _AmountAccountState extends State<AmountAccount> {
                     addCurrencyName: Provider.of<AllWallets>(context)
                             .allContainSameCurrency() ==
                         false,
-                    forceReveal: _isRevealed,
+                    forceReveal: isRevealed,
                   ),
                   textColor: textColor,
                   fontSize: widget.fontSize,

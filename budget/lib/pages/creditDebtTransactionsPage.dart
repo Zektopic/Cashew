@@ -110,7 +110,7 @@ class CreditDebtTransactionsState extends State<CreditDebtTransactions>
                             color: Theme.of(context)
                                 .colorScheme
                                 .secondaryContainer
-                                .withOpacity(0.4),
+                                .withValues(alpha: 0.4),
                             icon: appStateSettings["outlinedIcons"]
                                 ? Icons.av_timer_outlined
                                 : Icons.av_timer_rounded,

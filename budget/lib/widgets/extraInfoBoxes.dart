@@ -43,7 +43,7 @@ class _TipBoxState extends State<TipBox> {
         child: Tappable(
           onTap: widget.onTap,
           color:
-              Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.7),
+              Theme.of(context).colorScheme.secondaryContainer.withValues(alpha: 0.7),
           borderRadius: widget.borderRadius ??
               (getPlatform() == PlatformOS.isIOS ? 10 : 15),
           child: Padding(

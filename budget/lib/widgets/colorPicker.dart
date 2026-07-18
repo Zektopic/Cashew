@@ -466,7 +466,7 @@ class _RingColorPickerState extends State<RingColorPicker> {
 
   void onColorChanging(HSVColor color) {
     setState(() => currentHsvColor = color);
-    widget.onColorChanged(currentHsvColor.toColor().withOpacity(1));
+    widget.onColorChanged(currentHsvColor.toColor().withValues(alpha: 1));
   }
 
   @override
@@ -478,7 +478,7 @@ class _RingColorPickerState extends State<RingColorPicker> {
             ? Align(
                 alignment: Alignment.topRight,
                 child: widget
-                    .previewBuilder!(currentHsvColor.toColor().withOpacity(1)),
+                    .previewBuilder!(currentHsvColor.toColor().withValues(alpha: 1)),
               )
             : Align(
                 alignment: Alignment.topRight,
@@ -492,7 +492,7 @@ class _RingColorPickerState extends State<RingColorPicker> {
                   child: Tappable(
                     onTap: widget.onSelect,
                     borderRadius: 100,
-                    color: currentHsvColor.toColor().withOpacity(1),
+                    color: currentHsvColor.toColor().withValues(alpha: 1),
                     child: SizedBox(),
                   ),
                 ),

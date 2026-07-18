@@ -42,7 +42,7 @@ Future<T?> openPopup<T extends Object?>(
     context: context,
     useRootNavigator: false,
     barrierDismissible: barrierDismissible,
-    barrierColor: Colors.black.withOpacity(0.4),
+    barrierColor: Colors.black.withValues(alpha: 0.4),
     barrierLabel: '',
     transitionBuilder: (_, anim, __, child) {
       Tween<double> tween;
@@ -357,7 +357,7 @@ Future<T?> openPopupCustom<T extends Object?>(
     context: context,
     useRootNavigator: false,
     barrierDismissible: barrierDismissible,
-    barrierColor: Colors.black.withOpacity(0.4),
+    barrierColor: Colors.black.withValues(alpha: 0.4),
     barrierLabel: '',
     transitionBuilder: (_, anim, __, child) {
       Tween<double> tween;
@@ -433,7 +433,7 @@ Future<T?> openLoadingPopup<T extends Object?>(BuildContext context) {
     context: context,
     useRootNavigator: false,
     barrierDismissible: false,
-    barrierColor: Colors.black.withOpacity(0.4),
+    barrierColor: Colors.black.withValues(alpha: 0.4),
     barrierLabel: '',
     transitionBuilder: (_, anim, __, child) {
       Tween<double> tween;

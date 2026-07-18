@@ -27,7 +27,7 @@ class ScrollbarWrap extends StatelessWidget {
         controller: scrollController,
         thumbColor: dynamicPastel(
           context,
-          Theme.of(context).colorScheme.onSecondaryContainer.withOpacity(0.3),
+          Theme.of(context).colorScheme.onSecondaryContainer.withValues(alpha: 0.3),
           amountDark: 0.3,
         ),
         radius: Radius.circular(20),

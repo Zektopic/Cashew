@@ -590,7 +590,7 @@ class PageFrameworkState extends State<PageFramework>
             child: Material(
               elevation: 10,
               shadowColor:
-                  Theme.of(context).colorScheme.shadow.withOpacity(0.8),
+                  Theme.of(context).colorScheme.shadow.withValues(alpha: 0.8),
               borderRadius: BorderRadiusDirectional.circular(
                   getPlatform() == PlatformOS.isIOS ? 10 : 15),
               child: ButtonIcon(
@@ -646,7 +646,7 @@ class PageFrameworkState extends State<PageFramework>
             return Material(
               elevation: 10,
               shadowColor:
-                  Theme.of(context).colorScheme.shadow.withOpacity(0.8),
+                  Theme.of(context).colorScheme.shadow.withValues(alpha: 0.8),
               borderRadius: BorderRadiusDirectional.circular(borderRadius),
               child: Container(
                 height: height,

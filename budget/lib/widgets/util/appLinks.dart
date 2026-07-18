@@ -1,4 +1,3 @@
-import 'package:flutter/services.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'package:budget/database/tables.dart';
@@ -24,6 +23,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:budget/struct/commonDateFormats.dart';
 import 'package:budget/widgets/tableEntry.dart';
 import 'package:provider/provider.dart';
+import 'package:budget/widgets/holdToRevealListener.dart';
 
 Throttler appLinksThrottler = Throttler(duration: Duration(milliseconds: 350));
 
@@ -552,25 +552,6 @@ class _AppLinkTableEntry extends StatefulWidget {
 }
 
 class _AppLinkTableEntryState extends State<_AppLinkTableEntry> {
-  bool _isRevealed = false;
-  Timer? _hideTimer;
-
-  void _startHideTimer() {
-    _hideTimer?.cancel();
-    _hideTimer = Timer(const Duration(seconds: 2), () {
-      if (mounted) {
-        setState(() {
-          _isRevealed = false;
-        });
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _hideTimer?.cancel();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -578,21 +559,8 @@ class _AppLinkTableEntryState extends State<_AppLinkTableEntry> {
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         Expanded(
-          child: Listener(
-            onPointerDown: (event) {
-              HapticFeedback.selectionClick();
-              setState(() {
-                _isRevealed = true;
-              });
-              _hideTimer?.cancel();
-            },
-            onPointerUp: (event) {
-              _startHideTimer();
-            },
-            onPointerCancel: (event) {
-              _startHideTimer();
-            },
-            child: TableEntry(
+          child: HoldToRevealListener(
+            builder: (context, isRevealed) => TableEntry(
               padding: const EdgeInsetsDirectional.symmetric(horizontal: 18),
               firstEntry: [
                 convertToMoney(
@@ -601,7 +569,7 @@ class _AppLinkTableEntryState extends State<_AppLinkTableEntry> {
                   currencyKey: Provider.of<AllWallets>(context, listen: false)
                       .indexedByPk[widget.walletPk]
                       ?.currency,
-                  forceReveal: _isRevealed,
+                  forceReveal: isRevealed,
                 ),
                 if (widget.dateCreated != null)
                   getWordedDate(widget.dateCreated!),

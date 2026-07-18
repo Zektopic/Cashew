@@ -1373,7 +1373,7 @@ class _InstallmentObjectivePopupState extends State<InstallmentObjectivePopup> {
                 color: Theme.of(context)
                     .colorScheme
                     .secondaryContainer
-                    .withOpacity(0.5),
+                    .withValues(alpha: 0.5),
               ),
               SizedBox(height: 4),
               if (selectedCategory != null)

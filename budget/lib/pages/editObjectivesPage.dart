@@ -9,7 +9,6 @@ import 'package:budget/pages/objectivesListPage.dart';
 import 'package:budget/struct/currencyFunctions.dart';
 import 'package:budget/struct/databaseGlobal.dart';
 import 'package:budget/struct/settings.dart';
-import 'package:budget/widgets/animatedExpanded.dart';
 import 'package:budget/widgets/categoryIcon.dart';
 import 'package:budget/widgets/dropdownSelect.dart';
 import 'package:budget/widgets/fab.dart';
@@ -31,6 +30,7 @@ import 'package:budget/widgets/editRowEntry.dart';
 import 'package:budget/modified/reorderable_list.dart';
 import 'package:provider/provider.dart';
 import 'package:budget/pages/addButton.dart';
+import 'package:budget/widgets/holdToRevealListener.dart';
 
 class EditObjectivesPage extends StatefulWidget {
   EditObjectivesPage({
@@ -265,7 +265,7 @@ class _EditObjectivesPageState extends State<EditObjectivesPage> {
                                               : "expense-goal".tr(),
                                   fontSize: 14,
                                   textColor: getColor(context, "black")
-                                      .withOpacity(0.65),
+                                      .withValues(alpha: 0.65),
                                 ),
                                 ObjectiveRowAmountDisplay(
                                   objective: objective,
@@ -292,7 +292,7 @@ class _EditObjectivesPageState extends State<EditObjectivesPage> {
                                 //         fontSize: 14,
                                 //         textColor:
                                 //             getColor(context, "black")
-                                //                 .withOpacity(0.65),
+                                //                 .withValues(alpha: 0.65),
                                 //       );
                                 //     } else {
                                 //       return TextFont(
@@ -301,7 +301,7 @@ class _EditObjectivesPageState extends State<EditObjectivesPage> {
                                 //         fontSize: 14,
                                 //         textColor:
                                 //             getColor(context, "black")
-                                //                 .withOpacity(0.65),
+                                //                 .withValues(alpha: 0.65),
                                 //       );
                                 //     }
                                 //   },
@@ -599,14 +599,6 @@ class ObjectiveRowAmountDisplay extends StatefulWidget {
 }
 
 class _ObjectiveRowAmountDisplayState extends State<ObjectiveRowAmountDisplay> {
-  bool _isRevealed = false;
-  Timer? _revealTimer;
-
-  @override
-  void dispose() {
-    _revealTimer?.cancel();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -614,6 +606,7 @@ class _ObjectiveRowAmountDisplayState extends State<ObjectiveRowAmountDisplay> {
       objective: widget.objective,
       builder: (double objectiveAmount, double totalAmount,
           double percentageTowardsGoal) {
+        return HoldToRevealListener(builder: (context, isRevealed) {
         bool showTotalSpent = appStateSettings["showTotalSpentForObjective"];
         String amountSpentLabel = getObjectiveAmountSpentLabel(
           objective: widget.objective,
@@ -621,13 +614,13 @@ class _ObjectiveRowAmountDisplayState extends State<ObjectiveRowAmountDisplay> {
           showTotalSpent: showTotalSpent,
           objectiveAmount: objectiveAmount,
           totalAmount: totalAmount,
-          forceReveal: _isRevealed,
+          forceReveal: isRevealed,
         );
         String amountRemainingLabel = objectiveRemainingAmountText(
           objectiveAmount: objectiveAmount,
           totalAmount: totalAmount,
           context: context,
-          forceReveal: _isRevealed,
+          forceReveal: isRevealed,
         );
         String differenceOnlyLoanLabel =
             getIsDifferenceOnlyLoan(widget.objective)
@@ -641,38 +634,21 @@ class _ObjectiveRowAmountDisplayState extends State<ObjectiveRowAmountDisplay> {
                 : "";
 
         Widget textWidget = TextFont(
-          key: ValueKey(_isRevealed),
+          key: ValueKey(isRevealed),
           textAlign: TextAlign.start,
           text: getIsDifferenceOnlyLoan(widget.objective)
               ? (amountSpentLabel + " " + differenceOnlyLoanLabel.toLowerCase())
               : (amountSpentLabel + amountRemainingLabel),
           fontSize: 14,
-          textColor: getColor(context, "black").withOpacity(0.65),
+          textColor: getColor(context, "black").withValues(alpha: 0.65),
           maxLines: 2,
         );
 
-        return Listener(
-          onPointerDown: (_) {
-            HapticFeedback.selectionClick();
-            setState(() => _isRevealed = true);
-            _revealTimer?.cancel();
-            _revealTimer = Timer(Duration(seconds: 2), () {
-              if (mounted) setState(() => _isRevealed = false);
-            });
-          },
-          onPointerUp: (_) {
-            _revealTimer?.cancel();
-            setState(() => _isRevealed = false);
-          },
-          onPointerCancel: (_) {
-            _revealTimer?.cancel();
-            setState(() => _isRevealed = false);
-          },
-          child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 300),
-            child: textWidget,
-          ),
+        return AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          child: textWidget,
         );
+        });
       },
     );
   }

@@ -1094,7 +1094,7 @@ class _TransferBalancePopupState extends State<TransferBalancePopup> {
               border: Border.all(
                 color: HexColor(wallet?.colour,
                         defaultColor: Theme.of(context).colorScheme.primary)
-                    .withOpacity(0.7),
+                    .withValues(alpha: 0.7),
                 width: 2,
               ),
               borderRadius: BorderRadiusDirectional.all(Radius.circular(12)),
@@ -1338,7 +1338,7 @@ class _TransferBalancePopupState extends State<TransferBalancePopup> {
                     Theme.of(context)
                         .colorScheme
                         .secondaryContainer
-                        .withOpacity(0.5),
+                        .withValues(alpha: 0.5),
                     inverse: true,
                   ),
                   borderRadius: 100,

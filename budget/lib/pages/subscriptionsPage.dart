@@ -418,7 +418,7 @@ class TotalUpcomingHeaderPeriodSwitcher extends StatelessWidget {
                             amount: appStateSettings["materialYou"] ? 0.2 : 0.7)
                         : null,
                     textColor: selectedType != SelectedSubscriptionsType.monthly
-                        ? getColor(context, "black").withOpacity(0.5)
+                        ? getColor(context, "black").withValues(alpha: 0.5)
                         : getColor(context, "black"),
                     label: "monthly".tr(),
                     onTap: () {
@@ -444,7 +444,7 @@ class TotalUpcomingHeaderPeriodSwitcher extends StatelessWidget {
                             amount: appStateSettings["materialYou"] ? 0.2 : 0.7)
                         : null,
                     textColor: selectedType != SelectedSubscriptionsType.yearly
-                        ? getColor(context, "black").withOpacity(0.5)
+                        ? getColor(context, "black").withValues(alpha: 0.5)
                         : getColor(context, "black"),
                     label: "yearly".tr(),
                     onTap: () {
@@ -470,7 +470,7 @@ class TotalUpcomingHeaderPeriodSwitcher extends StatelessWidget {
                             amount: appStateSettings["materialYou"] ? 0.2 : 0.7)
                         : null,
                     textColor: selectedType != SelectedSubscriptionsType.total
-                        ? getColor(context, "black").withOpacity(0.5)
+                        ? getColor(context, "black").withValues(alpha: 0.5)
                         : getColor(context, "black"),
                     label: "total".tr(),
                     onTap: () {

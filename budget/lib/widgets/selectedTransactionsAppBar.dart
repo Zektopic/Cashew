@@ -27,10 +27,10 @@ import 'package:drift/drift.dart' hide Column;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:budget/widgets/countNumber.dart';
 import 'package:budget/widgets/framework/popupFramework.dart';
+import 'package:budget/widgets/holdToRevealListener.dart';
 
 class SelectedTransactionsAppBar extends StatefulWidget {
   const SelectedTransactionsAppBar(
@@ -47,14 +47,6 @@ class SelectedTransactionsAppBar extends StatefulWidget {
 
 class _SelectedTransactionsAppBarState
     extends State<SelectedTransactionsAppBar> {
-  bool _isRevealed = false;
-  Timer? _revealTimer;
-
-  @override
-  void dispose() {
-    _revealTimer?.cancel();
-    super.dispose();
-  }
 
   Future shareSelectedTransactions(
       {required BuildContext context,
@@ -198,26 +190,8 @@ class _SelectedTransactionsAppBarState
                                     },
                                   ),
                                 ),
-                                Listener(
-                                  onPointerDown: (_) {
-                                    HapticFeedback.selectionClick();
-                                    setState(() => _isRevealed = true);
-                                    _revealTimer?.cancel();
-                                    _revealTimer =
-                                        Timer(Duration(seconds: 2), () {
-                                      if (mounted)
-                                        setState(() => _isRevealed = false);
-                                    });
-                                  },
-                                  onPointerUp: (_) {
-                                    _revealTimer?.cancel();
-                                    setState(() => _isRevealed = false);
-                                  },
-                                  onPointerCancel: (_) {
-                                    _revealTimer?.cancel();
-                                    setState(() => _isRevealed = false);
-                                  },
-                                  child: CountNumber(
+                                HoldToRevealListener(
+                                  builder: (context, isRevealed) => CountNumber(
                                     count:
                                         snapshot.hasData ? snapshot.data! : 0,
                                     duration: Duration(milliseconds: 250),
@@ -238,7 +212,7 @@ class _SelectedTransactionsAppBarState
                                                 finalNumber: snapshot.hasData
                                                     ? snapshot.data!
                                                     : 0,
-                                                forceReveal: _isRevealed,
+                                                forceReveal: isRevealed,
                                               ),
                                             );
                                           },
@@ -254,7 +228,7 @@ class _SelectedTransactionsAppBarState
                                                 finalNumber: snapshot.hasData
                                                     ? snapshot.data!
                                                     : 0,
-                                                forceReveal: _isRevealed,
+                                                forceReveal: isRevealed,
                                               ),
                                               fontSize: 17.5,
                                               textAlign: TextAlign.start,

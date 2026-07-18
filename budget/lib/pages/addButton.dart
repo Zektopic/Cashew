@@ -36,7 +36,7 @@ class AddButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Color color = appStateSettings["materialYou"]
-        ? Theme.of(context).colorScheme.secondary.withOpacity(0.3)
+        ? Theme.of(context).colorScheme.secondary.withValues(alpha: 0.3)
         : getColor(context, "lightDarkAccentHeavy");
     Widget getButton(onTap) {
       return Tappable(

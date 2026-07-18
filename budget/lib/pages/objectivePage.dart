@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:flutter/services.dart';
 import 'package:budget/database/tables.dart';
 import 'package:budget/functions.dart';
 import 'package:budget/pages/addObjectivePage.dart';
@@ -35,6 +34,7 @@ import 'package:budget/colors.dart';
 import 'package:provider/provider.dart';
 import 'package:budget/widgets/countNumber.dart';
 import 'package:confetti/confetti.dart';
+import 'package:budget/widgets/holdToRevealListener.dart';
 
 class ObjectivePage extends StatelessWidget {
   const ObjectivePage({super.key, required this.objectivePk});
@@ -74,15 +74,6 @@ class _ObjectivePageContentState extends State<_ObjectivePageContent> {
 
   bool showTotalSpent = appStateSettings["showTotalSpentForObjective"];
 
-  bool _isRevealed = false;
-  Timer? _revealTimer;
-
-  void _startRevealTimer() {
-    _revealTimer?.cancel();
-    _revealTimer = Timer(const Duration(seconds: 2), () {
-      if (mounted) setState(() => _isRevealed = false);
-    });
-  }
 
   _swapTotalSpentDisplay() {
     setState(() {
@@ -104,7 +95,6 @@ class _ObjectivePageContentState extends State<_ObjectivePageContent> {
   @override
   void dispose() {
     confettiController.dispose();
-    _revealTimer?.cancel();
     super.dispose();
   }
 
@@ -274,25 +264,8 @@ class _ObjectivePageContentState extends State<_ObjectivePageContent> {
                     // else {
                     //   hasPlayedConfetti = false;
                     // }
-                    return Listener(
-                      onPointerDown: (event) {
-                        if (appStateSettings["obscureAmounts"] == true) {
-                          HapticFeedback.selectionClick();
-                          setState(() => _isRevealed = true);
-                          _revealTimer?.cancel();
-                        }
-                      },
-                      onPointerUp: (event) {
-                        if (appStateSettings["obscureAmounts"] == true) {
-                          _startRevealTimer();
-                        }
-                      },
-                      onPointerCancel: (event) {
-                        if (appStateSettings["obscureAmounts"] == true) {
-                          _startRevealTimer();
-                        }
-                      },
-                      child: Column(
+                    return HoldToRevealListener(
+                      builder: (context, isRevealed) => Column(
                         children: [
                           Padding(
                             padding: const EdgeInsetsDirectional.only(
@@ -317,7 +290,7 @@ class _ObjectivePageContentState extends State<_ObjectivePageContent> {
                                             percent: appStateSettings[
                                                             "obscureAmounts"] ==
                                                         true &&
-                                                    !_isRevealed
+                                                    !isRevealed
                                                 ? 0
                                                 : clampDouble(
                                                     percentageTowardsGoal,
@@ -389,7 +362,7 @@ class _ObjectivePageContentState extends State<_ObjectivePageContent> {
                                                 ),
                                                 child: TextFont(
                                                   key: ValueKey(
-                                                    _isRevealed,
+                                                    isRevealed,
                                                   ),
                                                   text: convertToPercent(
                                                     value,
@@ -397,7 +370,7 @@ class _ObjectivePageContentState extends State<_ObjectivePageContent> {
                                                         percentageTowardsGoal *
                                                             100,
                                                     useLessThanZero: true,
-                                                    forceReveal: _isRevealed,
+                                                    forceReveal: isRevealed,
                                                   ),
                                                   fontSize: 28,
                                                   fontWeight: FontWeight.bold,
@@ -414,7 +387,7 @@ class _ObjectivePageContentState extends State<_ObjectivePageContent> {
                                           showTotalSpent: showTotalSpent,
                                           objectiveAmount: objectiveAmount,
                                           totalAmount: totalAmount,
-                                          forceReveal: _isRevealed,
+                                          forceReveal: isRevealed,
                                         );
                                         return AnimatedSizeSwitcher(
                                           child: IntrinsicWidth(
@@ -486,7 +459,7 @@ class _ObjectivePageContentState extends State<_ObjectivePageContent> {
                                                             ),
                                                             child: TextFont(
                                                               key: ValueKey(
-                                                                _isRevealed,
+                                                                isRevealed,
                                                               ),
                                                               text:
                                                                   amountSpentLabel,
@@ -519,7 +492,7 @@ class _ObjectivePageContentState extends State<_ObjectivePageContent> {
                                                               ),
                                                               child: TextFont(
                                                                 key: ValueKey(
-                                                                  _isRevealed,
+                                                                  isRevealed,
                                                                 ),
                                                                 text:
                                                                     objectiveRemainingAmountText(
@@ -530,14 +503,14 @@ class _ObjectivePageContentState extends State<_ObjectivePageContent> {
                                                                   context:
                                                                       context,
                                                                   forceReveal:
-                                                                      _isRevealed,
+                                                                      isRevealed,
                                                                 ),
                                                                 fontSize: 13,
                                                                 textColor:
                                                                     getColor(
                                                                   context,
                                                                   "black",
-                                                                ).withOpacity(
+                                                                ).withValues(alpha: 
                                                                   0.4,
                                                                 ),
                                                               ),

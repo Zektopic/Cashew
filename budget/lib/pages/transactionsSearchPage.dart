@@ -406,7 +406,7 @@ class AppliedFilterChip extends StatelessWidget {
         },
         borderRadius: 8,
         color: (appStateSettings["materialYou"]
-            ? Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.5)
+            ? Theme.of(context).colorScheme.secondaryContainer.withValues(alpha: 0.5)
             : null),
         child: Container(
           padding:
@@ -416,7 +416,7 @@ class AppliedFilterChip extends StatelessWidget {
             border: Border.all(
               color: customBorderColor == null
                   ? Theme.of(context).colorScheme.secondaryContainer
-                  : customBorderColor!.withOpacity(0.4),
+                  : customBorderColor!.withValues(alpha: 0.4),
             ),
           ),
           child: Row(

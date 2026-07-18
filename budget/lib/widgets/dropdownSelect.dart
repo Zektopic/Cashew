@@ -118,7 +118,7 @@ class DropdownSelectState extends State<DropdownSelect> {
                   ? FontWeight.bold
                   : FontWeight.normal,
               textColor: getColor(context, "black")
-                  .withOpacity(widget.faintValues.contains(value) ? 0.3 : 1),
+                  .withValues(alpha: widget.faintValues.contains(value) ? 0.3 : 1),
             ),
             value: value,
           );
@@ -183,7 +183,7 @@ class CustomPopupMenuButton extends StatelessWidget {
                   Theme.of(context).colorScheme.secondaryContainer,
                   inverse: true,
                   amount: 0.2,
-                ).withOpacity(0.6),
+                ).withValues(alpha: 0.6),
               ),
             ),
           ),

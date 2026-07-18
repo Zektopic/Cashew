@@ -309,9 +309,9 @@ class AccountsPageState extends State<AccountsPage> {
                                 decorationStyle: TextDecorationStyle.solid,
                                 decorationColor:
                                     getColor(context, "unPaidOverdue")
-                                        .withOpacity(0.8),
+                                        .withValues(alpha: 0.8),
                                 color: getColor(context, "unPaidOverdue")
-                                    .withOpacity(0.8),
+                                    .withValues(alpha: 0.8),
                                 fontFamily: appStateSettings["font"],
                                 fontFamilyFallback: ['Inter'],
                               ),

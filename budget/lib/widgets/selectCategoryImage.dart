@@ -225,7 +225,7 @@ class UseEmoji extends StatelessWidget {
   Widget build(BuildContext context) {
     return Tappable(
       onTap: onTap,
-      color: Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.7),
+      color: Theme.of(context).colorScheme.secondaryContainer.withValues(alpha: 0.7),
       borderRadius: 15,
       child: Padding(
         padding: const EdgeInsetsDirectional.only(
@@ -278,7 +278,7 @@ class SuggestIcon extends StatelessWidget {
           useCustomController: true,
         );
       },
-      color: Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.7),
+      color: Theme.of(context).colorScheme.secondaryContainer.withValues(alpha: 0.7),
       borderRadius: 15,
       child: Padding(
         padding: const EdgeInsetsDirectional.only(
@@ -404,7 +404,7 @@ class ImageIcon extends StatelessWidget {
       decoration: outline
           ? BoxDecoration(
               border: Border.all(
-                color: Theme.of(context).colorScheme.primary.withOpacity(0.8),
+                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.8),
                 width: 2,
               ),
               borderRadius: BorderRadiusDirectional.all(Radius.circular(500)),

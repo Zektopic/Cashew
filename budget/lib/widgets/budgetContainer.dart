@@ -21,7 +21,6 @@ import 'package:budget/widgets/util/widgetSize.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:sa3_liquid/sa3_liquid.dart';
 import 'dart:async';
@@ -105,7 +104,7 @@ class _BudgetContainerState extends State<BudgetContainer> {
                           color: HexColor(
                             widget.budget.colour,
                             defaultColor: Theme.of(context).colorScheme.primary,
-                          ).withOpacity(0.8),
+                          ).withValues(alpha: 0.8),
                         ),
                       ),
                       Padding(
@@ -659,8 +658,8 @@ class AnimatedGooBackground extends StatelessWidget {
           type: PlasmaType.infinity,
           particles: 10,
           color: Theme.of(context).brightness == Brightness.light
-              ? this.color.withOpacity(0.1)
-              : this.color.withOpacity(0.3),
+              ? this.color.withValues(alpha: 0.1)
+              : this.color.withValues(alpha: 0.3),
           blur: 0.3,
           size: 1.3,
           speed: 3.3,
@@ -981,7 +980,6 @@ class AnimatedProgress extends StatefulWidget {
 class _AnimatedProgressState extends State<AnimatedProgress> {
   bool animateIn = false;
   bool fadeIn = false;
-  Future? _future;
   @override
   void initState() {
     Future.delayed(Duration.zero, () {
@@ -989,19 +987,13 @@ class _AnimatedProgressState extends State<AnimatedProgress> {
         animateIn = true;
       });
     });
-    _future = Future.delayed(Duration(milliseconds: 500), () {
+    Future.delayed(Duration(milliseconds: 500), () {
       if (mounted)
         setState(() {
           fadeIn = true;
         });
     });
     super.initState();
-  }
-
-  @override
-  void dispose() {
-    _future = null;
-    super.dispose();
   }
 
   @override
@@ -1050,7 +1042,7 @@ class _AnimatedProgressState extends State<AnimatedProgress> {
                         widget.color,
                         amountDark: 0.1,
                         amountLight: 0.3,
-                      ).withOpacity(0.8),
+                      ).withValues(alpha: 0.8),
                     ),
                   ),
                 ),
@@ -1214,7 +1206,7 @@ class _TodayIndicatorState extends State<TodayIndicator> {
                       borderRadius: BorderRadiusDirectional.vertical(
                         bottom: Radius.circular(5),
                       ),
-                      color: getColor(context, "black").withOpacity(0.4),
+                      color: getColor(context, "black").withValues(alpha: 0.4),
                     ),
                   ),
                 ),
@@ -1238,7 +1230,7 @@ class _TodayIndicatorState extends State<TodayIndicator> {
                 borderRadius: BorderRadiusDirectional.vertical(
                   bottom: Radius.circular(5),
                 ),
-                color: getColor(context, "black").withOpacity(0.4),
+                color: getColor(context, "black").withValues(alpha: 0.4),
               ),
             ),
           ),
@@ -1447,7 +1439,7 @@ class _BudgetSpenderSummaryState extends State<BudgetSpenderSummary> {
                                         ? getColor(
                                             context,
                                             "black",
-                                          ).withOpacity(0.4)
+                                          ).withValues(alpha: 0.4)
                                         : getColor(context, "textLight"),
                                   ),
                                 ],
@@ -1501,7 +1493,7 @@ class _BudgetSpenderSummaryState extends State<BudgetSpenderSummary> {
                                           ? getColor(
                                               context,
                                               "black",
-                                            ).withOpacity(0.4)
+                                            ).withValues(alpha: 0.4)
                                           : getColor(context, "textLight"),
                                     );
                                   }

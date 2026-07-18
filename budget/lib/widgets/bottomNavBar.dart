@@ -576,7 +576,7 @@ class NavBarIcon extends StatelessWidget {
                         : Theme.of(context)
                             .colorScheme
                             .secondary
-                            .withOpacity(0.3),
+                            .withValues(alpha: 0.3),
                   ),
                   height: 52,
                   width: 52,

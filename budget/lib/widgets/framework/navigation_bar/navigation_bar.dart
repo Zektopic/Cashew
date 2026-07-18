@@ -5,7 +5,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart' show clampDouble;
-import 'package:flutter/widgets.dart';
 
 import 'package:flutter/material.dart';
 
@@ -1389,7 +1388,7 @@ class _NavigationBarDefaultsM2 extends NavigationBarThemeData {
   }
 
   @override
-  Color? get indicatorColor => _colors.secondary.withOpacity(0.24);
+  Color? get indicatorColor => _colors.secondary.withValues(alpha: 0.24);
 
   @override
   MaterialStateProperty<TextStyle?>? get labelTextStyle =>

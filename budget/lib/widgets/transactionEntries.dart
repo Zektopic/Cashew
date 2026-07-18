@@ -14,8 +14,6 @@ import 'package:budget/widgets/transactionEntry/incomeAmountArrow.dart';
 import 'package:budget/widgets/transactionEntry/transactionEntry.dart';
 import 'package:budget/widgets/viewAllTransactionsButton.dart';
 import 'package:flutter/material.dart';
-import 'dart:async';
-import 'package:flutter/services.dart';
 import 'package:budget/struct/settings.dart';
 import 'package:budget/widgets/noResults.dart';
 import 'package:budget/functions.dart';
@@ -32,6 +30,7 @@ import 'package:budget/struct/currencyFunctions.dart';
 import 'package:budget/struct/randomConstants.dart';
 import 'package:sticky_and_expandable_list/sticky_and_expandable_list.dart';
 import 'package:budget/widgets/openBottomSheet.dart';
+import 'package:budget/widgets/holdToRevealListener.dart';
 
 enum TransactionEntriesRenderType {
   slivers,
@@ -258,7 +257,7 @@ class _TransactionEntriesState extends State<TransactionEntries> {
                                 : ""),
                     tintColor: Theme.of(
                       context,
-                    ).colorScheme.primary.withOpacity(0.6),
+                    ).colorScheme.primary.withValues(alpha: 0.6),
                     noSearchResultsVariation: widget.noSearchResultsVariation,
                     padding: widget.noResultsPadding,
                   ),
@@ -966,7 +965,7 @@ class FutureTransactionsDivider extends StatelessWidget {
                         color: Theme.of(context)
                             .colorScheme
                             .secondary
-                            .withOpacity(
+                            .withValues(alpha: 
                               Theme.of(context).brightness == Brightness.dark
                                   ? 0.1
                                   : 0.2,
@@ -1051,34 +1050,6 @@ class TransactionsEntriesSpendingSummary extends StatefulWidget {
 
 class _TransactionsEntriesSpendingSummaryState
     extends State<TransactionsEntriesSpendingSummary> {
-  bool _isRevealed = false;
-  Timer? _revealTimer;
-
-  void _setRevealed(bool reveal) {
-    setState(() {
-      _isRevealed = reveal;
-    });
-
-    if (reveal) {
-      HapticFeedback.selectionClick();
-      _revealTimer?.cancel();
-      _revealTimer = Timer(const Duration(seconds: 2), () {
-        if (mounted) {
-          setState(() {
-            _isRevealed = false;
-          });
-        }
-      });
-    } else {
-      _revealTimer?.cancel();
-    }
-  }
-
-  @override
-  void dispose() {
-    _revealTimer?.cancel();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -1100,11 +1071,8 @@ class _TransactionsEntriesSpendingSummaryState
             ),
           ),
           button: (openContainer) {
-            return Listener(
-              onPointerDown: (_) => _setRevealed(true),
-              onPointerUp: (_) => _setRevealed(false),
-              onPointerCancel: (_) => _setRevealed(false),
-              child: Tappable(
+            return HoldToRevealListener(
+              builder: (context, isRevealed) => Tappable(
                 borderRadius: borderRadius,
                 color: appStateSettings["materialYou"]
                     ? dynamicPastel(
@@ -1150,7 +1118,7 @@ class _TransactionsEntriesSpendingSummaryState
                                       Provider.of<AllWallets>(context),
                                       number,
                                       finalNumber: widget.expense.abs(),
-                                      forceReveal: _isRevealed,
+                                      forceReveal: isRevealed,
                                     ),
                                     fontSize: 15,
                                     textColor: getColor(
@@ -1189,7 +1157,7 @@ class _TransactionsEntriesSpendingSummaryState
                                       Provider.of<AllWallets>(context),
                                       number,
                                       finalNumber: widget.income.abs(),
-                                      forceReveal: _isRevealed,
+                                      forceReveal: isRevealed,
                                     ),
                                     fontSize: 15,
                                     textColor: getColor(
@@ -1224,7 +1192,7 @@ class _TransactionsEntriesSpendingSummaryState
                                           Provider.of<AllWallets>(context),
                                           number,
                                           finalNumber: widget.netSpending.abs(),
-                                          forceReveal: _isRevealed,
+                                          forceReveal: isRevealed,
                                         ),
                                     fontSize: 15,
                                     textColor: getColor(context, "black"),

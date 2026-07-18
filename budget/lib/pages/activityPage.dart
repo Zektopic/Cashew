@@ -229,7 +229,7 @@ class ActivityPageState extends State<ActivityPage> {
                                     color: Theme.of(context)
                                         .colorScheme
                                         .secondaryContainer
-                                        .withOpacity(0.2),
+                                        .withValues(alpha: 0.2),
                                     borderRadius: 5,
                                     child: Padding(
                                       padding:

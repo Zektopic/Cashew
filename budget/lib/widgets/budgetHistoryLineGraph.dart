@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'dart:async';
+import 'package:budget/widgets/holdToRevealListener.dart';
 
 class BudgetHistoryLineGraph extends StatelessWidget {
   const BudgetHistoryLineGraph({
@@ -238,33 +239,6 @@ class _BudgetHistoryLineGraphState extends State<_BudgetHistoryLineGraph> {
   bool loaded = false;
   int? touchedValue = null;
 
-  bool _isRevealed = false;
-  Timer? _revealTimer;
-
-  void _setRevealed(bool reveal) {
-    if (reveal) {
-      setState(() {
-        _isRevealed = true;
-      });
-      HapticFeedback.selectionClick();
-      _revealTimer?.cancel();
-    } else {
-      _revealTimer?.cancel();
-      _revealTimer = Timer(const Duration(seconds: 2), () {
-        if (mounted) {
-          setState(() {
-            _isRevealed = false;
-          });
-        }
-      });
-    }
-  }
-
-  @override
-  void dispose() {
-    _revealTimer?.cancel();
-    super.dispose();
-  }
 
   @override
   void initState() {
@@ -331,9 +305,9 @@ class _BudgetHistoryLineGraphState extends State<_BudgetHistoryLineGraph> {
                   show: true,
                   gradient: LinearGradient(
                     colors: [
-                      (widget.lineColors?[i] ?? widget.color).withOpacity(0),
-                      (widget.lineColors?[i] ?? widget.color).withOpacity(0.3),
-                      (widget.lineColors?[i] ?? widget.color).withOpacity(0.6),
+                      (widget.lineColors?[i] ?? widget.color).withValues(alpha: 0),
+                      (widget.lineColors?[i] ?? widget.color).withValues(alpha: 0.3),
+                      (widget.lineColors?[i] ?? widget.color).withValues(alpha: 0.6),
                     ],
                     begin: Alignment.bottomCenter,
                     end: Alignment.topCenter,
@@ -370,7 +344,7 @@ class _BudgetHistoryLineGraphState extends State<_BudgetHistoryLineGraph> {
                 color: lightenPastel(
                   widget.lineColors?[i] ?? widget.color,
                   amount: 0.3,
-                ).withOpacity(0.8),
+                ).withValues(alpha: 0.8),
                 strokeWidth: 0,
               );
             },
@@ -394,9 +368,9 @@ class _BudgetHistoryLineGraphState extends State<_BudgetHistoryLineGraph> {
               cutOffY: widget.horizontalLineAt ?? 0,
               gradient: LinearGradient(
                 colors: [
-                  (widget.lineColors?[i] ?? widget.color).withOpacity(0.15),
-                  (widget.lineColors?[i] ?? widget.color).withOpacity(0.15),
-                  (widget.lineColors?[i] ?? widget.color).withOpacity(0.15),
+                  (widget.lineColors?[i] ?? widget.color).withValues(alpha: 0.15),
+                  (widget.lineColors?[i] ?? widget.color).withValues(alpha: 0.15),
+                  (widget.lineColors?[i] ?? widget.color).withValues(alpha: 0.15),
                 ],
                 begin: Alignment.bottomCenter,
                 end: Alignment.topCenter,
@@ -421,7 +395,7 @@ class _BudgetHistoryLineGraphState extends State<_BudgetHistoryLineGraph> {
                 color: lightenPastel(
                   HexColor(widget.categoriesMapped[categoryPk]?.colour),
                   amount: 0.3,
-                ).withOpacity(0.6),
+                ).withValues(alpha: 0.6),
                 strokeWidth: 0,
               );
             },
@@ -429,15 +403,12 @@ class _BudgetHistoryLineGraphState extends State<_BudgetHistoryLineGraph> {
           color: lightenPastel(
             HexColor(widget.categoriesMapped[categoryPk]?.colour),
             amount: 0.3,
-          ).withOpacity(0.8),
+          ).withValues(alpha: 0.8),
         ),
     ];
 
-    return Listener(
-      onPointerDown: (_) => _setRevealed(true),
-      onPointerUp: (_) => _setRevealed(false),
-      onPointerCancel: (_) => _setRevealed(false),
-      child: Container(
+    return HoldToRevealListener(
+      builder: (context, isRevealed) => Container(
         height:
             MediaQuery.sizeOf(context).height * 0.3 >
                 (getIsFullScreen(context) == false ? 190 : 350)
@@ -509,7 +480,7 @@ class _BudgetHistoryLineGraphState extends State<_BudgetHistoryLineGraph> {
                                     (widget.extraCategorySpots.keys.length <=
                                                 0 &&
                                             widget.lineColors == null
-                                        ? widget.color.withOpacity(0.9)
+                                        ? widget.color.withValues(alpha: 0.9)
                                         : barData.color) ??
                                     Theme.of(context).colorScheme.primary,
                                 strokeWidth: 2,
@@ -517,7 +488,7 @@ class _BudgetHistoryLineGraphState extends State<_BudgetHistoryLineGraph> {
                                     (widget.extraCategorySpots.keys.length <=
                                                 0 &&
                                             widget.lineColors == null
-                                        ? widget.color.withOpacity(0.9)
+                                        ? widget.color.withValues(alpha: 0.9)
                                         : barData.color) ??
                                     Theme.of(context).colorScheme.primary,
                               ),
@@ -531,14 +502,14 @@ class _BudgetHistoryLineGraphState extends State<_BudgetHistoryLineGraph> {
                     widget.extraCategorySpots.keys.length <= 0 &&
                         (widget.lineColors == null ||
                             (widget.lineColors?.length ?? 0) <= 0)
-                    ? widget.color.withOpacity(0.7)
+                    ? widget.color.withValues(alpha: 0.7)
                     : dynamicPastel(
                         context,
                         getColor(context, "white"),
                         inverse: true,
                         amountLight: 0.2,
                         amountDark: 0.05,
-                      ).withOpacity(0.8),
+                      ).withValues(alpha: 0.8),
                 tooltipRoundedRadius: 8,
                 fitInsideVertically: true,
                 fitInsideHorizontally: true,
@@ -610,7 +581,7 @@ class _BudgetHistoryLineGraphState extends State<_BudgetHistoryLineGraph> {
                               color: getColor(
                                 context,
                                 "black",
-                              ).withOpacity(0.8),
+                              ).withValues(alpha: 0.8),
                               fontWeight: FontWeight.bold,
                               fontSize: 12,
                               fontFamilyFallback: ['Inter'],
@@ -620,13 +591,13 @@ class _BudgetHistoryLineGraphState extends State<_BudgetHistoryLineGraph> {
                           text: convertToMoney(
                             Provider.of<AllWallets>(context, listen: false),
                             lineBarSpot.y == -1e-14 ? 0 : lineBarSpot.y,
-                            forceReveal: _isRevealed,
+                            forceReveal: isRevealed,
                           ),
                           style: TextStyle(
                             color:
                                 lineBarSpot.bar.color ==
                                     lightenPastel(widget.color, amount: 0.3)
-                                ? getColor(context, "black").withOpacity(0.8)
+                                ? getColor(context, "black").withValues(alpha: 0.8)
                                 : lineBarSpot.bar.color,
                             fontWeight: FontWeight.bold,
                             fontSize: 12,
@@ -717,7 +688,7 @@ class _BudgetHistoryLineGraphState extends State<_BudgetHistoryLineGraph> {
                               widget.color,
                               amount: 0.8,
                               inverse: true,
-                            ).withOpacity(0.5),
+                            ).withValues(alpha: 0.5),
                           ),
                         ),
                       );
@@ -734,12 +705,9 @@ class _BudgetHistoryLineGraphState extends State<_BudgetHistoryLineGraph> {
                 sideTitles: SideTitles(
                   showTitles: true,
                   getTitlesWidget: (value, titleMeta) {
-                    bool show = false;
-                    if (value == 0) {
-                      show = true;
-                    } else if (value <= widget.maxY && value > widget.minY) {
-                      show = true;
-                    } else {
+                    bool show = value == 0 ||
+                        (value <= widget.maxY && value > widget.minY);
+                    if (!show) {
                       return SizedBox.shrink();
                     }
                     return Padding(
@@ -757,14 +725,14 @@ class _BudgetHistoryLineGraphState extends State<_BudgetHistoryLineGraph> {
                             context,
                             Provider.of<AllWallets>(context),
                             value,
-                            forceReveal: _isRevealed,
+                            forceReveal: isRevealed,
                           ),
                           textColor: dynamicPastel(
                             context,
                             widget.color,
                             amount: 0.5,
                             inverse: true,
-                          ).withOpacity(0.3),
+                          ).withValues(alpha: 0.3),
                           fontSize: 13,
                         ),
                       ),
@@ -804,7 +772,7 @@ class _BudgetHistoryLineGraphState extends State<_BudgetHistoryLineGraph> {
                     context,
                     widget.color,
                     amount: 0.3,
-                  ).withOpacity(0.4),
+                  ).withValues(alpha: 0.4),
                 ),
                 ...(widget.horizontalLineAt == null
                     ? []
@@ -815,7 +783,7 @@ class _BudgetHistoryLineGraphState extends State<_BudgetHistoryLineGraph> {
                             context,
                             widget.color,
                             amount: 0.3,
-                          ).withOpacity(0.7),
+                          ).withValues(alpha: 0.7),
                           dashArray: [2, 2],
                         ),
                       ]),
@@ -839,18 +807,18 @@ class _BudgetHistoryLineGraphState extends State<_BudgetHistoryLineGraph> {
               //       dashArray: [2, 2],
               //       strokeWidth: 2,
               //       color: dynamicPastel(context, widget.color, amount: 0.3)
-              //           .withOpacity(0.7),
+              //           .withValues(alpha: 0.7),
               //     );
               //   } else if (value == 0) {
               //     return FlLine(
               //       color: dynamicPastel(context, widget.color, amount: 0.3)
-              //           .withOpacity(0.2),
+              //           .withValues(alpha: 0.2),
               //       strokeWidth: 2,
               //     );
               //   } else if (value % ((widget.maxY / 3.8).ceil()) == 1) {
               //     return FlLine(
               //       color: dynamicPastel(context, widget.color, amount: 0.3)
-              //           .withOpacity(0.2),
+              //           .withValues(alpha: 0.2),
               //       strokeWidth: 2,
               //       dashArray: [2, 8],
               //     );
@@ -873,7 +841,7 @@ class _BudgetHistoryLineGraphState extends State<_BudgetHistoryLineGraph> {
                     context,
                     widget.color,
                     amount: 0.3,
-                  ).withOpacity(0.2),
+                  ).withValues(alpha: 0.2),
                   strokeWidth: 2,
                   dashArray: [2, 8],
                 );
@@ -884,7 +852,7 @@ class _BudgetHistoryLineGraphState extends State<_BudgetHistoryLineGraph> {
                     context,
                     widget.color,
                     amount: 0.3,
-                  ).withOpacity(0.2),
+                  ).withValues(alpha: 0.2),
                   strokeWidth: 2,
                   dashArray: [2, 8],
                 );

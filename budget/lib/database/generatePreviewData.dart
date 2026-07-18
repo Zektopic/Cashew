@@ -891,7 +891,7 @@ class PreviewDemoButton extends StatelessWidget {
           child: Icon(
             Icons.help,
             size: 17,
-            color: getColor(context, "black").withOpacity(0.5),
+            color: getColor(context, "black").withValues(alpha: 0.5),
           ),
         ),
       );

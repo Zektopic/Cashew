@@ -419,11 +419,10 @@ class ShakeAnimation extends StatefulWidget {
 
 class _ShakeAnimationState extends State<ShakeAnimation> {
   bool startAnimation = false;
-  Future? _future;
 
   @override
   void initState() {
-    _future = Future.delayed(widget.delay, () {
+    Future.delayed(widget.delay, () {
       if (mounted)
         setState(() {
           startAnimation = true;
@@ -444,12 +443,6 @@ class _ShakeAnimationState extends State<ShakeAnimation> {
     //   });
     // });
     super.initState();
-  }
-
-  @override
-  void dispose() {
-    _future = null;
-    super.dispose();
   }
 
   double shakeAnimation(double animation) =>

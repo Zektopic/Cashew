@@ -1,8 +1,6 @@
 import 'package:budget/database/tables.dart';
 import 'package:budget/functions.dart';
 import 'package:budget/pages/addBudgetPage.dart';
-import 'dart:async';
-import 'package:flutter/services.dart';
 import 'package:budget/pages/addTransactionPage.dart';
 import 'package:budget/pages/addWalletPage.dart';
 import 'package:budget/pages/creditDebtTransactionsPage.dart';
@@ -58,8 +56,7 @@ import 'package:async/async.dart' show StreamZip;
 import 'package:sliver_tools/sliver_tools.dart';
 import 'package:budget/widgets/util/fullPageDoubleColumnLayout.dart';
 import 'package:budget/widgets/util/contextMenu.dart';
-import 'package:flutter/services.dart';
-import 'dart:async';
+import 'package:budget/widgets/holdToRevealListener.dart';
 
 // Also known as the all spending page
 
@@ -2200,36 +2197,6 @@ class _AllSpendingPastSpendingGraphState
   int amountLoaded = 8;
   bool amountLoadedPressedOnce = false;
 
-  bool _isRevealed = false;
-  Timer? _revealTimer;
-
-  void _setRevealed(bool reveal) {
-    if (appStateSettings["obscureAmounts"] != true) return;
-
-    setState(() {
-      _isRevealed = reveal;
-    });
-
-    if (reveal) {
-      HapticFeedback.selectionClick();
-      _revealTimer?.cancel();
-    } else {
-      _revealTimer?.cancel();
-      _revealTimer = Timer(const Duration(seconds: 2), () {
-        if (mounted) {
-          setState(() {
-            _isRevealed = false;
-          });
-        }
-      });
-    }
-  }
-
-  @override
-  void dispose() {
-    _revealTimer?.cancel();
-    super.dispose();
-  }
 
   initState() {
     Future.delayed(Duration.zero, () async {
@@ -2307,11 +2274,8 @@ class _AllSpendingPastSpendingGraphState
   }) {
     return FadeIn(
       duration: Duration(milliseconds: 400),
-      child: Listener(
-        onPointerDown: (_) => _setRevealed(true),
-        onPointerUp: (_) => _setRevealed(false),
-        onPointerCancel: (_) => _setRevealed(false),
-        child: Container(
+      child: HoldToRevealListener(
+        builder: (context, isRevealed) => Container(
           decoration: BoxDecoration(
             boxShadow: getPlatform() == PlatformOS.isIOS ||
                     appStateSettings["materialYou"]
@@ -2400,11 +2364,11 @@ class _AllSpendingPastSpendingGraphState
                                 AnimatedSwitcher(
                                   duration: Duration(milliseconds: 300),
                                   child: TextFont(
-                                    key: ValueKey('netSpending-$_isRevealed'),
+                                    key: ValueKey('netSpending-$isRevealed'),
                                     text: convertToMoney(
                                       Provider.of<AllWallets>(context),
                                       netSpending,
-                                      forceReveal: _isRevealed,
+                                      forceReveal: isRevealed,
                                     ),
                                     fontSize: 16,
                                     textAlign: TextAlign.start,
@@ -2439,7 +2403,7 @@ class _AllSpendingPastSpendingGraphState
                                 textColor: getColor(context, "expenseAmount"),
                                 bold: false,
                                 countNumber: false,
-                                forceReveal: _isRevealed,
+                                forceReveal: isRevealed,
                               ),
                               SizedBox(height: 3),
                               AmountWithColorAndArrow(
@@ -2453,7 +2417,7 @@ class _AllSpendingPastSpendingGraphState
                                 textColor: getColor(context, "incomeAmount"),
                                 bold: false,
                                 countNumber: false,
-                                forceReveal: _isRevealed,
+                                forceReveal: isRevealed,
                               ),
                             ],
                           ),
@@ -2709,7 +2673,7 @@ class _AllSpendingPastSpendingGraphState
                         Theme.of(context)
                             .colorScheme
                             .background
-                            .withOpacity(0.0),
+                            .withValues(alpha: 0.0),
                       ],
                       begin: AlignmentDirectional.topCenter,
                       end: AlignmentDirectional.bottomCenter,
@@ -2771,7 +2735,7 @@ class _AllSpendingPastSpendingGraphState
                             ? Theme.of(context)
                                 .colorScheme
                                 .secondaryContainer
-                                .withOpacity(0.3)
+                                .withValues(alpha: 0.3)
                             : Colors.transparent
                         : getColor(context, "standardContainerColor");
 
@@ -2905,14 +2869,6 @@ class AmountSpentEntryRow extends StatefulWidget {
 }
 
 class _AmountSpentEntryRowState extends State<AmountSpentEntryRow> {
-  bool _isRevealed = false;
-  Timer? _revealTimer;
-
-  @override
-  void dispose() {
-    _revealTimer?.cancel();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -2920,6 +2876,7 @@ class _AmountSpentEntryRowState extends State<AmountSpentEntryRow> {
       totalWithCountStream: widget.totalWithCountStream,
       totalWithCountStream2: widget.totalWithCountStream2,
       builder: (context, snapshot) {
+        return HoldToRevealListener(builder: (context, isRevealed) {
         double totalSpent = widget.absolute
             ? (snapshot.data?.total ?? 0).abs()
             : (snapshot.data?.total ?? 0) * (widget.invertSign == true ? -1 : 1);
@@ -2937,7 +2894,7 @@ class _AmountSpentEntryRowState extends State<AmountSpentEntryRow> {
                       Provider.of<AllWallets>(context, listen: false),
                       totalSpent,
                       finalNumber: totalSpent.abs(),
-                      forceReveal: _isRevealed,
+                      forceReveal: isRevealed,
                     ));
               },
             ),
@@ -2951,30 +2908,7 @@ class _AmountSpentEntryRowState extends State<AmountSpentEntryRow> {
               openPage: widget.openPage,
               closedColor: getColor(context, "lightDarkAccentHeavyLight"),
               button: (openContainer) {
-                return Listener(
-                  onPointerDown: (_) {
-                    setState(() => _isRevealed = true);
-                    HapticFeedback.selectionClick();
-                    _revealTimer?.cancel();
-                    _revealTimer = Timer(Duration(seconds: 2), () {
-                      if (mounted) {
-                        setState(() => _isRevealed = false);
-                      }
-                    });
-                  },
-                  onPointerUp: (_) {
-                    _revealTimer?.cancel();
-                    _revealTimer = Timer(Duration(seconds: 2), () {
-                      if (mounted) setState(() => _isRevealed = false);
-                    });
-                  },
-                  onPointerCancel: (_) {
-                    _revealTimer?.cancel();
-                    _revealTimer = Timer(Duration(seconds: 2), () {
-                      if (mounted) setState(() => _isRevealed = false);
-                    });
-                  },
-                  child: Tappable(
+                return Tappable(
                     color: getColor(context, "lightDarkAccentHeavyLight"),
                     borderRadius: 0,
                     onTap: () async {
@@ -3049,7 +2983,7 @@ class _AmountSpentEntryRowState extends State<AmountSpentEntryRow> {
                                         color: Theme.of(context)
                                             .colorScheme
                                             .secondaryContainer
-                                            .withOpacity(0.5),
+                                            .withValues(alpha: 0.5),
                                       ),
                                     ),
                                   ],
@@ -3069,7 +3003,7 @@ class _AmountSpentEntryRowState extends State<AmountSpentEntryRow> {
                                   Provider.of<AllWallets>(context),
                                   number,
                                   finalNumber: totalSpent.abs(),
-                                  forceReveal: _isRevealed,
+                                  forceReveal: isRevealed,
                                 ),
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
@@ -3081,12 +3015,12 @@ class _AmountSpentEntryRowState extends State<AmountSpentEntryRow> {
                       ),
                     ),
                     ),
-                  ),
-                );
+                  );
               },
             ),
           ),
         );
+        });
       },
     );
   }

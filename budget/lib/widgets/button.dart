@@ -186,7 +186,7 @@ class TappableOpacityButtonBreak extends StatelessWidget {
       padding: EdgeInsetsDirectional.zero,
       color: color ??
           (appStateSettings["materialYou"]
-              ? Theme.of(context).colorScheme.secondary.withOpacity(0.5)
+              ? Theme.of(context).colorScheme.secondary.withValues(alpha: 0.5)
               : getColor(context, "lightDarkAccentHeavy")),
     );
   }
@@ -301,7 +301,7 @@ class SelectedIconForIconButton extends StatelessWidget {
       duration: Duration(milliseconds: 500),
       decoration: BoxDecoration(
         color: isSelected
-            ? Theme.of(context).colorScheme.tertiary.withOpacity(0.1)
+            ? Theme.of(context).colorScheme.tertiary.withValues(alpha: 0.1)
             : Colors.transparent,
         borderRadius: BorderRadiusDirectional.circular(100),
       ),

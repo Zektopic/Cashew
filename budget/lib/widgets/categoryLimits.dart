@@ -16,8 +16,6 @@ import 'package:budget/widgets/tappable.dart';
 import 'package:budget/widgets/textWidgets.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'dart:async';
-import 'package:flutter/services.dart';
 import 'package:budget/colors.dart';
 import 'package:provider/provider.dart';
 import 'package:budget/widgets/framework/popupFramework.dart';
@@ -25,6 +23,7 @@ import 'package:budget/widgets/framework/popupFramework.dart';
 import 'package:budget/pages/addButton.dart';
 import 'sliverStickyLabelDivider.dart';
 import 'tappableTextEntry.dart';
+import 'package:budget/widgets/holdToRevealListener.dart';
 
 class CategoryLimits extends StatefulWidget {
   const CategoryLimits({
@@ -50,14 +49,6 @@ class CategoryLimits extends StatefulWidget {
 }
 
 class _CategoryLimitsState extends State<CategoryLimits> {
-  bool _isRevealed = false;
-  Timer? _revealTimer;
-
-  @override
-  void dispose() {
-    _revealTimer?.cancel();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -85,24 +76,8 @@ class _CategoryLimitsState extends State<CategoryLimits> {
                   bool isOver = widget.isAbsoluteSpendingLimit
                       ? (snapshot.data ?? 0) > widget.budgetLimit
                       : (snapshot.data ?? 0) > 100;
-                  return Listener(
-                    onPointerDown: (_) {
-                      HapticFeedback.selectionClick();
-                      setState(() => _isRevealed = true);
-                      _revealTimer?.cancel();
-                      _revealTimer = Timer(Duration(seconds: 2), () {
-                        if (mounted) setState(() => _isRevealed = false);
-                      });
-                    },
-                    onPointerUp: (_) {
-                      _revealTimer?.cancel();
-                      setState(() => _isRevealed = false);
-                    },
-                    onPointerCancel: (_) {
-                      _revealTimer?.cancel();
-                      setState(() => _isRevealed = false);
-                    },
-                    child: CountNumber(
+                  return HoldToRevealListener(
+                    builder: (context, isRevealed) => CountNumber(
                       count: snapshot.data ?? 0,
                       duration: Duration(milliseconds: 700),
                       initialCount: 0,
@@ -113,11 +88,11 @@ class _CategoryLimitsState extends State<CategoryLimits> {
                             AnimatedSwitcher(
                               duration: Duration(milliseconds: 300),
                               child: TextFont(
-                                key: ValueKey(_isRevealed),
+                                key: ValueKey(isRevealed),
                                 fontSize: 15,
                                 textColor: isOver
                                     ? getColor(context, "expenseAmount")
-                                    : getColor(context, "black").withOpacity(
+                                    : getColor(context, "black").withValues(alpha: 
                                         appStateSettings[
                                                     "increaseTextContrast"] ==
                                                 true
@@ -128,17 +103,17 @@ class _CategoryLimitsState extends State<CategoryLimits> {
                                             Provider.of<AllWallets>(context),
                                             number,
                                             finalNumber: number,
-                                            forceReveal: _isRevealed) +
+                                            forceReveal: isRevealed) +
                                         " / " +
                                         convertToMoney(
                                             Provider.of<AllWallets>(context),
                                             widget.budgetLimit,
-                                            forceReveal: _isRevealed))
+                                            forceReveal: isRevealed))
                                     : (convertToPercent(number,
                                             numberDecimals: 2,
                                             shouldRemoveTrailingZeroes: true,
                                             finalNumber: number,
-                                            forceReveal: _isRevealed) +
+                                            forceReveal: isRevealed) +
                                         " / " +
                                         "100%"),
                               ),
@@ -153,7 +128,7 @@ class _CategoryLimitsState extends State<CategoryLimits> {
                               child: AnimatedSwitcher(
                                 duration: Duration(milliseconds: 300),
                                 child: TextFont(
-                                  key: ValueKey(_isRevealed),
+                                  key: ValueKey(isRevealed),
                                   fontSize: 15,
                                   textColor: isOver
                                       ? getColor(context, "expenseAmount")
@@ -166,13 +141,13 @@ class _CategoryLimitsState extends State<CategoryLimits> {
                                               finalNumber:
                                                   (widget.budgetLimit - number)
                                                       .abs(),
-                                              forceReveal: _isRevealed))
+                                              forceReveal: isRevealed))
                                           : (convertToPercent(
                                               (100 - number).abs(),
                                               numberDecimals: 2,
                                               shouldRemoveTrailingZeroes: true,
                                               finalNumber: (100 - number).abs(),
-                                              forceReveal: _isRevealed))) +
+                                              forceReveal: isRevealed))) +
                                       " " +
                                       (isOver
                                           ? "over".tr().toLowerCase()
@@ -272,14 +247,6 @@ class CategoryLimitEntry extends StatefulWidget {
 }
 
 class _CategoryLimitEntryState extends State<CategoryLimitEntry> {
-  bool _isRevealed = false;
-  Timer? _revealTimer;
-
-  @override
-  void dispose() {
-    _revealTimer?.cancel();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -294,6 +261,7 @@ class _CategoryLimitEntryState extends State<CategoryLimitEntry> {
       stream: database
           .watchAllSubCategoriesOfMainCategory(widget.category.categoryPk),
       builder: (context, snapshot) {
+        return HoldToRevealListener(builder: (context, isRevealed) {
         List<TransactionCategory> subCategories = snapshot.data ?? [];
         bool hasSubCategories = subCategories.length > 0;
 
@@ -355,7 +323,7 @@ class _CategoryLimitEntryState extends State<CategoryLimitEntry> {
                       AnimatedSwitcher(
                         duration: Duration(milliseconds: 300),
                         child: TextFont(
-                          key: ValueKey(_isRevealed),
+                          key: ValueKey(isRevealed),
                           text: widget.isAbsoluteSpendingLimit
                               ? convertToPercent(
                                     widget.budgetLimit == 0
@@ -365,7 +333,7 @@ class _CategoryLimitEntryState extends State<CategoryLimitEntry> {
                                             100,
                                     numberDecimals: 2,
                                     shouldRemoveTrailingZeroes: true,
-                                    forceReveal: _isRevealed,
+                                    forceReveal: isRevealed,
                                   ) +
                                   " " +
                                   (widget.isSubCategory == true
@@ -376,7 +344,7 @@ class _CategoryLimitEntryState extends State<CategoryLimitEntry> {
                                       widget.budgetLimit *
                                           categoryLimitAmount /
                                           100,
-                                      forceReveal: _isRevealed) +
+                                      forceReveal: isRevealed) +
                                   " " +
                                   (widget.isSubCategory == true
                                       ? "of-category".tr().toLowerCase()
@@ -398,12 +366,12 @@ class _CategoryLimitEntryState extends State<CategoryLimitEntry> {
                                   .indexedByPk[widget.categoryLimit?.walletFk ??
                                       appStateSettings["selectedWalletPk"]]
                                   ?.currency,
-                          forceReveal: _isRevealed)
+                          forceReveal: isRevealed)
                       : convertToPercent(
                           widget.categoryLimit?.amount ?? 0,
                           numberDecimals: 2,
                           shouldRemoveTrailingZeroes: true,
-                          forceReveal: _isRevealed,
+                          forceReveal: isRevealed,
                         ),
                   placeholder: widget.isAbsoluteSpendingLimit
                       ? convertToMoney(Provider.of<AllWallets>(context), 0,
@@ -412,8 +380,8 @@ class _CategoryLimitEntryState extends State<CategoryLimitEntry> {
                                   .indexedByPk[widget.categoryLimit?.walletFk ??
                                       appStateSettings["selectedWalletPk"]]
                                   ?.currency,
-                          forceReveal: _isRevealed)
-                      : convertToPercent(0, forceReveal: _isRevealed),
+                          forceReveal: isRevealed)
+                      : convertToPercent(0, forceReveal: isRevealed),
                   showPlaceHolderWhenTextEquals: widget.isAbsoluteSpendingLimit
                       ? convertToMoney(Provider.of<AllWallets>(context), 0,
                           currencyKey:
@@ -421,8 +389,8 @@ class _CategoryLimitEntryState extends State<CategoryLimitEntry> {
                                   .indexedByPk[widget.categoryLimit?.walletFk ??
                                       appStateSettings["selectedWalletPk"]]
                                   ?.currency,
-                          forceReveal: _isRevealed)
-                      : convertToPercent(0, forceReveal: _isRevealed),
+                          forceReveal: isRevealed)
+                      : convertToPercent(0, forceReveal: isRevealed),
                   onTap: () {
                     enterCategoryLimitPopup(
                       context,
@@ -458,7 +426,7 @@ class _CategoryLimitEntryState extends State<CategoryLimitEntry> {
                   color: Theme.of(context)
                       .colorScheme
                       .secondaryContainer
-                      .withOpacity(0.3),
+                      .withValues(alpha: 0.3),
                   info: "total".tr(),
                   extraInfoWidget: StreamBuilder<double?>(
                     stream: database
@@ -483,7 +451,7 @@ class _CategoryLimitEntryState extends State<CategoryLimitEntry> {
                           return AnimatedSwitcher(
                             duration: Duration(milliseconds: 300),
                             child: TextFont(
-                              key: ValueKey(_isRevealed),
+                              key: ValueKey(isRevealed),
                               fontSize: 15,
                               textColor: isOver
                                   ? getColor(context, "expenseAmount")
@@ -493,17 +461,17 @@ class _CategoryLimitEntryState extends State<CategoryLimitEntry> {
                                           Provider.of<AllWallets>(context),
                                           number,
                                           finalNumber: snapshot.data ?? 0,
-                                          forceReveal: _isRevealed) +
+                                          forceReveal: isRevealed) +
                                       " / " +
                                       convertToMoney(
                                           Provider.of<AllWallets>(context),
                                           subCategoryBudgetLimit,
-                                          forceReveal: _isRevealed))
+                                          forceReveal: isRevealed))
                                   : (convertToPercent(number,
                                           numberDecimals: 2,
                                           shouldRemoveTrailingZeroes: true,
                                           finalNumber: snapshot.data ?? 0,
-                                          forceReveal: _isRevealed) +
+                                          forceReveal: isRevealed) +
                                       " / " +
                                       "100%"),
                             ),
@@ -556,25 +524,8 @@ class _CategoryLimitEntryState extends State<CategoryLimitEntry> {
           returnWidget = mainCategory;
         }
 
-        return Listener(
-          onPointerDown: (_) {
-            HapticFeedback.selectionClick();
-            setState(() => _isRevealed = true);
-            _revealTimer?.cancel();
-            _revealTimer = Timer(Duration(seconds: 2), () {
-              if (mounted) setState(() => _isRevealed = false);
-            });
-          },
-          onPointerUp: (_) {
-            _revealTimer?.cancel();
-            setState(() => _isRevealed = false);
-          },
-          onPointerCancel: (_) {
-            _revealTimer?.cancel();
-            setState(() => _isRevealed = false);
-          },
-          child: returnWidget,
-        );
+        return returnWidget;
+        });
       },
     );
   }
@@ -605,7 +556,7 @@ class SubCategoriesContainer extends StatelessWidget {
             color: Theme.of(context)
                 .colorScheme
                 .secondaryContainer
-                .withOpacity(getPlatform() == PlatformOS.isIOS ? 0.15 : 0.5),
+                .withValues(alpha: getPlatform() == PlatformOS.isIOS ? 0.15 : 0.5),
             borderRadius: BorderRadiusDirectional.vertical(
               top: Radius.circular(
                 getPlatform() == PlatformOS.isIOS ? 0 : 14,
@@ -631,7 +582,7 @@ class SubCategoriesContainer extends StatelessWidget {
             color: Theme.of(context)
                 .colorScheme
                 .secondaryContainer
-                .withOpacity(0.3),
+                .withValues(alpha: 0.3),
           ),
           HorizontalBreak(padding: EdgeInsetsDirectional.zero),
           SizedBox(height: 6),
@@ -648,7 +599,7 @@ class SubCategoriesContainer extends StatelessWidget {
             decoration: BoxDecoration(
               border: Border.all(
                 color: (appStateSettings["materialYou"]
-                    ? Theme.of(context).colorScheme.secondary.withOpacity(0.5)
+                    ? Theme.of(context).colorScheme.secondary.withValues(alpha: 0.5)
                     : getColor(context, "lightDarkAccentHeavy")),
                 width: 2,
               ),

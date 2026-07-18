@@ -113,8 +113,11 @@ flutter_icons:
     theme_color: "#5f85c2"
 
 dev_dependencies:
+  flutter_test:
+    sdk: flutter
   drift_dev: ^2.14.0
   build_runner: ^2.4.7
+  flutter_lints: ^5.0.0
 
 dependency_overrides:
   win32: ^5.5.4

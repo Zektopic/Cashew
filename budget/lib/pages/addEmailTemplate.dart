@@ -737,7 +737,7 @@ class TemplateInfoBox extends StatelessWidget {
       onTap: onTap,
       color: selectedText == "" ||
               (extraCheck != null && extraCheck!(selectedText) == false)
-          ? Theme.of(context).colorScheme.selectableColorRed.withOpacity(0.5)
+          ? Theme.of(context).colorScheme.selectableColorRed.withValues(alpha: 0.5)
           : getColor(context, "lightDarkAccent"),
       borderRadius: 15,
       child: Padding(
@@ -773,7 +773,7 @@ class TemplateInfoBox extends StatelessWidget {
                 ? TextFont(
                     fontSize: 14,
                     text: extraCheckMessage ?? "",
-                    textColor: getColor(context, "black").withOpacity(0.9),
+                    textColor: getColor(context, "black").withValues(alpha: 0.9),
                     maxLines: 10,
                   )
                 : SizedBox.shrink(),
@@ -783,7 +783,7 @@ class TemplateInfoBox extends StatelessWidget {
               text: secondaryLabel,
               textColor: selectedText == "" ||
                       (extraCheck != null && extraCheck!(selectedText) == false)
-                  ? getColor(context, "black").withOpacity(0.5)
+                  ? getColor(context, "black").withValues(alpha: 0.5)
                   : getColor(context, "textLight"),
               maxLines: 10,
             )

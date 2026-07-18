@@ -234,7 +234,7 @@ class _SharedBudgetSettingsState extends State<SharedBudgetSettings> {
                         ? Theme.of(context)
                             .colorScheme
                             .secondaryContainer
-                            .withOpacity(0.2)
+                            .withValues(alpha: 0.2)
                         : getColor(context, "lightDarkAccentHeavy")
                             .withAlpha(20),
                     child: Padding(
@@ -253,7 +253,7 @@ class _SharedBudgetSettingsState extends State<SharedBudgetSettings> {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadiusDirectional.circular(15),
                           color: getColor(context, "lightDarkAccent")
-                              .withOpacity(0.5),
+                              .withValues(alpha: 0.5),
                           border: Border.all(
                             width: 1.5,
                             color: getColor(context, "lightDarkAccentHeavy"),
@@ -288,7 +288,7 @@ class _SharedBudgetSettingsState extends State<SharedBudgetSettings> {
                           ? Theme.of(context)
                               .colorScheme
                               .secondaryContainer
-                              .withOpacity(0.2)
+                              .withValues(alpha: 0.2)
                           : getColor(context, "lightDarkAccentHeavy")
                               .withAlpha(20),
                       child: Padding(
@@ -303,7 +303,7 @@ class _SharedBudgetSettingsState extends State<SharedBudgetSettings> {
                           decoration: BoxDecoration(
                             borderRadius: BorderRadiusDirectional.circular(15),
                             color: getColor(context, "lightDarkAccent")
-                                .withOpacity(0.5),
+                                .withValues(alpha: 0.5),
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,

@@ -4,7 +4,6 @@ import 'package:budget/widgets/framework/popupFramework.dart';
 import 'package:budget/widgets/textWidgets.dart';
 import 'package:budget/widgets/util/contextMenu.dart';
 import 'package:budget/widgets/util/onAppResume.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -264,7 +263,7 @@ class TextInput extends StatelessWidget {
                               ? Theme.of(context)
                                   .colorScheme
                                   .primary
-                                  .withOpacity(0.2)
+                                  .withValues(alpha: 0.2)
                               : getColor(context, "lightDarkAccentHeavy"),
                           width: 2,
                         ),

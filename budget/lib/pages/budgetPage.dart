@@ -814,7 +814,7 @@ class _BudgetPageContentState extends State<_BudgetPageContent> {
                                                       .arrow_drop_down_rounded,
                                           size: 15,
                                           color: getColor(context, "black")
-                                              .withOpacity(0.5),
+                                              .withValues(alpha: 0.5),
                                         ),
                                       ),
                                     ),
@@ -1058,13 +1058,17 @@ class _BudgetLineGraphState extends State<BudgetLineGraph> {
   List<DateTimeRange> dateTimeRanges = [];
   int longestDateRange = 0;
 
-  void didUpdateWidget(oldWidget) {
+  @override
+  void didUpdateWidget(covariant BudgetLineGraph oldWidget) {
+    super.didUpdateWidget(oldWidget);
     if (oldWidget != widget) {
       _init();
     }
   }
 
-  initState() {
+  @override
+  void initState() {
+    super.initState();
     _init();
   }
 
@@ -1222,7 +1226,7 @@ class _BudgetLineGraphState extends State<BudgetLineGraph> {
                                       widget.selectedCategory != null
                                   ? lineColor
                                   : Theme.of(context).colorScheme.tertiary)
-                              .withOpacity((index) / snapshot.data!.length)
+                              .withValues(alpha: (index) / snapshot.data!.length)
                   ],
                   horizontalLineAt: widget.isPastBudget == true ||
                           (widget.budget.reoccurrence ==
@@ -1272,7 +1276,7 @@ class _BudgetLineGraphState extends State<BudgetLineGraph> {
                               color: Theme.of(context)
                                   .colorScheme
                                   .primary
-                                  .withOpacity(0.8),
+                                  .withValues(alpha: 0.8),
                             ),
                           ),
                         ),

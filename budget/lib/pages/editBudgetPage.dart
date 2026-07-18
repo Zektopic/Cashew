@@ -2,18 +2,14 @@ import 'package:budget/colors.dart';
 import 'package:budget/database/tables.dart';
 import 'package:budget/functions.dart';
 import 'package:budget/pages/addBudgetPage.dart';
-import 'package:budget/pages/editCategoriesPage.dart';
 import 'package:budget/struct/databaseGlobal.dart';
 import 'package:budget/struct/settings.dart';
-import 'package:budget/struct/shareBudget.dart';
-import 'package:budget/widgets/animatedExpanded.dart';
 import 'package:budget/widgets/button.dart';
 import 'package:budget/widgets/dropdownSelect.dart';
 import 'package:budget/widgets/fab.dart';
 import 'package:budget/widgets/fadeIn.dart';
 import 'package:budget/widgets/framework/popupFramework.dart';
 import 'package:budget/widgets/globalSnackbar.dart';
-import 'package:budget/widgets/navigationFramework.dart';
 import 'package:budget/widgets/noResults.dart';
 import 'package:budget/widgets/openBottomSheet.dart';
 import 'package:budget/widgets/openPopup.dart';
@@ -345,7 +341,7 @@ class _EditBudgetPageState extends State<EditBudgetPage> {
                                             fontSize: 14,
                                             textColor:
                                                 getColor(context, "black")
-                                                    .withOpacity(0.65),
+                                                    .withValues(alpha: 0.65),
                                           );
                                         } else {
                                           return TextFont(
@@ -355,7 +351,7 @@ class _EditBudgetPageState extends State<EditBudgetPage> {
                                             fontSize: 14,
                                             textColor:
                                                 getColor(context, "black")
-                                                    .withOpacity(0.65),
+                                                    .withValues(alpha: 0.65),
                                           );
                                         }
                                       },

@@ -44,7 +44,7 @@ class FakeTextInput extends StatelessWidget {
                 ? TextFont(
                     text: label,
                     fontSize: 15,
-                    textColor: getColor(context, "black").withOpacity(0.6),
+                    textColor: getColor(context, "black").withValues(alpha: 0.6),
                   )
                 : TextFont(
                     text: content ?? "",

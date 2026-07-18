@@ -330,7 +330,7 @@ class _EditCategoriesPageState extends State<EditCategoriesPage> {
                                             fontSize: 14,
                                             textColor:
                                                 getColor(context, "black")
-                                                    .withOpacity(0.65),
+                                                    .withValues(alpha: 0.65),
                                           ),
                                           TextFont(
                                             textAlign: TextAlign.start,
@@ -350,7 +350,7 @@ class _EditCategoriesPageState extends State<EditCategoriesPage> {
                                             fontSize: 14,
                                             textColor:
                                                 getColor(context, "black")
-                                                    .withOpacity(0.65),
+                                                    .withValues(alpha: 0.65),
                                           ),
                                         ],
                                       ),

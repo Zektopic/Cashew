@@ -2,8 +2,6 @@ import 'package:budget/colors.dart';
 import 'package:budget/database/tables.dart';
 import 'package:budget/functions.dart';
 import 'package:budget/pages/addWalletPage.dart';
-import 'package:budget/pages/editAssociatedTitlesPage.dart';
-import 'package:budget/pages/editBudgetPage.dart';
 import 'package:budget/struct/databaseGlobal.dart';
 import 'package:budget/struct/settings.dart';
 import 'package:budget/widgets/animatedExpanded.dart';
@@ -317,7 +315,7 @@ class _EditWalletsPageState extends State<EditWalletsPage> {
                                         : "transactions".tr().toLowerCase()),
                                 fontSize: 14,
                                 textColor: getColor(context, "black")
-                                    .withOpacity(0.65),
+                                    .withValues(alpha: 0.65),
                               ),
                             ],
                           ),

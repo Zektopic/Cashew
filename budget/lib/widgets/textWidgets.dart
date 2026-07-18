@@ -58,7 +58,7 @@ class TextFont extends StatelessWidget {
       double threshold =
           Theme.of(context).brightness == Brightness.light ? 0.7 : 0.65;
       if (finalTextColor.alpha.toDouble() < (255 * threshold)) {
-        finalTextColor = finalTextColor.withOpacity(1 * threshold);
+        finalTextColor = finalTextColor.withValues(alpha: 1 * threshold);
       }
     }
 

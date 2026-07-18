@@ -145,7 +145,7 @@ class CategoryIcon extends StatelessWidget {
                                     Theme.of(context)
                                         .colorScheme
                                         .primary
-                                        .withOpacity(0.7),
+                                        .withValues(alpha: 0.7),
                                 BlendMode.srcATop,
                               ),
                               child: ColorFiltered(
@@ -248,6 +248,7 @@ class _CacheCategoryIconState extends State<CacheCategoryIcon> {
 
   @override
   void didUpdateWidget(covariant CacheCategoryIcon oldWidget) {
+    super.didUpdateWidget(oldWidget);
     if (widget.iconName != oldWidget.iconName ||
         widget.size != oldWidget.size) {
       setState(() {

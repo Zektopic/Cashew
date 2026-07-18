@@ -61,11 +61,6 @@ void main() async {
       db.getAllObjectives(objectiveType: ObjectiveType.goal),
       db.getAllObjectives(objectiveType: ObjectiveType.loan),
     ]);
-    final categories = futures[0] as List<TransactionCategory>;
-    final subcategories = futures[1] as List<TransactionCategory>;
-    final budgets = futures[2] as List<Budget>;
-    final goals = futures[3] as List<Objective>;
-    final loans = futures[4] as List<Objective>;
   }
   stopwatchOpt.stop();
   print('Optimized time: ${stopwatchOpt.elapsedMilliseconds} ms');

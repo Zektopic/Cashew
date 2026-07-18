@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:budget/colors.dart';
 import 'package:budget/database/tables.dart';
 import 'package:budget/functions.dart';
@@ -8,10 +7,10 @@ import 'package:budget/widgets/animatedExpanded.dart';
 import 'package:budget/widgets/countNumber.dart';
 import 'package:budget/widgets/textWidgets.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/src/provider.dart';
 
 import 'incomeAmountArrow.dart';
+import 'package:budget/widgets/holdToRevealListener.dart';
 
 class TransactionEntryAmount extends StatefulWidget {
   const TransactionEntryAmount({
@@ -29,39 +28,14 @@ class TransactionEntryAmount extends StatefulWidget {
 }
 
 class _TransactionEntryAmountState extends State<TransactionEntryAmount> {
-  bool _isRevealed = false;
-  Timer? _revealTimer;
-
-  @override
-  void dispose() {
-    _revealTimer?.cancel();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
     double count = widget.transaction.amount.abs() *
         (amountRatioToPrimaryCurrencyGivenPk(
             Provider.of<AllWallets>(context), widget.transaction.walletFk));
-    return Listener(
-      onPointerDown: (_) {
-        HapticFeedback.selectionClick();
-        setState(() => _isRevealed = true);
-        _revealTimer?.cancel();
-      },
-      onPointerUp: (_) {
-        _revealTimer?.cancel();
-        _revealTimer = Timer(Duration(seconds: 2), () {
-          if (mounted) setState(() => _isRevealed = false);
-        });
-      },
-      onPointerCancel: (_) {
-        _revealTimer?.cancel();
-        _revealTimer = Timer(Duration(seconds: 2), () {
-          if (mounted) setState(() => _isRevealed = false);
-        });
-      },
-      child: Column(
+    return HoldToRevealListener(
+      builder: (context, isRevealed) => Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -94,12 +68,12 @@ class _TransactionEntryAmountState extends State<TransactionEntryAmount> {
                       AnimatedSwitcher(
                         duration: const Duration(milliseconds: 300),
                         child: TextFont(
-                          key: ValueKey(_isRevealed),
+                          key: ValueKey(isRevealed),
                           text: convertToMoney(
                             Provider.of<AllWallets>(context),
                             number,
                             finalNumber: count,
-                            forceReveal: _isRevealed,
+                            forceReveal: isRevealed,
                           ),
                           fontSize: 19 - (widget.showOtherCurrency ? 1 : 0),
                           fontWeight: FontWeight.bold,
@@ -119,7 +93,7 @@ class _TransactionEntryAmountState extends State<TransactionEntryAmount> {
                 ? AnimatedSwitcher(
                     duration: const Duration(milliseconds: 300),
                     child: TextFont(
-                      key: ValueKey('other_curr_${_isRevealed}'),
+                      key: ValueKey('other_curr_${isRevealed}'),
                       text: convertToMoney(
                         Provider.of<AllWallets>(context),
                         widget.transaction.amount.abs(),
@@ -131,7 +105,7 @@ class _TransactionEntryAmountState extends State<TransactionEntryAmount> {
                             .indexedByPk[widget.transaction.walletFk]
                             ?.currency,
                         addCurrencyName: true,
-                        forceReveal: _isRevealed,
+                        forceReveal: isRevealed,
                       ),
                       fontSize: 12,
                       textColor: getTransactionAmountColor(
@@ -178,7 +152,7 @@ Color getTransactionAmountColor(BuildContext context, Transaction transaction) {
                           : getColor(context, "textLight");
   if (transaction.paid == true && transaction.categoryFk == "0") {
     if (appStateSettings["balanceTransferAmountColor"] == "no-color") {
-      return getColor(context, "black").withOpacity(0.95);
+      return getColor(context, "black").withValues(alpha: 0.95);
     } else {
       return dynamicPastel(context, color,
           inverse: true, amountLight: 0.3, amountDark: 0.25);
