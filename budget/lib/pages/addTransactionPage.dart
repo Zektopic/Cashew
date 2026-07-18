@@ -4090,8 +4090,10 @@ class ReorderCategoriesPopup extends StatelessWidget {
 }
 
 String? getFileIdFromUrl(String url) {
-  if (!url.startsWith("https://drive.google.com/") &&
-      !url.startsWith("https://docs.google.com/")) {
+  if (!url.startsWith("https://drive.google.com/file/d/") &&
+      !url.startsWith("https://docs.google.com/document/d/") &&
+      !url.startsWith("https://docs.google.com/spreadsheets/d/") &&
+      !url.startsWith("https://docs.google.com/presentation/d/")) {
     return null;
   }
   RegExp regExp = RegExp(r"/d/([a-zA-Z0-9_-]+)");
