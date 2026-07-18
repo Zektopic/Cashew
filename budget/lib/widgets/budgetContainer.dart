@@ -1,6 +1,7 @@
 import 'package:budget/database/tables.dart';
 import 'package:budget/pages/sharedBudgetSettings.dart';
 import 'package:budget/pages/transactionFilters.dart';
+import 'package:budget/struct/budgetRollover.dart';
 import 'package:budget/struct/currencyFunctions.dart';
 import 'package:budget/struct/defaultPreferences.dart';
 import 'package:budget/struct/settings.dart';
@@ -29,7 +30,9 @@ import 'package:budget/functions.dart';
 import 'package:async/async.dart' show StreamZip;
 import 'package:budget/struct/randomConstants.dart';
 
-class BudgetContainer extends StatefulWidget {
+// Thin wrapper: applies the rollover carry (if enabled for the budget) so the
+// dashboard card and the budget page show the same adjusted amount.
+class BudgetContainer extends StatelessWidget {
   BudgetContainer({
     Key? key,
     required this.budget,
@@ -48,10 +51,45 @@ class BudgetContainer extends StatefulWidget {
   final bool squishInactiveBudgetContainerHeight;
 
   @override
-  State<BudgetContainer> createState() => _BudgetContainerState();
+  Widget build(BuildContext context) {
+    return RolloverAdjustedBudget(
+      budget: budget,
+      builder: (adjustedBudget) => _BudgetContainerContent(
+        budget: adjustedBudget,
+        height: height,
+        dateForRange: dateForRange,
+        longPressToEdit: longPressToEdit,
+        intermediatePadding: intermediatePadding,
+        squishInactiveBudgetContainerHeight:
+            squishInactiveBudgetContainerHeight,
+      ),
+    );
+  }
 }
 
-class _BudgetContainerState extends State<BudgetContainer> {
+class _BudgetContainerContent extends StatefulWidget {
+  _BudgetContainerContent({
+    Key? key,
+    required this.budget,
+    this.height = 183,
+    this.dateForRange,
+    this.longPressToEdit = true,
+    this.intermediatePadding = true,
+    this.squishInactiveBudgetContainerHeight = false,
+  }) : super(key: key);
+
+  final Budget budget;
+  final double height;
+  final DateTime? dateForRange;
+  final bool longPressToEdit;
+  final bool intermediatePadding;
+  final bool squishInactiveBudgetContainerHeight;
+
+  @override
+  State<_BudgetContainerContent> createState() => _BudgetContainerState();
+}
+
+class _BudgetContainerState extends State<_BudgetContainerContent> {
   @override
   Widget build(BuildContext context) {
     double budgetAmount = budgetAmountToPrimaryCurrency(

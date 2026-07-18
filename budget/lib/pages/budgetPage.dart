@@ -10,7 +10,10 @@ import 'package:budget/pages/pastBudgetsPage.dart';
 import 'package:budget/pages/premiumPage.dart';
 import 'package:budget/pages/transactionFilters.dart';
 import 'package:budget/pages/walletDetailsPage.dart';
+import 'package:budget/struct/budgetRollover.dart';
 import 'package:budget/struct/databaseGlobal.dart';
+import 'package:budget/widgets/globalSnackbar.dart';
+import 'package:budget/widgets/openSnackbar.dart';
 import 'package:budget/struct/defaultPreferences.dart';
 import 'package:budget/struct/settings.dart';
 import 'package:budget/struct/spendingSummaryHelper.dart';
@@ -67,11 +70,14 @@ class BudgetPage extends StatelessWidget {
             Color? accentColor = HexColor(snapshot.data?.colour);
             return CustomColorTheme(
               accentColor: snapshot.data?.colour == null ? null : accentColor,
-              child: _BudgetPageContent(
+              child: RolloverAdjustedBudget(
                 budget: snapshot.data!,
-                dateForRange: dateForRange,
-                dateForRangeIndex: dateForRangeIndex,
-                openedFromHistory: openedFromHistory,
+                builder: (budget) => _BudgetPageContent(
+                  budget: budget,
+                  dateForRange: dateForRange,
+                  dateForRangeIndex: dateForRangeIndex,
+                  openedFromHistory: openedFromHistory,
+                ),
               ),
             );
           }
@@ -350,6 +356,33 @@ class _BudgetPageContentState extends State<_BudgetPageContent> {
                   );
                 },
               ),
+              if (widget.budget.reoccurrence != BudgetReoccurence.custom &&
+                  isPastBudget == false)
+                DropdownItemMenu(
+                  id: "budget-rollover",
+                  label: budgetHasRollover(widget.budget.budgetPk)
+                      ? "Disable Rollover"
+                      : "Enable Rollover",
+                  icon: appStateSettings["outlinedIcons"]
+                      ? Icons.repeat_outlined
+                      : Icons.repeat_rounded,
+                  action: () async {
+                    bool newValue =
+                        !budgetHasRollover(widget.budget.budgetPk);
+                    await setBudgetRollover(
+                        widget.budget.budgetPk, newValue);
+                    if (mounted) setState(() {});
+                    openSnackbar(SnackbarMessage(
+                      title: newValue
+                          ? "Rollover enabled"
+                          : "Rollover disabled",
+                      description: newValue
+                          ? "Last period's leftover is added to this period"
+                          : null,
+                      icon: Icons.repeat_rounded,
+                    ));
+                  },
+                ),
               if (widget.budget.reoccurrence != BudgetReoccurence.custom &&
                   isPastBudget == false &&
                   isPastBudgetButCurrentPeriod == false)

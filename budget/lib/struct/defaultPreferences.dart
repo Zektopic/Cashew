@@ -163,6 +163,8 @@ Future<Map<String, dynamic>> getDefaultPreferences() async {
     // 3-month average pace (checked once per day on app open)
     "spendingAnomalyAlerts": false,
     "spendingAnomalyLastCheck": "",
+    // Per-budget rollover flags: {budgetPk: true}
+    "budgetRollover": {},
     // Minutes in background before biometric re-lock (-1 = off, 0 = instant)
     "autoLockAfterMinutes": -1,
     "sendTransactionsToServerQueue": {},
