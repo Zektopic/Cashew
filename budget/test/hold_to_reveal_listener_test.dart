@@ -76,6 +76,36 @@ void main() {
       expect(find.text('hidden'), findsOneWidget);
     });
 
+    testWidgets('global reveal-all reveals without touch and expires',
+        (tester) async {
+      appStateSettings = {"obscureAmounts": true};
+      await tester.pumpWidget(buildTestWidget());
+      expect(find.text('hidden'), findsOneWidget);
+
+      revealAllAmountsTemporarily(duration: const Duration(seconds: 5));
+      await tester.pump();
+      expect(find.text('revealed'), findsOneWidget);
+
+      // Still revealed before expiry, hidden after.
+      await tester.pump(const Duration(seconds: 4));
+      expect(find.text('revealed'), findsOneWidget);
+      await tester.pump(const Duration(seconds: 2));
+      expect(find.text('hidden'), findsOneWidget);
+    });
+
+    testWidgets('cancelRevealAllAmounts hides immediately', (tester) async {
+      appStateSettings = {"obscureAmounts": true};
+      await tester.pumpWidget(buildTestWidget());
+
+      revealAllAmountsTemporarily(duration: const Duration(seconds: 60));
+      await tester.pump();
+      expect(find.text('revealed'), findsOneWidget);
+
+      cancelRevealAllAmounts();
+      await tester.pump();
+      expect(find.text('hidden'), findsOneWidget);
+    });
+
     testWidgets('pressing again cancels pending collapse', (tester) async {
       appStateSettings = {"obscureAmounts": true};
       await tester.pumpWidget(buildTestWidget());

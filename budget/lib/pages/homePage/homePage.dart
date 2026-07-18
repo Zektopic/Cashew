@@ -17,7 +17,9 @@ import 'package:budget/pages/homePage/homePageAllSpendingSummary.dart';
 import 'package:budget/pages/editHomePage.dart';
 import 'package:budget/pages/settingsPage.dart';
 import 'package:budget/pages/homePage/homePageCreditDebts.dart';
+import 'package:budget/struct/initializeBiometrics.dart';
 import 'package:budget/struct/settings.dart';
+import 'package:budget/widgets/holdToRevealListener.dart';
 import 'package:budget/widgets/animatedExpanded.dart';
 import 'package:budget/widgets/button.dart';
 import 'package:budget/widgets/framework/pageFramework.dart';
@@ -353,10 +355,31 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                             child: child ?? SizedBox.shrink(),
                                           );
                                         },
-                                        child: IconButton(
+                                        child: GestureDetector(
+                                          // Long-press: authenticated
+                                          // temporary reveal of all amounts
+                                          // (keeps obscureAmounts enabled)
+                                          onLongPress: () async {
+                                            if (appStateSettings[
+                                                    "obscureAmounts"] !=
+                                                true) return;
+                                            AuthResult authResult =
+                                                await checkBiometrics(
+                                                    checkAlways: true);
+                                            if (authResult ==
+                                                AuthResult.authenticated) {
+                                              revealAllAmountsTemporarily();
+                                              openSnackbar(SnackbarMessage(
+                                                  title:
+                                                      "Amounts revealed for 60 seconds",
+                                                  icon: Icons.visibility));
+                                            }
+                                          },
+                                          child: IconButton(
                                           padding: EdgeInsets.zero,
                                           constraints: BoxConstraints(),
                                           onPressed: () async {
+                                            cancelRevealAllAmounts();
                                             await updateSettings(
                                               "obscureAmounts",
                                               !(appStateSettings[
@@ -396,6 +419,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                               context,
                                             ).colorScheme.onPrimaryContainer,
                                           ),
+                                        ),
                                         ),
                                       ),
                                     ],

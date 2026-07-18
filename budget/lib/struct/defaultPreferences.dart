@@ -157,6 +157,10 @@ Future<Map<String, dynamic>> getDefaultPreferences() async {
     "obscureAmounts": false,
     "obscureAmountsCharacter": "•",
     "obscureAmountsMagnitude": false,
+    // Android FLAG_SECURE: block screenshots and blank the recents thumbnail
+    "secureScreen": false,
+    // Minutes in background before biometric re-lock (-1 = off, 0 = instant)
+    "autoLockAfterMinutes": -1,
     "sendTransactionsToServerQueue": {},
     "currentUserEmail": "",
     "usersNicknames": {},

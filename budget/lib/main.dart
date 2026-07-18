@@ -1,4 +1,5 @@
 import 'package:budget/functions.dart';
+import 'package:budget/struct/secureScreen.dart';
 import 'package:budget/pages/accountsPage.dart';
 import 'package:budget/pages/autoTransactionsPageEmail.dart';
 import 'package:budget/struct/currencyFunctions.dart';
@@ -61,6 +62,7 @@ void main() async {
     await loadCurrencyJSON();
     await loadLanguageNamesJSON();
     await initializeSettings();
+    applySecureScreenSetting();
     tz.initializeTimeZones();
     try {
       final locationName =

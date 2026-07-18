@@ -66,14 +66,52 @@ class InitializeBiometrics extends StatefulWidget {
   State<InitializeBiometrics> createState() => _InitializeBiometricsState();
 }
 
-class _InitializeBiometricsState extends State<InitializeBiometrics> {
+class _InitializeBiometricsState extends State<InitializeBiometrics>
+    with WidgetsBindingObserver {
   AuthResult authResult = AuthResult.waiting;
+  DateTime? _backgroundedAt;
+
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     Future.delayed(Duration.zero, () async {
       _biometricCheck();
     });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  // Auto-lock: when the app has been in the background longer than the
+  // configured "autoLockAfterMinutes" threshold, require authentication again
+  // on resume (-1 = never, 0 = immediately).
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (appStateSettings["requireAuth"] != true) return;
+    final int autoLockMinutes = appStateSettings["autoLockAfterMinutes"] ?? -1;
+    if (autoLockMinutes < 0) return;
+
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.hidden) {
+      _backgroundedAt ??= DateTime.now();
+    } else if (state == AppLifecycleState.resumed) {
+      final DateTime? backgroundedAt = _backgroundedAt;
+      _backgroundedAt = null;
+      if (backgroundedAt == null) return;
+      if (authResult != AuthResult.authenticated) return;
+      final Duration elapsed = DateTime.now().difference(backgroundedAt);
+      if (elapsed >= Duration(minutes: autoLockMinutes)) {
+        setState(() {
+          authResult = AuthResult.waiting;
+        });
+        _biometricCheck();
+      }
+    }
   }
 
   _biometricCheck() async {

@@ -55,7 +55,9 @@ import 'package:flutter/services.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:budget/functions.dart';
+import 'package:budget/struct/secureScreen.dart';
 import 'package:budget/struct/settings.dart';
+import 'package:flutter/foundation.dart';
 import 'package:budget/widgets/framework/popupFramework.dart';
 import 'package:app_settings/app_settings.dart';
 import 'package:budget/widgets/outlinedButtonStacked.dart';
@@ -928,6 +930,52 @@ class _BiometricsSettingToggleState extends State<BiometricsSettingToggle> {
                         : Icons.lock_open_rounded,
               )
             : SizedBox.shrink(),
+        AnimatedExpanded(
+          expand: isLocked,
+          child: SettingsContainerDropdown(
+            title: "Auto-Lock When In Background",
+            description: "Require unlock again after time in background",
+            icon: appStateSettings["outlinedIcons"]
+                ? Icons.timer_outlined
+                : Icons.timer_rounded,
+            initial:
+                (appStateSettings["autoLockAfterMinutes"] ?? -1).toString(),
+            items: ["-1", "0", "1", "2", "5", "10", "30"],
+            onChanged: (value) async {
+              await updateSettings(
+                  "autoLockAfterMinutes", int.tryParse(value) ?? -1,
+                  updateGlobalState: false);
+            },
+            getLabel: (item) {
+              switch (item) {
+                case "-1":
+                  return "Never";
+                case "0":
+                  return "Immediately";
+                case "1":
+                  return "After 1 minute";
+                default:
+                  return "After " + item + " minutes";
+              }
+            },
+          ),
+        ),
+        if (kIsWeb == false &&
+            defaultTargetPlatform == TargetPlatform.android)
+          SettingsContainerSwitch(
+            title: "Secure Screen",
+            description:
+                "Block screenshots and hide app preview in the app switcher",
+            onSwitched: (value) async {
+              await updateSettings("secureScreen", value,
+                  updateGlobalState: false);
+              await setSecureScreen(value);
+            },
+            initialValue: appStateSettings["secureScreen"] == true,
+            icon: appStateSettings["outlinedIcons"]
+                ? Icons.screenshot_monitor_outlined
+                : Icons.screenshot_monitor_rounded,
+          ),
       ],
     );
   }
