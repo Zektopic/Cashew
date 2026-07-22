@@ -75,6 +75,8 @@
 - 2026-07-05: Iterative Enhancement - Secured `BudgetSpenderSummary` widget across the budget dashboard. Refactored `BudgetSpenderSummary` to accept a `forceReveal` parameter and lifted its temporary reveal state up to the parent `BudgetPage` and `PastBudgetsPage` (`_BudgetPageContentState` and `__PastBudgetsPageContentState`), completely unifying the hold-to-reveal gesture on the dashboard view.
 - 2026-07-06: Iterative Enhancement - Addressed SSRF and Path Traversal risk in `getFileIdFromUrl` by replacing broad domain validation with strict path-prefix validation (`https://drive.google.com/file/d/`, `https://docs.google.com/spreadsheets/d/`, etc.). This ensures only well-formed identifiers for specific resources are queried, restricting external fetching capabilities and adhering to defense-in-depth principles.
 **Next Planned Step:** Investigate custom URL scheme handling and intent parsing in Android/iOS native wrappers, ensuring parameters passed back to Flutter are properly sanitized to prevent deep-link parameter injection vulnerabilities.
+- 2026-07-22: Iterative Enhancement - Secured URL parsing logic in `convertGoogleSheetsUrlToCsvUrl`. Switched from vulnerable string splitting to a strict regex `RegExp(r"/d/([a-zA-Z0-9_-]+)")` to safely extract Google Sheets IDs, maintaining the strict `https://docs.google.com/spreadsheets/d/` prefix and path traversal checks. This prevents URL manipulation bugs or SSRF vulnerabilities when users import CSV data.
+**Next Planned Step:** Audit input fields for missing sanitization to prevent XSS and SQLi.
 
 ## 🚨 Critical Security Learnings
 *Only add entries here for unique, repo-specific security gaps, unexpected side effects, or reusable patterns.*

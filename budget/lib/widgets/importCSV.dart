@@ -617,10 +617,10 @@ class _ImportCSVState extends State<ImportCSV> {
     )) {
       throw ("Invalid URL format");
     }
-    List<String> parts = googleSheetsUrl.split("/");
-    int index = parts.indexOf("d");
-    if (index != -1 && index + 1 < parts.length) {
-      String spreadsheetId = parts[index + 1];
+    RegExp regExp = RegExp(r"/d/([a-zA-Z0-9_-]+)");
+    Match? match = regExp.firstMatch(googleSheetsUrl);
+    if (match != null && match.groupCount >= 1) {
+      String spreadsheetId = match.group(1)!;
       if (RegExp(r'[/?#@\\]|\.\.').hasMatch(spreadsheetId)) {
         throw ("Invalid spreadsheet ID");
       }
