@@ -73,7 +73,8 @@
 **Next Planned Step:** Conclude the initial privacy mode phase and pivot to addressing security vulnerabilities (like SSRF and Path Traversal) in URL parsing components, specifically targeting `getFileIdFromUrl`.
 - 2026-07-04: Iterative Enhancement - Secured `DaySpending` widget across the budget dashboard. Refactored `DaySpending` to accept a `forceReveal` parameter and lifted its temporary reveal state up to the parent `BudgetContainer`. This unifies the hold-to-reveal gesture, preventing sub-components from having fragmented or missing privacy obfuscation logic.
 - 2026-07-05: Iterative Enhancement - Secured `BudgetSpenderSummary` widget across the budget dashboard. Refactored `BudgetSpenderSummary` to accept a `forceReveal` parameter and lifted its temporary reveal state up to the parent `BudgetPage` and `PastBudgetsPage` (`_BudgetPageContentState` and `__PastBudgetsPageContentState`), completely unifying the hold-to-reveal gesture on the dashboard view.
-**Next Planned Step:** Conclude the initial privacy mode phase and pivot to addressing security vulnerabilities (like SSRF and Path Traversal) in URL parsing components, specifically targeting `getFileIdFromUrl`.
+- 2026-07-22: Iterative Enhancement - Secured URL parsing logic in `convertGoogleSheetsUrlToCsvUrl`. Switched from vulnerable string splitting to a strict regex `RegExp(r"/d/([a-zA-Z0-9_-]+)")` to safely extract Google Sheets IDs, maintaining the strict `https://docs.google.com/spreadsheets/d/` prefix and path traversal checks. This prevents URL manipulation bugs or SSRF vulnerabilities when users import CSV data.
+**Next Planned Step:** Audit input fields for missing sanitization to prevent XSS and SQLi.
 
 ## 🚨 Critical Security Learnings
 *Only add entries here for unique, repo-specific security gaps, unexpected side effects, or reusable patterns.*
