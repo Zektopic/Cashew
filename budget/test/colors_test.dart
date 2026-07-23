@@ -45,7 +45,7 @@ void main() {
       const color = Color(0xFFFF0000); // Red
       final result = darken(color, 0.0);
 
-      expect(result.value, equals(color.value));
+      expect(result.toARGB32(), equals(color.toARGB32()));
     });
 
     test('throws assertion error if amount is negative', () {
@@ -101,7 +101,7 @@ void main() {
       const color = Color(0xFFFF0000); // Red
       final result = lighten(color, 0.0);
 
-      expect(result.value, equals(color.value));
+      expect(result.toARGB32(), equals(color.toARGB32()));
     });
 
     test('throws assertion error if amount is negative', () {
@@ -112,6 +112,72 @@ void main() {
     test('throws assertion error if amount is > 1.0', () {
       const color = Color(0xFFFF0000);
       expect(() => lighten(color, 1.1), throwsAssertionError);
+    });
+  });
+
+  group('lightenPastel', () {
+    test('lightens color by default amount (0.1)', () {
+      const color = Color(0xFFFF0000); // Red
+      final result = lightenPastel(color);
+
+      final expected = Color.alphaBlend(
+        Colors.white.withValues(alpha: 0.1),
+        color,
+      );
+
+      expect(result.toARGB32(), equals(expected.toARGB32()));
+    });
+
+    test('returns original color when amount is 0.0', () {
+      const color = Color(0xFFFF0000); // Red
+      final result = lightenPastel(color, amount: 0.0);
+
+      expect(result.toARGB32(), equals(color.toARGB32()));
+    });
+
+    test('returns pure white when amount is 1.0', () {
+      const color = Color(0xFFFF0000); // Red
+      final result = lightenPastel(color, amount: 1.0);
+
+      expect(result.toARGB32(), equals(Colors.white.toARGB32()));
+    });
+
+    test('handles pure black', () {
+      const color = Colors.black;
+      final result = lightenPastel(color, amount: 0.5);
+
+      final expected = Color.alphaBlend(
+        Colors.white.withValues(alpha: 0.5),
+        color,
+      );
+
+      expect(result.toARGB32(), equals(expected.toARGB32()));
+    });
+
+    test('handles pure white', () {
+      const color = Colors.white;
+      final result = lightenPastel(color, amount: 0.5);
+
+      final expected = Color.alphaBlend(
+        Colors.white.withValues(alpha: 0.5),
+        color,
+      );
+
+      expect(result.toARGB32(), equals(expected.toARGB32()));
+      expect(result.toARGB32(),
+          equals(Colors.white.toARGB32())); // White blended with white is white
+    });
+
+    test('handles transparent color', () {
+      const color = Colors.transparent;
+      final result = lightenPastel(color, amount: 0.5);
+
+      final expected = Color.alphaBlend(
+        Colors.white.withValues(alpha: 0.5),
+        color,
+      );
+
+      expect(result.toARGB32(), equals(expected.toARGB32()));
     });
   });
 }
