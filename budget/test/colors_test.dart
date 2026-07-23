@@ -114,4 +114,40 @@ void main() {
       expect(() => lighten(color, 1.1), throwsAssertionError);
     });
   });
+
+  group('darkenPastel', () {
+    test('blends with black by default amount (0.1)', () {
+      const color = Color(0xFFFF0000);
+      final result = darkenPastel(color);
+      expect(result.value, equals(0xFFE60000));
+    });
+
+    test('blends with black by custom amount (0.5)', () {
+      const color = Color(0xFFFF0000);
+      final result = darkenPastel(color, amount: 0.5);
+      expect(result.value, equals(0xFF800000));
+    });
+
+    test('returns black when darkening by 1.0', () {
+      const color = Color(0xFFFF0000);
+      final result = darkenPastel(color, amount: 1.0);
+      expect(result, equals(const Color(0xFF000000)));
+    });
+
+    test('returns same color when darkening by 0.0', () {
+      const color = Color(0xFFFF0000);
+      final result = darkenPastel(color, amount: 0.0);
+      expect(result, equals(const Color(0xFFFF0000)));
+    });
+
+    test('throws assertion error if amount is negative', () {
+      const color = Color(0xFFFF0000);
+      expect(() => darkenPastel(color, amount: -0.1), throwsAssertionError);
+    });
+
+    test('throws assertion error if amount is > 1.0', () {
+      const color = Color(0xFFFF0000);
+      expect(() => darkenPastel(color, amount: 1.1), throwsAssertionError);
+    });
+  });
 }
