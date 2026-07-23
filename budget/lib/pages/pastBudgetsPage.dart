@@ -44,25 +44,24 @@ class PastBudgetsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<Budget>(
-        stream: database.getBudget(budgetPk),
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            Color? accentColor = HexColor(snapshot.data?.colour);
-            return CustomColorTheme(
-              accentColor: snapshot.data?.colour == null ? null : accentColor,
-              child: _PastBudgetsPageContent(
-                budget: snapshot.data!,
-              ),
-            );
-          }
-          return SizedBox.shrink();
-        });
+      stream: database.getBudget(budgetPk),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          Color? accentColor = HexColor(snapshot.data?.colour);
+          return CustomColorTheme(
+            accentColor: snapshot.data?.colour == null ? null : accentColor,
+            child: _PastBudgetsPageContent(budget: snapshot.data!),
+          );
+        }
+        return SizedBox.shrink();
+      },
+    );
   }
 }
 
 class _PastBudgetsPageContent extends StatefulWidget {
   const _PastBudgetsPageContent({Key? key, required Budget this.budget})
-      : super(key: key);
+    : super(key: key);
   final Budget budget;
 
   @override
@@ -70,7 +69,8 @@ class _PastBudgetsPageContent extends StatefulWidget {
       __PastBudgetsPageContentState();
 }
 
-class __PastBudgetsPageContentState extends State<_PastBudgetsPageContent> {
+class __PastBudgetsPageContentState extends State<_PastBudgetsPageContent>
+    with WidgetsBindingObserver {
   Stream<List<double?>>? mergedStreamsBudgetTotal;
   Stream<List<double?>>? mergedStreamsCategoriesTotal;
   List<DateTimeRange> dateTimeRanges = [];
@@ -79,14 +79,38 @@ class __PastBudgetsPageContentState extends State<_PastBudgetsPageContent> {
   late List<String> selectedCategoryFks =
       getSelectedCategoryFksConsideringBudget();
   GlobalKey<_PastBudgetContainerListState>
-      _pastBudgetContainerListStateStateKey = GlobalKey();
+  _pastBudgetContainerListStateStateKey = GlobalKey();
   GlobalKey<PageFrameworkState> budgetHistoryKey = GlobalKey();
 
+  bool _isRevealed = false;
+  Timer? _revealTimer;
+
   initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
     Future.delayed(Duration.zero, () async {
       loadLines(amountLoaded);
     });
-    super.initState();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _revealTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive) {
+      if (_isRevealed) {
+        _revealTimer?.cancel();
+        setState(() {
+          _isRevealed = false;
+        });
+      }
+    }
   }
 
   @override
@@ -97,17 +121,20 @@ class __PastBudgetsPageContentState extends State<_PastBudgetsPageContent> {
 
   List<String> getSelectedCategoryFksConsideringBudget() {
     List<String> selectedCategoryFks =
-        (appStateSettings["watchedCategoriesOnBudget"]
-                    [widget.budget.budgetPk.toString()] ??
+        (appStateSettings["watchedCategoriesOnBudget"][widget.budget.budgetPk
+                    .toString()] ??
                 [])
             .map<String>((value) => value.toString())
             .toList();
-    selectedCategoryFks.removeWhere((categoryFk) =>
-        (widget.budget.categoryFksExclude ?? []).contains(categoryFk));
+    selectedCategoryFks.removeWhere(
+      (categoryFk) =>
+          (widget.budget.categoryFksExclude ?? []).contains(categoryFk),
+    );
     if (widget.budget.categoryFks != null ||
         widget.budget.categoryFks?.isNotEmpty == true) {
-      selectedCategoryFks.retainWhere((categoryFk) =>
-          (widget.budget.categoryFks ?? []).contains(categoryFk));
+      selectedCategoryFks.retainWhere(
+        (categoryFk) => (widget.budget.categoryFks ?? []).contains(categoryFk),
+      );
     }
     return selectedCategoryFks;
   }
@@ -117,25 +144,29 @@ class __PastBudgetsPageContentState extends State<_PastBudgetsPageContent> {
     List<Stream<double?>> watchedBudgetTotals = [];
     List<Stream<double?>> watchedCategoryTotals = [];
     for (int index = 0; index < amountLoaded; index++) {
-      DateTime datePast =
-          getDatePastToDetermineBudgetDate(index, widget.budget);
+      DateTime datePast = getDatePastToDetermineBudgetDate(
+        index,
+        widget.budget,
+      );
       DateTimeRange budgetRange = getBudgetDate(widget.budget, datePast);
       dateTimeRanges.add(budgetRange);
-      watchedBudgetTotals.add(database.watchTotalSpentInTimeRangeFromCategories(
-        allWallets: Provider.of<AllWallets>(context, listen: false),
-        start: budgetRange.start,
-        end: budgetRange.end,
-        categoryFks: widget.budget.categoryFks,
-        categoryFksExclude: widget.budget.categoryFksExclude,
-        budgetTransactionFilters: widget.budget.budgetTransactionFilters,
-        memberTransactionFilters: widget.budget.memberTransactionFilters,
-        onlyShowTransactionsBelongingToBudgetPk:
-            widget.budget.sharedKey != null ||
-                    widget.budget.addedTransactionsOnly == true
-                ? widget.budget.budgetPk
-                : null,
-        budget: widget.budget,
-      ));
+      watchedBudgetTotals.add(
+        database.watchTotalSpentInTimeRangeFromCategories(
+          allWallets: Provider.of<AllWallets>(context, listen: false),
+          start: budgetRange.start,
+          end: budgetRange.end,
+          categoryFks: widget.budget.categoryFks,
+          categoryFksExclude: widget.budget.categoryFksExclude,
+          budgetTransactionFilters: widget.budget.budgetTransactionFilters,
+          memberTransactionFilters: widget.budget.memberTransactionFilters,
+          onlyShowTransactionsBelongingToBudgetPk:
+              widget.budget.sharedKey != null ||
+                  widget.budget.addedTransactionsOnly == true
+              ? widget.budget.budgetPk
+              : null,
+          budget: widget.budget,
+        ),
+      );
       for (String categoryFk in [...(selectedCategoryFks)]) {
         try {
           await database.getCategory(categoryFk).$2;
@@ -145,22 +176,23 @@ class __PastBudgetsPageContentState extends State<_PastBudgetsPageContent> {
           updateSetting(selectedCategoryFks);
           continue;
         }
-        watchedCategoryTotals
-            .add(database.watchTotalSpentInTimeRangeFromCategories(
-          allWallets: Provider.of<AllWallets>(context, listen: false),
-          start: budgetRange.start,
-          end: budgetRange.end,
-          categoryFks: [categoryFk],
-          categoryFksExclude: null,
-          budgetTransactionFilters: widget.budget.budgetTransactionFilters,
-          memberTransactionFilters: widget.budget.memberTransactionFilters,
-          onlyShowTransactionsBelongingToBudgetPk:
-              widget.budget.sharedKey != null ||
-                      widget.budget.addedTransactionsOnly == true
-                  ? widget.budget.budgetPk
-                  : null,
-          budget: widget.budget,
-        ));
+        watchedCategoryTotals.add(
+          database.watchTotalSpentInTimeRangeFromCategories(
+            allWallets: Provider.of<AllWallets>(context, listen: false),
+            start: budgetRange.start,
+            end: budgetRange.end,
+            categoryFks: [categoryFk],
+            categoryFksExclude: null,
+            budgetTransactionFilters: widget.budget.budgetTransactionFilters,
+            memberTransactionFilters: widget.budget.memberTransactionFilters,
+            onlyShowTransactionsBelongingToBudgetPk:
+                widget.budget.sharedKey != null ||
+                    widget.budget.addedTransactionsOnly == true
+                ? widget.budget.budgetPk
+                : null,
+            budget: widget.budget,
+          ),
+        );
       }
     }
 
@@ -177,11 +209,12 @@ class __PastBudgetsPageContentState extends State<_PastBudgetsPageContent> {
   }
 
   void updateSetting(List<String> selectedCategoryFks) {
-    if (appStateSettings["watchedCategoriesOnBudget"]
-            [widget.budget.budgetPk.toString()] ==
+    if (appStateSettings["watchedCategoriesOnBudget"][widget.budget.budgetPk
+            .toString()] ==
         null) {
-      appStateSettings["watchedCategoriesOnBudget"]
-          [widget.budget.budgetPk.toString()] = {};
+      appStateSettings["watchedCategoriesOnBudget"][widget.budget.budgetPk
+              .toString()] =
+          {};
     }
     Map<dynamic, dynamic> newSetting =
         appStateSettings["watchedCategoriesOnBudget"];
@@ -190,8 +223,12 @@ class __PastBudgetsPageContentState extends State<_PastBudgetsPageContent> {
       convertedMap[key.toString()] = value;
     });
     convertedMap[widget.budget.budgetPk.toString()] = selectedCategoryFks;
-    updateSettings("watchedCategoriesOnBudget", convertedMap,
-        pagesNeedingRefresh: [], updateGlobalState: false);
+    updateSettings(
+      "watchedCategoriesOnBudget",
+      convertedMap,
+      pagesNeedingRefresh: [],
+      updateGlobalState: false,
+    );
   }
 
   void openWatchCategoriesBottomSheet() {
@@ -231,8 +268,9 @@ class __PastBudgetsPageContentState extends State<_PastBudgetsPageContent> {
                       popRoute(context);
                     },
                     color: Theme.of(context).colorScheme.tertiaryContainer,
-                    textColor:
-                        Theme.of(context).colorScheme.onTertiaryContainer,
+                    textColor: Theme.of(
+                      context,
+                    ).colorScheme.onTertiaryContainer,
                   ),
                 ),
                 SizedBox(width: 13),
@@ -254,23 +292,23 @@ class __PastBudgetsPageContentState extends State<_PastBudgetsPageContent> {
   }
 
   @override
-  void dispose() {
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     DateTimeRange budgetRange = getBudgetDate(widget.budget, DateTime.now());
     Color pageBackgroundColor =
         Theme.of(context).brightness == Brightness.dark &&
-                appStateSettings["forceFullDarkBackground"]
-            ? Colors.black
-            : appStateSettings["materialYou"]
-                ? dynamicPastel(context, Theme.of(context).colorScheme.primary,
-                    amount: 0.92)
-                : Theme.of(context).colorScheme.background;
+            appStateSettings["forceFullDarkBackground"]
+        ? Colors.black
+        : appStateSettings["materialYou"]
+        ? dynamicPastel(
+            context,
+            Theme.of(context).colorScheme.primary,
+            amount: 0.92,
+          )
+        : Theme.of(context).colorScheme.background;
     double budgetAmount = budgetAmountToPrimaryCurrency(
-        Provider.of<AllWallets>(context, listen: true), widget.budget);
+      Provider.of<AllWallets>(context, listen: true),
+      widget.budget,
+    );
 
     return PageFramework(
       backgroundColor: pageBackgroundColor,
@@ -280,10 +318,13 @@ class __PastBudgetsPageContentState extends State<_PastBudgetsPageContent> {
       title: "history".tr(),
       subtitle: TextFont(
         text: widget.budget.name,
-        fontSize: getCenteredTitle(context: context, backButtonEnabled: true) ==
+        fontSize:
+            getCenteredTitle(context: context, backButtonEnabled: true) ==
                     true &&
                 getCenteredTitleSmall(
-                        context: context, backButtonEnabled: true) ==
+                      context: context,
+                      backButtonEnabled: true,
+                    ) ==
                     false
             ? 30
             : 22,
@@ -339,183 +380,204 @@ class __PastBudgetsPageContentState extends State<_PastBudgetsPageContent> {
                   children: [
                     Container(
                       padding: const EdgeInsetsDirectional.symmetric(
-                          vertical: 7, horizontal: 0),
+                        vertical: 7,
+                        horizontal: 0,
+                      ),
                       color: pageBackgroundColor,
                       child: Padding(
                         padding: const EdgeInsetsDirectional.only(end: 5),
                         child: StreamBuilder<Map<String, TransactionCategory>>(
-                            stream: database.watchAllCategoriesMapped(),
-                            builder: (context, snapshotCategoriesMapped) {
-                              if (snapshotCategoriesMapped.hasData) {
-                                return StreamBuilder<List<double?>>(
-                                  stream: mergedStreamsBudgetTotal,
-                                  builder: (context, snapshot) {
-                                    if (snapshot.hasData) {
-                                      double maxY = 0.1;
-                                      double minY = -0.00000000000001;
-                                      List<FlSpot> spots = [];
+                          stream: database.watchAllCategoriesMapped(),
+                          builder: (context, snapshotCategoriesMapped) {
+                            if (snapshotCategoriesMapped.hasData) {
+                              return StreamBuilder<List<double?>>(
+                                stream: mergedStreamsBudgetTotal,
+                                builder: (context, snapshot) {
+                                  if (snapshot.hasData) {
+                                    double maxY = 0.1;
+                                    double minY = -0.00000000000001;
+                                    List<FlSpot> spots = [];
 
-                                      for (int i = snapshot.data!.length - 1;
-                                          i >= 0;
-                                          i--) {
-                                        if ((snapshot.data![i] ?? 0) *
-                                                determineBudgetPolarity(
-                                                    widget.budget) <
-                                            minY) {
-                                          minY = (snapshot.data![i] ?? 0) *
+                                    for (
+                                      int i = snapshot.data!.length - 1;
+                                      i >= 0;
+                                      i--
+                                    ) {
+                                      if ((snapshot.data![i] ?? 0) *
                                               determineBudgetPolarity(
-                                                  widget.budget);
-                                        }
-                                        if ((snapshot.data![i] ?? 0) *
-                                                determineBudgetPolarity(
-                                                    widget.budget) >
-                                            maxY) {
-                                          maxY = (snapshot.data![i] ?? 0) *
+                                                widget.budget,
+                                              ) <
+                                          minY) {
+                                        minY =
+                                            (snapshot.data![i] ?? 0) *
+                                            determineBudgetPolarity(
+                                              widget.budget,
+                                            );
+                                      }
+                                      if ((snapshot.data![i] ?? 0) *
                                               determineBudgetPolarity(
-                                                  widget.budget);
-                                        }
-                                        spots.add(FlSpot(
+                                                widget.budget,
+                                              ) >
+                                          maxY) {
+                                        maxY =
+                                            (snapshot.data![i] ?? 0) *
+                                            determineBudgetPolarity(
+                                              widget.budget,
+                                            );
+                                      }
+                                      spots.add(
+                                        FlSpot(
                                           snapshot.data!.length -
                                               1 -
                                               i.toDouble(),
                                           (snapshot.data![i] ?? 0).abs() == 0
                                               ? 0.00000000001
                                               : (snapshot.data![i] ?? 0) *
-                                                  determineBudgetPolarity(
-                                                      widget.budget),
-                                        ));
-                                      }
-                                      // print(minY);
-                                      // print(maxY);
-                                      return StreamBuilder<List<double?>>(
-                                        stream: mergedStreamsCategoriesTotal,
-                                        builder: (context,
-                                            snapshotMergedStreamsCategoriesTotal) {
-                                          Map<String, List<FlSpot>>
-                                              categorySpentPoints = {};
-                                          if (snapshotMergedStreamsCategoriesTotal
-                                                  .hasData &&
-                                              (selectedCategoryFks).length >
-                                                  0) {
-                                            maxY = 0.1;
-                                            // separate each into a map of their own
-                                            int i =
-                                                snapshotMergedStreamsCategoriesTotal
-                                                        .data!.length -
-                                                    1;
-                                            for (int day = 0;
+                                                    determineBudgetPolarity(
+                                                      widget.budget,
+                                                    ),
+                                        ),
+                                      );
+                                    }
+                                    // print(minY);
+                                    // print(maxY);
+                                    return StreamBuilder<List<double?>>(
+                                      stream: mergedStreamsCategoriesTotal,
+                                      builder:
+                                          (
+                                            context,
+                                            snapshotMergedStreamsCategoriesTotal,
+                                          ) {
+                                            Map<String, List<FlSpot>>
+                                            categorySpentPoints = {};
+                                            if (snapshotMergedStreamsCategoriesTotal
+                                                    .hasData &&
+                                                (selectedCategoryFks).length >
+                                                    0) {
+                                              maxY = 0.1;
+                                              // separate each into a map of their own
+                                              int i =
+                                                  snapshotMergedStreamsCategoriesTotal
+                                                      .data!
+                                                      .length -
+                                                  1;
+                                              for (
+                                                int day = 0;
                                                 day <
                                                     snapshotMergedStreamsCategoriesTotal
-                                                            .data!.length /
+                                                            .data!
+                                                            .length /
                                                         selectedCategoryFks
                                                             .length;
-                                                day++) {
-                                              for (String categoryFk
-                                                  in selectedCategoryFks
-                                                      .reversed) {
-                                                if (categorySpentPoints[
-                                                        categoryFk] ==
-                                                    null) {
-                                                  categorySpentPoints[
-                                                      categoryFk] = [];
-                                                }
-                                                if (i <
-                                                        snapshotMergedStreamsCategoriesTotal
-                                                            .data!.length &&
-                                                    i >= 0) {
-                                                  categorySpentPoints[
-                                                          categoryFk]!
-                                                      .add(
-                                                    FlSpot(
-                                                      (snapshotMergedStreamsCategoriesTotal
-                                                                  .data!
-                                                                  .length -
-                                                              day.toDouble() -
-                                                              snapshotMergedStreamsCategoriesTotal
-                                                                  .data!.length)
-                                                          .abs(),
-                                                      (snapshotMergedStreamsCategoriesTotal
-                                                                              .data?[
-                                                                          i] ??
-                                                                      0)
-                                                                  .abs() ==
-                                                              0
-                                                          ? 0.00000000001
-                                                          : (snapshotMergedStreamsCategoriesTotal
-                                                                          .data![
-                                                                      i] ??
-                                                                  0)
-                                                              .abs(),
-                                                    ),
-                                                  );
-                                                  if ((snapshotMergedStreamsCategoriesTotal
-                                                                  .data?[i] ??
-                                                              0)
-                                                          .abs() >
-                                                      maxY) {
-                                                    maxY =
+                                                day++
+                                              ) {
+                                                for (String categoryFk
+                                                    in selectedCategoryFks
+                                                        .reversed) {
+                                                  if (categorySpentPoints[categoryFk] ==
+                                                      null) {
+                                                    categorySpentPoints[categoryFk] =
+                                                        [];
+                                                  }
+                                                  if (i <
+                                                          snapshotMergedStreamsCategoriesTotal
+                                                              .data!
+                                                              .length &&
+                                                      i >= 0) {
+                                                    categorySpentPoints[categoryFk]!.add(
+                                                      FlSpot(
                                                         (snapshotMergedStreamsCategoriesTotal
+                                                                    .data!
+                                                                    .length -
+                                                                day.toDouble() -
+                                                                snapshotMergedStreamsCategoriesTotal
+                                                                    .data!
+                                                                    .length)
+                                                            .abs(),
+                                                        (snapshotMergedStreamsCategoriesTotal
+                                                                            .data?[i] ??
+                                                                        0)
+                                                                    .abs() ==
+                                                                0
+                                                            ? 0.00000000001
+                                                            : (snapshotMergedStreamsCategoriesTotal
+                                                                          .data![i] ??
+                                                                      0)
+                                                                  .abs(),
+                                                      ),
+                                                    );
+                                                    if ((snapshotMergedStreamsCategoriesTotal
                                                                     .data?[i] ??
                                                                 0)
-                                                            .abs();
+                                                            .abs() >
+                                                        maxY) {
+                                                      maxY =
+                                                          (snapshotMergedStreamsCategoriesTotal
+                                                                      .data?[i] ??
+                                                                  0)
+                                                              .abs();
+                                                    }
                                                   }
+                                                  i--;
                                                 }
-                                                i--;
                                               }
                                             }
-                                          }
-                                          // print(categorySpentPoints);
-                                          Widget graph = BudgetHistoryLineGraph(
-                                            onTouchedIndex: (index) {
-                                              // debounce to avoid duplicate key on AnimatedSwitcher
-                                              _pastBudgetContainerListStateStateKey
-                                                  .currentState
-                                                  ?.setTouchedBudgetIndex(
-                                                      index);
-                                            },
-                                            color: dynamicPastel(
-                                              context,
-                                              Theme.of(context)
-                                                  .colorScheme
-                                                  .primary,
-                                              amountLight: 0.4,
-                                              amountDark: 0.2,
-                                            ),
-                                            dateRanges: dateTimeRanges,
-                                            spots: [spots],
-                                            horizontalLineAt: budgetAmount,
-                                            budget: widget.budget,
-                                            extraCategorySpots:
-                                                categorySpentPoints,
-                                            categoriesMapped:
-                                                snapshotCategoriesMapped.data!,
-                                            loadAllEvenIfZero:
-                                                amountLoadedPressedOnce,
-                                            setNoPastRegionsAreZero:
-                                                (bool value) {
-                                              amountLoadedPressedOnce = true;
-                                            },
-                                            forceMaxY: maxY,
-                                            forceMinYIfPositive: 0,
-                                          );
-                                          if (getCenteredTitle(
-                                              context: context,
-                                              backButtonEnabled: true)) {
-                                            return ClipRRect(
-                                              child: graph,
+                                            // print(categorySpentPoints);
+                                            Widget
+                                            graph = BudgetHistoryLineGraph(
+                                              onTouchedIndex: (index) {
+                                                // debounce to avoid duplicate key on AnimatedSwitcher
+                                                _pastBudgetContainerListStateStateKey
+                                                    .currentState
+                                                    ?.setTouchedBudgetIndex(
+                                                      index,
+                                                    );
+                                              },
+                                              color: dynamicPastel(
+                                                context,
+                                                Theme.of(
+                                                  context,
+                                                ).colorScheme.primary,
+                                                amountLight: 0.4,
+                                                amountDark: 0.2,
+                                              ),
+                                              dateRanges: dateTimeRanges,
+                                              spots: [spots],
+                                              horizontalLineAt: budgetAmount,
+                                              budget: widget.budget,
+                                              extraCategorySpots:
+                                                  categorySpentPoints,
+                                              categoriesMapped:
+                                                  snapshotCategoriesMapped
+                                                      .data!,
+                                              loadAllEvenIfZero:
+                                                  amountLoadedPressedOnce,
+                                              setNoPastRegionsAreZero:
+                                                  (bool value) {
+                                                    amountLoadedPressedOnce =
+                                                        true;
+                                                  },
+                                              forceMaxY: maxY,
+                                              forceMinYIfPositive: 0,
                                             );
-                                          }
-                                          return graph;
-                                        },
-                                      );
-                                    } else {
-                                      return SizedBox.shrink();
-                                    }
-                                  },
-                                );
-                              }
-                              return SizedBox.shrink();
-                            }),
+                                            if (getCenteredTitle(
+                                              context: context,
+                                              backButtonEnabled: true,
+                                            )) {
+                                              return ClipRRect(child: graph);
+                                            }
+                                            return graph;
+                                          },
+                                    );
+                                  } else {
+                                    return SizedBox.shrink();
+                                  }
+                                },
+                              );
+                            }
+                            return SizedBox.shrink();
+                          },
+                        ),
                       ),
                     ),
                     Transform.translate(
@@ -592,95 +654,137 @@ class __PastBudgetsPageContentState extends State<_PastBudgetsPageContent> {
                       child: Padding(
                         padding: const EdgeInsetsDirectional.only(bottom: 10),
                         child: StreamBuilder<List<double?>>(
-                            stream: mergedStreamsBudgetTotal,
-                            builder:
-                                (context, snapshotMergedStreamsBudgetTotal) {
-                              int totalNonZeroPeriods = 0;
-                              for (double? periodTotal
-                                  in (snapshotMergedStreamsBudgetTotal.data ??
-                                      [])) {
-                                if (periodTotal != null && periodTotal != 0) {
-                                  totalNonZeroPeriods++;
-                                }
+                          stream: mergedStreamsBudgetTotal,
+                          builder: (context, snapshotMergedStreamsBudgetTotal) {
+                            int totalNonZeroPeriods = 0;
+                            for (double? periodTotal
+                                in (snapshotMergedStreamsBudgetTotal.data ??
+                                    [])) {
+                              if (periodTotal != null && periodTotal != 0) {
+                                totalNonZeroPeriods++;
                               }
+                            }
 
-                              return StreamBuilder<
-                                  Map<String, TransactionCategory>>(
-                                stream: database.watchAllCategoriesMapped(),
-                                builder: (context, snapshotCategoriesMapped) {
-                                  if (snapshotCategoriesMapped.hasData) {
-                                    return StreamBuilder<List<double?>>(
-                                      stream: mergedStreamsCategoriesTotal,
-                                      builder:
-                                          (context, snapshotCategoriesTotal) {
-                                        if (snapshotCategoriesTotal.hasData) {
-                                          List<Widget> children = [];
-                                          Map<String, double> categoryTotals =
-                                              {};
-                                          for (int period = 0;
+                            return StreamBuilder<
+                              Map<String, TransactionCategory>
+                            >(
+                              stream: database.watchAllCategoriesMapped(),
+                              builder: (context, snapshotCategoriesMapped) {
+                                if (snapshotCategoriesMapped.hasData) {
+                                  return StreamBuilder<List<double?>>(
+                                    stream: mergedStreamsCategoriesTotal,
+                                    builder: (context, snapshotCategoriesTotal) {
+                                      if (snapshotCategoriesTotal.hasData) {
+                                        List<Widget> children = [];
+                                        Map<String, double> categoryTotals = {};
+                                        for (
+                                          int period = 0;
+                                          period <
+                                              amountLoaded *
+                                                  selectedCategoryFks.length;
+                                          period++
+                                        ) {
+                                          int categoryIndex =
+                                              period %
+                                              (selectedCategoryFks).length;
+                                          TransactionCategory?
+                                          category = snapshotCategoriesMapped
+                                              .data![selectedCategoryFks[categoryIndex]];
+                                          if (category != null &&
                                               period <
-                                                  amountLoaded *
-                                                      selectedCategoryFks
-                                                          .length;
-                                              period++) {
-                                            int categoryIndex = period %
-                                                (selectedCategoryFks).length;
-                                            TransactionCategory? category =
-                                                snapshotCategoriesMapped.data![
-                                                    selectedCategoryFks[
-                                                        categoryIndex]];
-                                            if (category != null &&
-                                                period <
-                                                    snapshotCategoriesTotal
-                                                        .data!.length) {
-                                              categoryTotals[
-                                                      category.categoryPk] =
-                                                  (categoryTotals[category
-                                                              .categoryPk] ??
-                                                          0) +
-                                                      (snapshotCategoriesTotal
-                                                              .data?[period] ??
-                                                          0);
-                                            }
+                                                  snapshotCategoriesTotal
+                                                      .data!
+                                                      .length) {
+                                            categoryTotals[category
+                                                    .categoryPk] =
+                                                (categoryTotals[category
+                                                        .categoryPk] ??
+                                                    0) +
+                                                (snapshotCategoriesTotal
+                                                        .data?[period] ??
+                                                    0);
                                           }
-                                          for (String categoryPk
-                                              in categoryTotals.keys) {
-                                            TransactionCategory? category =
-                                                snapshotCategoriesMapped
-                                                    .data![categoryPk];
-                                            if (category != null) {
-                                              children.add(
-                                                CategoryAverageSpent(
-                                                  category: category,
-                                                  amountPeriods:
-                                                      totalNonZeroPeriods,
-                                                  amountSpent: categoryTotals[
-                                                          categoryPk] ??
-                                                      0,
-                                                  onTap: () {
-                                                    openWatchCategoriesBottomSheet();
-                                                  },
-                                                  isSavingsBudget:
-                                                      widget.budget.income,
-                                                ),
+                                        }
+                                        for (String categoryPk
+                                            in categoryTotals.keys) {
+                                          TransactionCategory? category =
+                                              snapshotCategoriesMapped
+                                                  .data![categoryPk];
+                                          if (category != null) {
+                                            children.add(
+                                              CategoryAverageSpent(
+                                                category: category,
+                                                amountPeriods:
+                                                    totalNonZeroPeriods,
+                                                amountSpent:
+                                                    categoryTotals[categoryPk] ??
+                                                    0,
+                                                onTap: () {
+                                                  openWatchCategoriesBottomSheet();
+                                                },
+                                                isSavingsBudget:
+                                                    widget.budget.income,
+                                                forceReveal: _isRevealed,
+                                              ),
+                                            );
+                                          }
+                                        }
+
+                                        return Listener(
+                                          onPointerDown: (_) {
+                                            if (appStateSettings["obscureAmounts"] ==
+                                                true) {
+                                              HapticFeedback.selectionClick();
+                                              setState(
+                                                () => _isRevealed = true,
+                                              );
+                                              _revealTimer?.cancel();
+                                            }
+                                          },
+                                          onPointerUp: (_) {
+                                            if (appStateSettings["obscureAmounts"] ==
+                                                true) {
+                                              _revealTimer?.cancel();
+                                              _revealTimer = Timer(
+                                                Duration(seconds: 2),
+                                                () {
+                                                  if (mounted)
+                                                    setState(
+                                                      () => _isRevealed = false,
+                                                    );
+                                                },
                                               );
                                             }
-                                          }
-
-                                          return Column(
-                                            children: children,
-                                          );
-                                        } else {
-                                          return SizedBox.shrink();
-                                        }
-                                      },
-                                    );
-                                  } else {
-                                    return SizedBox.shrink();
-                                  }
-                                },
-                              );
-                            }),
+                                          },
+                                          onPointerCancel: (_) {
+                                            if (appStateSettings["obscureAmounts"] ==
+                                                true) {
+                                              _revealTimer?.cancel();
+                                              _revealTimer = Timer(
+                                                Duration(seconds: 2),
+                                                () {
+                                                  if (mounted)
+                                                    setState(
+                                                      () => _isRevealed = false,
+                                                    );
+                                                },
+                                              );
+                                            }
+                                          },
+                                          child: Column(children: children),
+                                        );
+                                      } else {
+                                        return SizedBox.shrink();
+                                      }
+                                    },
+                                  );
+                                } else {
+                                  return SizedBox.shrink();
+                                }
+                              },
+                            );
+                          },
+                        ),
                       ),
                     )
                   : SliverToBoxAdapter(child: SizedBox.shrink()),
@@ -705,8 +809,9 @@ class __PastBudgetsPageContentState extends State<_PastBudgetsPageContent> {
                   } else {
                     loadLines(amountLoaded);
                     Future.delayed(Duration(milliseconds: 150), () {
-                      budgetHistoryKey.currentState!
-                          .scrollToBottom(duration: 4000);
+                      budgetHistoryKey.currentState!.scrollToBottom(
+                        duration: 4000,
+                      );
                     });
                   }
                 },
@@ -800,33 +905,38 @@ class _PastBudgetContainerListState extends State<PastBudgetContainerList> {
                   delegate: SliverChildBuilderDelegate(
                     (BuildContext context, int index) {
                       DateTime datePast = getDatePastToDetermineBudgetDate(
-                          index, widget.budget);
+                        index,
+                        widget.budget,
+                      );
                       return FadeIn(
                         duration: Duration(milliseconds: 400),
                         child: AnimatedContainer(
                           duration: Duration(milliseconds: 200),
                           decoration: BoxDecoration(
-                            boxShadow: getPlatform() == PlatformOS.isIOS ||
+                            boxShadow:
+                                getPlatform() == PlatformOS.isIOS ||
                                     appStateSettings["materialYou"]
                                 ? []
                                 : touchedBudgetIndex == null ||
-                                        widget.amountLoaded -
-                                                touchedBudgetIndex! -
-                                                1 ==
-                                            index
-                                    ? boxShadowCheck(boxShadowGeneral(context))
-                                    : [BoxShadow(color: Colors.transparent)],
+                                      widget.amountLoaded -
+                                              touchedBudgetIndex! -
+                                              1 ==
+                                          index
+                                ? boxShadowCheck(boxShadowGeneral(context))
+                                : [BoxShadow(color: Colors.transparent)],
                           ),
                           padding: getPlatform() == PlatformOS.isIOS
                               ? EdgeInsetsDirectional.zero
                               : EdgeInsetsDirectional.only(
-                                  bottom: touchedBudgetIndex != null ||
+                                  bottom:
+                                      touchedBudgetIndex != null ||
                                           index == widget.amountLoaded - 1
                                       ? 0
                                       : 10,
                                 ),
                           child: AnimatedExpanded(
-                            expand: touchedBudgetIndex == null ||
+                            expand:
+                                touchedBudgetIndex == null ||
                                 widget.amountLoaded - touchedBudgetIndex! - 1 ==
                                     index,
                             child: AddTopAndBottomBorderIfIOS(
@@ -834,8 +944,9 @@ class _PastBudgetContainerListState extends State<PastBudgetContainerList> {
                               child: PastBudgetContainer(
                                 budget: widget.budget,
                                 smallBudgetContainer: true,
-                                showTodayForSmallBudget:
-                                    (index == 0 ? true : false),
+                                showTodayForSmallBudget: (index == 0
+                                    ? true
+                                    : false),
                                 dateForRange: datePast,
                                 backgroundColor: widget.backgroundColor,
                                 dateForRangeIndex: index,
@@ -853,60 +964,68 @@ class _PastBudgetContainerListState extends State<PastBudgetContainerList> {
                 padding: getPlatform() == PlatformOS.isIOS
                     ? EdgeInsetsDirectional.zero
                     : EdgeInsetsDirectional.only(
-                        bottom: 15, start: 13, end: 13),
+                        bottom: 15,
+                        start: 13,
+                        end: 13,
+                      ),
                 sliver: SliverGrid(
                   gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
                     maxCrossAxisExtent: 600,
                     mainAxisExtent: 95,
-                    crossAxisSpacing:
-                        getPlatform() == PlatformOS.isIOS ? 0 : 10,
+                    crossAxisSpacing: getPlatform() == PlatformOS.isIOS
+                        ? 0
+                        : 10,
                   ),
-                  delegate: SliverChildBuilderDelegate(
-                    (BuildContext context, int index) {
-                      DateTime datePast = getDatePastToDetermineBudgetDate(
-                          index, widget.budget);
-                      return FadeIn(
-                        duration: Duration(milliseconds: 400),
-                        child: AnimatedOpacity(
-                          duration: Duration(milliseconds: 200),
-                          opacity: touchedBudgetIndex == null ||
-                                  widget.amountLoaded -
-                                          touchedBudgetIndex! -
-                                          1 ==
-                                      index
-                              ? 1
-                              : 0.5,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              boxShadow: getPlatform() == PlatformOS.isIOS ||
-                                      appStateSettings["materialYou"]
-                                  ? []
-                                  : boxShadowCheck(boxShadowGeneral(context)),
-                            ),
-                            child: AddTopAndBottomBorderIfIOS(
-                              enabled: getPlatform() == PlatformOS.isIOS,
-                              child: Padding(
-                                padding: getPlatform() == PlatformOS.isIOS
-                                    ? EdgeInsetsDirectional.symmetric(
-                                        vertical: 13.0 / 2)
-                                    : EdgeInsetsDirectional.only(bottom: 13.0),
-                                child: PastBudgetContainer(
-                                  budget: widget.budget,
-                                  smallBudgetContainer: true,
-                                  showTodayForSmallBudget:
-                                      (index == 0 ? true : false),
-                                  dateForRange: datePast,
-                                  backgroundColor: widget.backgroundColor,
-                                  dateForRangeIndex: index,
-                                ),
+                  delegate: SliverChildBuilderDelegate((
+                    BuildContext context,
+                    int index,
+                  ) {
+                    DateTime datePast = getDatePastToDetermineBudgetDate(
+                      index,
+                      widget.budget,
+                    );
+                    return FadeIn(
+                      duration: Duration(milliseconds: 400),
+                      child: AnimatedOpacity(
+                        duration: Duration(milliseconds: 200),
+                        opacity:
+                            touchedBudgetIndex == null ||
+                                widget.amountLoaded - touchedBudgetIndex! - 1 ==
+                                    index
+                            ? 1
+                            : 0.5,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            boxShadow:
+                                getPlatform() == PlatformOS.isIOS ||
+                                    appStateSettings["materialYou"]
+                                ? []
+                                : boxShadowCheck(boxShadowGeneral(context)),
+                          ),
+                          child: AddTopAndBottomBorderIfIOS(
+                            enabled: getPlatform() == PlatformOS.isIOS,
+                            child: Padding(
+                              padding: getPlatform() == PlatformOS.isIOS
+                                  ? EdgeInsetsDirectional.symmetric(
+                                      vertical: 13.0 / 2,
+                                    )
+                                  : EdgeInsetsDirectional.only(bottom: 13.0),
+                              child: PastBudgetContainer(
+                                budget: widget.budget,
+                                smallBudgetContainer: true,
+                                showTodayForSmallBudget: (index == 0
+                                    ? true
+                                    : false),
+                                dateForRange: datePast,
+                                backgroundColor: widget.backgroundColor,
+                                dateForRangeIndex: index,
                               ),
                             ),
                           ),
                         ),
-                      );
-                    },
-                    childCount: widget.amountLoaded,
-                  ),
+                      ),
+                    );
+                  }, childCount: widget.amountLoaded),
                 ),
               ),
         SliverToBoxAdapter(
@@ -914,18 +1033,21 @@ class _PastBudgetContainerListState extends State<PastBudgetContainerList> {
             child: Padding(
               padding: EdgeInsetsDirectional.only(
                 bottom: 30,
-                top: getIsFullScreen(context) == true &&
+                top:
+                    getIsFullScreen(context) == true &&
                         getPlatform() == PlatformOS.isIOS
                     ? 10
                     : 0,
               ),
               child: LowKeyButton(
                 onTap: () {
-                  int amountMoreToLoad =
-                      getIsFullScreen(context) == false ? 3 : 5;
+                  int amountMoreToLoad = getIsFullScreen(context) == false
+                      ? 3
+                      : 5;
                   widget.loadLines(widget.amountLoaded + amountMoreToLoad);
-                  widget
-                      .setAmountLoaded(widget.amountLoaded + amountMoreToLoad);
+                  widget.setAmountLoaded(
+                    widget.amountLoaded + amountMoreToLoad,
+                  );
                 },
                 text: "view-more".tr(),
               ),
@@ -959,14 +1081,35 @@ class PastBudgetContainer extends StatefulWidget {
   State<PastBudgetContainer> createState() => _PastBudgetContainerState();
 }
 
-class _PastBudgetContainerState extends State<PastBudgetContainer> {
+class _PastBudgetContainerState extends State<PastBudgetContainer>
+    with WidgetsBindingObserver {
   bool _isRevealed = false;
   Timer? _revealTimer;
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _revealTimer?.cancel();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive) {
+      if (_isRevealed) {
+        _revealTimer?.cancel();
+        setState(() {
+          _isRevealed = false;
+        });
+      }
+    }
   }
 
   @override
@@ -976,15 +1119,22 @@ class _PastBudgetContainerState extends State<PastBudgetContainer> {
     Color backgroundColor = this.widget.backgroundColor;
     int dateForRangeIndex = this.widget.dateForRangeIndex;
     Color progressForegroundColor = dynamicPastel(
-        context, Theme.of(context).colorScheme.primary,
-        amountLight: 0.4, amountDark: 0.2);
-    Color progressBackgroundColor =
-        Theme.of(context).colorScheme.secondaryContainer;
+      context,
+      Theme.of(context).colorScheme.primary,
+      amountLight: 0.4,
+      amountDark: 0.2,
+    );
+    Color progressBackgroundColor = Theme.of(
+      context,
+    ).colorScheme.secondaryContainer;
     Color progressOverageColor = Theme.of(context).colorScheme.tertiary;
     double budgetAmount = budgetAmountToPrimaryCurrency(
-        Provider.of<AllWallets>(context, listen: true), budget);
-    DateTime dateForRangeLocal =
-        dateForRange == null ? DateTime.now() : dateForRange;
+      Provider.of<AllWallets>(context, listen: true),
+      budget,
+    );
+    DateTime dateForRangeLocal = dateForRange == null
+        ? DateTime.now()
+        : dateForRange;
     DateTimeRange budgetRange = getBudgetDate(budget, dateForRangeLocal);
     var widget = StreamBuilder<List<CategoryWithTotal>>(
       stream: database.watchTotalSpentInEachCategoryInTimeRangeFromCategories(
@@ -997,8 +1147,8 @@ class _PastBudgetContainerState extends State<PastBudgetContainer> {
         memberTransactionFilters: budget.memberTransactionFilters,
         onlyShowTransactionsBelongingToBudgetPk:
             budget.sharedKey != null || budget.addedTransactionsOnly == true
-                ? budget.budgetPk
-                : null,
+            ? budget.budgetPk
+            : null,
         budget: budget,
       ),
       builder: (context, snapshot) {
@@ -1011,8 +1161,10 @@ class _PastBudgetContainerState extends State<PastBudgetContainer> {
           totalSpent = absoluteZero(totalSpent);
 
           return Padding(
-            padding:
-                EdgeInsetsDirectional.symmetric(horizontal: 20, vertical: 10),
+            padding: EdgeInsetsDirectional.symmetric(
+              horizontal: 20,
+              vertical: 10,
+            ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -1029,8 +1181,11 @@ class _PastBudgetContainerState extends State<PastBudgetContainer> {
                           children: [
                             Flexible(
                               child: TextFont(
-                                text: getPercentBetweenDates(
-                                            budgetRange, DateTime.now()) <=
+                                text:
+                                    getPercentBetweenDates(
+                                          budgetRange,
+                                          DateTime.now(),
+                                        ) <=
                                         100
                                     ? "current-period".tr()
                                     : getWordedDateShortMore(budgetRange.start),
@@ -1044,7 +1199,8 @@ class _PastBudgetContainerState extends State<PastBudgetContainer> {
                                 start: 5,
                               ),
                               child: TextFont(
-                                text: budgetRange.start.year !=
+                                text:
+                                    budgetRange.start.year !=
                                         DateTime.now().year
                                     ? budgetRange.start.year.toString()
                                     : "",
@@ -1063,28 +1219,31 @@ class _PastBudgetContainerState extends State<PastBudgetContainer> {
                                     children: [
                                       Container(
                                         child: CountNumber(
-                                          count: appStateSettings[
-                                                  "showTotalSpentForBudget"]
+                                          count:
+                                              appStateSettings["showTotalSpentForBudget"]
                                               ? totalSpent
                                               : budgetAmount - totalSpent,
                                           duration: Duration(milliseconds: 700),
                                           initialCount: (0),
                                           textBuilder: (number) {
                                             return AnimatedSwitcher(
-                                              duration:
-                                                  Duration(milliseconds: 300),
+                                              duration: Duration(
+                                                milliseconds: 300,
+                                              ),
                                               child: TextFont(
                                                 key: ValueKey(_isRevealed),
                                                 text: convertToMoney(
-                                                    Provider.of<AllWallets>(
-                                                        context),
-                                                    number,
-                                                    finalNumber: appStateSettings[
-                                                            "showTotalSpentForBudget"]
-                                                        ? totalSpent
-                                                        : budgetAmount -
+                                                  Provider.of<AllWallets>(
+                                                    context,
+                                                  ),
+                                                  number,
+                                                  finalNumber:
+                                                      appStateSettings["showTotalSpentForBudget"]
+                                                      ? totalSpent
+                                                      : budgetAmount -
                                                             totalSpent,
-                                                    forceReveal: _isRevealed),
+                                                  forceReveal: _isRevealed,
+                                                ),
                                                 fontSize: 16,
                                                 textAlign: TextAlign.start,
                                                 fontWeight: FontWeight.bold,
@@ -1096,21 +1255,28 @@ class _PastBudgetContainerState extends State<PastBudgetContainer> {
                                       Padding(
                                         padding:
                                             const EdgeInsetsDirectional.only(
-                                                bottom: 0.5),
+                                              bottom: 0.5,
+                                            ),
                                         child: Container(
                                           child: AnimatedSwitcher(
-                                            duration:
-                                                Duration(milliseconds: 300),
+                                            duration: Duration(
+                                              milliseconds: 300,
+                                            ),
                                             child: TextFont(
                                               key: ValueKey(
-                                                  'spent_$_isRevealed'),
-                                              text: getBudgetSpentText(
-                                                      budget.income) +
+                                                'spent_$_isRevealed',
+                                              ),
+                                              text:
+                                                  getBudgetSpentText(
+                                                    budget.income,
+                                                  ) +
                                                   convertToMoney(
-                                                      Provider.of<AllWallets>(
-                                                          context),
-                                                      budgetAmount,
-                                                      forceReveal: _isRevealed),
+                                                    Provider.of<AllWallets>(
+                                                      context,
+                                                    ),
+                                                    budgetAmount,
+                                                    forceReveal: _isRevealed,
+                                                  ),
                                               fontSize: 12,
                                               textAlign: TextAlign.start,
                                             ),
@@ -1126,8 +1292,8 @@ class _PastBudgetContainerState extends State<PastBudgetContainer> {
                                 children: [
                                   Container(
                                     child: CountNumber(
-                                      count: appStateSettings[
-                                              "showTotalSpentForBudget"]
+                                      count:
+                                          appStateSettings["showTotalSpentForBudget"]
                                           ? totalSpent
                                           : totalSpent - budgetAmount,
                                       duration: Duration(milliseconds: 700),
@@ -1138,14 +1304,14 @@ class _PastBudgetContainerState extends State<PastBudgetContainer> {
                                           child: TextFont(
                                             key: ValueKey(_isRevealed),
                                             text: convertToMoney(
-                                                Provider.of<AllWallets>(
-                                                    context),
-                                                number,
-                                                finalNumber: appStateSettings[
-                                                        "showTotalSpentForBudget"]
-                                                    ? totalSpent
-                                                    : totalSpent - budgetAmount,
-                                                forceReveal: _isRevealed),
+                                              Provider.of<AllWallets>(context),
+                                              number,
+                                              finalNumber:
+                                                  appStateSettings["showTotalSpentForBudget"]
+                                                  ? totalSpent
+                                                  : totalSpent - budgetAmount,
+                                              forceReveal: _isRevealed,
+                                            ),
                                             fontSize: 16,
                                             textAlign: TextAlign.start,
                                             fontWeight: FontWeight.bold,
@@ -1157,19 +1323,25 @@ class _PastBudgetContainerState extends State<PastBudgetContainer> {
                                   Flexible(
                                     child: Container(
                                       padding: const EdgeInsetsDirectional.only(
-                                          bottom: 0),
+                                        bottom: 0,
+                                      ),
                                       child: AnimatedSwitcher(
                                         duration: Duration(milliseconds: 300),
                                         child: TextFont(
                                           key: ValueKey(
-                                              'overspent_$_isRevealed'),
-                                          text: getBudgetOverSpentText(
-                                                  budget.income) +
+                                            'overspent_$_isRevealed',
+                                          ),
+                                          text:
+                                              getBudgetOverSpentText(
+                                                budget.income,
+                                              ) +
                                               convertToMoney(
-                                                  Provider.of<AllWallets>(
-                                                      context),
-                                                  budgetAmount,
-                                                  forceReveal: _isRevealed),
+                                                Provider.of<AllWallets>(
+                                                  context,
+                                                ),
+                                                budgetAmount,
+                                                forceReveal: _isRevealed,
+                                              ),
                                           fontSize: 12,
                                           textAlign: TextAlign.start,
                                         ),
@@ -1202,10 +1374,12 @@ class _PastBudgetContainerState extends State<PastBudgetContainer> {
                               child: TextFont(
                                 key: ValueKey(_isRevealed),
                                 autoSizeText: true,
-                                text: convertToPercent(value,
-                                    numberDecimals: 0,
-                                    useLessThanZero: true,
-                                    forceReveal: _isRevealed),
+                                text: convertToPercent(
+                                  value,
+                                  numberDecimals: 0,
+                                  useLessThanZero: true,
+                                  forceReveal: _isRevealed,
+                                ),
                                 fontSize: 16,
                                 textAlign: TextAlign.center,
                                 fontWeight: FontWeight.bold,
@@ -1222,7 +1396,8 @@ class _PastBudgetContainerState extends State<PastBudgetContainer> {
                       height: 60,
                       width: 60,
                       child: AnimatedCircularProgress(
-                        percent: appStateSettings["obscureAmounts"] == true &&
+                        percent:
+                            appStateSettings["obscureAmounts"] == true &&
                                 !_isRevealed
                             ? 0
                             : (totalSpent / budgetAmount).abs(),
@@ -1245,33 +1420,33 @@ class _PastBudgetContainerState extends State<PastBudgetContainer> {
     return Container(
       child: Listener(
         onPointerDown: (_) {
-        HapticFeedback.selectionClick();
-        setState(() => _isRevealed = true);
-        _revealTimer?.cancel();
-      },
-      onPointerUp: (_) {
-        _revealTimer?.cancel();
-        _revealTimer = Timer(Duration(seconds: 2), () {
-          if (mounted) setState(() => _isRevealed = false);
-        });
-      },
-      onPointerCancel: (_) {
-        _revealTimer?.cancel();
-        _revealTimer = Timer(Duration(seconds: 2), () {
-          if (mounted) setState(() => _isRevealed = false);
-        });
-      },
+          HapticFeedback.selectionClick();
+          setState(() => _isRevealed = true);
+          _revealTimer?.cancel();
+        },
+        onPointerUp: (_) {
+          _revealTimer?.cancel();
+          _revealTimer = Timer(Duration(seconds: 2), () {
+            if (mounted) setState(() => _isRevealed = false);
+          });
+        },
+        onPointerCancel: (_) {
+          _revealTimer?.cancel();
+          _revealTimer = Timer(Duration(seconds: 2), () {
+            if (mounted) setState(() => _isRevealed = false);
+          });
+        },
         child: OpenContainerNavigation(
           borderRadius: getPlatform() == PlatformOS.isIOS ? 0 : 18,
           closedColor: getPlatform() == PlatformOS.isIOS
               ? backgroundColor
               : appStateSettings["materialYou"]
-                  ? dynamicPastel(
-                      context,
-                      Theme.of(context).colorScheme.secondaryContainer,
-                      amount: 0.5,
-                    )
-                  : getColor(context, "lightDarkAccentHeavyLight"),
+              ? dynamicPastel(
+                  context,
+                  Theme.of(context).colorScheme.secondaryContainer,
+                  amount: 0.5,
+                )
+              : getColor(context, "lightDarkAccentHeavyLight"),
           button: (openContainer) {
             return Tappable(
               onTap: () {
@@ -1291,12 +1466,12 @@ class _PastBudgetContainerState extends State<PastBudgetContainer> {
               color: getPlatform() == PlatformOS.isIOS
                   ? backgroundColor
                   : appStateSettings["materialYou"]
-                      ? dynamicPastel(
-                          context,
-                          Theme.of(context).colorScheme.secondaryContainer,
-                          amount: 0.3,
-                        )
-                      : getColor(context, "lightDarkAccentHeavyLight"),
+                  ? dynamicPastel(
+                      context,
+                      Theme.of(context).colorScheme.secondaryContainer,
+                      amount: 0.3,
+                    )
+                  : getColor(context, "lightDarkAccentHeavyLight"),
             );
           },
           openPage: BudgetPage(
@@ -1318,6 +1493,7 @@ class CategoryAverageSpent extends StatefulWidget {
     required this.amountSpent,
     required this.onTap,
     required this.isSavingsBudget,
+    this.forceReveal = false,
     super.key,
   });
   final TransactionCategory category;
@@ -1325,179 +1501,141 @@ class CategoryAverageSpent extends StatefulWidget {
   final double amountSpent;
   final VoidCallback onTap;
   final bool isSavingsBudget;
+  final bool forceReveal;
 
   @override
   State<CategoryAverageSpent> createState() => _CategoryAverageSpentState();
 }
 
 class _CategoryAverageSpentState extends State<CategoryAverageSpent> {
-  bool _isRevealed = false;
-  Timer? _revealTimer;
-
-  void _startRevealTimer() {
-    _revealTimer?.cancel();
-    _revealTimer = Timer(const Duration(seconds: 2), () {
-      if (mounted) setState(() => _isRevealed = false);
-    });
-  }
-
-  @override
-  void dispose() {
-    _revealTimer?.cancel();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Listener(
-      onPointerDown: (event) {
-        if (appStateSettings["obscureAmounts"] == true) {
-          HapticFeedback.selectionClick();
-          setState(() => _isRevealed = true);
-          _revealTimer?.cancel();
-        }
-      },
-      onPointerUp: (event) {
-        if (appStateSettings["obscureAmounts"] == true) {
-          _startRevealTimer();
-        }
-      },
-      onPointerCancel: (event) {
-        if (appStateSettings["obscureAmounts"] == true) {
-          _startRevealTimer();
-        }
-      },
-      child: Tappable(
-        onLongPress: () {
-          pushRoute(
-            context,
-            AddCategoryPage(
-              category: widget.category,
-              routesToPopAfterDelete: RoutesToPopAfterDelete.One,
-            ),
-          );
-        },
-        onTap: widget.onTap,
-        color: Colors.transparent,
-        child: Padding(
-          padding: EdgeInsetsDirectional.symmetric(
-            horizontal: getHorizontalPaddingConstrained(context),
+    return Tappable(
+      onLongPress: () {
+        pushRoute(
+          context,
+          AddCategoryPage(
+            category: widget.category,
+            routesToPopAfterDelete: RoutesToPopAfterDelete.One,
           ),
-          child: Padding(
-            padding: const EdgeInsetsDirectional.symmetric(
-                horizontal: 16, vertical: 4),
-            child: Row(
-              children: [
-                CategoryIcon(
-                  category: widget.category,
-                  size: 30,
-                  margin: EdgeInsetsDirectional.zero,
-                  borderRadius: 1000,
-                ),
-                SizedBox(
-                  width: 12,
-                ),
-                Expanded(
-                  child: Container(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        TextFont(
-                          text: widget.category.name,
-                          fontSize: 17,
-                          maxLines: 1,
-                        ),
-                        SizedBox(
-                          height: 1,
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: CountNumber(
-                                count: widget.amountPeriods == 0
-                                    ? 0
-                                    : (widget.amountSpent /
-                                            widget.amountPeriods)
+        );
+      },
+      onTap: widget.onTap,
+      color: Colors.transparent,
+      child: Padding(
+        padding: EdgeInsetsDirectional.symmetric(
+          horizontal: getHorizontalPaddingConstrained(context),
+        ),
+        child: Padding(
+          padding: const EdgeInsetsDirectional.symmetric(
+            horizontal: 16,
+            vertical: 4,
+          ),
+          child: Row(
+            children: [
+              CategoryIcon(
+                category: widget.category,
+                size: 30,
+                margin: EdgeInsetsDirectional.zero,
+                borderRadius: 1000,
+              ),
+              SizedBox(width: 12),
+              Expanded(
+                child: Container(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextFont(
+                        text: widget.category.name,
+                        fontSize: 17,
+                        maxLines: 1,
+                      ),
+                      SizedBox(height: 1),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: CountNumber(
+                              count: widget.amountPeriods == 0
+                                  ? 0
+                                  : (widget.amountSpent / widget.amountPeriods)
                                         .abs(),
-                                duration: Duration(milliseconds: 400),
-                                initialCount: widget.amountPeriods == 0
-                                    ? 0
-                                    : (widget.amountSpent /
-                                            widget.amountPeriods)
+                              duration: Duration(milliseconds: 400),
+                              initialCount: widget.amountPeriods == 0
+                                  ? 0
+                                  : (widget.amountSpent / widget.amountPeriods)
                                         .abs(),
-                                textBuilder: (number) {
-                                  return AnimatedSwitcher(
-                                    duration: Duration(milliseconds: 300),
-                                    child: TextFont(
-                                      key: ValueKey(_isRevealed),
-                                      text: convertToMoney(
-                                              Provider.of<AllWallets>(context),
-                                              number,
-                                              finalNumber: widget
-                                                          .amountPeriods ==
-                                                      0
-                                                  ? 0
-                                                  : (widget.amountSpent /
-                                                          widget.amountPeriods)
-                                                      .abs(),
-                                              forceReveal: _isRevealed) +
-                                          " " +
-                                          (widget.isSavingsBudget
-                                              ? "average-saved"
-                                                  .tr()
-                                                  .toLowerCase()
-                                              : "average-spent"
+                              textBuilder: (number) {
+                                return AnimatedSwitcher(
+                                  duration: Duration(milliseconds: 300),
+                                  child: TextFont(
+                                    key: ValueKey(widget.forceReveal),
+                                    text:
+                                        convertToMoney(
+                                          Provider.of<AllWallets>(context),
+                                          number,
+                                          finalNumber: widget.amountPeriods == 0
+                                              ? 0
+                                              : (widget.amountSpent /
+                                                        widget.amountPeriods)
+                                                    .abs(),
+                                          forceReveal: widget.forceReveal,
+                                        ) +
+                                        " " +
+                                        (widget.isSavingsBudget
+                                            ? "average-saved".tr().toLowerCase()
+                                            : "average-spent"
                                                   .tr()
                                                   .toLowerCase()),
-                                      fontSize: 14,
-                                      textColor: getColor(context, "textLight"),
-                                    ),
-                                  );
-                                },
-                              ),
+                                    fontSize: 14,
+                                    textColor: getColor(context, "textLight"),
+                                  ),
+                                );
+                              },
                             ),
-                            // TextFont(
-                            //   text: transactionCount.toString() +
-                            //       " " +
-                            //       (transactionCount == 1
-                            //           ? "transaction".tr().toLowerCase()
-                            //           : "transactions".tr().toLowerCase()),
-                            //   fontSize: 13,
-                            //   textColor: selected
-                            //       ? getColor(context, "black").withOpacity(0.4)
-                            //       : getColor(context, "textLight"),
-                            // ),
-                          ],
-                        ),
-                      ],
-                    ),
+                          ),
+                          // TextFont(
+                          //   text: transactionCount.toString() +
+                          //       " " +
+                          //       (transactionCount == 1
+                          //           ? "transaction".tr().toLowerCase()
+                          //           : "transactions".tr().toLowerCase()),
+                          //   fontSize: 13,
+                          //   textColor: selected
+                          //       ? getColor(context, "black").withOpacity(0.4)
+                          //       : getColor(context, "textLight"),
+                          // ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
-                SizedBox(width: 10),
-                CountNumber(
-                  count: widget.amountSpent.abs(),
-                  duration: Duration(milliseconds: 400),
-                  initialCount: widget.amountSpent.abs(),
-                  textBuilder: (number) {
-                    return AnimatedSwitcher(
-                      duration: Duration(milliseconds: 300),
-                      child: TextFont(
-                        key: ValueKey(_isRevealed),
-                        fontWeight: FontWeight.bold,
-                        text: convertToMoney(
-                            Provider.of<AllWallets>(context), number,
-                            finalNumber: widget.amountSpent.abs(),
-                            forceReveal: _isRevealed),
-                        fontSize: 20,
-                        textColor: getColor(context, "black"),
+              ),
+              SizedBox(width: 10),
+              CountNumber(
+                count: widget.amountSpent.abs(),
+                duration: Duration(milliseconds: 400),
+                initialCount: widget.amountSpent.abs(),
+                textBuilder: (number) {
+                  return AnimatedSwitcher(
+                    duration: Duration(milliseconds: 300),
+                    child: TextFont(
+                      key: ValueKey(widget.forceReveal),
+                      fontWeight: FontWeight.bold,
+                      text: convertToMoney(
+                        Provider.of<AllWallets>(context),
+                        number,
+                        finalNumber: widget.amountSpent.abs(),
+                        forceReveal: widget.forceReveal,
                       ),
-                    );
-                  },
-                ),
-              ],
-            ),
+                      fontSize: 20,
+                      textColor: getColor(context, "black"),
+                    ),
+                  );
+                },
+              ),
+            ],
           ),
         ),
       ),

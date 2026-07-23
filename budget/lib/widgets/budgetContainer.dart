@@ -51,14 +51,35 @@ class BudgetContainer extends StatefulWidget {
   State<BudgetContainer> createState() => _BudgetContainerState();
 }
 
-class _BudgetContainerState extends State<BudgetContainer> {
+class _BudgetContainerState extends State<BudgetContainer>
+    with WidgetsBindingObserver {
   bool _isRevealed = false;
   Timer? _revealTimer;
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _revealTimer?.cancel();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive) {
+      if (_isRevealed) {
+        _revealTimer?.cancel();
+        setState(() {
+          _isRevealed = false;
+        });
+      }
+    }
   }
 
   @override

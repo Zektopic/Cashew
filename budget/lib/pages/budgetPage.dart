@@ -60,22 +60,23 @@ class BudgetPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<Budget>(
-        stream: database.getBudget(budgetPk),
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            Color? accentColor = HexColor(snapshot.data?.colour);
-            return CustomColorTheme(
-              accentColor: snapshot.data?.colour == null ? null : accentColor,
-              child: _BudgetPageContent(
-                budget: snapshot.data!,
-                dateForRange: dateForRange,
-                dateForRangeIndex: dateForRangeIndex,
-                openedFromHistory: openedFromHistory,
-              ),
-            );
-          }
-          return SizedBox.shrink();
-        });
+      stream: database.getBudget(budgetPk),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          Color? accentColor = HexColor(snapshot.data?.colour);
+          return CustomColorTheme(
+            accentColor: snapshot.data?.colour == null ? null : accentColor,
+            child: _BudgetPageContent(
+              budget: snapshot.data!,
+              dateForRange: dateForRange,
+              dateForRangeIndex: dateForRangeIndex,
+              openedFromHistory: openedFromHistory,
+            ),
+          );
+        }
+        return SizedBox.shrink();
+      },
+    );
   }
 }
 
@@ -97,7 +98,8 @@ class _BudgetPageContent extends StatefulWidget {
   State<_BudgetPageContent> createState() => _BudgetPageContentState();
 }
 
-class _BudgetPageContentState extends State<_BudgetPageContent> {
+class _BudgetPageContentState extends State<_BudgetPageContent>
+    with WidgetsBindingObserver {
   String? selectedMember = null;
   bool showAllSubcategories = appStateSettings["showAllSubcategories"] == true;
   TransactionCategory? selectedCategory =
@@ -107,18 +109,43 @@ class _BudgetPageContentState extends State<_BudgetPageContent> {
       appStateSettings["expandAllCategoriesWithSpendingLimits"] == true;
   final scrollController = ScrollController();
   late int dateForRangeIndex = widget.dateForRangeIndex;
-  late DateTime dateForRange =
-      widget.dateForRange == null ? DateTime.now() : widget.dateForRange!;
+  late DateTime dateForRange = widget.dateForRange == null
+      ? DateTime.now()
+      : widget.dateForRange!;
   bool budgetHistoryDismissedPremium = false;
   bool get isPastBudget => dateForRangeIndex != 0;
   bool get isPastBudgetButCurrentPeriod => dateForRangeIndex == 0;
 
+  bool _isRevealed = false;
+  Timer? _revealTimer;
+
   @override
   void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
     Future.delayed(Duration.zero, () {
       if (isPastBudget == true) premiumPopupPastBudgets(context);
     });
-    super.initState();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _revealTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive) {
+      if (_isRevealed) {
+        _revealTimer?.cancel();
+        setState(() {
+          _isRevealed = false;
+        });
+      }
+    }
   }
 
   void changeSelectedDateRange(int delta) async {
@@ -129,10 +156,7 @@ class _BudgetPageContentState extends State<_BudgetPageContent> {
       if (budgetHistoryDismissedPremium) {
         setState(() {
           dateForRangeIndex = index;
-          dateForRange = getDatePastToDetermineBudgetDate(
-            index,
-            widget.budget,
-          );
+          dateForRange = getDatePastToDetermineBudgetDate(index, widget.budget);
         });
       }
     }
@@ -143,20 +167,26 @@ class _BudgetPageContentState extends State<_BudgetPageContent> {
       showAllSubcategories = !showAllSubcategories;
     });
     Future.delayed(Duration(milliseconds: 10), () {
-      _pieChartDisplayStateKey.currentState!
-          .setTouchedCategoryPk(selectedCategory?.categoryPk);
+      _pieChartDisplayStateKey.currentState!.setTouchedCategoryPk(
+        selectedCategory?.categoryPk,
+      );
     });
 
-    updateSettings("showAllSubcategories", showAllSubcategories,
-        updateGlobalState: false);
+    updateSettings(
+      "showAllSubcategories",
+      showAllSubcategories,
+      updateGlobalState: false,
+    );
   }
 
   void toggleShowAllCategoriesWithCategoryLimit() {
     setState(() {
       showAllCategoriesWithCategoryLimit = !showAllCategoriesWithCategoryLimit;
-      updateSettings("expandAllCategoriesWithSpendingLimits",
-          showAllCategoriesWithCategoryLimit,
-          updateGlobalState: false);
+      updateSettings(
+        "expandAllCategoriesWithSpendingLimits",
+        showAllCategoriesWithCategoryLimit,
+        updateGlobalState: false,
+      );
     });
   }
 
@@ -173,10 +203,9 @@ class _BudgetPageContentState extends State<_BudgetPageContent> {
       children: [
         Container(
           decoration: BoxDecoration(
-              boxShadow: boxShadowCheck(
-                boxShadowGeneral(context),
-              ),
-              borderRadius: BorderRadiusDirectional.circular(200)),
+            boxShadow: boxShadowCheck(boxShadowGeneral(context)),
+            borderRadius: BorderRadiusDirectional.circular(200),
+          ),
           child: PieChartWrapper(
             pieChartDisplayStateKey: _pieChartDisplayStateKey,
             data: dataFilterUnassignedTransactions,
@@ -212,12 +241,7 @@ class _BudgetPageContentState extends State<_BudgetPageContent> {
             _pieChartDisplayStateKey.currentState?.setTouchedIndex(-1);
           },
           onEditSpendingGoals: () {
-            pushRoute(
-              context,
-              EditBudgetLimitsPage(
-                budget: widget.budget,
-              ),
-            );
+            pushRoute(context, EditBudgetLimitsPage(budget: widget.budget));
           },
           showAllSubcategories: showAllSubcategories,
           toggleAllSubCategories: toggleAllSubCategories,
@@ -229,27 +253,34 @@ class _BudgetPageContentState extends State<_BudgetPageContent> {
   @override
   Widget build(BuildContext context) {
     double budgetAmount = budgetAmountToPrimaryCurrency(
-        Provider.of<AllWallets>(context, listen: true), widget.budget);
+      Provider.of<AllWallets>(context, listen: true),
+      widget.budget,
+    );
     DateTimeRange budgetRange = getBudgetDate(widget.budget, dateForRange);
-    String pageId = budgetRange.start.millisecondsSinceEpoch.toString() +
+    String pageId =
+        budgetRange.start.millisecondsSinceEpoch.toString() +
         widget.budget.name +
         budgetRange.end.millisecondsSinceEpoch.toString() +
         widget.budget.budgetPk;
     Color? pageBackgroundColor =
         Theme.of(context).brightness == Brightness.dark &&
-                appStateSettings["forceFullDarkBackground"]
-            ? Colors.black
-            : appStateSettings["materialYou"]
-                ? dynamicPastel(context, Theme.of(context).colorScheme.primary,
-                    amount: 0.92)
-                : null;
+            appStateSettings["forceFullDarkBackground"]
+        ? Colors.black
+        : appStateSettings["materialYou"]
+        ? dynamicPastel(
+            context,
+            Theme.of(context).colorScheme.primary,
+            amount: 0.92,
+          )
+        : null;
     bool showIncomeExpenseIcons = widget.budget.budgetTransactionFilters == null
         ? true
-        : widget.budget.budgetTransactionFilters
-                    ?.contains(BudgetTransactionFilters.includeIncome) ==
-                true
-            ? true
-            : false;
+        : widget.budget.budgetTransactionFilters?.contains(
+                BudgetTransactionFilters.includeIncome,
+              ) ==
+              true
+        ? true
+        : false;
     final double todayPercent = getPercentBetweenDates(
       budgetRange,
       //dateForRange,
@@ -274,23 +305,25 @@ class _BudgetPageContentState extends State<_BudgetPageContent> {
       child: PageFramework(
         belowAppBarPaddingWhenCenteredTitleSmall: 0,
         subtitle: StreamBuilder<List<CategoryWithTotal>>(
-          stream:
-              database.watchTotalSpentInEachCategoryInTimeRangeFromCategories(
-            allWallets: Provider.of<AllWallets>(context),
-            start: budgetRange.start,
-            end: budgetRange.end,
-            categoryFks: widget.budget.categoryFks,
-            categoryFksExclude: widget.budget.categoryFksExclude,
-            budgetTransactionFilters: widget.budget.budgetTransactionFilters,
-            memberTransactionFilters: widget.budget.memberTransactionFilters,
-            member: selectedMember,
-            onlyShowTransactionsBelongingToBudgetPk:
-                widget.budget.sharedKey != null ||
+          stream: database
+              .watchTotalSpentInEachCategoryInTimeRangeFromCategories(
+                allWallets: Provider.of<AllWallets>(context),
+                start: budgetRange.start,
+                end: budgetRange.end,
+                categoryFks: widget.budget.categoryFks,
+                categoryFksExclude: widget.budget.categoryFksExclude,
+                budgetTransactionFilters:
+                    widget.budget.budgetTransactionFilters,
+                memberTransactionFilters:
+                    widget.budget.memberTransactionFilters,
+                member: selectedMember,
+                onlyShowTransactionsBelongingToBudgetPk:
+                    widget.budget.sharedKey != null ||
                         widget.budget.addedTransactionsOnly == true
                     ? widget.budget.budgetPk
                     : null,
-            budget: widget.budget,
-          ),
+                budget: widget.budget,
+              ),
           builder: (context, snapshot) {
             double totalSpent = 0;
             if (snapshot.hasData) {
@@ -301,9 +334,35 @@ class _BudgetPageContentState extends State<_BudgetPageContent> {
             }
 
             if (snapshot.hasData) {
-              return TotalSpent(
-                budget: widget.budget,
-                totalSpent: totalSpent,
+              return Listener(
+                onPointerDown: (_) {
+                  if (appStateSettings["obscureAmounts"] == true) {
+                    HapticFeedback.selectionClick();
+                    setState(() => _isRevealed = true);
+                    _revealTimer?.cancel();
+                  }
+                },
+                onPointerUp: (_) {
+                  if (appStateSettings["obscureAmounts"] == true) {
+                    _revealTimer?.cancel();
+                    _revealTimer = Timer(Duration(seconds: 2), () {
+                      if (mounted) setState(() => _isRevealed = false);
+                    });
+                  }
+                },
+                onPointerCancel: (_) {
+                  if (appStateSettings["obscureAmounts"] == true) {
+                    _revealTimer?.cancel();
+                    _revealTimer = Timer(Duration(seconds: 2), () {
+                      if (mounted) setState(() => _isRevealed = false);
+                    });
+                  }
+                },
+                child: TotalSpent(
+                  budget: widget.budget,
+                  totalSpent: totalSpent,
+                  forceReveal: _isRevealed,
+                ),
               );
             } else {
               return SizedBox.shrink();
@@ -318,7 +377,8 @@ class _BudgetPageContentState extends State<_BudgetPageContent> {
           fab: AddFAB(
             tooltip: "add-transaction".tr(),
             openPage: AddTransactionPage(
-              selectedBudget: widget.budget.sharedKey != null ||
+              selectedBudget:
+                  widget.budget.sharedKey != null ||
                       widget.budget.addedTransactionsOnly == true
                   ? widget.budget
                   : null,
@@ -388,116 +448,126 @@ class _BudgetPageContentState extends State<_BudgetPageContent> {
         title: widget.budget.name,
         capitalizeTitle: false,
         appBarBackgroundColor: Theme.of(context).colorScheme.secondaryContainer,
-        appBarBackgroundColorStart:
-            Theme.of(context).colorScheme.secondaryContainer,
+        appBarBackgroundColorStart: Theme.of(
+          context,
+        ).colorScheme.secondaryContainer,
         textColor: getColor(context, "black"),
         dragDownToDismiss: true,
         scrollController: scrollController,
         slivers: [
           StreamBuilder<List<CategoryWithTotal>>(
-              stream: database.watchAllCategoryLimitsInBudgetWithCategory(
-                  widget.budget.budgetPk),
-              builder: (context, allCategoryLimitsSnap) {
-                return StreamBuilder<List<CategoryWithTotal>>(
-                  stream: database
-                      .watchTotalSpentInEachCategoryInTimeRangeFromCategories(
-                    allWallets: Provider.of<AllWallets>(context),
-                    start: budgetRange.start,
-                    end: budgetRange.end,
-                    categoryFks: widget.budget.categoryFks,
-                    categoryFksExclude: widget.budget.categoryFksExclude,
-                    budgetTransactionFilters:
-                        widget.budget.budgetTransactionFilters,
-                    memberTransactionFilters:
-                        widget.budget.memberTransactionFilters,
-                    member: selectedMember,
-                    onlyShowTransactionsBelongingToBudgetPk:
-                        widget.budget.sharedKey != null ||
-                                widget.budget.addedTransactionsOnly == true
-                            ? widget.budget.budgetPk
-                            : null,
-                    budget: widget.budget,
-                    // Set to countUnassignedTransactons: false for the pie chart
-                    //  includeAllSubCategories: showAllSubcategories,
-                    // If implementing pie chart summary for subcategories, also need to implement ability to tap a subcategory from the pie chart
-                    countUnassignedTransactions: true,
-                    includeAllSubCategories: true,
-                  ),
-                  builder: (context, categoryWithTotalsSnap) {
-                    //Ensure the main category always gets bundled in
-                    List<CategoryWithTotal> allCategoryLimits =
-                        (allCategoryLimitsSnap.data ?? []).where((c) {
-                      if (c.categoryBudgetLimit != null) {
-                        return true;
-                      }
-                      return (allCategoryLimitsSnap.data ?? []).any((other) =>
-                          other.categoryBudgetLimit != null &&
-                          other.category.mainCategoryPk ==
-                              c.category.categoryPk);
-                    }).toList();
+            stream: database.watchAllCategoryLimitsInBudgetWithCategory(
+              widget.budget.budgetPk,
+            ),
+            builder: (context, allCategoryLimitsSnap) {
+              return StreamBuilder<List<CategoryWithTotal>>(
+                stream: database
+                    .watchTotalSpentInEachCategoryInTimeRangeFromCategories(
+                      allWallets: Provider.of<AllWallets>(context),
+                      start: budgetRange.start,
+                      end: budgetRange.end,
+                      categoryFks: widget.budget.categoryFks,
+                      categoryFksExclude: widget.budget.categoryFksExclude,
+                      budgetTransactionFilters:
+                          widget.budget.budgetTransactionFilters,
+                      memberTransactionFilters:
+                          widget.budget.memberTransactionFilters,
+                      member: selectedMember,
+                      onlyShowTransactionsBelongingToBudgetPk:
+                          widget.budget.sharedKey != null ||
+                              widget.budget.addedTransactionsOnly == true
+                          ? widget.budget.budgetPk
+                          : null,
+                      budget: widget.budget,
+                      // Set to countUnassignedTransactons: false for the pie chart
+                      //  includeAllSubCategories: showAllSubcategories,
+                      // If implementing pie chart summary for subcategories, also need to implement ability to tap a subcategory from the pie chart
+                      countUnassignedTransactions: true,
+                      includeAllSubCategories: true,
+                    ),
+                builder: (context, categoryWithTotalsSnap) {
+                  //Ensure the main category always gets bundled in
+                  List<CategoryWithTotal> allCategoryLimits =
+                      (allCategoryLimitsSnap.data ?? []).where((c) {
+                        if (c.categoryBudgetLimit != null) {
+                          return true;
+                        }
+                        return (allCategoryLimitsSnap.data ?? []).any(
+                          (other) =>
+                              other.categoryBudgetLimit != null &&
+                              other.category.mainCategoryPk ==
+                                  c.category.categoryPk,
+                        );
+                      }).toList();
 
-                    // Remove all duplicates
-                    Set<String> existingCategoryPks =
-                        (categoryWithTotalsSnap.data ?? [])
-                            .map((c) => c.category.categoryPk)
-                            .toSet();
-                    List<CategoryWithTotal> categoryWithTotals = [
-                      ...(categoryWithTotalsSnap.data ?? []),
-                      ...(allCategoryLimits).where((c) =>
-                          !existingCategoryPks.contains(c.category.categoryPk)),
-                    ];
+                  // Remove all duplicates
+                  Set<String> existingCategoryPks =
+                      (categoryWithTotalsSnap.data ?? [])
+                          .map((c) => c.category.categoryPk)
+                          .toSet();
+                  List<CategoryWithTotal> categoryWithTotals = [
+                    ...(categoryWithTotalsSnap.data ?? []),
+                    ...(allCategoryLimits).where(
+                      (c) =>
+                          !existingCategoryPks.contains(c.category.categoryPk),
+                    ),
+                  ];
 
-                    //Count number of categories that have a spending limit, but no spending
-                    int extraCategoriesCountWithSpendingLimit =
-                        (allCategoryLimits)
-                            .where((c) => !existingCategoryPks
-                                .contains(c.category.categoryPk))
-                            .length;
+                  //Count number of categories that have a spending limit, but no spending
+                  int extraCategoriesCountWithSpendingLimit =
+                      (allCategoryLimits)
+                          .where(
+                            (c) => !existingCategoryPks.contains(
+                              c.category.categoryPk,
+                            ),
+                          )
+                          .length;
 
-                    TotalSpentCategoriesSummary s =
-                        watchTotalSpentInTimeRangeHelper(
-                      dataInput: categoryWithTotals,
-                      showAllSubcategories: showAllSubcategories,
-                      multiplyTotalBy: determineBudgetPolarity(widget.budget),
-                    );
-                    List<Widget> categoryEntries = [];
-                    double totalSpentPercent = 45 / 360;
-                    categoryWithTotals.asMap().forEach(
-                      (index, category) {
-                        categoryEntries.add(
-                          CategoryEntry(
-                            alwaysHide:
-                                showAllCategoriesWithCategoryLimit == false &&
-                                    category.transactionCount == -1,
-                            percentageOffset: totalSpentPercent,
-                            getPercentageAfterText: (double categorySpent) {
-                              if (widget.budget.income == true) {
-                                return categorySpent < 0 &&
-                                        showIncomeExpenseIcons
-                                    ? "of-total".tr().toLowerCase()
-                                    : "of-saving".tr().toLowerCase();
-                              } else {
-                                return categorySpent > 0 &&
-                                        showIncomeExpenseIcons
-                                    ? "of-total".tr().toLowerCase()
-                                    : "of-spending".tr().toLowerCase();
-                              }
-                            },
-                            selectedSubCategoryPk: selectedCategory?.categoryPk,
-                            expandSubcategories: showAllSubcategories ||
-                                category.category.categoryPk ==
-                                    selectedCategory?.categoryPk ||
-                                category.category.categoryPk ==
-                                    selectedCategory?.mainCategoryPk,
-                            subcategoriesWithTotalMap:
-                                s.subCategorySpendingIndexedByMainCategoryPk,
-                            todayPercent: todayPercent,
-                            overSpentColor: category.total > 0
-                                ? getColor(context, "incomeAmount")
-                                : getColor(context, "expenseAmount"),
-                            showIncomeExpenseIcons: showIncomeExpenseIcons,
-                            onLongPress: (TransactionCategory category,
-                                CategoryBudgetLimit? categoryBudgetLimit) {
+                  TotalSpentCategoriesSummary s =
+                      watchTotalSpentInTimeRangeHelper(
+                        dataInput: categoryWithTotals,
+                        showAllSubcategories: showAllSubcategories,
+                        multiplyTotalBy: determineBudgetPolarity(widget.budget),
+                      );
+                  List<Widget> categoryEntries = [];
+                  double totalSpentPercent = 45 / 360;
+                  categoryWithTotals.asMap().forEach((index, category) {
+                    categoryEntries.add(
+                      CategoryEntry(
+                        alwaysHide:
+                            showAllCategoriesWithCategoryLimit == false &&
+                            category.transactionCount == -1,
+                        percentageOffset: totalSpentPercent,
+                        getPercentageAfterText: (double categorySpent) {
+                          if (widget.budget.income == true) {
+                            return categorySpent < 0 && showIncomeExpenseIcons
+                                ? "of-total".tr().toLowerCase()
+                                : "of-saving".tr().toLowerCase();
+                          } else {
+                            return categorySpent > 0 && showIncomeExpenseIcons
+                                ? "of-total".tr().toLowerCase()
+                                : "of-spending".tr().toLowerCase();
+                          }
+                        },
+                        selectedSubCategoryPk: selectedCategory?.categoryPk,
+                        expandSubcategories:
+                            showAllSubcategories ||
+                            category.category.categoryPk ==
+                                selectedCategory?.categoryPk ||
+                            category.category.categoryPk ==
+                                selectedCategory?.mainCategoryPk,
+                        subcategoriesWithTotalMap:
+                            s.subCategorySpendingIndexedByMainCategoryPk,
+                        todayPercent: todayPercent,
+                        overSpentColor: category.total > 0
+                            ? getColor(context, "incomeAmount")
+                            : getColor(context, "expenseAmount"),
+                        showIncomeExpenseIcons: showIncomeExpenseIcons,
+                        onLongPress:
+                            (
+                              TransactionCategory category,
+                              CategoryBudgetLimit? categoryBudgetLimit,
+                            ) {
                               enterCategoryLimitPopup(
                                 context,
                                 category,
@@ -507,309 +577,329 @@ class _BudgetPageContentState extends State<_BudgetPageContent> {
                                 widget.budget.isAbsoluteSpendingLimit,
                               );
                             },
-                            isAbsoluteSpendingLimit:
-                                widget.budget.isAbsoluteSpendingLimit,
-                            budgetLimit: budgetAmount,
-                            categoryBudgetLimit: category.categoryBudgetLimit,
-                            category: category.category,
-                            totalSpent: s.totalSpent,
-                            transactionCount: category.transactionCount,
-                            categorySpent: showIncomeExpenseIcons == true
-                                ? category.total
-                                : category.total.abs(),
-                            onTap: (TransactionCategory tappedCategory, _) {
-                              if (selectedCategory?.categoryPk ==
-                                  tappedCategory.categoryPk) {
-                                setState(() {
-                                  selectedCategory = null;
-                                });
-                                _pieChartDisplayStateKey.currentState
-                                    ?.setTouchedIndex(-1);
-                              } else {
-                                if (showAllSubcategories ||
-                                    tappedCategory.mainCategoryPk == null) {
-                                  setState(() {
-                                    selectedCategory = tappedCategory;
-                                  });
-                                  _pieChartDisplayStateKey.currentState
-                                      ?.setTouchedCategoryPk(
-                                          tappedCategory.categoryPk);
-                                } else {
-                                  // We are tapping a subcategoryEntry and it is not in the pie chart
-                                  // because showAllSubcategories is false and mainCategoryPk is not null
-                                  setState(() {
-                                    selectedCategory = tappedCategory;
-                                  });
-                                  _pieChartDisplayStateKey.currentState
-                                      ?.setTouchedCategoryPk(
-                                          tappedCategory.mainCategoryPk);
-                                }
-                              }
-                            },
-                            selected: category.category.categoryPk ==
-                                    selectedCategory?.mainCategoryPk ||
-                                selectedCategory?.categoryPk ==
-                                    category.category.categoryPk,
-                            allSelected: selectedCategory == null,
-                          ),
-                        );
-                        if (s.totalSpent != 0)
-                          totalSpentPercent +=
-                              category.total.abs() / s.totalSpent;
-                      },
+                        isAbsoluteSpendingLimit:
+                            widget.budget.isAbsoluteSpendingLimit,
+                        budgetLimit: budgetAmount,
+                        categoryBudgetLimit: category.categoryBudgetLimit,
+                        category: category.category,
+                        totalSpent: s.totalSpent,
+                        transactionCount: category.transactionCount,
+                        categorySpent: showIncomeExpenseIcons == true
+                            ? category.total
+                            : category.total.abs(),
+                        onTap: (TransactionCategory tappedCategory, _) {
+                          if (selectedCategory?.categoryPk ==
+                              tappedCategory.categoryPk) {
+                            setState(() {
+                              selectedCategory = null;
+                            });
+                            _pieChartDisplayStateKey.currentState
+                                ?.setTouchedIndex(-1);
+                          } else {
+                            if (showAllSubcategories ||
+                                tappedCategory.mainCategoryPk == null) {
+                              setState(() {
+                                selectedCategory = tappedCategory;
+                              });
+                              _pieChartDisplayStateKey.currentState
+                                  ?.setTouchedCategoryPk(
+                                    tappedCategory.categoryPk,
+                                  );
+                            } else {
+                              // We are tapping a subcategoryEntry and it is not in the pie chart
+                              // because showAllSubcategories is false and mainCategoryPk is not null
+                              setState(() {
+                                selectedCategory = tappedCategory;
+                              });
+                              _pieChartDisplayStateKey.currentState
+                                  ?.setTouchedCategoryPk(
+                                    tappedCategory.mainCategoryPk,
+                                  );
+                            }
+                          }
+                        },
+                        selected:
+                            category.category.categoryPk ==
+                                selectedCategory?.mainCategoryPk ||
+                            selectedCategory?.categoryPk ==
+                                category.category.categoryPk,
+                        allSelected: selectedCategory == null,
+                      ),
                     );
-                    // print(s.totalSpent);
-                    return MultiSliver(
-                      children: [
-                        SliverToBoxAdapter(
-                          child: Container(
-                            padding: EdgeInsetsDirectional.only(
-                              bottom: showingSelectedPeriodAppBar
-                                  ? isPastBudgetButCurrentPeriod == true
+                    if (s.totalSpent != 0)
+                      totalSpentPercent += category.total.abs() / s.totalSpent;
+                  });
+                  // print(s.totalSpent);
+                  return MultiSliver(
+                    children: [
+                      SliverToBoxAdapter(
+                        child: Container(
+                          padding: EdgeInsetsDirectional.only(
+                            bottom: showingSelectedPeriodAppBar
+                                ? isPastBudgetButCurrentPeriod == true
                                       ? 14
                                       : 5
-                                  : 20,
-                              start: 22,
-                              end: 22,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .secondaryContainer,
-                            ),
-                            child: AnimatedSizeSwitcher(
-                              child: Column(
-                                key: ValueKey(isPastBudgetButCurrentPeriod),
-                                children: [
-                                  Transform.scale(
-                                    alignment:
-                                        AlignmentDirectional.bottomCenter,
-                                    scale: 1500,
-                                    child: Container(
-                                      height: 10,
-                                      width: 100,
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .secondaryContainer,
+                                : 20,
+                            start: 22,
+                            end: 22,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.secondaryContainer,
+                          ),
+                          child: AnimatedSizeSwitcher(
+                            child: Column(
+                              key: ValueKey(isPastBudgetButCurrentPeriod),
+                              children: [
+                                Transform.scale(
+                                  alignment: AlignmentDirectional.bottomCenter,
+                                  scale: 1500,
+                                  child: Container(
+                                    height: 10,
+                                    width: 100,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.secondaryContainer,
+                                  ),
+                                ),
+                                Padding(
+                                  padding: EdgeInsetsDirectional.symmetric(
+                                    horizontal: getHorizontalPaddingConstrained(
+                                      context,
                                     ),
                                   ),
-                                  Padding(
-                                    padding: EdgeInsetsDirectional.symmetric(
-                                      horizontal:
-                                          getHorizontalPaddingConstrained(
-                                              context),
-                                    ),
-                                    child: StreamBuilder<double?>(
-                                      stream: database.watchTotalOfBudget(
-                                        allWallets:
-                                            Provider.of<AllWallets>(context),
-                                        start: budgetRange.start,
-                                        end: budgetRange.end,
-                                        categoryFks: widget.budget.categoryFks,
-                                        categoryFksExclude:
-                                            widget.budget.categoryFksExclude,
-                                        budgetTransactionFilters: widget
-                                            .budget.budgetTransactionFilters,
-                                        memberTransactionFilters: widget
-                                            .budget.memberTransactionFilters,
-                                        member: selectedMember,
-                                        onlyShowTransactionsBelongingToBudgetPk:
-                                            widget.budget.sharedKey != null ||
-                                                    widget.budget
-                                                            .addedTransactionsOnly ==
-                                                        true
-                                                ? widget.budget.budgetPk
-                                                : null,
-                                        budget: widget.budget,
-                                        searchFilters: SearchFilters(
-                                            paidStatus: [PaidStatus.notPaid]),
-                                        paidOnly: false,
+                                  child: StreamBuilder<double?>(
+                                    stream: database.watchTotalOfBudget(
+                                      allWallets: Provider.of<AllWallets>(
+                                        context,
                                       ),
-                                      builder: (context, snapshot) {
-                                        return BudgetTimeline(
-                                          dateForRange: dateForRange,
-                                          budget: widget.budget,
-                                          large: true,
-                                          percent: budgetAmount == 0
-                                              ? 0
-                                              : s.totalSpent /
-                                                  budgetAmount *
-                                                  100,
-                                          yourPercent: 0,
-                                          todayPercent: isPastBudget == true
-                                              ? -1
-                                              : todayPercent,
-                                          ghostPercent: budgetAmount == 0
-                                              ? 0
-                                              : (((snapshot.data ?? 0) *
+                                      start: budgetRange.start,
+                                      end: budgetRange.end,
+                                      categoryFks: widget.budget.categoryFks,
+                                      categoryFksExclude:
+                                          widget.budget.categoryFksExclude,
+                                      budgetTransactionFilters: widget
+                                          .budget
+                                          .budgetTransactionFilters,
+                                      memberTransactionFilters: widget
+                                          .budget
+                                          .memberTransactionFilters,
+                                      member: selectedMember,
+                                      onlyShowTransactionsBelongingToBudgetPk:
+                                          widget.budget.sharedKey != null ||
+                                              widget
+                                                      .budget
+                                                      .addedTransactionsOnly ==
+                                                  true
+                                          ? widget.budget.budgetPk
+                                          : null,
+                                      budget: widget.budget,
+                                      searchFilters: SearchFilters(
+                                        paidStatus: [PaidStatus.notPaid],
+                                      ),
+                                      paidOnly: false,
+                                    ),
+                                    builder: (context, snapshot) {
+                                      return BudgetTimeline(
+                                        dateForRange: dateForRange,
+                                        budget: widget.budget,
+                                        large: true,
+                                        percent: budgetAmount == 0
+                                            ? 0
+                                            : s.totalSpent / budgetAmount * 100,
+                                        yourPercent: 0,
+                                        todayPercent: isPastBudget == true
+                                            ? -1
+                                            : todayPercent,
+                                        ghostPercent: budgetAmount == 0
+                                            ? 0
+                                            : (((snapshot.data ?? 0) *
                                                           determineBudgetPolarity(
-                                                              widget.budget)) /
+                                                            widget.budget,
+                                                          )) /
                                                       budgetAmount) *
                                                   100,
-                                        );
-                                      },
-                                    ),
+                                      );
+                                    },
                                   ),
-                                  isPastBudget == true
-                                      ? SizedBox.shrink()
-                                      : DaySpending(
-                                          budget: widget.budget,
-                                          totalAmount: s.totalSpent,
-                                          large: true,
-                                          budgetRange: budgetRange,
-                                          padding:
-                                              const EdgeInsetsDirectional.only(
-                                                  top: 15, bottom: 0),
-                                        ),
-                                ],
-                              ),
+                                ),
+                                isPastBudget == true
+                                    ? SizedBox.shrink()
+                                    : DaySpending(
+                                        budget: widget.budget,
+                                        totalAmount: s.totalSpent,
+                                        large: true,
+                                        budgetRange: budgetRange,
+                                        padding:
+                                            const EdgeInsetsDirectional.only(
+                                              top: 15,
+                                              bottom: 0,
+                                            ),
+                                      ),
+                              ],
                             ),
                           ),
                         ),
-                        SliverPinnedHeader(
-                          child: showingSelectedPeriodAppBar
-                              // Based on SelectedPeriodHeaderLabel
-                              ? Container(
-                                  transform:
-                                      Matrix4.translationValues(0, -1, 0),
-                                  padding: const EdgeInsetsDirectional.only(
-                                      bottom: 3, top: 3),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Padding(
-                                        padding: const EdgeInsetsDirectional
-                                            .symmetric(horizontal: 10),
+                      ),
+                      SliverPinnedHeader(
+                        child: showingSelectedPeriodAppBar
+                            // Based on SelectedPeriodHeaderLabel
+                            ? Container(
+                                transform: Matrix4.translationValues(0, -1, 0),
+                                padding: const EdgeInsetsDirectional.only(
+                                  bottom: 3,
+                                  top: 3,
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Padding(
+                                      padding:
+                                          const EdgeInsetsDirectional.symmetric(
+                                            horizontal: 10,
+                                          ),
+                                      child: IconButtonScaled(
+                                        iconData:
+                                            appStateSettings["outlinedIcons"]
+                                            ? Icons.chevron_left_outlined
+                                            : Icons.chevron_left_rounded,
+                                        iconSize: 18,
+                                        scale: 1,
+                                        onTap: () =>
+                                            changeSelectedDateRange(-1),
+                                      ),
+                                    ),
+                                    Flexible(
+                                      child: AnimatedSizeSwitcher(
+                                        child: TextFont(
+                                          key: ValueKey(timeRangeString),
+                                          text: timeRangeString,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 18,
+                                          textAlign: TextAlign.center,
+                                          textColor: Theme.of(
+                                            context,
+                                          ).colorScheme.onSecondaryContainer,
+                                          maxLines: 2,
+                                        ),
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding:
+                                          const EdgeInsetsDirectional.symmetric(
+                                            horizontal: 10,
+                                          ),
+                                      child: DisabledButton(
+                                        disabled: dateForRangeIndex == 0,
                                         child: IconButtonScaled(
                                           iconData:
                                               appStateSettings["outlinedIcons"]
-                                                  ? Icons.chevron_left_outlined
-                                                  : Icons.chevron_left_rounded,
+                                              ? Icons.chevron_right_outlined
+                                              : Icons.chevron_right_rounded,
                                           iconSize: 18,
                                           scale: 1,
                                           onTap: () =>
-                                              changeSelectedDateRange(-1),
+                                              changeSelectedDateRange(1),
                                         ),
                                       ),
-                                      Flexible(
-                                        child: AnimatedSizeSwitcher(
-                                          child: TextFont(
-                                            key: ValueKey(timeRangeString),
-                                            text: timeRangeString,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 18,
-                                            textAlign: TextAlign.center,
-                                            textColor: Theme.of(context)
-                                                .colorScheme
-                                                .onSecondaryContainer,
-                                            maxLines: 2,
-                                          ),
-                                        ),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsetsDirectional
-                                            .symmetric(horizontal: 10),
-                                        child: DisabledButton(
-                                          disabled: dateForRangeIndex == 0,
-                                          child: IconButtonScaled(
-                                            iconData: appStateSettings[
-                                                    "outlinedIcons"]
-                                                ? Icons.chevron_right_outlined
-                                                : Icons.chevron_right_rounded,
-                                            iconSize: 18,
-                                            scale: 1,
-                                            onTap: () =>
-                                                changeSelectedDateRange(1),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
+                                    ),
+                                  ],
+                                ),
+                                decoration: BoxDecoration(
+                                  boxShadow: boxShadowCheck(
+                                    boxShadowSharp(context),
                                   ),
-                                  decoration: BoxDecoration(
-                                    boxShadow:
-                                        boxShadowCheck(boxShadowSharp(context)),
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .secondaryContainer,
-                                  ),
-                                )
-                              : Container(),
-                        ),
-                        SliverToBoxAdapter(
-                            child: Column(children: [
-                          appStateSettings["sharedBudgets"]
-                              ? BudgetSpenderSummary(
-                                  budget: widget.budget,
-                                  budgetRange: budgetRange,
-                                  setSelectedMember: (member) {
-                                    setState(() {
-                                      selectedMember = member;
-                                      selectedCategory = null;
-                                    });
-                                    _pieChartDisplayStateKey.currentState
-                                        ?.setTouchedIndex(-1);
-                                  },
-                                )
-                              : SizedBox.shrink(),
-                          if (categoryWithTotals.length > 0)
-                            SizedBox(height: 37),
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.secondaryContainer,
+                                ),
+                              )
+                            : Container(),
+                      ),
+                      SliverToBoxAdapter(
+                        child: Column(
+                          children: [
+                            appStateSettings["sharedBudgets"]
+                                ? BudgetSpenderSummary(
+                                    budget: widget.budget,
+                                    budgetRange: budgetRange,
+                                    setSelectedMember: (member) {
+                                      setState(() {
+                                        selectedMember = member;
+                                        selectedCategory = null;
+                                      });
+                                      _pieChartDisplayStateKey.currentState
+                                          ?.setTouchedIndex(-1);
+                                    },
+                                  )
+                                : SizedBox.shrink(),
+                            if (categoryWithTotals.length > 0)
+                              SizedBox(height: 37),
 
-                          if (categoryWithTotals.length > 0)
-                            pieChart(
-                              budgetRange: budgetRange,
-                              totalSpent: s.totalSpent,
-                              showAllSubcategories: showAllSubcategories,
-                              toggleAllSubCategories: toggleAllSubcategories,
-                              dataFilterUnassignedTransactions:
-                                  s.dataFilterUnassignedTransactions,
-                              hasSubCategories: s.hasSubCategories,
-                              pageBackgroundColor: pageBackgroundColor,
-                            ),
-                          // if (snapshot.data!.length > 0)
-                          //   SizedBox(height: 35),
-                          ...categoryEntries,
-                          if (categoryWithTotals.length > 0)
-                            SizedBox(height: 15),
-                          AnimatedExpanded(
-                            expand: selectedCategory == null &&
-                                extraCategoriesCountWithSpendingLimit > 0,
-                            child: Padding(
-                              padding:
-                                  const EdgeInsetsDirectional.only(bottom: 15),
-                              child: AnimatedSizeSwitcher(
-                                child: Center(
-                                  key: ValueKey(
+                            if (categoryWithTotals.length > 0)
+                              pieChart(
+                                budgetRange: budgetRange,
+                                totalSpent: s.totalSpent,
+                                showAllSubcategories: showAllSubcategories,
+                                toggleAllSubCategories: toggleAllSubcategories,
+                                dataFilterUnassignedTransactions:
+                                    s.dataFilterUnassignedTransactions,
+                                hasSubCategories: s.hasSubCategories,
+                                pageBackgroundColor: pageBackgroundColor,
+                              ),
+                            // if (snapshot.data!.length > 0)
+                            //   SizedBox(height: 35),
+                            ...categoryEntries,
+                            if (categoryWithTotals.length > 0)
+                              SizedBox(height: 15),
+                            AnimatedExpanded(
+                              expand:
+                                  selectedCategory == null &&
+                                  extraCategoriesCountWithSpendingLimit > 0,
+                              child: Padding(
+                                padding: const EdgeInsetsDirectional.only(
+                                  bottom: 15,
+                                ),
+                                child: AnimatedSizeSwitcher(
+                                  child: Center(
+                                    key: ValueKey(
                                       "showAllCategoriesWithCategoryLimit" +
                                           showAllCategoriesWithCategoryLimit
-                                              .toString()),
-                                  child: LowKeyButton(
-                                    onTap: () {
-                                      toggleShowAllCategoriesWithCategoryLimit();
-                                    },
-                                    text: showAllCategoriesWithCategoryLimit
-                                        ? "collapse-empty-categories".tr()
-                                        : "expand-all-with-spending-goals".tr(),
-                                    extraWidgetAtBeginning: true,
-                                    extraWidget: Padding(
-                                      padding: const EdgeInsetsDirectional.only(
-                                          end: 3),
-                                      child: Transform.scale(
-                                        scale: 1.6,
-                                        child: Icon(
-                                          showAllCategoriesWithCategoryLimit
-                                              ? appStateSettings[
-                                                      "outlinedIcons"]
-                                                  ? Icons.arrow_drop_up_outlined
-                                                  : Icons.arrow_drop_up_rounded
-                                              : appStateSettings[
-                                                      "outlinedIcons"]
-                                                  ? Icons
-                                                      .arrow_drop_down_outlined
-                                                  : Icons
-                                                      .arrow_drop_down_rounded,
-                                          size: 15,
-                                          color: getColor(context, "black")
-                                              .withOpacity(0.5),
+                                              .toString(),
+                                    ),
+                                    child: LowKeyButton(
+                                      onTap: () {
+                                        toggleShowAllCategoriesWithCategoryLimit();
+                                      },
+                                      text: showAllCategoriesWithCategoryLimit
+                                          ? "collapse-empty-categories".tr()
+                                          : "expand-all-with-spending-goals"
+                                                .tr(),
+                                      extraWidgetAtBeginning: true,
+                                      extraWidget: Padding(
+                                        padding:
+                                            const EdgeInsetsDirectional.only(
+                                              end: 3,
+                                            ),
+                                        child: Transform.scale(
+                                          scale: 1.6,
+                                          child: Icon(
+                                            showAllCategoriesWithCategoryLimit
+                                                ? appStateSettings["outlinedIcons"]
+                                                      ? Icons
+                                                            .arrow_drop_up_outlined
+                                                      : Icons
+                                                            .arrow_drop_up_rounded
+                                                : appStateSettings["outlinedIcons"]
+                                                ? Icons.arrow_drop_down_outlined
+                                                : Icons.arrow_drop_down_rounded,
+                                            size: 15,
+                                            color: getColor(
+                                              context,
+                                              "black",
+                                            ).withOpacity(0.5),
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -817,20 +907,26 @@ class _BudgetPageContentState extends State<_BudgetPageContent> {
                                 ),
                               ),
                             ),
-                          ),
-                        ]))
-                      ],
-                    );
-                  },
-                );
-              }),
+                          ],
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
+          ),
           SliverToBoxAdapter(
             child: AnimatedExpanded(
               expand: selectedCategory != null,
               child: Padding(
                 key: ValueKey(1),
                 padding: const EdgeInsetsDirectional.only(
-                    start: 13, end: 15, top: 5, bottom: 15),
+                  start: 13,
+                  end: 15,
+                  top: 5,
+                  bottom: 15,
+                ),
                 child: Center(
                   child: TextFont(
                     text: "transactions-for-selected-category".tr(),
@@ -850,12 +946,15 @@ class _BudgetPageContentState extends State<_BudgetPageContent> {
               child: Container(
                 margin: EdgeInsetsDirectional.symmetric(horizontal: 13),
                 decoration: BoxDecoration(
-                  borderRadius:
-                      BorderRadiusDirectional.all(Radius.circular(15)),
+                  borderRadius: BorderRadiusDirectional.all(
+                    Radius.circular(15),
+                  ),
                   color: appStateSettings["materialYou"]
-                      ? dynamicPastel(context,
+                      ? dynamicPastel(
+                          context,
                           Theme.of(context).colorScheme.secondaryContainer,
-                          amount: 0.5)
+                          amount: 0.5,
+                        )
                       : getColor(context, "lightDarkAccentHeavyLight"),
                   boxShadow: boxShadowCheck(boxShadowGeneral(context)),
                 ),
@@ -885,9 +984,9 @@ class _BudgetPageContentState extends State<_BudgetPageContent> {
             member: selectedMember,
             onlyShowTransactionsBelongingToBudgetPk:
                 widget.budget.sharedKey != null ||
-                        widget.budget.addedTransactionsOnly == true
-                    ? widget.budget.budgetPk
-                    : null,
+                    widget.budget.addedTransactionsOnly == true
+                ? widget.budget.budgetPk
+                : null,
             walletFks: widget.budget.walletFks ?? [],
             budget: widget.budget,
             dateDividerColor: pageBackgroundColor,
@@ -895,70 +994,82 @@ class _BudgetPageContentState extends State<_BudgetPageContent> {
             categoryTintColor: Theme.of(context).colorScheme.primary,
             noResultsExtraWidget:
                 widget.budget.reoccurrence != BudgetReoccurence.custom &&
-                        isPastBudget == false &&
-                        isPastBudgetButCurrentPeriod == false
-                    ? Padding(
-                        padding: const EdgeInsetsDirectional.only(top: 20),
-                        child: ExtraInfoButton(
-                          onTap: () {
-                            pushRoute(
-                              context,
-                              PastBudgetsPage(budgetPk: widget.budget.budgetPk),
-                            );
-                          },
-                          text: "view-previous-budget-periods".tr(),
-                          icon: appStateSettings["outlinedIcons"]
-                              ? Icons.history_outlined
-                              : Icons.history_rounded,
-                          color: dynamicPastel(
-                            context,
-                            Theme.of(context).colorScheme.secondaryContainer,
-                            amountLight:
-                                appStateSettings["materialYou"] ? 0.25 : 0.4,
-                            amountDark:
-                                appStateSettings["materialYou"] ? 0.4 : 0.55,
-                          ),
-                          buttonIconColor: dynamicPastel(
-                              context,
-                              HexColor(widget.budget.colour,
-                                  defaultColor:
-                                      Theme.of(context).colorScheme.primary),
-                              amount: 0.5),
-                          buttonIconColorIcon: dynamicPastel(
-                              context,
-                              HexColor(widget.budget.colour,
-                                  defaultColor:
-                                      Theme.of(context).colorScheme.primary),
-                              amount: 0.7,
-                              inverse: true),
+                    isPastBudget == false &&
+                    isPastBudgetButCurrentPeriod == false
+                ? Padding(
+                    padding: const EdgeInsetsDirectional.only(top: 20),
+                    child: ExtraInfoButton(
+                      onTap: () {
+                        pushRoute(
+                          context,
+                          PastBudgetsPage(budgetPk: widget.budget.budgetPk),
+                        );
+                      },
+                      text: "view-previous-budget-periods".tr(),
+                      icon: appStateSettings["outlinedIcons"]
+                          ? Icons.history_outlined
+                          : Icons.history_rounded,
+                      color: dynamicPastel(
+                        context,
+                        Theme.of(context).colorScheme.secondaryContainer,
+                        amountLight: appStateSettings["materialYou"]
+                            ? 0.25
+                            : 0.4,
+                        amountDark: appStateSettings["materialYou"]
+                            ? 0.4
+                            : 0.55,
+                      ),
+                      buttonIconColor: dynamicPastel(
+                        context,
+                        HexColor(
+                          widget.budget.colour,
+                          defaultColor: Theme.of(context).colorScheme.primary,
                         ),
-                      )
-                    : SizedBox.shrink(),
+                        amount: 0.5,
+                      ),
+                      buttonIconColorIcon: dynamicPastel(
+                        context,
+                        HexColor(
+                          widget.budget.colour,
+                          defaultColor: Theme.of(context).colorScheme.primary,
+                        ),
+                        amount: 0.7,
+                        inverse: true,
+                      ),
+                    ),
+                  )
+                : SizedBox.shrink(),
             showTotalCashFlow: true,
             showExcludedBudgetTag: (Transaction transaction) =>
-                transaction.budgetFksExclude
-                    ?.contains(widget.budget.budgetPk) ==
+                transaction.budgetFksExclude?.contains(
+                  widget.budget.budgetPk,
+                ) ==
                 true,
             renderType:
                 appStateSettings["appAnimations"] != AppAnimations.all.index
-                    ? TransactionEntriesRenderType.sliversNotSticky
-                    : TransactionEntriesRenderType.implicitlyAnimatedSlivers,
+                ? TransactionEntriesRenderType.sliversNotSticky
+                : TransactionEntriesRenderType.implicitlyAnimatedSlivers,
           ),
           SliverToBoxAdapter(
             child: widget.budget.sharedDateUpdated == null
                 ? SizedBox.shrink()
                 : Padding(
                     padding: const EdgeInsetsDirectional.only(
-                        start: 10, end: 10, bottom: 0),
+                      start: 10,
+                      end: 10,
+                      bottom: 0,
+                    ),
                     child: TextFont(
-                      text: "synced".tr() +
+                      text:
+                          "synced".tr() +
                           " " +
                           getTimeAgo(
                             widget.budget.sharedDateUpdated!,
                           ).toLowerCase() +
                           "\n Created by " +
                           getMemberNickname(
-                              (widget.budget.sharedMembers ?? [""])[0]),
+                            (widget.budget.sharedMembers ?? [""])[0],
+                          ),
                       fontSize: 13,
                       textColor: getColor(context, "textLight"),
                       textAlign: TextAlign.center,
@@ -970,11 +1081,9 @@ class _BudgetPageContentState extends State<_BudgetPageContent> {
           SliverToBoxAdapter(
             child: Container(height: 1, color: pageBackgroundColor),
           ),
-          SliverToBoxAdapter(child: SizedBox(height: 45))
+          SliverToBoxAdapter(child: SizedBox(height: 45)),
         ],
-        selectedTransactionsAppBar: SelectedTransactionsAppBar(
-          pageID: pageId,
-        ),
+        selectedTransactionsAppBar: SelectedTransactionsAppBar(pageID: pageId),
       ),
     );
   }
@@ -984,11 +1093,8 @@ class WidgetPosition extends StatefulWidget {
   final Widget child;
   final Function(Offset position) onChange;
 
-  const WidgetPosition({
-    Key? key,
-    required this.onChange,
-    required this.child,
-  }) : super(key: key);
+  const WidgetPosition({Key? key, required this.onChange, required this.child})
+    : super(key: key);
 
   @override
   _WidgetPositionState createState() => _WidgetPositionState();
@@ -998,10 +1104,7 @@ class _WidgetPositionState extends State<WidgetPosition> {
   @override
   Widget build(BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback(postFrameCallback);
-    return Container(
-      key: widgetKey,
-      child: widget.child,
-    );
+    return Container(key: widgetKey, child: widget.child);
   }
 
   var widgetKey = GlobalKey();
@@ -1064,44 +1167,44 @@ class _BudgetLineGraphState extends State<BudgetLineGraph> {
   }
 
   _init() {
-    Future.delayed(
-      Duration.zero,
-      () async {
-        dateTimeRanges = [];
-        List<Stream<List<Transaction>>> watchedPastSpendingTotals = [];
-        for (int index = 0;
-            index <=
-                (widget.showPastSpending == false
-                    ? 0
-                    : (appStateSettings["showPastSpendingTrajectory"] == true
-                        ? 2
-                        : 0));
-            index++) {
-          DateTime datePast = DateTime(
-            (widget.dateForRange ?? DateTime.now()).year -
-                (widget.budget.reoccurrence == BudgetReoccurence.yearly
-                    ? index * widget.budget.periodLength
-                    : 0),
-            (widget.dateForRange ?? DateTime.now()).month -
-                (widget.budget.reoccurrence == BudgetReoccurence.monthly
-                    ? index * widget.budget.periodLength
-                    : 0),
-            (widget.dateForRange ?? DateTime.now()).day -
-                (widget.budget.reoccurrence == BudgetReoccurence.daily
-                    ? index * widget.budget.periodLength
-                    : 0) -
-                (widget.budget.reoccurrence == BudgetReoccurence.weekly
-                    ? index * 7 * widget.budget.periodLength
-                    : 0),
-            0,
-            0,
-            1,
-          );
+    Future.delayed(Duration.zero, () async {
+      dateTimeRanges = [];
+      List<Stream<List<Transaction>>> watchedPastSpendingTotals = [];
+      for (
+        int index = 0;
+        index <=
+            (widget.showPastSpending == false
+                ? 0
+                : (appStateSettings["showPastSpendingTrajectory"] == true
+                      ? 2
+                      : 0));
+        index++
+      ) {
+        DateTime datePast = DateTime(
+          (widget.dateForRange ?? DateTime.now()).year -
+              (widget.budget.reoccurrence == BudgetReoccurence.yearly
+                  ? index * widget.budget.periodLength
+                  : 0),
+          (widget.dateForRange ?? DateTime.now()).month -
+              (widget.budget.reoccurrence == BudgetReoccurence.monthly
+                  ? index * widget.budget.periodLength
+                  : 0),
+          (widget.dateForRange ?? DateTime.now()).day -
+              (widget.budget.reoccurrence == BudgetReoccurence.daily
+                  ? index * widget.budget.periodLength
+                  : 0) -
+              (widget.budget.reoccurrence == BudgetReoccurence.weekly
+                  ? index * 7 * widget.budget.periodLength
+                  : 0),
+          0,
+          0,
+          1,
+        );
 
-          DateTimeRange budgetRange = getBudgetDate(widget.budget, datePast);
-          dateTimeRanges.add(budgetRange);
-          watchedPastSpendingTotals
-              .add(database.getTransactionsInTimeRangeFromCategories(
+        DateTimeRange budgetRange = getBudgetDate(widget.budget, datePast);
+        dateTimeRanges.add(budgetRange);
+        watchedPastSpendingTotals.add(
+          database.getTransactionsInTimeRangeFromCategories(
             budgetRange.start,
             budgetRange.end,
             widget.selectedCategory != null
@@ -1116,22 +1219,21 @@ class _BudgetLineGraphState extends State<BudgetLineGraph> {
             widget.budget.memberTransactionFilters,
             onlyShowTransactionsBelongingToBudgetPk:
                 widget.budget.sharedKey != null ||
-                        widget.budget.addedTransactionsOnly == true
-                    ? widget.budget.budgetPk
-                    : null,
+                    widget.budget.addedTransactionsOnly == true
+                ? widget.budget.budgetPk
+                : null,
             budget: widget.budget,
-          ));
-          if (budgetRange.duration.inDays > longestDateRange) {
-            longestDateRange = budgetRange.duration.inDays;
-          }
+          ),
+        );
+        if (budgetRange.duration.inDays > longestDateRange) {
+          longestDateRange = budgetRange.duration.inDays;
         }
+      }
 
-        setState(() {
-          mergedStreamsPastSpendingTotals =
-              StreamZip(watchedPastSpendingTotals);
-        });
-      },
-    );
+      setState(() {
+        mergedStreamsPastSpendingTotals = StreamZip(watchedPastSpendingTotals);
+      });
+    });
   }
 
   // Whether to always show all the days of the budget in the line graph
@@ -1140,7 +1242,9 @@ class _BudgetLineGraphState extends State<BudgetLineGraph> {
   @override
   Widget build(BuildContext context) {
     double budgetAmount = budgetAmountToPrimaryCurrency(
-        Provider.of<AllWallets>(context, listen: true), widget.budget);
+      Provider.of<AllWallets>(context, listen: true),
+      widget.budget,
+    );
 
     return StreamBuilder<List<List<Transaction>>>(
       stream: mergedStreamsPastSpendingTotals,
@@ -1154,9 +1258,11 @@ class _BudgetLineGraphState extends State<BudgetLineGraph> {
           bool allZeroes = true;
           List<List<Pair>> pointsList = [];
 
-          for (int snapshotIndex = 0;
-              snapshotIndex < snapshot.data!.length;
-              snapshotIndex++) {
+          for (
+            int snapshotIndex = 0;
+            snapshotIndex < snapshot.data!.length;
+            snapshotIndex++
+          ) {
             var p = CalculatePointsParams(
               transactions: snapshot.data![snapshotIndex],
               customStartDate: dateTimeRanges[snapshotIndex].start,
@@ -1168,8 +1274,9 @@ class _BudgetLineGraphState extends State<BudgetLineGraph> {
               allWallets: Provider.of<AllWallets>(context, listen: false),
               showCumulativeSpending:
                   appStateSettings["showCumulativeSpending"],
-              invertPolarity:
-                  determineBudgetPolarity(widget.budget) == -1 ? true : false,
+              invertPolarity: determineBudgetPolarity(widget.budget) == -1
+                  ? true
+                  : false,
               appStateSettingsPassed: appStateSettings,
             );
             List<Pair> points = calculatePoints(p);
@@ -1185,10 +1292,13 @@ class _BudgetLineGraphState extends State<BudgetLineGraph> {
             pointsList.add(points);
           }
 
-          Color lineColor = widget.selectedCategory?.categoryPk != null &&
+          Color lineColor =
+              widget.selectedCategory?.categoryPk != null &&
                   widget.selectedCategory != null
-              ? HexColor(widget.selectedCategory!.colour,
-                  defaultColor: Theme.of(context).colorScheme.primary)
+              ? HexColor(
+                  widget.selectedCategory!.colour,
+                  defaultColor: Theme.of(context).colorScheme.primary,
+                )
               : Theme.of(context).colorScheme.primary;
           if (widget.showIfNone == false && allZeroes) return SizedBox.shrink();
           return Stack(
@@ -1196,16 +1306,18 @@ class _BudgetLineGraphState extends State<BudgetLineGraph> {
               Padding(
                 padding: widget.padding,
                 child: LineChartWrapper(
-                  keepHorizontalLineInView:
-                      widget.selectedCategory == null ? true : false,
+                  keepHorizontalLineInView: widget.selectedCategory == null
+                      ? true
+                      : false,
                   color: lineColor,
                   verticalLineAt: widget.isPastBudget == true
                       ? null
                       : (budgetRangeEnd
-                              .difference(
-                                  (widget.dateForRange ?? DateTime.now()))
-                              .inDays)
-                          .toDouble(),
+                                .difference(
+                                  (widget.dateForRange ?? DateTime.now()),
+                                )
+                                .inDays)
+                            .toDouble(),
                   endDate: budgetRangeEnd,
                   points: pointsList,
                   isCurved: true,
@@ -1214,12 +1326,13 @@ class _BudgetLineGraphState extends State<BudgetLineGraph> {
                       index == 0
                           ? lineColor
                           : (widget.selectedCategory?.categoryPk != null &&
-                                      widget.selectedCategory != null
-                                  ? lineColor
-                                  : Theme.of(context).colorScheme.tertiary)
-                              .withOpacity((index) / snapshot.data!.length)
+                                        widget.selectedCategory != null
+                                    ? lineColor
+                                    : Theme.of(context).colorScheme.tertiary)
+                                .withOpacity((index) / snapshot.data!.length),
                   ],
-                  horizontalLineAt: widget.isPastBudget == true ||
+                  horizontalLineAt:
+                      widget.isPastBudget == true ||
                           (widget.budget.reoccurrence ==
                                   BudgetReoccurence.custom &&
                               widget.budget.endDate.millisecondsSinceEpoch <
@@ -1229,12 +1342,16 @@ class _BudgetLineGraphState extends State<BudgetLineGraph> {
                                   DateTime.now().millisecondsSinceEpoch)
                       ? budgetAmount
                       : budgetAmount *
-                          ((DateTime.now().millisecondsSinceEpoch -
-                                  widget.budgetRange.start
-                                      .millisecondsSinceEpoch) /
-                              (widget.budgetRange.end.millisecondsSinceEpoch -
-                                  widget.budgetRange.start
-                                      .millisecondsSinceEpoch)),
+                            ((DateTime.now().millisecondsSinceEpoch -
+                                    widget
+                                        .budgetRange
+                                        .start
+                                        .millisecondsSinceEpoch) /
+                                (widget.budgetRange.end.millisecondsSinceEpoch -
+                                    widget
+                                        .budgetRange
+                                        .start
+                                        .millisecondsSinceEpoch)),
                 ),
               ),
               if (widget.isPastBudget == false &&
@@ -1258,16 +1375,15 @@ class _BudgetLineGraphState extends State<BudgetLineGraph> {
                             child: Icon(
                               showCompressedView
                                   ? appStateSettings["outlinedIcons"]
-                                      ? Icons.expand_outlined
-                                      : Icons.expand_rounded
+                                        ? Icons.expand_outlined
+                                        : Icons.expand_rounded
                                   : appStateSettings["outlinedIcons"]
-                                      ? Icons.compress_outlined
-                                      : Icons.compress_rounded,
+                                  ? Icons.compress_outlined
+                                  : Icons.compress_rounded,
                               size: 22,
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .primary
-                                  .withOpacity(0.8),
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.primary.withOpacity(0.8),
                             ),
                           ),
                         ),
@@ -1275,9 +1391,11 @@ class _BudgetLineGraphState extends State<BudgetLineGraph> {
                           setState(() {
                             showCompressedView = !showCompressedView;
                           });
-                          updateSettings("showCompressedViewBudgetGraph",
-                              showCompressedView,
-                              updateGlobalState: false);
+                          updateSettings(
+                            "showCompressedViewBudgetGraph",
+                            showCompressedView,
+                            updateGlobalState: false,
+                          );
                         },
                       ),
                     ),
@@ -1297,10 +1415,12 @@ class TotalSpent extends StatefulWidget {
     super.key,
     required this.totalSpent,
     required this.budget,
+    this.forceReveal = false,
   });
 
   final double totalSpent;
   final Budget budget;
+  final bool forceReveal;
 
   @override
   State<TotalSpent> createState() => _TotalSpentState();
@@ -1308,149 +1428,138 @@ class TotalSpent extends StatefulWidget {
 
 class _TotalSpentState extends State<TotalSpent> {
   bool showTotalSpent = appStateSettings["showTotalSpentForBudget"];
-  bool _isRevealed = false;
-  Timer? _revealTimer;
-
-  @override
-  void dispose() {
-    _revealTimer?.cancel();
-    super.dispose();
-  }
 
   _swapTotalSpentDisplay() {
     setState(() {
       showTotalSpent = !showTotalSpent;
     });
-    updateSettings("showTotalSpentForBudget", showTotalSpent,
-        pagesNeedingRefresh: [0, 2], updateGlobalState: false);
+    updateSettings(
+      "showTotalSpentForBudget",
+      showTotalSpent,
+      pagesNeedingRefresh: [0, 2],
+      updateGlobalState: false,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     double budgetAmount = budgetAmountToPrimaryCurrency(
-        Provider.of<AllWallets>(context, listen: true), widget.budget);
+      Provider.of<AllWallets>(context, listen: true),
+      widget.budget,
+    );
 
-    return Listener(
-      onPointerDown: (_) {
-        HapticFeedback.selectionClick();
-        setState(() => _isRevealed = true);
-        _revealTimer?.cancel();
+    return GestureDetector(
+      onTap: () {
+        _swapTotalSpentDisplay();
       },
-      onPointerUp: (_) {
-        _revealTimer?.cancel();
-        _revealTimer = Timer(Duration(seconds: 2), () {
-          if (mounted) setState(() => _isRevealed = false);
-        });
+      onLongPress: () {
+        HapticFeedback.heavyImpact();
+        _swapTotalSpentDisplay();
       },
-      onPointerCancel: (_) {
-        _revealTimer?.cancel();
-        _revealTimer = Timer(Duration(seconds: 2), () {
-          if (mounted) setState(() => _isRevealed = false);
-        });
-      },
-      child: GestureDetector(
-        onTap: () {
-          _swapTotalSpentDisplay();
-        },
-        onLongPress: () {
-          HapticFeedback.heavyImpact();
-          _swapTotalSpentDisplay();
-        },
-        child: AnimatedSwitcher(
-          duration: Duration(milliseconds: 200),
-          child: IntrinsicWidth(
-            child: budgetAmount - widget.totalSpent >= 0
-                ? Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Container(
-                        child: CountNumber(
-                          count: showTotalSpent
-                              ? widget.totalSpent
-                              : budgetAmount - widget.totalSpent,
-                          duration: Duration(milliseconds: 400),
-                          initialCount: (0),
-                          textBuilder: (number) {
-                            return TextFont(
-                              text: convertToMoney(
-                                  Provider.of<AllWallets>(context), number,
-                                  finalNumber: showTotalSpent
-                                      ? widget.totalSpent
-                                      : budgetAmount - widget.totalSpent,
-                                  forceReveal: _isRevealed),
-                              fontSize: 22,
-                              textAlign: TextAlign.start,
-                              fontWeight: FontWeight.bold,
-                              textColor: Theme.of(context)
-                                  .colorScheme
-                                  .onSecondaryContainer,
-                            );
-                          },
-                        ),
+      child: AnimatedSwitcher(
+        duration: Duration(milliseconds: 200),
+        child: IntrinsicWidth(
+          child: budgetAmount - widget.totalSpent >= 0
+              ? Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Container(
+                      child: CountNumber(
+                        count: showTotalSpent
+                            ? widget.totalSpent
+                            : budgetAmount - widget.totalSpent,
+                        duration: Duration(milliseconds: 400),
+                        initialCount: (0),
+                        textBuilder: (number) {
+                          return TextFont(
+                            text: convertToMoney(
+                              Provider.of<AllWallets>(context),
+                              number,
+                              finalNumber: showTotalSpent
+                                  ? widget.totalSpent
+                                  : budgetAmount - widget.totalSpent,
+                              forceReveal: widget.forceReveal,
+                            ),
+                            fontSize: 22,
+                            textAlign: TextAlign.start,
+                            fontWeight: FontWeight.bold,
+                            textColor: Theme.of(
+                              context,
+                            ).colorScheme.onSecondaryContainer,
+                          );
+                        },
                       ),
-                      Container(
-                        padding: const EdgeInsetsDirectional.only(bottom: 1.5),
-                        child: TextFont(
-                          text: getBudgetSpentText(widget.budget.income) +
-                              convertToMoney(Provider.of<AllWallets>(context),
-                                  budgetAmount,
-                                  forceReveal: _isRevealed),
-                          fontSize: 15,
-                          textAlign: TextAlign.start,
-                          textColor: Theme.of(context)
-                              .colorScheme
-                              .onSecondaryContainer,
-                        ),
+                    ),
+                    Container(
+                      padding: const EdgeInsetsDirectional.only(bottom: 1.5),
+                      child: TextFont(
+                        text:
+                            getBudgetSpentText(widget.budget.income) +
+                            convertToMoney(
+                              Provider.of<AllWallets>(context),
+                              budgetAmount,
+                              forceReveal: widget.forceReveal,
+                            ),
+                        fontSize: 15,
+                        textAlign: TextAlign.start,
+                        textColor: Theme.of(
+                          context,
+                        ).colorScheme.onSecondaryContainer,
                       ),
-                    ],
-                  )
-                : Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Container(
-                        child: CountNumber(
-                          count: showTotalSpent
-                              ? widget.totalSpent
-                              : widget.totalSpent - budgetAmount,
-                          duration: Duration(milliseconds: 400),
-                          initialCount: (0),
-                          textBuilder: (number) {
-                            return TextFont(
-                              text: convertToMoney(
-                                  Provider.of<AllWallets>(context), number,
-                                  finalNumber: showTotalSpent
-                                      ? widget.totalSpent
-                                      : widget.totalSpent - budgetAmount,
-                                  forceReveal: _isRevealed),
-                              fontSize: 22,
-                              textAlign: TextAlign.start,
-                              fontWeight: FontWeight.bold,
-                              textColor: Theme.of(context)
-                                  .colorScheme
-                                  .onSecondaryContainer,
-                            );
-                          },
-                        ),
+                    ),
+                  ],
+                )
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Container(
+                      child: CountNumber(
+                        count: showTotalSpent
+                            ? widget.totalSpent
+                            : widget.totalSpent - budgetAmount,
+                        duration: Duration(milliseconds: 400),
+                        initialCount: (0),
+                        textBuilder: (number) {
+                          return TextFont(
+                            text: convertToMoney(
+                              Provider.of<AllWallets>(context),
+                              number,
+                              finalNumber: showTotalSpent
+                                  ? widget.totalSpent
+                                  : widget.totalSpent - budgetAmount,
+                              forceReveal: widget.forceReveal,
+                            ),
+                            fontSize: 22,
+                            textAlign: TextAlign.start,
+                            fontWeight: FontWeight.bold,
+                            textColor: Theme.of(
+                              context,
+                            ).colorScheme.onSecondaryContainer,
+                          );
+                        },
                       ),
-                      Container(
-                        padding: const EdgeInsetsDirectional.only(bottom: 1.5),
-                        child: TextFont(
-                          text: getBudgetOverSpentText(widget.budget.income) +
-                              convertToMoney(Provider.of<AllWallets>(context),
-                                  budgetAmount,
-                                  forceReveal: _isRevealed),
-                          fontSize: 15,
-                          textAlign: TextAlign.start,
-                          textColor: Theme.of(context)
-                              .colorScheme
-                              .onSecondaryContainer,
-                        ),
+                    ),
+                    Container(
+                      padding: const EdgeInsetsDirectional.only(bottom: 1.5),
+                      child: TextFont(
+                        text:
+                            getBudgetOverSpentText(widget.budget.income) +
+                            convertToMoney(
+                              Provider.of<AllWallets>(context),
+                              budgetAmount,
+                              forceReveal: widget.forceReveal,
+                            ),
+                        fontSize: 15,
+                        textAlign: TextAlign.start,
+                        textColor: Theme.of(
+                          context,
+                        ).colorScheme.onSecondaryContainer,
                       ),
-                    ],
-                  ),
-          ),
+                    ),
+                  ],
+                ),
         ),
       ),
     );
