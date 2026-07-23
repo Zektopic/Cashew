@@ -119,6 +119,31 @@ void main() {
     });
   });
 
+  group('hasDecimalPoints', () {
+    test('returns false for null', () {
+      expect(hasDecimalPoints(null), isFalse);
+    });
+
+    test('returns false for integers represented as doubles', () {
+      expect(hasDecimalPoints(1.0), isFalse);
+      expect(hasDecimalPoints(0.0), isFalse);
+      expect(hasDecimalPoints(-5.0), isFalse);
+      expect(hasDecimalPoints(100.0), isFalse);
+    });
+
+    test('returns true for numbers with decimal values', () {
+      expect(hasDecimalPoints(1.5), isTrue);
+      expect(hasDecimalPoints(0.01), isTrue);
+      expect(hasDecimalPoints(-5.99), isTrue);
+      expect(hasDecimalPoints(3.14159), isTrue);
+    });
+
+    test('handles small values close to zero (without scientific notation)', () {
+      expect(hasDecimalPoints(0.0001), isTrue);
+      expect(hasDecimalPoints(-0.0001), isTrue);
+    });
+  });
+
   group('cleanupNoteStringWithURLs', () {
     test('removes standard http URL', () {
       final input = "Check out this link: http://example.com/page";
