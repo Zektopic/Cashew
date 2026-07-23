@@ -1153,10 +1153,6 @@ class _AddBillItemPageState extends State<AddBillItemPage> {
                 ? "add-item".tr()
                 : "update-item".tr(),
             onTap: () {
-              // for (SplitPerson splitPerson in selectedSplitPersons) {
-              //   print(splitPerson.name);
-              //   print(splitPerson.percent);
-              // }
               billSplitterItem.userAmounts = [...selectedSplitPersons];
               if (widget.billSplitterItem == null) {
                 widget.addBillSplitterItem(billSplitterItem);
