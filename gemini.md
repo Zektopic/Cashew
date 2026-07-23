@@ -75,6 +75,11 @@
 
 ## 🚨 Critical Security Learnings
 *Only add entries here for unique, repo-specific security gaps, unexpected side effects, or reusable patterns.*
+- **2026-07-05 - Exposure of PII in Logs:**
+  - **Vulnerability/Gap:** The user's email address and shared budget owner member details were being logged to the console using `print()` during the initialization of `SharedBudgetSettings`. This exposed Personally Identifiable Information (PII) to device logs, which could be read by any process or person with physical access to the device or its debug output.
+  - **Learning:** PII and sensitive data should never be logged to the standard output or log files in production code, as these logs can persist on devices and be accessible to unauthorized parties.
+  - **Prevention:** Consistently audit application code, especially initialization logic and debug traces, to ensure sensitive information (such as user credentials, emails, and exact monetary amounts) is never passed to `print()` or insecure logging mechanisms before merging into release branches.
+
 - **2025-04-04 - Hardcoded Firebase Credentials:**
   - **Vulnerability/Gap:** Firebase API keys and app IDs were hardcoded directly into `budget/lib/firebase_options.dart`. This exposes sensitive infrastructure credentials to anyone with access to the source code or potentially via compiled app inspection.
   - **Learning:** Production secrets, including Firebase config, should never be checked into version control. They should be injected at build/runtime.

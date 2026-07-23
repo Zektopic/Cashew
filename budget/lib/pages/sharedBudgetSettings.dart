@@ -23,10 +23,7 @@ import 'package:budget/struct/randomConstants.dart';
 import 'addButton.dart';
 
 class SharedBudgetSettings extends StatefulWidget {
-  SharedBudgetSettings({
-    Key? key,
-    required this.budget,
-  }) : super(key: key);
+  SharedBudgetSettings({Key? key, required this.budget}) : super(key: key);
 
   final Budget budget;
 
@@ -43,8 +40,10 @@ class _SharedBudgetSettingsState extends State<SharedBudgetSettings> {
   void initState() {
     super.initState();
     Future.delayed(Duration.zero, () async {
-      dynamic response =
-          await getMembersFromBudget(widget.budget.sharedKey!, widget.budget);
+      dynamic response = await getMembersFromBudget(
+        widget.budget.sharedKey!,
+        widget.budget,
+      );
       if (response == null) {
         openSnackbar(SnackbarMessage(title: "Connection error"));
         setState(() {
@@ -58,8 +57,6 @@ class _SharedBudgetSettingsState extends State<SharedBudgetSettings> {
         });
         return;
       }
-      print(FirebaseAuth.instance.currentUser!.email);
-      print(widget.budget.sharedOwnerMember);
       setState(() {
         members = response;
         isLoaded = true;
@@ -67,8 +64,11 @@ class _SharedBudgetSettingsState extends State<SharedBudgetSettings> {
     });
   }
 
-  addMember(String member,
-      {bool updateEntry = false, String originalMember = ""}) async {
+  addMember(
+    String member, {
+    bool updateEntry = false,
+    String originalMember = "",
+  }) async {
     member = member.replaceAll(' ', '');
     if (members.contains(member)) {
       openSnackbar(
@@ -94,7 +94,10 @@ class _SharedBudgetSettingsState extends State<SharedBudgetSettings> {
     }
     if (updateEntry) {
       await removeMemberFromBudget(
-          widget.budget.sharedKey!, originalMember, widget.budget);
+        widget.budget.sharedKey!,
+        originalMember,
+        widget.budget,
+      );
       await addMemberToBudget(widget.budget.sharedKey!, member, widget.budget);
       setState(() {
         int index = members.indexOf(originalMember);
@@ -111,7 +114,10 @@ class _SharedBudgetSettingsState extends State<SharedBudgetSettings> {
 
   removeMember(String member) async {
     await removeMemberFromBudget(
-        widget.budget.sharedKey!, member, widget.budget);
+      widget.budget.sharedKey!,
+      member,
+      widget.budget,
+    );
     setState(() {
       int index = members.indexOf(member);
       members.removeAt(index);
@@ -199,29 +205,30 @@ class _SharedBudgetSettingsState extends State<SharedBudgetSettings> {
                     children: [
                       Expanded(
                         child: AddButton(
-                            margin: EdgeInsetsDirectional.only(
-                              start: 15,
-                              end: 15,
-                              bottom: 9,
-                              top: 4,
-                            ),
-                            onTap: () {
-                              openBottomSheet(
-                                context,
-                                PopupFramework(
-                                  title: "Add Member",
-                                  subtitle: "Enter the email of the member",
-                                  child: SelectText(
-                                    buttonLabel: "Add Member",
-                                    setSelectedText: (_) {},
-                                    placeholder: "example@example.com",
-                                    nextWithInput: (text) async {
-                                      addMember(text);
-                                    },
-                                  ),
+                          margin: EdgeInsetsDirectional.only(
+                            start: 15,
+                            end: 15,
+                            bottom: 9,
+                            top: 4,
+                          ),
+                          onTap: () {
+                            openBottomSheet(
+                              context,
+                              PopupFramework(
+                                title: "Add Member",
+                                subtitle: "Enter the email of the member",
+                                child: SelectText(
+                                  buttonLabel: "Add Member",
+                                  setSelectedText: (_) {},
+                                  placeholder: "example@example.com",
+                                  nextWithInput: (text) async {
+                                    addMember(text);
+                                  },
                                 ),
-                              );
-                            }),
+                              ),
+                            );
+                          },
+                        ),
                       ),
                     ],
                   )
@@ -231,15 +238,17 @@ class _SharedBudgetSettingsState extends State<SharedBudgetSettings> {
                         ? Theme.of(context).colorScheme.secondaryContainer
                         : getColor(context, "lightDarkAccentHeavyLight"),
                     highlightColor: appStateSettings["materialYou"]
-                        ? Theme.of(context)
-                            .colorScheme
-                            .secondaryContainer
-                            .withOpacity(0.2)
-                        : getColor(context, "lightDarkAccentHeavy")
-                            .withAlpha(20),
+                        ? Theme.of(
+                            context,
+                          ).colorScheme.secondaryContainer.withOpacity(0.2)
+                        : getColor(
+                            context,
+                            "lightDarkAccentHeavy",
+                          ).withAlpha(20),
                     child: Padding(
-                      padding:
-                          const EdgeInsetsDirectional.symmetric(horizontal: 15),
+                      padding: const EdgeInsetsDirectional.symmetric(
+                        horizontal: 15,
+                      ),
                       child: Container(
                         padding: EdgeInsetsDirectional.only(
                           start: 15,
@@ -249,11 +258,15 @@ class _SharedBudgetSettingsState extends State<SharedBudgetSettings> {
                         ),
                         height: 52,
                         margin: const EdgeInsetsDirectional.only(
-                            bottom: 8.0, top: 4.0),
+                          bottom: 8.0,
+                          top: 4.0,
+                        ),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadiusDirectional.circular(15),
-                          color: getColor(context, "lightDarkAccent")
-                              .withOpacity(0.5),
+                          color: getColor(
+                            context,
+                            "lightDarkAccent",
+                          ).withOpacity(0.5),
                           border: Border.all(
                             width: 1.5,
                             color: getColor(context, "lightDarkAccentHeavy"),
@@ -263,8 +276,10 @@ class _SharedBudgetSettingsState extends State<SharedBudgetSettings> {
                           child: TextFont(
                             text: "+",
                             fontWeight: FontWeight.bold,
-                            textColor:
-                                getColor(context, "lightDarkAccentHeavy"),
+                            textColor: getColor(
+                              context,
+                              "lightDarkAccentHeavy",
+                            ),
                           ),
                         ),
                       ),
@@ -279,31 +294,38 @@ class _SharedBudgetSettingsState extends State<SharedBudgetSettings> {
                       i++)
                     Shimmer.fromColors(
                       period: Duration(
-                          milliseconds:
-                              (1000 + randomDouble[i % 10] * 520).toInt()),
+                        milliseconds:
+                            (1000 + randomDouble[i % 10] * 520).toInt(),
+                      ),
                       baseColor: appStateSettings["materialYou"]
                           ? Theme.of(context).colorScheme.secondaryContainer
                           : getColor(context, "lightDarkAccentHeavyLight"),
                       highlightColor: appStateSettings["materialYou"]
-                          ? Theme.of(context)
-                              .colorScheme
-                              .secondaryContainer
-                              .withOpacity(0.2)
-                          : getColor(context, "lightDarkAccentHeavy")
-                              .withAlpha(20),
+                          ? Theme.of(
+                              context,
+                            ).colorScheme.secondaryContainer.withOpacity(0.2)
+                          : getColor(
+                              context,
+                              "lightDarkAccentHeavy",
+                            ).withAlpha(20),
                       child: Padding(
                         padding: const EdgeInsetsDirectional.symmetric(
-                            horizontal: 15),
+                          horizontal: 15,
+                        ),
                         child: Container(
                           width: double.infinity,
                           height: 70,
                           margin: const EdgeInsetsDirectional.only(bottom: 8.0),
                           padding: const EdgeInsetsDirectional.symmetric(
-                              horizontal: 25, vertical: 15),
+                            horizontal: 25,
+                            vertical: 15,
+                          ),
                           decoration: BoxDecoration(
                             borderRadius: BorderRadiusDirectional.circular(15),
-                            color: getColor(context, "lightDarkAccent")
-                                .withOpacity(0.5),
+                            color: getColor(
+                              context,
+                              "lightDarkAccent",
+                            ).withOpacity(0.5),
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -312,7 +334,8 @@ class _SharedBudgetSettingsState extends State<SharedBudgetSettings> {
                               Container(
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadiusDirectional.all(
-                                      Radius.circular(5)),
+                                    Radius.circular(5),
+                                  ),
                                   color: Colors.white,
                                 ),
                                 height: 15,
@@ -321,7 +344,8 @@ class _SharedBudgetSettingsState extends State<SharedBudgetSettings> {
                               Container(
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadiusDirectional.all(
-                                      Radius.circular(5)),
+                                    Radius.circular(5),
+                                  ),
                                   color: Colors.white,
                                 ),
                                 height: 17,
@@ -331,14 +355,15 @@ class _SharedBudgetSettingsState extends State<SharedBudgetSettings> {
                           ),
                         ),
                       ),
-                    )
+                    ),
                 ],
               )
             : Column(
                 children: [
                   Padding(
-                    padding:
-                        const EdgeInsetsDirectional.symmetric(horizontal: 15),
+                    padding: const EdgeInsetsDirectional.symmetric(
+                      horizontal: 15,
+                    ),
                     child: CategoryMemberContainer(
                       member: members[0],
                       setMember: (_) {},
@@ -350,13 +375,17 @@ class _SharedBudgetSettingsState extends State<SharedBudgetSettings> {
                   ),
                   for (String member in members.sublist(1))
                     Padding(
-                      padding:
-                          const EdgeInsetsDirectional.symmetric(horizontal: 15),
+                      padding: const EdgeInsetsDirectional.symmetric(
+                        horizontal: 15,
+                      ),
                       child: CategoryMemberContainer(
                         member: member,
                         setMember: (text) async {
-                          addMember(text,
-                              updateEntry: true, originalMember: member);
+                          addMember(
+                            text,
+                            updateEntry: true,
+                            originalMember: member,
+                          );
                         },
                         onDelete: () {
                           removeMember(member);
@@ -395,8 +424,9 @@ class _SharedBudgetSettingsState extends State<SharedBudgetSettings> {
                       onSubmit: () async {
                         popRoute(context);
                         openLoadingPopup(context);
-                        bool status =
-                            await removedSharedFromBudget(widget.budget);
+                        bool status = await removedSharedFromBudget(
+                          widget.budget,
+                        );
                         if (status == false) {
                           openSnackbar(
                             SnackbarMessage(
@@ -537,8 +567,12 @@ class CategoryMemberContainer extends StatelessWidget {
                         Map<dynamic, dynamic> nicknames =
                             appStateSettings["usersNicknames"];
                         nicknames[member] = text;
-                        updateSettings("usersNicknames", nicknames,
-                            pagesNeedingRefresh: [], updateGlobalState: false);
+                        updateSettings(
+                          "usersNicknames",
+                          nicknames,
+                          pagesNeedingRefresh: [],
+                          updateGlobalState: false,
+                        );
                       },
                       selectedText:
                           appStateSettings["usersNicknames"][member] ?? "",
@@ -559,7 +593,9 @@ class CategoryMemberContainer extends StatelessWidget {
             Expanded(
               child: Padding(
                 padding: const EdgeInsetsDirectional.symmetric(
-                    horizontal: 25, vertical: 15),
+                  horizontal: 25,
+                  vertical: 15,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -582,10 +618,7 @@ class CategoryMemberContainer extends StatelessWidget {
                       fontSize: 15,
                       textColor: Theme.of(context).colorScheme.secondary,
                     ),
-                    TextFont(
-                      text: member,
-                      fontSize: 16,
-                    ),
+                    TextFont(text: member, fontSize: 16),
                   ],
                 ),
               ),
@@ -665,8 +698,12 @@ memberPopup(context, String member) {
               Map<dynamic, dynamic> nicknames =
                   appStateSettings["usersNicknames"];
               nicknames[member] = text;
-              updateSettings("usersNicknames", nicknames,
-                  pagesNeedingRefresh: [], updateGlobalState: false);
+              updateSettings(
+                "usersNicknames",
+                nicknames,
+                pagesNeedingRefresh: [],
+                updateGlobalState: false,
+              );
             },
             selectedText: appStateSettings["usersNicknames"][member] ?? "",
             placeholder: "Nickname",
