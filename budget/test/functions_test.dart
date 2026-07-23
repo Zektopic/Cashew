@@ -166,4 +166,37 @@ void main() {
       expect(cleanupNoteStringWithURLs(input), expected);
     });
   });
+
+  group('absoluteZeroString', () {
+    test('converts "-0" to "0"', () {
+      expect(absoluteZeroString("-0"), "0");
+    });
+
+    test('returns "-0.0" unmodified', () {
+      expect(absoluteZeroString("-0.0"), "-0.0");
+    });
+
+    test('returns "0" unmodified', () {
+      expect(absoluteZeroString("0"), "0");
+    });
+
+    test('returns standard positive numbers unmodified', () {
+      expect(absoluteZeroString("5"), "5");
+      expect(absoluteZeroString("100"), "100");
+    });
+
+    test('returns standard negative numbers unmodified', () {
+      expect(absoluteZeroString("-5"), "-5");
+      expect(absoluteZeroString("-100"), "-100");
+    });
+
+    test('returns empty string unmodified', () {
+      expect(absoluteZeroString(""), "");
+    });
+
+    test('returns non-numeric strings unmodified', () {
+      expect(absoluteZeroString("hello"), "hello");
+      expect(absoluteZeroString("abc-0"), "abc-0");
+    });
+  });
 }
