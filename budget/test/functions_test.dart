@@ -119,6 +119,46 @@ void main() {
     });
   });
 
+  group('absoluteZeroNull', () {
+    test('returns null for null', () {
+      expect(absoluteZeroNull(null), isNull);
+    });
+
+    test('converts -0.0 to 0.0', () {
+      final result = absoluteZeroNull(-0.0);
+      expect(result, 0.0);
+      expect(result?.isNegative, isFalse);
+    });
+
+    test('keeps 0.0 as 0.0', () {
+      final result = absoluteZeroNull(0.0);
+      expect(result, 0.0);
+      expect(result?.isNegative, isFalse);
+    });
+
+    test('keeps positive numbers unchanged', () {
+      expect(absoluteZeroNull(5.5), 5.5);
+      expect(absoluteZeroNull(100.0), 100.0);
+    });
+
+    test('keeps negative numbers (other than -0.0) unchanged', () {
+      expect(absoluteZeroNull(-5.5), -5.5);
+      expect(absoluteZeroNull(-100.0), -100.0);
+    });
+
+    test('handles infinity', () {
+      expect(absoluteZeroNull(double.infinity), double.infinity);
+      expect(
+        absoluteZeroNull(double.negativeInfinity),
+        double.negativeInfinity,
+      );
+    });
+
+    test('handles NaN', () {
+      expect(absoluteZeroNull(double.nan)?.isNaN, isTrue);
+    });
+  });
+
   group('hasDecimalPoints', () {
     test('returns false for null', () {
       expect(hasDecimalPoints(null), isFalse);
@@ -138,10 +178,13 @@ void main() {
       expect(hasDecimalPoints(3.14159), isTrue);
     });
 
-    test('handles small values close to zero (without scientific notation)', () {
-      expect(hasDecimalPoints(0.0001), isTrue);
-      expect(hasDecimalPoints(-0.0001), isTrue);
-    });
+    test(
+      'handles small values close to zero (without scientific notation)',
+      () {
+        expect(hasDecimalPoints(0.0001), isTrue);
+        expect(hasDecimalPoints(-0.0001), isTrue);
+      },
+    );
   });
 
   group('cleanupNoteStringWithURLs', () {
