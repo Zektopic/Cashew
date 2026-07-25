@@ -82,6 +82,10 @@
 **Next Planned Step:** Review database ORM input paths to ensure no raw statements bypass input sanitization when data comes from UI forms.
 
 ## 🚨 Critical Security Learnings
+- **2026-07-26 - Sensitive Data Exposure in Logs:**
+  - **Vulnerability/Gap:** Recently deleted transaction data was inadvertently being printed to the console (`print(jsonString)`) before being saved to local storage. This exposes sensitive financial data and Personally Identifiable Information (PII) to application and device logs, which could be accessed by other applications or logging aggregators.
+  - **Learning:** Development `print` statements or loggers should never be left in production code paths that handle sensitive user data. Console outputs are often globally accessible on devices or collected by analytics, posing a severe privacy risk.
+  - **Prevention:** Strictly scrub codebase for development `print` statements before merging, particularly in serialization or caching routines handling sensitive structures. Use robust, sanitizeable logging mechanisms instead of raw console printing.
 *Only add entries here for unique, repo-specific security gaps, unexpected side effects, or reusable patterns.*
 - **2025-04-04 - Hardcoded Firebase Credentials:**
   - **Vulnerability/Gap:** Firebase API keys and app IDs were hardcoded directly into `budget/lib/firebase_options.dart`. This exposes sensitive infrastructure credentials to anyone with access to the source code or potentially via compiled app inspection.
