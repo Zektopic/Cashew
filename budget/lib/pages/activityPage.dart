@@ -24,13 +24,16 @@ import 'package:budget/functions.dart';
 
 List<MapEntry<String, Transaction>> recentlyDeletedTransactions = [];
 
-void addTransactionToRecentlyDeleted(Transaction transaction,
-    {bool save = true}) {
+void addTransactionToRecentlyDeleted(
+  Transaction transaction, {
+  bool save = true,
+}) {
   while (recentlyDeletedTransactions.length >= 50) {
     recentlyDeletedTransactions.removeAt(0);
   }
-  recentlyDeletedTransactions
-      .add(MapEntry(transaction.transactionPk, transaction));
+  recentlyDeletedTransactions.add(
+    MapEntry(transaction.transactionPk, transaction),
+  );
   if (save) saveRecentlyDeletedTransactions();
 }
 
@@ -45,28 +48,27 @@ Transaction? getTransactionFromRecentlyDeleted(String transactionPk) {
 
 Future<void> saveRecentlyDeletedTransactions() async {
   List<Map<String, dynamic>> encodedData = recentlyDeletedTransactions
-      .map((entry) => {
-            'key': entry.key,
-            'value': entry.value.toJson(),
-          })
+      .map((entry) => {'key': entry.key, 'value': entry.value.toJson()})
       .toList();
   String jsonString = jsonEncode(encodedData);
-  print(jsonString);
   await sharedPreferences.setString("recentlyDeletedTransactions", jsonString);
 }
 
 Future<void> loadRecentlyDeletedTransactions() async {
-  String? jsonString =
-      sharedPreferences.getString("recentlyDeletedTransactions");
+  String? jsonString = sharedPreferences.getString(
+    "recentlyDeletedTransactions",
+  );
 
   if (jsonString != null) {
     try {
       List<dynamic> decodedData = jsonDecode(jsonString);
       recentlyDeletedTransactions = decodedData
-          .map((entry) => MapEntry<String, Transaction>(
-                entry['key'] as String,
-                Transaction.fromJson(entry['value'] as Map<String, dynamic>),
-              ))
+          .map(
+            (entry) => MapEntry<String, Transaction>(
+              entry['key'] as String,
+              Transaction.fromJson(entry['value'] as Map<String, dynamic>),
+            ),
+          )
           .toList();
     } catch (e) {
       print("Error loading recently deleted transactions: " + e.toString());
@@ -75,7 +77,10 @@ Future<void> loadRecentlyDeletedTransactions() async {
 }
 
 void restoreTransaction(
-    BuildContext context, DeleteLog deleteLog, Transaction transaction) async {
+  BuildContext context,
+  DeleteLog deleteLog,
+  Transaction transaction,
+) async {
   if (await database.getCategoryInstanceOrNull(transaction.categoryFk) ==
       null) {
     openPopup(
@@ -179,8 +184,9 @@ class ActivityPageState extends State<ActivityPage> {
             builder: (context, snapshot1) {
               return Container(
                 child: StreamBuilder<List<TransactionActivityLog>>(
-                  stream:
-                      database.watchAllTransactionDeleteActivityLog(limit: 30),
+                  stream: database.watchAllTransactionDeleteActivityLog(
+                    limit: 30,
+                  ),
                   builder: (context, snapshot2) {
                     // print(snapshot1.data);
                     // print(snapshot2.data);
@@ -190,13 +196,14 @@ class ActivityPageState extends State<ActivityPage> {
                     }
                     List<TransactionActivityLog> activityLogList = [
                       ...(snapshot1.data ?? []),
-                      ...(snapshot2.data ?? [])
+                      ...(snapshot2.data ?? []),
                     ]..sort((a, b) => b.dateTime.compareTo(a.dateTime));
                     if (activityLogList.length <= 0) {
                       return SliverToBoxAdapter(
                         child: Center(
-                          child:
-                              NoResults(message: "no-transactions-found".tr()),
+                          child: NoResults(
+                            message: "no-transactions-found".tr(),
+                          ),
                         ),
                       );
                     }
@@ -218,10 +225,10 @@ class ActivityPageState extends State<ActivityPage> {
                               item.transactionWithCategory?.objectiveLoan;
                           Widget noTransactionFound = Padding(
                             padding: EdgeInsetsDirectional.symmetric(
-                                horizontal:
-                                    getHorizontalPaddingConstrained(context) +
-                                        16,
-                                vertical: 5),
+                              horizontal:
+                                  getHorizontalPaddingConstrained(context) + 16,
+                              vertical: 5,
+                            ),
                             child: Row(
                               children: [
                                 Expanded(
@@ -234,12 +241,16 @@ class ActivityPageState extends State<ActivityPage> {
                                     child: Padding(
                                       padding:
                                           const EdgeInsetsDirectional.symmetric(
-                                              vertical: 8.0, horizontal: 10),
+                                            vertical: 8.0,
+                                            horizontal: 10,
+                                          ),
                                       child: TextFont(
                                         text: "transaction-no-longer-available"
                                             .tr(),
-                                        textColor:
-                                            getColor(context, "textLight"),
+                                        textColor: getColor(
+                                          context,
+                                          "textLight",
+                                        ),
                                         fontSize: 15,
                                         maxLines: 2,
                                       ),
@@ -294,14 +305,16 @@ class ActivityPageState extends State<ActivityPage> {
                               : SizedBox.shrink();
                           return Column(
                             key: ValueKey(
-                                (item.transaction?.transactionPk ?? "") +
-                                    (item.deleteLog?.deleteLogPk ?? "")),
+                              (item.transaction?.transactionPk ?? "") +
+                                  (item.deleteLog?.deleteLogPk ?? ""),
+                            ),
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               DateDivider(
                                 date: transaction?.dateCreated ?? item.dateTime,
                                 maxLines: 2,
-                                afterDate: " • " +
+                                afterDate:
+                                    " • " +
                                     (wasADeletedTransaction
                                             ? "deleted"
                                             : "modified")
@@ -323,13 +336,9 @@ class ActivityPageState extends State<ActivityPage> {
               );
             },
           ),
-          SliverToBoxAdapter(
-            child: SizedBox(height: 75),
-          ),
+          SliverToBoxAdapter(child: SizedBox(height: 75)),
         ],
-        selectedTransactionsAppBar: SelectedTransactionsAppBar(
-          pageID: pageId,
-        ),
+        selectedTransactionsAppBar: SelectedTransactionsAppBar(pageID: pageId),
       ),
     );
   }
