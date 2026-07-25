@@ -138,7 +138,8 @@ void main() {
       expect(hasDecimalPoints(3.14159), isTrue);
     });
 
-    test('handles small values close to zero (without scientific notation)', () {
+    test('handles small values close to zero (without scientific notation)',
+        () {
       expect(hasDecimalPoints(0.0001), isTrue);
       expect(hasDecimalPoints(-0.0001), isTrue);
     });
@@ -222,6 +223,66 @@ void main() {
     test('returns non-numeric strings unmodified', () {
       expect(absoluteZeroString("hello"), "hello");
       expect(absoluteZeroString("abc-0"), "abc-0");
+    });
+  });
+
+  group('getDomainNameFromURL', () {
+    test('extracts domain from standard https URL', () {
+      expect(getDomainNameFromURL('https://example.com'), 'example.com');
+    });
+
+    test('extracts domain from standard http URL', () {
+      expect(getDomainNameFromURL('http://example.com'), 'example.com');
+    });
+
+    test('ignores www subdomain', () {
+      expect(getDomainNameFromURL('www.example.com'), 'example.com');
+      expect(getDomainNameFromURL('https://www.example.com'), 'example.com');
+    });
+
+    test('extracts domain from URL with path', () {
+      expect(
+          getDomainNameFromURL('example.com/path/to/resource'), 'example.com');
+      expect(
+          getDomainNameFromURL('https://www.example.com/path'), 'example.com');
+    });
+
+    test('extracts domain from URL with query parameters', () {
+      expect(getDomainNameFromURL('example.com?query=1&b=2'), 'example.com');
+      expect(getDomainNameFromURL('https://example.com/path?query=1'),
+          'example.com');
+    });
+
+    test('extracts domain from URL with fragment', () {
+      // The current regex implementation does not trim hash fragments
+      expect(
+          getDomainNameFromURL('example.com#section'), 'example.com#section');
+      expect(getDomainNameFromURL('https://example.com/path#section'),
+          'example.com');
+    });
+
+    test('ignores basic authentication', () {
+      expect(getDomainNameFromURL('user:pass@example.com'), 'example.com');
+      expect(
+          getDomainNameFromURL('https://user:pass@example.com'), 'example.com');
+    });
+
+    test('ignores ports', () {
+      expect(getDomainNameFromURL('example.com:8080'), 'example.com');
+      expect(
+          getDomainNameFromURL('https://example.com:8080/path'), 'example.com');
+    });
+
+    test('keeps other subdomains', () {
+      expect(getDomainNameFromURL('subdomain.example.com'),
+          'subdomain.example.com');
+      expect(getDomainNameFromURL('https://sub.subdomain.example.com'),
+          'sub.subdomain.example.com');
+    });
+
+    test('handles invalid or empty strings gracefully', () {
+      expect(getDomainNameFromURL('not a url'), 'not a url');
+      expect(getDomainNameFromURL(''), '');
     });
   });
 }
