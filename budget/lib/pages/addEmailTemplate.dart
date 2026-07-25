@@ -16,6 +16,8 @@ import 'package:budget/widgets/selectChips.dart';
 import 'package:budget/widgets/tappable.dart';
 import 'package:budget/widgets/textInput.dart';
 import 'package:budget/widgets/textWidgets.dart';
+import 'package:budget/widgets/settingsContainers.dart';
+import 'package:budget/struct/settings.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -53,6 +55,7 @@ class _AddEmailTemplateState extends State<AddEmailTemplate> {
   String? titleTransactionBefore;
   String? titleTransactionAfter;
   String? selectedTitle;
+  bool ignore = false;
 
   @override
   void initState() {
@@ -67,6 +70,7 @@ class _AddEmailTemplateState extends State<AddEmailTemplate> {
       amountTransactionAfter = widget.scannerTemplate!.amountTransactionAfter;
       titleTransactionBefore = widget.scannerTemplate!.titleTransactionBefore;
       titleTransactionAfter = widget.scannerTemplate!.titleTransactionAfter;
+      ignore = widget.scannerTemplate!.ignore;
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       updateInitial();
@@ -385,7 +389,7 @@ class _AddEmailTemplateState extends State<AddEmailTemplate> {
       titleTransactionAfter: titleTransactionAfter ?? "",
       titleTransactionBefore: titleTransactionBefore ?? "",
       walletFk: selectedWalletPk ?? "-1",
-      ignore: false,
+      ignore: ignore,
     );
   }
 
@@ -707,6 +711,21 @@ class _AddEmailTemplateState extends State<AddEmailTemplate> {
                     ),
                   ),
                 ),
+          SettingsContainerSwitch(
+            title: "Ignore messages with this text",
+            description:
+                "If a message contains this text, it will be skipped entirely.",
+            onSwitched: (value) {
+              setState(() {
+                ignore = value;
+              });
+              determineBottomButton();
+            },
+            initialValue: ignore,
+            icon: appStateSettings["outlinedIcons"]
+                ? Icons.block_outlined
+                : Icons.block,
+          ),
           SizedBox(height: 70),
         ],
       ),
@@ -737,7 +756,10 @@ class TemplateInfoBox extends StatelessWidget {
       onTap: onTap,
       color: selectedText == "" ||
               (extraCheck != null && extraCheck!(selectedText) == false)
-          ? Theme.of(context).colorScheme.selectableColorRed.withValues(alpha: 0.5)
+          ? Theme.of(context)
+              .colorScheme
+              .selectableColorRed
+              .withValues(alpha: 0.5)
           : getColor(context, "lightDarkAccent"),
       borderRadius: 15,
       child: Padding(
@@ -773,7 +795,8 @@ class TemplateInfoBox extends StatelessWidget {
                 ? TextFont(
                     fontSize: 14,
                     text: extraCheckMessage ?? "",
-                    textColor: getColor(context, "black").withValues(alpha: 0.9),
+                    textColor:
+                        getColor(context, "black").withValues(alpha: 0.9),
                     maxLines: 10,
                   )
                 : SizedBox.shrink(),
