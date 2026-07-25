@@ -196,6 +196,7 @@ Color lightenPastel(Color color, {double amount = 0.1}) {
 }
 
 Color darkenPastel(Color color, {double amount = 0.1}) {
+  assert(amount >= 0 && amount <= 1);
   return Color.alphaBlend(
     Colors.black.withValues(alpha: amount),
     color,
