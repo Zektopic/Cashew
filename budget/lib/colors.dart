@@ -189,6 +189,7 @@ Color lighten(Color color, [double amount = .1]) {
 }
 
 Color lightenPastel(Color color, {double amount = 0.1}) {
+  assert(amount >= 0 && amount <= 1);
   return Color.alphaBlend(
     Colors.white.withValues(alpha: amount),
     color,
