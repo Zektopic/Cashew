@@ -190,7 +190,6 @@ void main() {
           'Hello\ud83d'); // 😊 is \ud83d\ude0a
     });
   });
-
   group('hasDecimalPoints', () {
     test('returns false for null', () {
       expect(hasDecimalPoints(null), isFalse);
