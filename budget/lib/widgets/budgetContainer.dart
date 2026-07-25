@@ -1,7 +1,6 @@
 import 'package:budget/database/tables.dart';
 import 'package:budget/pages/sharedBudgetSettings.dart';
 import 'package:budget/pages/transactionFilters.dart';
-import 'package:budget/struct/budgetRollover.dart';
 import 'package:budget/struct/currencyFunctions.dart';
 import 'package:budget/struct/defaultPreferences.dart';
 import 'package:budget/struct/settings.dart';
@@ -13,7 +12,6 @@ import 'package:budget/struct/databaseGlobal.dart';
 import 'package:budget/widgets/button.dart';
 import 'package:budget/widgets/countNumber.dart';
 import 'package:budget/widgets/fadeIn.dart';
-import 'package:budget/widgets/holdToRevealListener.dart';
 import 'package:budget/widgets/openContainerNavigation.dart';
 import 'package:budget/widgets/openPopup.dart';
 import 'package:budget/widgets/tappable.dart';
@@ -22,6 +20,7 @@ import 'package:budget/widgets/util/widgetSize.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:sa3_liquid/sa3_liquid.dart';
 import 'dart:async';
@@ -30,9 +29,7 @@ import 'package:budget/functions.dart';
 import 'package:async/async.dart' show StreamZip;
 import 'package:budget/struct/randomConstants.dart';
 
-// Thin wrapper: applies the rollover carry (if enabled for the budget) so the
-// dashboard card and the budget page show the same adjusted amount.
-class BudgetContainer extends StatelessWidget {
+class BudgetContainer extends StatefulWidget {
   BudgetContainer({
     Key? key,
     required this.budget,
@@ -51,45 +48,40 @@ class BudgetContainer extends StatelessWidget {
   final bool squishInactiveBudgetContainerHeight;
 
   @override
-  Widget build(BuildContext context) {
-    return RolloverAdjustedBudget(
-      budget: budget,
-      builder: (adjustedBudget) => _BudgetContainerContent(
-        budget: adjustedBudget,
-        height: height,
-        dateForRange: dateForRange,
-        longPressToEdit: longPressToEdit,
-        intermediatePadding: intermediatePadding,
-        squishInactiveBudgetContainerHeight:
-            squishInactiveBudgetContainerHeight,
-      ),
-    );
-  }
+  State<BudgetContainer> createState() => _BudgetContainerState();
 }
 
-class _BudgetContainerContent extends StatefulWidget {
-  _BudgetContainerContent({
-    Key? key,
-    required this.budget,
-    this.height = 183,
-    this.dateForRange,
-    this.longPressToEdit = true,
-    this.intermediatePadding = true,
-    this.squishInactiveBudgetContainerHeight = false,
-  }) : super(key: key);
-
-  final Budget budget;
-  final double height;
-  final DateTime? dateForRange;
-  final bool longPressToEdit;
-  final bool intermediatePadding;
-  final bool squishInactiveBudgetContainerHeight;
+class _BudgetContainerState extends State<BudgetContainer>
+    with WidgetsBindingObserver {
+  bool _isRevealed = false;
+  Timer? _revealTimer;
 
   @override
-  State<_BudgetContainerContent> createState() => _BudgetContainerState();
-}
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
 
-class _BudgetContainerState extends State<_BudgetContainerContent> {
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _revealTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive) {
+      if (_isRevealed) {
+        _revealTimer?.cancel();
+        setState(() {
+          _isRevealed = false;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     double budgetAmount = budgetAmountToPrimaryCurrency(
@@ -103,7 +95,7 @@ class _BudgetContainerState extends State<_BudgetContainerContent> {
     bool isOutOfRange =
         budgetRange.end.difference(DateTime.now()).inDays < 0 ||
         budgetRange.start.difference(DateTime.now()).inDays > 0;
-    Widget innerWidget(bool isRevealed) => StreamBuilder<List<CategoryWithTotal>>(
+    var innerWidget = StreamBuilder<List<CategoryWithTotal>>(
       stream: database.watchTotalSpentInEachCategoryInTimeRangeFromCategories(
         allWallets: Provider.of<AllWallets>(context),
         start: budgetRange.start,
@@ -142,7 +134,7 @@ class _BudgetContainerState extends State<_BudgetContainerContent> {
                           color: HexColor(
                             widget.budget.colour,
                             defaultColor: Theme.of(context).colorScheme.primary,
-                          ).withValues(alpha: 0.8),
+                          ).withOpacity(0.8),
                         ),
                       ),
                       Padding(
@@ -186,7 +178,7 @@ class _BudgetContainerState extends State<_BudgetContainerContent> {
                                                 milliseconds: 300,
                                               ),
                                               child: TextFont(
-                                                key: ValueKey(isRevealed),
+                                                key: ValueKey(_isRevealed),
                                                 text: convertToMoney(
                                                   Provider.of<AllWallets>(
                                                     context,
@@ -197,7 +189,7 @@ class _BudgetContainerState extends State<_BudgetContainerContent> {
                                                       ? totalSpent
                                                       : budgetAmount -
                                                             totalSpent,
-                                                  forceReveal: isRevealed,
+                                                  forceReveal: _isRevealed,
                                                 ),
                                                 fontSize: 18,
                                                 textAlign: TextAlign.start,
@@ -220,7 +212,7 @@ class _BudgetContainerState extends State<_BudgetContainerContent> {
                                               ),
                                               child: TextFont(
                                                 key: ValueKey(
-                                                  'budget_1_${isRevealed}',
+                                                  'budget_1_${_isRevealed}',
                                                 ),
                                                 text:
                                                     getBudgetSpentText(
@@ -231,7 +223,7 @@ class _BudgetContainerState extends State<_BudgetContainerContent> {
                                                         context,
                                                       ),
                                                       budgetAmount,
-                                                      forceReveal: isRevealed,
+                                                      forceReveal: _isRevealed,
                                                     ),
                                                 fontSize: 13,
                                                 textAlign: TextAlign.start,
@@ -260,7 +252,7 @@ class _BudgetContainerState extends State<_BudgetContainerContent> {
                                                 milliseconds: 300,
                                               ),
                                               child: TextFont(
-                                                key: ValueKey(isRevealed),
+                                                key: ValueKey(_isRevealed),
                                                 text: convertToMoney(
                                                   Provider.of<AllWallets>(
                                                     context,
@@ -271,7 +263,7 @@ class _BudgetContainerState extends State<_BudgetContainerContent> {
                                                       ? totalSpent
                                                       : totalSpent -
                                                             budgetAmount,
-                                                  forceReveal: isRevealed,
+                                                  forceReveal: _isRevealed,
                                                 ),
                                                 fontSize: 18,
                                                 textAlign: TextAlign.start,
@@ -293,7 +285,7 @@ class _BudgetContainerState extends State<_BudgetContainerContent> {
                                             ),
                                             child: TextFont(
                                               key: ValueKey(
-                                                'budget_2_${isRevealed}',
+                                                'budget_2_${_isRevealed}',
                                               ),
                                               text:
                                                   getBudgetOverSpentText(
@@ -304,7 +296,7 @@ class _BudgetContainerState extends State<_BudgetContainerContent> {
                                                       context,
                                                     ),
                                                     budgetAmount,
-                                                    forceReveal: isRevealed,
+                                                    forceReveal: _isRevealed,
                                                   ),
                                               fontSize: 13,
                                               textAlign: TextAlign.start,
@@ -438,7 +430,6 @@ class _BudgetContainerState extends State<_BudgetContainerContent> {
                     budget: widget.budget,
                     totalAmount: totalSpent,
                     budgetRange: budgetRange,
-                    forceReveal: isRevealed,
                     padding: EdgeInsetsDirectional.only(
                       start: 10,
                       end: 10,
@@ -496,8 +487,25 @@ class _BudgetContainerState extends State<_BudgetContainerContent> {
       decoration: BoxDecoration(
         boxShadow: boxShadowCheck(boxShadowGeneral(context)),
       ),
-      child: HoldToRevealListener(
-        builder: (context, isRevealed) => OpenContainerNavigation(
+      child: Listener(
+        onPointerDown: (_) {
+          HapticFeedback.selectionClick();
+          setState(() => _isRevealed = true);
+          _revealTimer?.cancel();
+        },
+        onPointerUp: (_) {
+          _revealTimer?.cancel();
+          _revealTimer = Timer(Duration(seconds: 2), () {
+            if (mounted) setState(() => _isRevealed = false);
+          });
+        },
+        onPointerCancel: (_) {
+          _revealTimer?.cancel();
+          _revealTimer = Timer(Duration(seconds: 2), () {
+            if (mounted) setState(() => _isRevealed = false);
+          });
+        },
+        child: OpenContainerNavigation(
           borderRadius: 20,
           closedColor: backgroundColor,
           button: (openContainer) {
@@ -517,7 +525,7 @@ class _BudgetContainerState extends State<_BudgetContainerContent> {
                     }
                   : null,
               borderRadius: 20,
-              child: innerWidget(isRevealed),
+              child: innerWidget,
               color: backgroundColor,
             );
           },
@@ -539,7 +547,6 @@ class DaySpending extends StatelessWidget {
     bool this.large = false,
     required this.budgetRange,
     required this.padding,
-    this.forceReveal = false,
   }) : super(key: key);
 
   final Budget budget;
@@ -547,7 +554,6 @@ class DaySpending extends StatelessWidget {
   final double totalAmount;
   final DateTimeRange budgetRange;
   final EdgeInsetsDirectional padding;
-  final bool forceReveal;
 
   @override
   Widget build(BuildContext context) {
@@ -580,7 +586,6 @@ class DaySpending extends StatelessWidget {
                           budgetAmount: budgetAmount,
                           budget: budget,
                           remainingDays: remainingDays,
-                          forceReveal: forceReveal,
                         ),
                   fontSize: large ? 14 : 13,
                   textAlign: TextAlign.center,
@@ -696,8 +701,8 @@ class AnimatedGooBackground extends StatelessWidget {
           type: PlasmaType.infinity,
           particles: 10,
           color: Theme.of(context).brightness == Brightness.light
-              ? this.color.withValues(alpha: 0.1)
-              : this.color.withValues(alpha: 0.3),
+              ? this.color.withOpacity(0.1)
+              : this.color.withOpacity(0.3),
           blur: 0.3,
           size: 1.3,
           speed: 3.3,
@@ -1018,6 +1023,7 @@ class AnimatedProgress extends StatefulWidget {
 class _AnimatedProgressState extends State<AnimatedProgress> {
   bool animateIn = false;
   bool fadeIn = false;
+  Future? _future;
   @override
   void initState() {
     Future.delayed(Duration.zero, () {
@@ -1025,13 +1031,19 @@ class _AnimatedProgressState extends State<AnimatedProgress> {
         animateIn = true;
       });
     });
-    Future.delayed(Duration(milliseconds: 500), () {
+    _future = Future.delayed(Duration(milliseconds: 500), () {
       if (mounted)
         setState(() {
           fadeIn = true;
         });
     });
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _future = null;
+    super.dispose();
   }
 
   @override
@@ -1080,7 +1092,7 @@ class _AnimatedProgressState extends State<AnimatedProgress> {
                         widget.color,
                         amountDark: 0.1,
                         amountLight: 0.3,
-                      ).withValues(alpha: 0.8),
+                      ).withOpacity(0.8),
                     ),
                   ),
                 ),
@@ -1244,7 +1256,7 @@ class _TodayIndicatorState extends State<TodayIndicator> {
                       borderRadius: BorderRadiusDirectional.vertical(
                         bottom: Radius.circular(5),
                       ),
-                      color: getColor(context, "black").withValues(alpha: 0.4),
+                      color: getColor(context, "black").withOpacity(0.4),
                     ),
                   ),
                 ),
@@ -1268,7 +1280,7 @@ class _TodayIndicatorState extends State<TodayIndicator> {
                 borderRadius: BorderRadiusDirectional.vertical(
                   bottom: Radius.circular(5),
                 ),
-                color: getColor(context, "black").withValues(alpha: 0.4),
+                color: getColor(context, "black").withOpacity(0.4),
               ),
             ),
           ),
@@ -1293,7 +1305,6 @@ class BudgetSpenderSummary extends StatefulWidget {
     this.allTime = false,
     this.disableMemberSelection = false,
     this.isLarge = false,
-    this.forceReveal = false,
     super.key,
   });
 
@@ -1303,7 +1314,6 @@ class BudgetSpenderSummary extends StatefulWidget {
   final bool allTime;
   final bool disableMemberSelection;
   final bool isLarge;
-  final bool forceReveal;
 
   @override
   State<BudgetSpenderSummary> createState() => _BudgetSpenderSummaryState();
@@ -1311,6 +1321,15 @@ class BudgetSpenderSummary extends StatefulWidget {
 
 class _BudgetSpenderSummaryState extends State<BudgetSpenderSummary> {
   Stream<List<double?>>? mergedStreams;
+  bool _isRevealed = false;
+  Timer? _revealTimer;
+
+  @override
+  void dispose() {
+    _revealTimer?.cancel();
+    super.dispose();
+  }
+
   Set<String> members = {};
   String? selectedMember = null;
 
@@ -1389,8 +1408,25 @@ class _BudgetSpenderSummaryState extends State<BudgetSpenderSummary> {
                   }
                   return true;
                 },
-                child: HoldToRevealListener(
-                  builder: (context, isRevealed) => Tappable(
+                child: Listener(
+                  onPointerDown: (_) {
+                    HapticFeedback.selectionClick();
+                    setState(() => _isRevealed = true);
+                    _revealTimer?.cancel();
+                  },
+                  onPointerUp: (_) {
+                    _revealTimer?.cancel();
+                    _revealTimer = Timer(Duration(seconds: 2), () {
+                      if (mounted) setState(() => _isRevealed = false);
+                    });
+                  },
+                  onPointerCancel: (_) {
+                    _revealTimer?.cancel();
+                    _revealTimer = Timer(Duration(seconds: 2), () {
+                      if (mounted) setState(() => _isRevealed = false);
+                    });
+                  },
+                  child: Tappable(
                     onTap: () {
                       if (widget.disableMemberSelection == false) {
                         if (selectedMember == spender.member ||
@@ -1477,7 +1513,7 @@ class _BudgetSpenderSummaryState extends State<BudgetSpenderSummary> {
                                         ? getColor(
                                             context,
                                             "black",
-                                          ).withValues(alpha: 0.4)
+                                          ).withOpacity(0.4)
                                         : getColor(context, "textLight"),
                                   ),
                                 ],
@@ -1491,15 +1527,12 @@ class _BudgetSpenderSummaryState extends State<BudgetSpenderSummary> {
                               AnimatedSwitcher(
                                 duration: Duration(milliseconds: 200),
                                 child: TextFont(
-                                  key: ValueKey(
-                                    widget.forceReveal || isRevealed,
-                                  ),
+                                  key: ValueKey(_isRevealed),
                                   fontWeight: FontWeight.bold,
                                   text: convertToMoney(
                                     Provider.of<AllWallets>(context),
                                     spender.amount,
-                                    forceReveal:
-                                        widget.forceReveal || isRevealed,
+                                    forceReveal: _isRevealed,
                                   ),
                                   fontSize: widget.isLarge ? 21 : 20,
                                 ),
@@ -1531,7 +1564,7 @@ class _BudgetSpenderSummaryState extends State<BudgetSpenderSummary> {
                                           ? getColor(
                                               context,
                                               "black",
-                                            ).withValues(alpha: 0.4)
+                                            ).withOpacity(0.4)
                                           : getColor(context, "textLight"),
                                     );
                                   }
