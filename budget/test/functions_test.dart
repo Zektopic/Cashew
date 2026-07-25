@@ -119,6 +119,38 @@ void main() {
     });
   });
 
+  group('removeLastCharacter', () {
+    test('returns empty string when given an empty string', () {
+      expect(removeLastCharacter(''), '');
+    });
+
+    test('returns empty string when given a single-character string', () {
+      expect(removeLastCharacter('a'), '');
+    });
+
+    test('removes the last character of a multi-character string', () {
+      expect(removeLastCharacter('hello'), 'hell');
+      expect(removeLastCharacter('123.45'), '123.4');
+    });
+
+    test('exhibits broken surrogate pair behavior with emojis', () {
+      // The current implementation uses text.substring(0, text.length - 1)
+      // which truncates string by UTF-16 code units. Emojis are typically
+      // 2 code units, so removing the last code unit leaves an invalid character.
+      final emoji = '😊';
+      expect(emoji.length, 2);
+      final result = removeLastCharacter(emoji);
+      expect(result.length, 1);
+      // It leaves half of the surrogate pair (the high surrogate)
+      expect(result, emoji.substring(0, 1));
+
+      final textWithEmoji = 'Hello😊';
+      expect(textWithEmoji.length, 7);
+      expect(removeLastCharacter(textWithEmoji),
+          'Hello\ud83d'); // 😊 is \ud83d\ude0a
+    });
+  });
+
   group('hasDecimalPoints', () {
     test('returns false for null', () {
       expect(hasDecimalPoints(null), isFalse);
@@ -138,7 +170,8 @@ void main() {
       expect(hasDecimalPoints(3.14159), isTrue);
     });
 
-    test('handles small values close to zero (without scientific notation)', () {
+    test('handles small values close to zero (without scientific notation)',
+        () {
       expect(hasDecimalPoints(0.0001), isTrue);
       expect(hasDecimalPoints(-0.0001), isTrue);
     });
