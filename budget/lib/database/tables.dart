@@ -2602,20 +2602,20 @@ class FinanceDatabase extends _$FinanceDatabase {
     )..orderBy([(b) => OrderingTerm.asc(b.order)]))
         .get();
     if (direction == -1 || direction == 1) {
-      for (Budget budget in budgetsList) {
-        await (update(budgets)
-              ..where(
-                (b) =>
-                    b.order.isBiggerOrEqualValue(pastIndexIncluding) &
-                    b.budgetPk.equals(budget.budgetPk),
-              ))
-            .write(
-          BudgetsCompanion(
-            order: Value(budget.order + direction),
-            dateTimeModified: Value(DateTime.now()),
-          ),
-        );
-      }
+      await batch((batch) {
+        for (Budget budget in budgetsList) {
+          batch.update(
+            budgets,
+            BudgetsCompanion(
+              order: Value(budget.order + direction),
+              dateTimeModified: Value(DateTime.now()),
+            ),
+            where: (b) =>
+                b.order.isBiggerOrEqualValue(pastIndexIncluding) &
+                b.budgetPk.equals(budget.budgetPk),
+          );
+        }
+      });
     } else {
       return false;
     }
@@ -2632,20 +2632,20 @@ class FinanceDatabase extends _$FinanceDatabase {
           ..orderBy([(b) => OrderingTerm.asc(b.order)]))
         .get();
     if (direction == -1 || direction == 1) {
-      for (Objective objective in objectivesList) {
-        await (update(objectives)
-              ..where(
-                (b) =>
-                    b.order.isBiggerOrEqualValue(pastIndexIncluding) &
-                    b.objectivePk.equals(objective.objectivePk),
-              ))
-            .write(
-          ObjectivesCompanion(
-            order: Value(objective.order + direction),
-            dateTimeModified: Value(DateTime.now()),
-          ),
-        );
-      }
+      await batch((batch) {
+        for (Objective objective in objectivesList) {
+          batch.update(
+            objectives,
+            ObjectivesCompanion(
+              order: Value(objective.order + direction),
+              dateTimeModified: Value(DateTime.now()),
+            ),
+            where: (b) =>
+                b.order.isBiggerOrEqualValue(pastIndexIncluding) &
+                b.objectivePk.equals(objective.objectivePk),
+          );
+        }
+      });
     } else {
       return false;
     }
