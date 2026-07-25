@@ -78,6 +78,9 @@
 - 2026-07-22: Iterative Enhancement - Secured URL parsing logic in `convertGoogleSheetsUrlToCsvUrl`. Switched from vulnerable string splitting to a strict regex `RegExp(r"/d/([a-zA-Z0-9_-]+)")` to safely extract Google Sheets IDs, maintaining the strict `https://docs.google.com/spreadsheets/d/` prefix and path traversal checks. This prevents URL manipulation bugs or SSRF vulnerabilities when users import CSV data.
 **Next Planned Step:** Audit input fields for missing sanitization to prevent XSS and SQLi.
 
+- 2026-07-25: Iterative Enhancement - Added global `maxLength` fallback (5000 characters) to `TextInput` components across the application. This prevents unbounded strings from being pasted into form fields (such as notes, descriptions, or titles), mitigating resource exhaustion and Denial of Service (DoS) risks during UI rendering.
+**Next Planned Step:** Review database ORM input paths to ensure no raw statements bypass input sanitization when data comes from UI forms.
+
 ## 🚨 Critical Security Learnings
 *Only add entries here for unique, repo-specific security gaps, unexpected side effects, or reusable patterns.*
 - **2025-04-04 - Hardcoded Firebase Credentials:**
@@ -126,3 +129,8 @@
   - **Vulnerability/Gap:** The global `requireAuth` flag was being persistently overwritten to `false` when a biometric error popup occurred (which would happen automatically on web access in some contexts), effectively defeating security preferences across devices.
   - **Learning:** Global state modification (`updateSettings`) should not be intertwined with error handling mechanisms for local session constraints or dialog cancellations.
   - **Prevention:** Only update local UI state (`isLocked = false`) when an authentication error occurs, preserving the user's global configuration in the database.
+
+- **2026-07-25 - Unbounded Input DoS Vulnerability:**
+  - **Vulnerability/Gap:** Form inputs (`TextInput`) lacked default max length limitations. Users could paste massive, unbounded payloads into input fields, causing the application to consume excessive memory, leading to frame drops, layout exceptions, and potential crashes (DoS).
+  - **Learning:** Every entry point for user input must have an upper bound limit to enforce resource constraints and prevent abuse, regardless of whether a business rule dictates a max length.
+  - **Prevention:** Enforce fallback upper limits (e.g., `maxLength ?? 5000`) on all input fields globally at the core widget level.
