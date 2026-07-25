@@ -149,12 +149,14 @@ class TextInput extends StatelessWidget {
             color: bubbly == false
                 ? Colors.transparent
                 : backgroundColor ??
-                    (appStateSettings["materialYou"]
-                        ? Theme.of(context).colorScheme.secondaryContainer
-                        : getColor(context, "canvasContainer")),
-            borderRadius: borderRadius ??
+                      (appStateSettings["materialYou"]
+                          ? Theme.of(context).colorScheme.secondaryContainer
+                          : getColor(context, "canvasContainer")),
+            borderRadius:
+                borderRadius ??
                 BorderRadiusDirectional.circular(
-                    getPlatform() == PlatformOS.isIOS ? 8 : 15),
+                  getPlatform() == PlatformOS.isIOS ? 8 : 15,
+                ),
           ),
           child: Center(
             child: TextFormField(
@@ -166,7 +168,7 @@ class TextInput extends StatelessWidget {
                       handleOnTapOutsideTextInput(context);
                     },
               scrollController: scrollController,
-              maxLength: maxLength,
+              maxLength: maxLength ?? 5000,
               inputFormatters: inputFormatters,
               textInputAction: textInputAction,
               textCapitalization:
@@ -180,8 +182,8 @@ class TextInput extends StatelessWidget {
               keyboardType: keyboardType != null
                   ? keyboardType
                   : numbersOnly
-                      ? TextInputType.number
-                      : TextInputType.text,
+                  ? TextInputType.number
+                  : TextInputType.text,
               maxLines: maxLines,
               minLines: minLines,
               onTap: onTap,
@@ -194,20 +196,24 @@ class TextInput extends StatelessWidget {
               textAlign: textAlign,
               autocorrect: autocorrect,
               style: TextStyle(
-                fontSize:
-                    fontSize != null ? fontSize : (bubbly == false ? 18 : 15),
+                fontSize: fontSize != null
+                    ? fontSize
+                    : (bubbly == false ? 18 : 15),
                 height: kIsWeb
                     ? null
                     : bubbly == true
-                        ? 1.7
-                        : 1.3,
+                    ? 1.7
+                    : 1.3,
                 fontWeight: fontWeight,
                 fontFamily: appStateSettings["font"],
                 fontFamilyFallback: ['Inter'],
               ),
               cursorColor: dynamicPastel(
-                  context, Theme.of(context).colorScheme.primary,
-                  amount: 0.2, inverse: false),
+                context,
+                Theme.of(context).colorScheme.primary,
+                amount: 0.2,
+                inverse: false,
+              ),
               decoration: new InputDecoration(
                 counterText: "",
                 hintStyle: TextStyle(color: getColor(context, "textLight")),
@@ -220,8 +226,9 @@ class TextInput extends StatelessWidget {
                   top: topContentPadding != null
                       ? topContentPadding ?? 0
                       : (bubbly == false ? 15 : 18),
-                  bottom:
-                      bubbly == false ? (kIsWeb ? 8 : 5) : (kIsWeb ? 15 : 0),
+                  bottom: bubbly == false
+                      ? (kIsWeb ? 8 : 5)
+                      : (kIsWeb ? 15 : 0),
                 ),
                 hintText: labelText,
                 filled: bubbly == false ? true : false,
@@ -232,7 +239,9 @@ class TextInput extends StatelessWidget {
                     ? null
                     : Padding(
                         padding: const EdgeInsetsDirectional.only(
-                            end: 13.0, start: 5),
+                          end: 13.0,
+                          start: 5,
+                        ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           mainAxisAlignment: MainAxisAlignment.end,
@@ -247,38 +256,38 @@ class TextInput extends StatelessWidget {
                       ),
                 icon: bubbly == false
                     ? icon != null
-                        ? Icon(
-                            icon,
-                            size: 30,
-                            color: Theme.of(context).colorScheme.secondary,
-                          )
-                        : null
+                          ? Icon(
+                              icon,
+                              size: 30,
+                              color: Theme.of(context).colorScheme.secondary,
+                            )
+                          : null
                     : null,
                 enabledBorder: bubbly == false
                     ? UnderlineInputBorder(
-                        borderRadius:
-                            BorderRadius.vertical(top: Radius.circular(10)),
+                        borderRadius: BorderRadius.vertical(
+                          top: Radius.circular(10),
+                        ),
                         borderSide: BorderSide(
                           color: appStateSettings["materialYou"]
-                              ? Theme.of(context)
-                                  .colorScheme
-                                  .primary
-                                  .withValues(alpha: 0.2)
+                              ? Theme.of(
+                                  context,
+                                ).colorScheme.primary.withValues(alpha: 0.2)
                               : getColor(context, "lightDarkAccentHeavy"),
                           width: 2,
                         ),
                       )
                     : null,
                 hoverColor: bubbly == false
-                    ? Theme.of(context)
-                        .colorScheme
-                        .secondaryContainer
-                        .withAlpha(90)
+                    ? Theme.of(
+                        context,
+                      ).colorScheme.secondaryContainer.withAlpha(90)
                     : null,
                 focusedBorder: bubbly == false
                     ? UnderlineInputBorder(
-                        borderRadius:
-                            BorderRadius.vertical(top: Radius.circular(5.0)),
+                        borderRadius: BorderRadius.vertical(
+                          top: Radius.circular(5.0),
+                        ),
                         borderSide: BorderSide(
                           color: Theme.of(context).colorScheme.secondary,
                           width: 2,
@@ -312,8 +321,8 @@ class TextInput extends StatelessWidget {
 }
 
 void handleOnTapOutsideTextInput(BuildContext context) {
-  Widget? popupFramework =
-      context.findAncestorWidgetOfExactType<PopupFramework>();
+  Widget? popupFramework = context
+      .findAncestorWidgetOfExactType<PopupFramework>();
   TextInput? textInput = context.findAncestorWidgetOfExactType<TextInput>();
   if (popupFramework == null && textInput == null) minimizeKeyboard(context);
 }
