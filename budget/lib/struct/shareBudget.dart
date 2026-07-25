@@ -707,11 +707,15 @@ Future<bool> updateTransactionOnServerAfterChangingCategoryInformation(
       await database.getAllTransactionsSharedInCategory(category.categoryPk);
 
   List<Future> asyncCalls = [];
+  Map<String, Budget> budgetCache = {};
   for (Transaction transaction in sharedTransactionsInCategory) {
     // update all shared transactions one by one, need to update the server
     if (transaction.sharedReferenceBudgetPk != null) {
-      Budget budget = await database
-          .getBudgetInstance(transaction.sharedReferenceBudgetPk!);
+      final String budgetPk = transaction.sharedReferenceBudgetPk!;
+      if (!budgetCache.containsKey(budgetPk)) {
+        budgetCache[budgetPk] = await database.getBudgetInstance(budgetPk);
+      }
+      Budget budget = budgetCache[budgetPk]!;
       asyncCalls.add(sendTransactionSet(transaction, budget));
     }
   }
