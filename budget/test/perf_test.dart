@@ -1,9 +1,15 @@
+import 'dart:ffi';
+import 'package:sqlite3/open.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:budget/database/tables.dart';
 import 'package:drift/native.dart';
 import 'package:drift/drift.dart';
 
-void main() async {
-  final db = FinanceDatabase(NativeDatabase.memory());
+void main() {
+  open.overrideFor(OperatingSystem.linux, () => DynamicLibrary.open('libsqlite3.so.0'));
+
+  test('Database Sequential vs Concurrent Query Performance', () async {
+    final db = FinanceDatabase(NativeDatabase.memory());
 
   // Insert some dummy data
   for (int i = 0; i < 100; i++) {
@@ -64,4 +70,5 @@ void main() async {
   }
   stopwatchOpt.stop();
   print('Optimized time: ${stopwatchOpt.elapsedMilliseconds} ms');
+  });
 }

@@ -1,9 +1,13 @@
+import 'dart:ffi';
+import 'package:sqlite3/open.dart';
 import 'package:budget/database/tables.dart';
 import 'package:drift/native.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() async {
+  open.overrideFor(OperatingSystem.linux, () => DynamicLibrary.open('libsqlite3.so.0'));
+
   test('N+1 Query vs Cached Query Performance', () async {
     final db = FinanceDatabase(NativeDatabase.memory());
 
