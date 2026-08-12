@@ -10,8 +10,9 @@ import 'package:flutter/services.dart';
 final ValueNotifier<bool> globalRevealAllNotifier = ValueNotifier<bool>(false);
 Timer? _globalRevealTimer;
 
-void revealAllAmountsTemporarily(
-    {Duration duration = const Duration(seconds: 60)}) {
+void revealAllAmountsTemporarily({
+  Duration duration = const Duration(seconds: 60),
+}) {
   _globalRevealTimer?.cancel();
   globalRevealAllNotifier.value = true;
   _globalRevealTimer = Timer(duration, () {
@@ -44,21 +45,37 @@ class HoldToRevealListener extends StatefulWidget {
   State<HoldToRevealListener> createState() => _HoldToRevealListenerState();
 }
 
-class _HoldToRevealListenerState extends State<HoldToRevealListener> {
+class _HoldToRevealListenerState extends State<HoldToRevealListener>
+    with WidgetsBindingObserver {
   bool _isRevealed = false;
   Timer? _revealTimer;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     globalRevealAllNotifier.addListener(_onGlobalRevealChanged);
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     globalRevealAllNotifier.removeListener(_onGlobalRevealChanged);
     _revealTimer?.cancel();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive) {
+      if (_isRevealed) {
+        _revealTimer?.cancel();
+        setState(() {
+          _isRevealed = false;
+        });
+      }
+    }
   }
 
   void _onGlobalRevealChanged() {
@@ -93,7 +110,9 @@ class _HoldToRevealListenerState extends State<HoldToRevealListener> {
         }
       },
       child: widget.builder(
-          context, _isRevealed || globalRevealAllNotifier.value),
+        context,
+        _isRevealed || globalRevealAllNotifier.value,
+      ),
     );
   }
 }
