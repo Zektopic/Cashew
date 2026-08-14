@@ -327,27 +327,6 @@ String convertToMoney(
   }
 
   return formatOutput;
-  // if (finalNumber != null &&
-  //     !finalNumber
-  //         .abs()
-  //         .toStringAsFixed(numberDecimals)
-  //         .split(".")[1]
-  //         .startsWith("0" * numberDecimals)) {
-  //   return currency.format(amount);
-  // }
-  // if ((finalNumber != null &&
-  //         finalNumber
-  //             .abs()
-  //             .toStringAsFixed(numberDecimals)
-  //             .split(".")[1]
-  //             .startsWith("0" * numberDecimals)) ||
-  //     formatOutput.substring(formatOutput.length - numberDecimals) ==
-  //         "0" * numberDecimals) {
-  //   // Do not show the zeroes
-  //   return formatOutput.replaceRange(
-  //       formatOutput.length - numberDecimals - 1, formatOutput.length, '');
-  // }
-  // return currency.format(amount);
 }
 
 String formatOutputWithNewDelimiterAndDecimal({
