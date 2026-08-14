@@ -3383,11 +3383,23 @@ class FinanceDatabase extends _$FinanceDatabase {
     List<CategoryBudgetLimit> limitsInserting = [];
     List<CategoryBudgetLimit> categorySpendingLimits = await (select(
       categoryBudgetLimits,
-    )..where((t) => t.budgetFk.equals(budgetPk))).get();
+    )..where((t) => t.budgetFk.equals(budgetPk)))
+        .get();
+
+    List<String> categoryPks =
+        categorySpendingLimits.map((e) => e.categoryFk).toList();
+    List<TransactionCategory> fetchedCategories = categoryPks.isEmpty
+        ? []
+        : await (select(categories)
+              ..where((t) => t.categoryPk.isIn(categoryPks)))
+            .get();
+    Map<String, TransactionCategory> categoryMap = {
+      for (var c in fetchedCategories) c.categoryPk: c
+    };
     for (CategoryBudgetLimit categorySpendingLimit in categorySpendingLimits) {
-      TransactionCategory category = await getCategoryInstance(
-        categorySpendingLimit.categoryFk,
-      );
+      TransactionCategory? category =
+          categoryMap[categorySpendingLimit.categoryFk];
+      if (category == null) continue;
       double convertedAmount;
       if (category.mainCategoryPk == null) {
         // This is a main category
@@ -3444,6 +3456,8 @@ class FinanceDatabase extends _$FinanceDatabase {
           dateTimeModified: Value(DateTime.now()),
         ),
       );
+    }
+    if (limitsInserting.isNotEmpty) {
       await updateBatchCategoryLimitsOnly(limitsInserting);
     }
     return true;
