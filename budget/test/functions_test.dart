@@ -190,6 +190,34 @@ void main() {
           'Hello\ud83d'); // 😊 is \ud83d\ude0a
     });
   });
+  group('countDecimalDigits', () {
+    test('returns 0 for strings without a decimal point', () {
+      expect(countDecimalDigits('100'), 0);
+      expect(countDecimalDigits('hello'), 0);
+      expect(countDecimalDigits(''), 0);
+    });
+
+    test('returns correct count for standard decimals', () {
+      expect(countDecimalDigits('10.5'), 1);
+      expect(countDecimalDigits('3.14159'), 5);
+      expect(countDecimalDigits('0.001'), 3);
+    });
+
+    test('handles decimal point at the beginning', () {
+      expect(countDecimalDigits('.75'), 2);
+    });
+
+    test('handles decimal point at the end', () {
+      expect(countDecimalDigits('42.'), 0);
+    });
+
+    test('handles strings with multiple decimal points', () {
+      // The current implementation uses indexOf('.'), so it will count
+      // all characters after the *first* decimal point.
+      expect(countDecimalDigits('1.2.3'), 3); // "2.3" -> length 3
+    });
+  });
+
   group('hasDecimalPoints', () {
     test('returns false for null', () {
       expect(hasDecimalPoints(null), isFalse);
