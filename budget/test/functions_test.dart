@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:budget/functions.dart';
+import 'package:budget/struct/settings.dart';
 
 void main() {
   group('daysBetween', () {
@@ -190,6 +191,75 @@ void main() {
           'Hello\ud83d'); // 😊 is \ud83d\ude0a
     });
   });
+  group('convertToPercent', () {
+    setUp(() {
+      appStateSettings.clear();
+      appStateSettings["percentagePrecision"] = 0;
+      appStateSettings["obscureAmounts"] = false;
+      appStateSettings["obscureAmountsMagnitude"] = false;
+    });
+
+    test('basic percentage conversion without decimals', () {
+      expect(convertToPercent(50.123), "50%");
+    });
+
+    test('basic percentage conversion with decimals', () {
+      expect(convertToPercent(50.123, numberDecimals: 2), "50.12%");
+    });
+
+    test('obscuring amounts basic', () {
+      appStateSettings["obscureAmounts"] = true;
+      expect(convertToPercent(50.123), "•••%");
+    });
+
+    test('obscuring amounts with magnitude', () {
+      appStateSettings["obscureAmounts"] = true;
+      appStateSettings["obscureAmountsMagnitude"] = true;
+      expect(convertToPercent(50.123), "••%");
+      expect(convertToPercent(100.123), "•••%");
+      expect(convertToPercent(0), "•%");
+    });
+
+    test('forceReveal overrides obscuring', () {
+      appStateSettings["obscureAmounts"] = true;
+      expect(convertToPercent(50.123, forceReveal: true), "50%");
+    });
+
+    test('useLessThanZero for close to zero values', () {
+      expect(convertToPercent(0.4, useLessThanZero: true), "< 1%");
+    });
+
+    test('shouldRemoveTrailingZeroes removes trailing zeroes', () {
+      expect(
+        convertToPercent(
+          50.100,
+          numberDecimals: 3,
+          shouldRemoveTrailingZeroes: true,
+        ),
+        "50.1%",
+      );
+      expect(
+        convertToPercent(
+          50.000,
+          numberDecimals: 3,
+          shouldRemoveTrailingZeroes: true,
+        ),
+        "50%",
+      );
+    });
+
+    test('handles edge cases', () {
+      expect(convertToPercent(double.nan), "0%");
+      expect(convertToPercent(0.0), "0%");
+      expect(convertToPercent(10.0, finalNumber: 0.0), "0%");
+    });
+
+    test('uses appStateSettings for default precision', () {
+      appStateSettings["percentagePrecision"] = 3;
+      expect(convertToPercent(50.1234), "50.123%");
+    });
+  });
+
   group('hasDecimalPoints', () {
     test('returns false for null', () {
       expect(hasDecimalPoints(null), isFalse);
