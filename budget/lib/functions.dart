@@ -1111,12 +1111,6 @@ Future<dynamic> pushRoute(
   if (contextToPush == null) return;
 
   minimizeKeyboard(contextToPush);
-  // if (appStateSettings["iOSNavigation"]) {
-  //   return await Navigator.push(
-  //     context,
-  //     CustomMaterialPageRoute(builder: (context) => page),
-  //   );
-  // }
 
   return await Navigator.push(
     contextToPush,
