@@ -72,14 +72,17 @@ class PremiumPage extends StatelessWidget {
                   Center(
                     child: Padding(
                       padding: const EdgeInsetsDirectional.symmetric(
-                          horizontal: 20, vertical: 30),
+                        horizontal: 20,
+                        vertical: 30,
+                      ),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Column(
                             children: [
                               SizedBox(
-                                height: MediaQuery.viewPaddingOf(context).top +
+                                height:
+                                    MediaQuery.viewPaddingOf(context).top +
                                     MediaQuery.sizeOf(context).height * 0.1,
                               ),
                               Column(
@@ -87,7 +90,8 @@ class PremiumPage extends StatelessWidget {
                                   CashewProBanner(large: true),
                                   SizedBox(height: 4),
                                   TextFont(
-                                    text: "budget-like-a-pro".tr() +
+                                    text:
+                                        "budget-like-a-pro".tr() +
                                         " " +
                                         globalAppName +
                                         " " +
@@ -100,20 +104,22 @@ class PremiumPage extends StatelessWidget {
                                 ],
                               ),
                               SizedBox(
-                                  height: 15 +
-                                      MediaQuery.sizeOf(context).height *
-                                          0.028),
+                                height:
+                                    15 +
+                                    MediaQuery.sizeOf(context).height * 0.028,
+                              ),
                               Padding(
                                 padding: const EdgeInsetsDirectional.symmetric(
-                                    horizontal: 8.0),
+                                  horizontal: 8.0,
+                                ),
                                 child: IntrinsicWidth(
                                   child: Column(
                                     children: [
                                       SubscriptionFeature(
                                         iconData:
                                             appStateSettings["outlinedIcons"]
-                                                ? Icons.favorite_outlined
-                                                : Icons.favorite_rounded,
+                                            ? Icons.favorite_outlined
+                                            : Icons.favorite_rounded,
                                         label: "support-the-developer".tr(),
                                         description:
                                             "support-the-developer-description"
@@ -122,10 +128,10 @@ class PremiumPage extends StatelessWidget {
                                       SubscriptionFeature(
                                         iconData:
                                             appStateSettings["outlinedIcons"]
-                                                ? Icons.donut_small_outlined
-                                                : MoreIcons.chart_pie,
-                                        label:
-                                            "unlimited-budgets-and-goals".tr(),
+                                            ? Icons.donut_small_outlined
+                                            : MoreIcons.chart_pie,
+                                        label: "unlimited-budgets-and-goals"
+                                            .tr(),
                                         description:
                                             "unlimited-budgets-and-goals-description"
                                                 .tr(),
@@ -133,8 +139,8 @@ class PremiumPage extends StatelessWidget {
                                       SubscriptionFeature(
                                         iconData:
                                             appStateSettings["outlinedIcons"]
-                                                ? Icons.history_outlined
-                                                : Icons.history_rounded,
+                                            ? Icons.history_outlined
+                                            : Icons.history_rounded,
                                         label: "past-budget-periods".tr(),
                                         description:
                                             "past-budget-periods-description"
@@ -143,8 +149,8 @@ class PremiumPage extends StatelessWidget {
                                       SubscriptionFeature(
                                         iconData:
                                             appStateSettings["outlinedIcons"]
-                                                ? Icons.color_lens_outlined
-                                                : Icons.color_lens_rounded,
+                                            ? Icons.color_lens_outlined
+                                            : Icons.color_lens_rounded,
                                         label: "unlimited-color-picker".tr(),
                                         description:
                                             "unlimited-color-picker-description"
@@ -155,9 +161,10 @@ class PremiumPage extends StatelessWidget {
                                 ),
                               ),
                               SizedBox(
-                                  height: 13 +
-                                      MediaQuery.sizeOf(context).height *
-                                          0.028),
+                                height:
+                                    13 +
+                                    MediaQuery.sizeOf(context).height * 0.028,
+                              ),
                               Products(
                                 key: purchasesStateKey,
                                 popRouteWithPurchase: popRouteWithPurchase,
@@ -169,8 +176,9 @@ class PremiumPage extends StatelessWidget {
                             Opacity(
                               opacity: 0.7,
                               child: Padding(
-                                padding:
-                                    const EdgeInsetsDirectional.only(top: 4),
+                                padding: const EdgeInsetsDirectional.only(
+                                  top: 4,
+                                ),
                                 child: Tappable(
                                   onTap: () async {
                                     var result = await openPopupCustom(
@@ -185,14 +193,16 @@ class PremiumPage extends StatelessWidget {
                                     }
                                   },
                                   color: darkenPastel(
-                                          Theme.of(context).colorScheme.primary,
-                                          amount: 0.3)
-                                      .withValues(alpha: 0.5),
+                                    Theme.of(context).colorScheme.primary,
+                                    amount: 0.3,
+                                  ).withValues(alpha: 0.5),
                                   borderRadius: 15,
                                   child: Padding(
                                     padding:
                                         const EdgeInsetsDirectional.symmetric(
-                                            horizontal: 13, vertical: 9),
+                                          horizontal: 13,
+                                          vertical: 9,
+                                        ),
                                     child: TextFont(
                                       text: "continue-for-free".tr(),
                                       fontSize: 13.5,
@@ -219,13 +229,14 @@ class PremiumPage extends StatelessWidget {
                         icon: Icon(
                           getPlatform() == PlatformOS.isIOS
                               ? appStateSettings["outlinedIcons"]
-                                  ? Icons.chevron_left_outlined
-                                  : Icons.chevron_left_rounded
+                                    ? Icons.chevron_left_outlined
+                                    : Icons.chevron_left_rounded
                               : appStateSettings["outlinedIcons"]
-                                  ? Icons.arrow_back_outlined
-                                  : Icons.arrow_back_rounded,
-                          color:
-                              Colors.black.withValues(alpha: canDismiss ? 0.9 : 0.16),
+                              ? Icons.arrow_back_outlined
+                              : Icons.arrow_back_rounded,
+                          color: Colors.black.withValues(
+                            alpha: canDismiss ? 0.9 : 0.16,
+                          ),
                         ),
                         onPressed: () {
                           popRoute(context);
@@ -242,7 +253,7 @@ class PremiumPage extends StatelessWidget {
     );
     bool enableSubscriptionAboutBanner =
         (getPlatform(ignoreEmulation: true) == PlatformOS.isAndroid &&
-            appStateSettings["purchaseID"] != productIDs["lifetime"]);
+        appStateSettings["purchaseID"] != productIDs["lifetime"]);
     return Column(
       children: [
         Expanded(
@@ -272,7 +283,9 @@ class PremiumPage extends StatelessWidget {
                     color: Colors.transparent,
                     child: Padding(
                       padding: const EdgeInsetsDirectional.symmetric(
-                          horizontal: 15, vertical: 10),
+                        horizontal: 15,
+                        vertical: 10,
+                      ),
                       child: TextFont(
                         text: "",
                         maxLines: 25,
@@ -296,7 +309,9 @@ class PremiumPage extends StatelessWidget {
                               fontFamilyFallback: ['Inter'],
                               decoration: TextDecoration.underline,
                               decorationStyle: TextDecorationStyle.solid,
-                              decorationColor: Colors.white.withValues(alpha: 0.3),
+                              decorationColor: Colors.white.withValues(
+                                alpha: 0.3,
+                              ),
                             ),
                           ),
                         ],
@@ -321,18 +336,29 @@ class FreePremiumMessage extends StatefulWidget {
 
 class _FreePremiumMessageState extends State<FreePremiumMessage> {
   int remainingTime = appStateSettings["premiumPopupFreeSeen"] != true ? 26 : 0;
+  Timer? _timer;
+
   @override
   void initState() {
-    Future.delayed(Duration.zero, () async {
-      for (int i = remainingTime; i > 0; i--) {
-        if (mounted)
+    super.initState();
+    if (remainingTime > 0) {
+      _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+        if (mounted) {
           setState(() {
             remainingTime--;
           });
-        await Future.delayed(const Duration(milliseconds: 1000));
-      }
-    });
-    super.initState();
+        }
+        if (remainingTime <= 0) {
+          timer.cancel();
+        }
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
   }
 
   @override
@@ -350,19 +376,22 @@ class _FreePremiumMessageState extends State<FreePremiumMessage> {
         ),
         SizedBox(height: 10),
         TextFont(
-            maxLines: 80,
-            fontSize: 15.5,
-            textAlign: TextAlign.start,
-            text: "developer-message-1".tr() +
-                (appStateSettings["premiumPopupFreeSeen"]
-                    ? "."
-                    : " " + "developer-message-1-1".tr())),
+          maxLines: 80,
+          fontSize: 15.5,
+          textAlign: TextAlign.start,
+          text:
+              "developer-message-1".tr() +
+              (appStateSettings["premiumPopupFreeSeen"]
+                  ? "."
+                  : " " + "developer-message-1-1".tr()),
+        ),
         SizedBox(height: 10),
         TextFont(
-            maxLines: 80,
-            fontSize: 15.5,
-            textAlign: TextAlign.start,
-            text: "developer-message-2".tr()),
+          maxLines: 80,
+          fontSize: 15.5,
+          textAlign: TextAlign.start,
+          text: "developer-message-2".tr(),
+        ),
         SizedBox(height: 15),
         Row(
           children: [
@@ -373,8 +402,11 @@ class _FreePremiumMessageState extends State<FreePremiumMessage> {
                 label: "support".tr(),
                 onTap: () {
                   if (timerUp) {
-                    updateSettings("premiumPopupFreeSeen", true,
-                        updateGlobalState: false);
+                    updateSettings(
+                      "premiumPopupFreeSeen",
+                      true,
+                      updateGlobalState: false,
+                    );
                   }
                   popRoute(context, false); //Pop current popup route
                 },
@@ -388,7 +420,8 @@ class _FreePremiumMessageState extends State<FreePremiumMessage> {
                 child: Button(
                   fontSize: 14,
                   expandedLayout: true,
-                  label: "unlock-for-free".tr() +
+                  label:
+                      "unlock-for-free".tr() +
                       (timerUp == false
                           ? (" " + "(" + remainingTime.toString() + ")")
                           : ""),
@@ -396,8 +429,11 @@ class _FreePremiumMessageState extends State<FreePremiumMessage> {
                     if (timerUp) {
                       popRoute(context, true); //Pop current popup route
                       popRoute(context, true); //Pop premium page route
-                      updateSettings("premiumPopupFreeSeen", true,
-                          updateGlobalState: false);
+                      updateSettings(
+                        "premiumPopupFreeSeen",
+                        true,
+                        updateGlobalState: false,
+                      );
                     }
                   },
                 ),
@@ -483,10 +519,12 @@ openManagePurchase() {
     openUrl("https://apps.apple.com/account/subscriptions");
   } else if (appStateSettings["purchaseID"] == productIDs["monthly"]) {
     openUrl(
-        "https://play.google.com/store/account/subscriptions?sku=cashew.pro.monthly&package=com.budget.tracker_app");
+      "https://play.google.com/store/account/subscriptions?sku=cashew.pro.monthly&package=com.budget.tracker_app",
+    );
   } else if (appStateSettings["purchaseID"] == productIDs["yearly"]) {
     openUrl(
-        "https://play.google.com/store/account/subscriptions?sku=cashew.pro.yearly&package=com.budget.tracker_app");
+      "https://play.google.com/store/account/subscriptions?sku=cashew.pro.yearly&package=com.budget.tracker_app",
+    );
   } else {
     if (getPlatform(ignoreEmulation: true) == PlatformOS.isAndroid)
       openUrl("https://play.google.com/store/account/subscriptions");
@@ -522,14 +560,8 @@ class ManageSubscription extends StatelessWidget {
         child: Column(
           children: [
             appStateSettings["purchaseID"] == productIDs["lifetime"]
-                ? TextFont(
-                    text: "already-purchased".tr(),
-                    fontSize: 16,
-                  )
-                : TextFont(
-                    text: "current-plan".tr(),
-                    fontSize: 16,
-                  ),
+                ? TextFont(text: "already-purchased".tr(), fontSize: 16)
+                : TextFont(text: "current-plan".tr(), fontSize: 16),
             SizedBox(height: 10),
             CashewProBanner(fontColor: getColor(context, "black")),
             TextFont(
@@ -542,7 +574,9 @@ class ManageSubscription extends StatelessWidget {
                 ? SizedBox.shrink()
                 : Padding(
                     padding: EdgeInsetsDirectional.symmetric(
-                        horizontal: 10, vertical: 4),
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     child: Tappable(
                       borderRadius: 15,
                       color: dynamicPastel(
@@ -556,12 +590,16 @@ class ManageSubscription extends StatelessWidget {
                       },
                       child: Container(
                         padding: EdgeInsetsDirectional.symmetric(
-                            vertical: 6, horizontal: 13),
+                          vertical: 6,
+                          horizontal: 13,
+                        ),
                         child: TextFont(
                           text: "manage".tr(),
                           fontSize: 12,
-                          textColor:
-                              getColor(context, "black").withValues(alpha: 0.5),
+                          textColor: getColor(
+                            context,
+                            "black",
+                          ).withValues(alpha: 0.5),
                         ),
                       ),
                     ),
@@ -583,8 +621,12 @@ void listenToPurchaseUpdated({
     if (productIDs.values.toSet().contains(purchaseDetails.productID)) {
       if (purchaseDetails.status == PurchaseStatus.purchased ||
           purchaseDetails.status == PurchaseStatus.restored) {
-        updateSettings("purchaseID", purchaseDetails.productID,
-            updateGlobalState: false, pagesNeedingRefresh: [3]);
+        updateSettings(
+          "purchaseID",
+          purchaseDetails.productID,
+          updateGlobalState: false,
+          pagesNeedingRefresh: [3],
+        );
         print("Purchased " + purchaseDetails.productID);
         if (popRouteWithPurchase == true) {
           popRoute(null, true);
@@ -600,16 +642,18 @@ void listenToPurchaseUpdated({
             SnackBar snackBar = SnackBar(
               content: Text('error-processing-order'.tr()),
             );
-            ScaffoldMessenger.of(navigatorKey.currentContext!)
-                .showSnackBar(snackBar);
+            ScaffoldMessenger.of(
+              navigatorKey.currentContext!,
+            ).showSnackBar(snackBar);
           }
         } else if (purchaseDetails.status == PurchaseStatus.purchased) {
           if (navigatorKey.currentContext != null) {
             SnackBar snackBar = SnackBar(
               content: Text('order-confirmation'.tr()),
             );
-            ScaffoldMessenger.of(navigatorKey.currentContext!)
-                .showSnackBar(snackBar);
+            ScaffoldMessenger.of(
+              navigatorKey.currentContext!,
+            ).showSnackBar(snackBar);
           }
         }
         if (purchaseDetails.pendingCompletePurchase) {
@@ -620,8 +664,10 @@ void listenToPurchaseUpdated({
   });
 }
 
-Future<Map<String, ProductDetails>> initializeStoreAndPurchases(
-    {required BuildContext context, required bool popRouteWithPurchase}) async {
+Future<Map<String, ProductDetails>> initializeStoreAndPurchases({
+  required BuildContext context,
+  required bool popRouteWithPurchase,
+}) async {
   if (tryStoreEnabled == true) {
     print("Loading Store");
     final bool available = await InAppPurchase.instance.isAvailable();
@@ -655,7 +701,7 @@ Future<Map<String, ProductDetails>> initializeStoreAndPurchases(
         print("Some products not found...");
       } else {
         storeProducts = {
-          for (var product in response.productDetails) product.id: product
+          for (var product in response.productDetails) product.id: product,
         };
         print("Products Loaded");
         print(storeProducts);
@@ -673,9 +719,7 @@ Future<Map<String, ProductDetails>> initializeStoreAndPurchases(
 
 Future restorePurchases(BuildContext context) async {
   if (storeProducts.isEmpty) {
-    SnackBar snackBar = SnackBar(
-      content: Text('error-processing-order'.tr()),
-    );
+    SnackBar snackBar = SnackBar(content: Text('error-processing-order'.tr()));
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   } else {
     await InAppPurchase.instance.restorePurchases();
@@ -686,7 +730,8 @@ Future restorePurchases(BuildContext context) async {
               label: "help".tr().capitalizeFirst,
               onPressed: () {
                 showHelpRestorePopup(context);
-              })
+              },
+            )
           : null,
     );
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
@@ -724,9 +769,7 @@ Future<bool> premiumPopupPushRoute(BuildContext context) async {
   if (hidePremiumPopup()) return true;
   dynamic result = await pushRoute(
     context,
-    PremiumPage(
-      popRouteWithPurchase: true,
-    ),
+    PremiumPage(popRouteWithPurchase: true),
   );
   if (result == true) {
     return true;
@@ -749,8 +792,10 @@ Future<bool> premiumPopupBudgets(BuildContext context) async {
   }
 }
 
-Future<bool> premiumPopupObjectives(BuildContext context,
-    {required ObjectiveType objectiveType}) async {
+Future<bool> premiumPopupObjectives(
+  BuildContext context, {
+  required ObjectiveType objectiveType,
+}) async {
   if (hidePremiumPopup()) return true;
   if ((await database.getAllObjectives(objectiveType: objectiveType)).length >
       0) {
@@ -778,33 +823,39 @@ Future<bool> premiumPopupPastBudgets(BuildContext context) async {
 Future premiumPopupAddTransaction(BuildContext context) async {
   if (hidePremiumPopup()) return true;
 
-  print("Checking premium before adding transaction - " +
-      appStateSettings["premiumPopupAddTransactionCount"].toString());
+  print(
+    "Checking premium before adding transaction - " +
+        appStateSettings["premiumPopupAddTransactionCount"].toString(),
+  );
 
   try {
     DateTime.parse(appStateSettings["premiumPopupAddTransactionLastShown"]);
   } catch (e) {
     print("Error parsing date for premium popup, resetting...");
     updateSettings(
-        "premiumPopupAddTransactionLastShown", DateTime.now().toString(),
-        updateGlobalState: false);
+      "premiumPopupAddTransactionLastShown",
+      DateTime.now().toString(),
+      updateGlobalState: false,
+    );
   }
 
-  if (DateTime.parse(appStateSettings["premiumPopupAddTransactionLastShown"])
-          .add(Duration(days: 1))
-          .isBefore(DateTime.now()) &&
+  if (DateTime.parse(
+        appStateSettings["premiumPopupAddTransactionLastShown"],
+      ).add(Duration(days: 1)).isBefore(DateTime.now()) &&
       appStateSettings["premiumPopupAddTransactionCount"] > 5) {
-    updateSettings("premiumPopupAddTransactionCount", 0,
-        updateGlobalState: false);
     updateSettings(
-        "premiumPopupAddTransactionLastShown", DateTime.now().toString(),
-        updateGlobalState: false);
+      "premiumPopupAddTransactionCount",
+      0,
+      updateGlobalState: false,
+    );
+    updateSettings(
+      "premiumPopupAddTransactionLastShown",
+      DateTime.now().toString(),
+      updateGlobalState: false,
+    );
     await pushRoute(
       context,
-      PremiumPage(
-        popRouteWithPurchase: true,
-        canDismiss: true,
-      ),
+      PremiumPage(popRouteWithPurchase: true, canDismiss: true),
     );
   }
 
@@ -865,170 +916,168 @@ class ProductsState extends State<Products> {
       child: appStateSettings["purchaseID"] != null
           ? ManageSubscription()
           : kIsWeb || hasProducts == false
-              ? loading == true
-                  ? SizedBox.shrink()
-                  : StatusBox(
-                      title: "error-getting-products".tr(),
-                      description: "error-getting-products-description".tr() +
-                          (kDebugMode && tryStoreEnabled == false
-                              ? " Store disabled in debug mode! Enable `tryStoreEnabled`"
-                              : ""),
-                      icon: appStateSettings["outlinedIcons"]
-                          ? Icons.warning_outlined
-                          : Icons.warning_rounded,
-                      color: Theme.of(context).colorScheme.error,
-                      onTap: () {
-                        initializeStoreAndPurchases(
-                          context: context,
-                          popRouteWithPurchase: widget.popRouteWithPurchase,
-                        );
-                      },
-                      forceDark: true,
-                    )
-              : Padding(
-                  padding: EdgeInsetsDirectional.symmetric(
-                      horizontal:
-                          getHorizontalPaddingConstrained(context) + 28),
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(maxWidth: 300),
-                    child: Column(
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadiusDirectional.circular(20),
-                          child: FlashingContainer(
-                            isAnimating: animateHighlightProducts,
-                            backgroundColor:
-                                Theme.of(context).colorScheme.primary,
-                            loopCount: 2,
-                            flashDuration: Duration(milliseconds: 650),
-                            child: Container(
-                              color: dynamicPastel(
-                                context,
-                                Theme.of(context).colorScheme.primaryContainer,
-                                amountDark: 0.2,
-                                amountLight: 0.6,
-                              ).withValues(alpha: 0.45),
-                              child: Column(
-                                children: [
-                                  Builder(
-                                    builder: (context) {
-                                      if (storeProducts[productIDs["yearly"]] ==
-                                              null ||
-                                          storeProducts[
-                                                  productIDs["monthly"]] ==
-                                              null) {
-                                        return SizedBox.shrink();
-                                      }
-                                      final double monthlyPrice =
-                                          storeProducts[productIDs["monthly"]]!
-                                              .rawPrice;
-                                      final double monthlyPriceForYear =
-                                          (monthlyPrice * 12);
-                                      return storeProducts[
-                                                  productIDs["yearly"]] ==
-                                              null
-                                          ? SizedBox.shrink()
-                                          : SubscriptionOption(
-                                              label:
-                                                  "yearly".tr().capitalizeFirst,
-                                              price: storeProducts[
-                                                      productIDs["yearly"]]!
+          ? loading == true
+                ? SizedBox.shrink()
+                : StatusBox(
+                    title: "error-getting-products".tr(),
+                    description:
+                        "error-getting-products-description".tr() +
+                        (kDebugMode && tryStoreEnabled == false
+                            ? " Store disabled in debug mode! Enable `tryStoreEnabled`"
+                            : ""),
+                    icon: appStateSettings["outlinedIcons"]
+                        ? Icons.warning_outlined
+                        : Icons.warning_rounded,
+                    color: Theme.of(context).colorScheme.error,
+                    onTap: () {
+                      initializeStoreAndPurchases(
+                        context: context,
+                        popRouteWithPurchase: widget.popRouteWithPurchase,
+                      );
+                    },
+                    forceDark: true,
+                  )
+          : Padding(
+              padding: EdgeInsetsDirectional.symmetric(
+                horizontal: getHorizontalPaddingConstrained(context) + 28,
+              ),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: 300),
+                child: Column(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadiusDirectional.circular(20),
+                      child: FlashingContainer(
+                        isAnimating: animateHighlightProducts,
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        loopCount: 2,
+                        flashDuration: Duration(milliseconds: 650),
+                        child: Container(
+                          color: dynamicPastel(
+                            context,
+                            Theme.of(context).colorScheme.primaryContainer,
+                            amountDark: 0.2,
+                            amountLight: 0.6,
+                          ).withValues(alpha: 0.45),
+                          child: Column(
+                            children: [
+                              Builder(
+                                builder: (context) {
+                                  if (storeProducts[productIDs["yearly"]] ==
+                                          null ||
+                                      storeProducts[productIDs["monthly"]] ==
+                                          null) {
+                                    return SizedBox.shrink();
+                                  }
+                                  final double monthlyPrice =
+                                      storeProducts[productIDs["monthly"]]!
+                                          .rawPrice;
+                                  final double monthlyPriceForYear =
+                                      (monthlyPrice * 12);
+                                  return storeProducts[productIDs["yearly"]] ==
+                                          null
+                                      ? SizedBox.shrink()
+                                      : SubscriptionOption(
+                                          label: "yearly".tr().capitalizeFirst,
+                                          price:
+                                              storeProducts[productIDs["yearly"]]!
                                                   .price,
-                                              extraPadding:
-                                                  EdgeInsetsDirectional.only(
-                                                      top: 13 / 2),
-                                              onTap: () {
-                                                InAppPurchase.instance
-                                                    .buyNonConsumable(
-                                                  purchaseParam: PurchaseParam(
-                                                    productDetails:
-                                                        storeProducts[
-                                                            productIDs[
-                                                                "yearly"]]!,
-                                                  ),
-                                                );
-                                              },
-                                              originalPrice: storeProducts[
-                                                          productIDs["yearly"]]!
-                                                      .currencySymbol +
-                                                  monthlyPriceForYear
-                                                      .toStringAsFixed(2),
-                                            );
-                                    },
-                                  ),
-                                  storeProducts[productIDs["monthly"]] == null
-                                      ? SizedBox.shrink()
-                                      : SubscriptionOption(
-                                          label: "monthly".tr().capitalizeFirst,
-                                          price: storeProducts[
-                                                  productIDs["monthly"]]!
-                                              .price,
-                                          onTap: () {
-                                            InAppPurchase.instance
-                                                .buyNonConsumable(
-                                              purchaseParam: PurchaseParam(
-                                                productDetails: storeProducts[
-                                                    productIDs["monthly"]]!,
-                                              ),
-                                            );
-                                          },
-                                        ),
-                                  storeProducts[productIDs["lifetime"]] == null
-                                      ? SizedBox.shrink()
-                                      : SubscriptionOption(
-                                          label:
-                                              "lifetime".tr().capitalizeFirst,
-                                          price: storeProducts[
-                                                  productIDs["lifetime"]]!
-                                              .price,
                                           extraPadding:
                                               EdgeInsetsDirectional.only(
-                                                  bottom: 13 / 2),
+                                                top: 13 / 2,
+                                              ),
                                           onTap: () {
-                                            InAppPurchase.instance
-                                                .buyNonConsumable(
+                                            InAppPurchase.instance.buyNonConsumable(
                                               purchaseParam: PurchaseParam(
-                                                productDetails: storeProducts[
-                                                    productIDs["lifetime"]]!,
+                                                productDetails:
+                                                    storeProducts[productIDs["yearly"]]!,
                                               ),
                                             );
                                           },
-                                        ),
-                                ],
+                                          originalPrice:
+                                              storeProducts[productIDs["yearly"]]!
+                                                  .currencySymbol +
+                                              monthlyPriceForYear
+                                                  .toStringAsFixed(2),
+                                        );
+                                },
                               ),
-                            ),
+                              storeProducts[productIDs["monthly"]] == null
+                                  ? SizedBox.shrink()
+                                  : SubscriptionOption(
+                                      label: "monthly".tr().capitalizeFirst,
+                                      price:
+                                          storeProducts[productIDs["monthly"]]!
+                                              .price,
+                                      onTap: () {
+                                        InAppPurchase.instance.buyNonConsumable(
+                                          purchaseParam: PurchaseParam(
+                                            productDetails:
+                                                storeProducts[productIDs["monthly"]]!,
+                                          ),
+                                        );
+                                      },
+                                    ),
+                              storeProducts[productIDs["lifetime"]] == null
+                                  ? SizedBox.shrink()
+                                  : SubscriptionOption(
+                                      label: "lifetime".tr().capitalizeFirst,
+                                      price:
+                                          storeProducts[productIDs["lifetime"]]!
+                                              .price,
+                                      extraPadding: EdgeInsetsDirectional.only(
+                                        bottom: 13 / 2,
+                                      ),
+                                      onTap: () {
+                                        InAppPurchase.instance.buyNonConsumable(
+                                          purchaseParam: PurchaseParam(
+                                            productDetails:
+                                                storeProducts[productIDs["lifetime"]]!,
+                                          ),
+                                        );
+                                      },
+                                    ),
+                            ],
                           ),
                         ),
-                        Padding(
-                          padding: EdgeInsetsDirectional.symmetric(
-                              horizontal: 10, vertical: 4),
-                          child: Tappable(
-                            borderRadius: 15,
-                            color: dynamicPastel(
-                              context,
-                              Theme.of(context).colorScheme.primaryContainer,
-                              amountDark: 0.2,
-                              amountLight: 0.6,
-                            ).withValues(alpha: 0.45),
-                            onTap: () async {
-                              restorePurchases(context);
-                            },
-                            child: Container(
-                              padding: EdgeInsetsDirectional.symmetric(
-                                  vertical: 6, horizontal: 13),
-                              child: TextFont(
-                                text: "restore-purchases".tr(),
-                                fontSize: 12,
-                                textColor:
-                                    getColor(context, "black").withValues(alpha: 0.5),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
+                    Padding(
+                      padding: EdgeInsetsDirectional.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      child: Tappable(
+                        borderRadius: 15,
+                        color: dynamicPastel(
+                          context,
+                          Theme.of(context).colorScheme.primaryContainer,
+                          amountDark: 0.2,
+                          amountLight: 0.6,
+                        ).withValues(alpha: 0.45),
+                        onTap: () async {
+                          restorePurchases(context);
+                        },
+                        child: Container(
+                          padding: EdgeInsetsDirectional.symmetric(
+                            vertical: 6,
+                            horizontal: 13,
+                          ),
+                          child: TextFont(
+                            text: "restore-purchases".tr(),
+                            fontSize: 12,
+                            textColor: getColor(
+                              context,
+                              "black",
+                            ).withValues(alpha: 0.5),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
+              ),
+            ),
     );
   }
 }
@@ -1120,7 +1169,9 @@ class SubscriptionOption extends StatelessWidget {
               padding: extraPadding ?? EdgeInsetsDirectional.zero,
               child: Padding(
                 padding: const EdgeInsetsDirectional.symmetric(
-                    horizontal: 26, vertical: 13),
+                  horizontal: 26,
+                  vertical: 13,
+                ),
                 child: Wrap(
                   alignment: WrapAlignment.spaceBetween,
                   direction: Axis.horizontal,
@@ -1143,10 +1194,14 @@ class SubscriptionOption extends StatelessWidget {
                               style: TextStyle(
                                 decoration: TextDecoration.lineThrough,
                                 decorationStyle: TextDecorationStyle.solid,
-                                decorationColor: getColor(context, "black")
-                                    .withValues(alpha: 0.65),
-                                color:
-                                    getColor(context, "black").withValues(alpha: 0.7),
+                                decorationColor: getColor(
+                                  context,
+                                  "black",
+                                ).withValues(alpha: 0.65),
+                                color: getColor(
+                                  context,
+                                  "black",
+                                ).withValues(alpha: 0.7),
                                 fontSize: 14,
                                 fontFamily: appStateSettings["font"],
                                 fontFamilyFallback: ['Inter'],
@@ -1186,9 +1241,12 @@ class SubscriptionOption extends StatelessWidget {
 }
 
 class LockedFeature extends StatelessWidget {
-  const LockedFeature(
-      {required this.child, this.actionAfter, this.showLock = false, Key? key})
-      : super(key: key);
+  const LockedFeature({
+    required this.child,
+    this.actionAfter,
+    this.showLock = false,
+    Key? key,
+  }) : super(key: key);
   final Widget child;
   final Function? actionAfter;
   final bool showLock;
@@ -1201,9 +1259,11 @@ class LockedFeature extends StatelessWidget {
         alignment: AlignmentDirectional.center,
         children: [
           IgnorePointer(child: this.child),
-          Icon(appStateSettings["outlinedIcons"]
-              ? Icons.lock_outlined
-              : Icons.lock_rounded),
+          Icon(
+            appStateSettings["outlinedIcons"]
+                ? Icons.lock_outlined
+                : Icons.lock_rounded,
+          ),
         ],
       );
     return Tappable(
@@ -1292,10 +1352,7 @@ class _FadeOutAndLockFeatureState extends State<FadeOutAndLockFeature> {
             duration: Duration(milliseconds: 500),
             child: Column(
               children: [
-                TextFont(
-                  text: "unlock-with".tr(),
-                  fontSize: 15,
-                ),
+                TextFont(text: "unlock-with".tr(), fontSize: 15),
                 SizedBox(height: 5),
                 CashewProBanner(fontColor: getColor(context, "black")),
                 SizedBox(height: 15),
@@ -1307,7 +1364,7 @@ class _FadeOutAndLockFeatureState extends State<FadeOutAndLockFeature> {
                     Theme.of(context).colorScheme.secondaryContainer,
                     amount: 0.4,
                   ).withValues(alpha: 0.8),
-                )
+                ),
               ],
             ),
           ),
@@ -1318,8 +1375,11 @@ class _FadeOutAndLockFeatureState extends State<FadeOutAndLockFeature> {
 }
 
 class PremiumBackground extends StatelessWidget {
-  const PremiumBackground(
-      {this.disableAnimation = false, this.purchased = false, super.key});
+  const PremiumBackground({
+    this.disableAnimation = false,
+    this.purchased = false,
+    super.key,
+  });
   final bool disableAnimation;
   final bool purchased;
 
@@ -1333,34 +1393,31 @@ class PremiumBackground extends StatelessWidget {
           end: AlignmentDirectional.bottomEnd,
           colors: [
             dynamicPastel(
-                context,
-                Theme.of(context).brightness == Brightness.light
-                    ? Theme.of(context).colorScheme.primary
-                    : Theme.of(context).colorScheme.tertiary,
-                amountDark: 0,
-                amountLight: 0.4),
+              context,
+              Theme.of(context).brightness == Brightness.light
+                  ? Theme.of(context).colorScheme.primary
+                  : Theme.of(context).colorScheme.tertiary,
+              amountDark: 0,
+              amountLight: 0.4,
+            ),
             dynamicPastel(
-                context,
-                Theme.of(context).brightness == Brightness.light
-                    ? Theme.of(context).colorScheme.primaryContainer
-                    : Theme.of(context).colorScheme.primary,
-                amountDark: 0,
-                amountLight: 0.4),
+              context,
+              Theme.of(context).brightness == Brightness.light
+                  ? Theme.of(context).colorScheme.primaryContainer
+                  : Theme.of(context).colorScheme.primary,
+              amountDark: 0,
+              amountLight: 0.4,
+            ),
             dynamicPastel(
-                context,
-                Theme.of(context).brightness == Brightness.light
-                    ? Theme.of(context).colorScheme.primary
-                    : Theme.of(context).colorScheme.tertiary,
-                amountDark: 0,
-                amountLight: 0.4),
+              context,
+              Theme.of(context).brightness == Brightness.light
+                  ? Theme.of(context).colorScheme.primary
+                  : Theme.of(context).colorScheme.tertiary,
+              amountDark: 0,
+              amountLight: 0.4,
+            ),
           ],
-          stops: disableAnimation
-              ? [0, 0.4, 2.5]
-              : [
-                  0,
-                  0.3,
-                  1.3,
-                ],
+          stops: disableAnimation ? [0, 0.4, 2.5] : [0, 0.3, 1.3],
         ),
         backgroundBlendMode: BlendMode.srcOver,
       ),
@@ -1408,8 +1465,9 @@ class PremiumBanner extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-          boxShadow: boxShadowSharp(context),
-          borderRadius: BorderRadiusDirectional.circular(borderRadius)),
+        boxShadow: boxShadowSharp(context),
+        borderRadius: BorderRadiusDirectional.circular(borderRadius),
+      ),
       margin: const EdgeInsetsDirectional.symmetric(horizontal: 9, vertical: 0),
       child: OpenContainerNavigation(
         borderRadius: borderRadius,
@@ -1438,7 +1496,8 @@ class PremiumBanner extends StatelessWidget {
                           : 0.9,
                       child: PremiumBackground(
                         purchased: purchased,
-                        disableAnimation: appStateSettings["appAnimations"] !=
+                        disableAnimation:
+                            appStateSettings["appAnimations"] !=
                                 AppAnimations.all.index ||
                             getPlatform() == PlatformOS.isIOS ||
                             kIsWeb ||
@@ -1447,7 +1506,11 @@ class PremiumBanner extends StatelessWidget {
                     ),
                     Padding(
                       padding: const EdgeInsetsDirectional.only(
-                          start: 25, end: 17, top: 17, bottom: 17),
+                        start: 25,
+                        end: 17,
+                        top: 17,
+                        bottom: 17,
+                      ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -1464,24 +1527,28 @@ class PremiumBanner extends StatelessWidget {
                                         ? Container(
                                             margin:
                                                 EdgeInsetsDirectional.symmetric(
-                                                    horizontal: 5),
+                                                  horizontal: 5,
+                                                ),
                                             padding:
                                                 EdgeInsetsDirectional.symmetric(
-                                                    horizontal: 12,
-                                                    vertical: 5),
+                                                  horizontal: 12,
+                                                  vertical: 5,
+                                                ),
                                             decoration: BoxDecoration(
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .secondaryContainer,
+                                              color: Theme.of(
+                                                context,
+                                              ).colorScheme.secondaryContainer,
                                               borderRadius:
-                                                  BorderRadiusDirectional
-                                                      .circular(100),
-                                              boxShadow:
-                                                  boxShadowGeneral(context),
+                                                  BorderRadiusDirectional.circular(
+                                                    100,
+                                                  ),
+                                              boxShadow: boxShadowGeneral(
+                                                context,
+                                              ),
                                             ),
                                             child: TextFont(
-                                              text: appStateSettings[
-                                                          "purchaseID"] ==
+                                              text:
+                                                  appStateSettings["purchaseID"] ==
                                                       productIDs["lifetime"]
                                                   ? "lifetime".tr()
                                                   : "active".tr(),
@@ -1502,7 +1569,8 @@ class PremiumBanner extends StatelessWidget {
                                         children: [
                                           Flexible(
                                             child: TextFont(
-                                              text: "budget-like-a-pro".tr() +
+                                              text:
+                                                  "budget-like-a-pro".tr() +
                                                   " " +
                                                   globalAppName +
                                                   " " +
@@ -1525,7 +1593,7 @@ class PremiumBanner extends StatelessWidget {
                                       : Icons.arrow_forward_ios_rounded,
                                   color: Colors.black,
                                   size: 20,
-                                )
+                                ),
                         ],
                       ),
                     ),
