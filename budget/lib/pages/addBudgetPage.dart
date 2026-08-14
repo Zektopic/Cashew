@@ -378,18 +378,6 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
             fullSnap: false,
             SelectBudgetTypePopup(setBudgetType: setSelectedBudgetType),
           );
-          // if (result == "All Transactions") {
-          //   await openBottomSheet(
-          //     context,
-          //     fullSnap: false,
-          //     ViewBudgetTransactionFilterInfo(
-          //       isIncomeBudget: selectedIncome,
-          //       selectedBudgetFilters: selectedBudgetTransactionFilters,
-          //       setSelectedBudgetFilters: setSelectedBudgetFilters,
-          //       popOnDefault: true,
-          //     ),
-          //   );
-          // }
           await openBottomSheet(
             context,
             fullSnap: false,
