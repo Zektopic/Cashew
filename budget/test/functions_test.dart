@@ -192,11 +192,19 @@ void main() {
     });
   });
   group('convertToPercent', () {
+    Map<String, dynamic> _originalAppState = {};
+
     setUp(() {
+      _originalAppState = Map.from(appStateSettings);
       appStateSettings.clear();
       appStateSettings["percentagePrecision"] = 0;
       appStateSettings["obscureAmounts"] = false;
       appStateSettings["obscureAmountsMagnitude"] = false;
+    });
+
+    tearDown(() {
+      appStateSettings.clear();
+      appStateSettings.addAll(_originalAppState);
     });
 
     test('basic percentage conversion without decimals', () {
