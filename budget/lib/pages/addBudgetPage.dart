@@ -111,15 +111,16 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
   int selectedPeriodLength = 1;
   DateTime selectedStartDate = DateTime.now().firstDayOfMonth();
   DateTime? selectedEndDate;
-  late Color? selectedColor =
-      widget.budget?.colour == null ? null : HexColor(widget.budget?.colour);
+  late Color? selectedColor = widget.budget?.colour == null
+      ? null
+      : HexColor(widget.budget?.colour);
   String selectedRecurrence = "Monthly";
   bool selectedPin = true;
   bool selectedShared = false;
   bool selectedIncome = false;
   bool selectedAddedTransactionsOnly = false;
   List<BudgetTransactionFilters> selectedBudgetTransactionFilters = [
-    BudgetTransactionFilters.defaultBudgetTransactionFilters
+    BudgetTransactionFilters.defaultBudgetTransactionFilters,
   ];
   List<String> allMembersOfAllBudgets = [];
   List<String>? selectedMemberTransactionFilters;
@@ -231,7 +232,9 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
     Budget createdBudget = await createBudget();
     print("Added budget");
     int result = await database.createOrUpdateBudget(
-        insert: widget.budget == null, createdBudget);
+      insert: widget.budget == null,
+      createdBudget,
+    );
     if (selectedShared == true &&
         widget.budget == null &&
         appStateSettings["sharedBudgets"] == true) {
@@ -287,8 +290,9 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
   Future<Budget> createBudget() async {
     Budget? currentInstance;
     if (widget.budget != null) {
-      currentInstance =
-          await database.getBudgetInstance(widget.budget!.budgetPk);
+      currentInstance = await database.getBudgetInstance(
+        widget.budget!.budgetPk,
+      );
     }
     return await Budget(
       budgetPk: widget.budget != null ? widget.budget!.budgetPk : "-1",
@@ -303,8 +307,9 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
       // TODO make this work excludeAddedTransactions
       periodLength: selectedPeriodLength,
       reoccurrence: mapRecurrence(selectedRecurrence),
-      dateCreated:
-          widget.budget != null ? widget.budget!.dateCreated : DateTime.now(),
+      dateCreated: widget.budget != null
+          ? widget.budget!.dateCreated
+          : DateTime.now(),
       dateTimeModified: null,
       order: widget.budget != null
           ? widget.budget!.order
@@ -313,26 +318,32 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
       pinned: selectedPin,
       archived: widget.budget?.archived ?? false,
       sharedKey: widget.budget != null ? currentInstance!.sharedKey : null,
-      sharedOwnerMember:
-          widget.budget != null ? currentInstance!.sharedOwnerMember : null,
-      sharedDateUpdated:
-          widget.budget != null ? currentInstance!.sharedDateUpdated : null,
-      sharedMembers:
-          widget.budget != null ? currentInstance!.sharedMembers : null,
-      sharedAllMembersEver:
-          widget.budget != null ? currentInstance!.sharedAllMembersEver : null,
-      budgetTransactionFilters: widget.budget?.addedTransactionsOnly == true ||
+      sharedOwnerMember: widget.budget != null
+          ? currentInstance!.sharedOwnerMember
+          : null,
+      sharedDateUpdated: widget.budget != null
+          ? currentInstance!.sharedDateUpdated
+          : null,
+      sharedMembers: widget.budget != null
+          ? currentInstance!.sharedMembers
+          : null,
+      sharedAllMembersEver: widget.budget != null
+          ? currentInstance!.sharedAllMembersEver
+          : null,
+      budgetTransactionFilters:
+          widget.budget?.addedTransactionsOnly == true ||
               selectedAddedTransactionsOnly
           ? null
           : currentInstance?.sharedKey != null
-              ? null
-              : selectedBudgetTransactionFilters,
-      memberTransactionFilters: widget.budget?.addedTransactionsOnly == true ||
+          ? null
+          : selectedBudgetTransactionFilters,
+      memberTransactionFilters:
+          widget.budget?.addedTransactionsOnly == true ||
               selectedAddedTransactionsOnly
           ? null
           : currentInstance?.sharedKey != null
-              ? null
-              : selectedMemberTransactionFilters,
+          ? null
+          : selectedMemberTransactionFilters,
       isAbsoluteSpendingLimit:
           currentInstance?.isAbsoluteSpendingLimit ?? false,
       income: selectedIncome,
@@ -345,8 +356,9 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
   void showDiscardChangesPopupIfNotEditing() async {
     Budget budgetCreated = await createBudget();
     budgetCreated = budgetCreated.copyWith(
-        dateCreated: budgetInitial?.dateCreated,
-        endDate: budgetInitial?.endDate);
+      dateCreated: budgetInitial?.dateCreated,
+      endDate: budgetInitial?.endDate,
+    );
     if (budgetCreated != budgetInitial && widget.budget == null) {
       discardChangesPopup(context, forceShow: true);
     } else {
@@ -366,18 +378,6 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
             fullSnap: false,
             SelectBudgetTypePopup(setBudgetType: setSelectedBudgetType),
           );
-          // if (result == "All Transactions") {
-          //   await openBottomSheet(
-          //     context,
-          //     fullSnap: false,
-          //     ViewBudgetTransactionFilterInfo(
-          //       isIncomeBudget: selectedIncome,
-          //       selectedBudgetFilters: selectedBudgetTransactionFilters,
-          //       setSelectedBudgetFilters: setSelectedBudgetFilters,
-          //       popOnDefault: true,
-          //     ),
-          //   );
-          // }
           await openBottomSheet(
             context,
             fullSnap: false,
@@ -416,14 +416,16 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
 
       selectedBudgetTransactionFilters =
           widget.budget!.budgetTransactionFilters ??
-              [BudgetTransactionFilters.defaultBudgetTransactionFilters];
+          [BudgetTransactionFilters.defaultBudgetTransactionFilters];
       selectedMemberTransactionFilters =
           widget.budget!.memberTransactionFilters ?? null;
 
       var amountString = widget.budget!.amount.toStringAsFixed(2);
       if (amountString.substring(amountString.length - 2) == "00") {
-        selectedAmountCalculation =
-            amountString.substring(0, amountString.length - 3);
+        selectedAmountCalculation = amountString.substring(
+          0,
+          amountString.length - 3,
+        );
       } else {
         selectedAmountCalculation = amountString;
       }
@@ -497,8 +499,9 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
   discardChangesPopupIfBudgetPassed() async {
     Budget? currentInstance;
     if (widget.budget != null) {
-      currentInstance =
-          await database.getBudgetInstance(widget.budget!.budgetPk);
+      currentInstance = await database.getBudgetInstance(
+        widget.budget!.budgetPk,
+      );
     }
     discardChangesPopup(
       context,
@@ -515,7 +518,9 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
   }
 
   void checkPopupBalanceCorrectionSelectedWarning(
-      BuildContext context, List<String>? categories) {
+    BuildContext context,
+    List<String>? categories,
+  ) {
     if (categories?.contains("0") == true) {
       openPopup(
         context,
@@ -576,7 +581,9 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
     double? budgetAmount = widget.budget == null
         ? null
         : budgetAmountToPrimaryCurrency(
-            Provider.of<AllWallets>(context, listen: true), widget.budget!);
+            Provider.of<AllWallets>(context, listen: true),
+            widget.budget!,
+          );
 
     return WillPopScope(
       onWillPop: () async {
@@ -622,10 +629,7 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
                       : Icons.copy_rounded,
                   action: () async {
                     Budget savedBudget = await createBudget();
-                    duplicateBudgetPopup(
-                      context,
-                      budget: savedBudget,
-                    );
+                    duplicateBudgetPopup(context, budget: savedBudget);
                   },
                 ),
               if (widget.budget != null &&
@@ -675,23 +679,22 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
                   disabled: false,
                 )
               : selectedAmount == 0 || selectedAmount == null
-                  ? SaveBottomButton(
-                      label: "set-amount".tr(),
-                      onTap: () async {
-                        _budgetDetailsStateKey.currentState
-                            ?.selectAmount(context);
-                      },
-                      disabled: false,
-                    )
-                  : SaveBottomButton(
-                      label: widget.budget == null
-                          ? "add-budget".tr()
-                          : "save-changes".tr(),
-                      onTap: () async {
-                        await addBudget();
-                      },
-                      disabled: !(canAddBudget ?? false),
-                    ),
+              ? SaveBottomButton(
+                  label: "set-amount".tr(),
+                  onTap: () async {
+                    _budgetDetailsStateKey.currentState?.selectAmount(context);
+                  },
+                  disabled: false,
+                )
+              : SaveBottomButton(
+                  label: widget.budget == null
+                      ? "add-budget".tr()
+                      : "save-changes".tr(),
+                  onTap: () async {
+                    await addBudget();
+                  },
+                  disabled: !(canAddBudget ?? false),
+                ),
         ),
         slivers: [
           ColumnSliver(
@@ -699,7 +702,8 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
             children: [
               Padding(
                 padding: EdgeInsetsDirectional.symmetric(
-                    horizontal: 13 + getHorizontalPaddingConstrained(context)),
+                  horizontal: 13 + getHorizontalPaddingConstrained(context),
+                ),
                 child: IncomeExpenseTabSelector(
                   onTabChanged: setSelectedIncome,
                   initialTabIsIncome: selectedIncome,
@@ -769,9 +773,11 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
                   if (widget.budget != null &&
                       amountEntered != null &&
                       budgetAmount != null) {
-                    amountEntered = amountRatioToPrimaryCurrencyGivenPk(
-                            Provider.of<AllWallets>(context, listen: false),
-                            selectedWalletPk) *
+                    amountEntered =
+                        amountRatioToPrimaryCurrencyGivenPk(
+                          Provider.of<AllWallets>(context, listen: false),
+                          selectedWalletPk,
+                        ) *
                         amountEntered;
                     if (budgetAmount < amountEntered &&
                         increaseBudgetWarningShown == false) {
@@ -889,9 +895,10 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
             ),
           ),
           SliverToBoxAdapter(
-              child: HorizontalBreak(
-            padding: EdgeInsetsDirectional.symmetric(vertical: 15),
-          )),
+            child: HorizontalBreak(
+              padding: EdgeInsetsDirectional.symmetric(vertical: 15),
+            ),
+          ),
 
           widget.budget != null
               ? SliverToBoxAdapter(child: SizedBox.shrink())
@@ -925,7 +932,7 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
                           "All Transactions",
                           ...(appStateSettings["sharedBudgets"]
                               ? ["Shared Group Budget"]
-                              : [])
+                              : []),
                         ],
                         getLabel: (String item) {
                           if (item == "Shared Group Budget")
@@ -964,186 +971,188 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
             info: "transactions-to-include".tr(),
             visible:
                 !(selectedShared == true || selectedAddedTransactionsOnly) &&
-                    ((widget.budget != null &&
-                            widget.budget!.sharedKey == null &&
-                            widget.budget!.addedTransactionsOnly == false) ||
-                        widget.budget == null),
+                ((widget.budget != null &&
+                        widget.budget!.sharedKey == null &&
+                        widget.budget!.addedTransactionsOnly == false) ||
+                    widget.budget == null),
             sliver: SliverToBoxAdapter(
               child: FutureBuilder<TransactionCategory?>(
-                  future: database.getCategory("0").$2,
-                  builder: (context, snapshot) {
-                    return AnimatedExpanded(
-                      expand: !(selectedShared == true ||
-                          selectedAddedTransactionsOnly),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          SizedBox(height: 5),
-                          SelectChips(
-                            extraWidgetBefore: Transform.scale(
-                              scale: 1.3,
-                              child: IconButton(
-                                padding: EdgeInsetsDirectional.zero,
-                                visualDensity: VisualDensity.compact,
-                                icon: Icon(
-                                  appStateSettings["outlinedIcons"]
-                                      ? Icons.info_outlined
-                                      : Icons.info_outline_rounded,
-                                  size: 19,
-                                ),
-                                onPressed: openTransactionsToIncludeInfo,
+                future: database.getCategory("0").$2,
+                builder: (context, snapshot) {
+                  return AnimatedExpanded(
+                    expand:
+                        !(selectedShared == true ||
+                            selectedAddedTransactionsOnly),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(height: 5),
+                        SelectChips(
+                          extraWidgetBefore: Transform.scale(
+                            scale: 1.3,
+                            child: IconButton(
+                              padding: EdgeInsetsDirectional.zero,
+                              visualDensity: VisualDensity.compact,
+                              icon: Icon(
+                                appStateSettings["outlinedIcons"]
+                                    ? Icons.info_outlined
+                                    : Icons.info_outline_rounded,
+                                size: 19,
                               ),
+                              onPressed: openTransactionsToIncludeInfo,
                             ),
-                            onLongPress: (_) {
-                              openTransactionsToIncludeInfo();
-                            },
-                            items: [
-                              BudgetTransactionFilters
-                                  .defaultBudgetTransactionFilters,
-                              BudgetTransactionFilters.includeIncome,
-                              BudgetTransactionFilters.includeDebtAndCredit,
-                              BudgetTransactionFilters.addedToOtherBudget,
-                              BudgetTransactionFilters.addedToObjective,
-                              ...(appStateSettings["sharedBudgets"]
-                                  ? [
-                                      BudgetTransactionFilters
-                                          .sharedToOtherBudget
-                                    ]
-                                  : []),
-                              if (snapshot.hasData)
-                                BudgetTransactionFilters
-                                    .includeBalanceCorrection,
-                            ],
-                            getLabel: (dynamic item) {
-                              return item ==
-                                      BudgetTransactionFilters
-                                          .defaultBudgetTransactionFilters
-                                  ? "default".tr()
-                                  : item ==
-                                          BudgetTransactionFilters.includeIncome
-                                      ? selectedIncome
-                                          ? "include-expense".tr()
-                                          : "include-income".tr()
-                                      : item ==
-                                              BudgetTransactionFilters
-                                                  .addedToOtherBudget
-                                          ? "added-to-other-budgets".tr()
-                                          : item ==
-                                                  BudgetTransactionFilters
-                                                      .addedToObjective
-                                              ? "added-to-goal".tr()
-                                              : item ==
-                                                      BudgetTransactionFilters
-                                                          .sharedToOtherBudget
-                                                  ? "shared-to-other-budgets"
-                                                      .tr()
-                                                  : item ==
-                                                          BudgetTransactionFilters
-                                                              .includeDebtAndCredit
-                                                      ? "include-debt-and-credit"
-                                                          .tr()
-                                                      : item ==
-                                                              BudgetTransactionFilters
-                                                                  .includeBalanceCorrection
-                                                          ? "balance-correction"
-                                                              .tr()
-                                                          : "";
-                            },
-                            onSelected: (dynamic item) {
-                              if (item ==
-                                  BudgetTransactionFilters
-                                      .defaultBudgetTransactionFilters) {
-                                if (selectedBudgetTransactionFilters.contains(
-                                    BudgetTransactionFilters
-                                        .defaultBudgetTransactionFilters)) {
-                                  selectedBudgetTransactionFilters = [];
-                                } else {
-                                  selectedBudgetTransactionFilters = [
+                          ),
+                          onLongPress: (_) {
+                            openTransactionsToIncludeInfo();
+                          },
+                          items: [
+                            BudgetTransactionFilters
+                                .defaultBudgetTransactionFilters,
+                            BudgetTransactionFilters.includeIncome,
+                            BudgetTransactionFilters.includeDebtAndCredit,
+                            BudgetTransactionFilters.addedToOtherBudget,
+                            BudgetTransactionFilters.addedToObjective,
+                            ...(appStateSettings["sharedBudgets"]
+                                ? [BudgetTransactionFilters.sharedToOtherBudget]
+                                : []),
+                            if (snapshot.hasData)
+                              BudgetTransactionFilters.includeBalanceCorrection,
+                          ],
+                          getLabel: (dynamic item) {
+                            return item ==
                                     BudgetTransactionFilters
                                         .defaultBudgetTransactionFilters
-                                  ];
-                                }
+                                ? "default".tr()
+                                : item == BudgetTransactionFilters.includeIncome
+                                ? selectedIncome
+                                      ? "include-expense".tr()
+                                      : "include-income".tr()
+                                : item ==
+                                      BudgetTransactionFilters
+                                          .addedToOtherBudget
+                                ? "added-to-other-budgets".tr()
+                                : item ==
+                                      BudgetTransactionFilters.addedToObjective
+                                ? "added-to-goal".tr()
+                                : item ==
+                                      BudgetTransactionFilters
+                                          .sharedToOtherBudget
+                                ? "shared-to-other-budgets".tr()
+                                : item ==
+                                      BudgetTransactionFilters
+                                          .includeDebtAndCredit
+                                ? "include-debt-and-credit".tr()
+                                : item ==
+                                      BudgetTransactionFilters
+                                          .includeBalanceCorrection
+                                ? "balance-correction".tr()
+                                : "";
+                          },
+                          onSelected: (dynamic item) {
+                            if (item ==
+                                BudgetTransactionFilters
+                                    .defaultBudgetTransactionFilters) {
+                              if (selectedBudgetTransactionFilters.contains(
+                                BudgetTransactionFilters
+                                    .defaultBudgetTransactionFilters,
+                              )) {
+                                selectedBudgetTransactionFilters = [];
                               } else {
-                                if (selectedBudgetTransactionFilters.contains(
-                                    BudgetTransactionFilters
-                                        .defaultBudgetTransactionFilters)) {
-                                  selectedBudgetTransactionFilters = [];
-                                }
-                                if (selectedBudgetTransactionFilters
-                                    .contains(item)) {
-                                  selectedBudgetTransactionFilters.remove(item);
-                                } else {
-                                  selectedBudgetTransactionFilters.add(item);
-                                }
+                                selectedBudgetTransactionFilters = [
+                                  BudgetTransactionFilters
+                                      .defaultBudgetTransactionFilters,
+                                ];
                               }
+                            } else {
+                              if (selectedBudgetTransactionFilters.contains(
+                                BudgetTransactionFilters
+                                    .defaultBudgetTransactionFilters,
+                              )) {
+                                selectedBudgetTransactionFilters = [];
+                              }
+                              if (selectedBudgetTransactionFilters.contains(
+                                item,
+                              )) {
+                                selectedBudgetTransactionFilters.remove(item);
+                              } else {
+                                selectedBudgetTransactionFilters.add(item);
+                              }
+                            }
 
+                            setState(() {});
+                            determineBottomButton();
+                          },
+                          getSelected: (dynamic item) {
+                            if (selectedBudgetTransactionFilters.contains(
+                              BudgetTransactionFilters
+                                  .defaultBudgetTransactionFilters,
+                            ))
+                              return isFilterSelectedWithDefaults(
+                                selectedBudgetTransactionFilters,
+                                item,
+                              );
+                            return selectedBudgetTransactionFilters.contains(
+                              item,
+                            );
+                          },
+                        ),
+                        AnimatedExpanded(
+                          expand:
+                              appStateSettings["sharedBudgets"] == true &&
+                              (selectedBudgetTransactionFilters.contains(
+                                BudgetTransactionFilters.sharedToOtherBudget,
+                              )),
+                          child: SelectChips(
+                            items: ["All", ...allMembersOfAllBudgets],
+                            getLabel: (String item) {
+                              return getMemberNickname(item);
+                            },
+                            onSelected: (String item) {
+                              if (item == "All" &&
+                                  selectedMemberTransactionFilters == null) {
+                                selectedMemberTransactionFilters = [];
+                                setState(() {});
+                                determineBottomButton();
+                                return;
+                              } else if (item == "All" &&
+                                  selectedMemberTransactionFilters != null) {
+                                selectedMemberTransactionFilters = null;
+                                setState(() {});
+                                determineBottomButton();
+                                return;
+                              }
+                              if (selectedMemberTransactionFilters == null) {
+                                selectedMemberTransactionFilters = [];
+                              }
+                              if (selectedMemberTransactionFilters!.contains(
+                                item,
+                              )) {
+                                selectedMemberTransactionFilters!.remove(item);
+                              } else {
+                                selectedMemberTransactionFilters!.add(item);
+                              }
                               setState(() {});
                               determineBottomButton();
                             },
-                            getSelected: (dynamic item) {
-                              if (selectedBudgetTransactionFilters.contains(
-                                  BudgetTransactionFilters
-                                      .defaultBudgetTransactionFilters))
-                                return isFilterSelectedWithDefaults(
-                                    selectedBudgetTransactionFilters, item);
-                              return selectedBudgetTransactionFilters
-                                  .contains(item);
+                            getSelected: (String item) {
+                              if (item == "All" &&
+                                  selectedMemberTransactionFilters == null)
+                                return true;
+                              if (item != "All" &&
+                                  selectedMemberTransactionFilters == null)
+                                return true;
+                              return selectedMemberTransactionFilters!.contains(
+                                item,
+                              );
                             },
                           ),
-                          AnimatedExpanded(
-                            expand: appStateSettings["sharedBudgets"] == true &&
-                                (selectedBudgetTransactionFilters.contains(
-                                    BudgetTransactionFilters
-                                        .sharedToOtherBudget)),
-                            child: SelectChips(
-                              items: ["All", ...allMembersOfAllBudgets],
-                              getLabel: (String item) {
-                                return getMemberNickname(item);
-                              },
-                              onSelected: (String item) {
-                                if (item == "All" &&
-                                    selectedMemberTransactionFilters == null) {
-                                  selectedMemberTransactionFilters = [];
-                                  setState(() {});
-                                  determineBottomButton();
-                                  return;
-                                } else if (item == "All" &&
-                                    selectedMemberTransactionFilters != null) {
-                                  selectedMemberTransactionFilters = null;
-                                  setState(() {});
-                                  determineBottomButton();
-                                  return;
-                                }
-                                if (selectedMemberTransactionFilters == null) {
-                                  selectedMemberTransactionFilters = [];
-                                }
-                                if (selectedMemberTransactionFilters!
-                                    .contains(item)) {
-                                  selectedMemberTransactionFilters!
-                                      .remove(item);
-                                } else {
-                                  selectedMemberTransactionFilters!.add(item);
-                                }
-                                setState(() {});
-                                determineBottomButton();
-                              },
-                              getSelected: (String item) {
-                                if (item == "All" &&
-                                    selectedMemberTransactionFilters == null)
-                                  return true;
-                                if (item != "All" &&
-                                    selectedMemberTransactionFilters == null)
-                                  return true;
-                                return selectedMemberTransactionFilters!
-                                    .contains(item);
-                              },
-                            ),
-                          ),
-                          SizedBox(height: 10),
-                        ],
-                      ),
-                    );
-                  }),
+                        ),
+                        SizedBox(height: 10),
+                      ],
+                    ),
+                  );
+                },
+              ),
             ),
           ),
           if (widget.budget != null && widget.budget!.addedTransactionsOnly)
@@ -1153,7 +1162,10 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
                   Expanded(
                     child: Padding(
                       padding: const EdgeInsetsDirectional.only(
-                          start: 15, end: 15, top: 25),
+                        start: 15,
+                        end: 15,
+                        top: 25,
+                      ),
                       child: TextFont(
                         text: "added-budget-description".tr(),
                         fontSize: 14,
@@ -1170,49 +1182,54 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
             info: "select-accounts".tr(),
             visible:
                 !(selectedShared == true || selectedAddedTransactionsOnly) &&
-                    ((widget.budget != null &&
-                            widget.budget!.sharedKey == null &&
-                            widget.budget!.addedTransactionsOnly == false) ||
-                        widget.budget == null),
+                ((widget.budget != null &&
+                        widget.budget!.sharedKey == null &&
+                        widget.budget!.addedTransactionsOnly == false) ||
+                    widget.budget == null),
             sliver: SliverToBoxAdapter(
-                child: WalletChipSelector(
-              expand:
-                  !(selectedShared == true || selectedAddedTransactionsOnly),
-              onSelected: (selected) {
-                selectedWalletFks = selected;
-                setState(() {});
-                determineBottomButton();
-              },
-              initiallySelectedWalletFks: selectedWalletFks,
-            )),
+              child: WalletChipSelector(
+                expand:
+                    !(selectedShared == true || selectedAddedTransactionsOnly),
+                onSelected: (selected) {
+                  selectedWalletFks = selected;
+                  setState(() {});
+                  determineBottomButton();
+                },
+                initiallySelectedWalletFks: selectedWalletFks,
+              ),
+            ),
           ),
           SliverStickyLabelDivider(
             info: "select-categories".tr(),
             extraInfo: getSelectedCategoriesText(selectedCategoryPks),
             visible:
                 !(selectedShared == true || selectedAddedTransactionsOnly) &&
-                    ((widget.budget != null &&
-                            widget.budget!.sharedKey == null &&
-                            widget.budget!.addedTransactionsOnly == false) ||
-                        widget.budget == null),
+                ((widget.budget != null &&
+                        widget.budget!.sharedKey == null &&
+                        widget.budget!.addedTransactionsOnly == false) ||
+                    widget.budget == null),
             sliver: SliverToBoxAdapter(
               child: AnimatedOpacity(
                 duration: Duration(milliseconds: 500),
-                opacity: (selectedCategoryPksExclude == null ||
+                opacity:
+                    (selectedCategoryPksExclude == null ||
                         selectedCategoryPksExclude?.isEmpty == true)
                     ? 1
                     : 0.3,
                 child: Padding(
                   padding: const EdgeInsetsDirectional.only(bottom: 5),
                   child: AnimatedExpanded(
-                    expand: !(selectedShared == true ||
-                        selectedAddedTransactionsOnly),
+                    expand:
+                        !(selectedShared == true ||
+                            selectedAddedTransactionsOnly),
                     child: SelectCategory(
                       horizontalList: true,
                       selectedCategories: selectedCategoryPks,
                       setSelectedCategories: (categories) {
                         checkPopupBalanceCorrectionSelectedWarning(
-                            context, categories);
+                          context,
+                          categories,
+                        );
                         setSelectedCategories(categories);
                       },
                       showSelectedAllCategoriesIfNoneSelected: true,
@@ -1224,32 +1241,38 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
           ),
           SliverStickyLabelDivider(
             info: "select-exclude-categories".tr(),
-            extraInfo: getSelectedCategoriesText(selectedCategoryPksExclude,
-                defaultText: "no-categories".tr()),
+            extraInfo: getSelectedCategoriesText(
+              selectedCategoryPksExclude,
+              defaultText: "no-categories".tr(),
+            ),
             visible:
                 !(selectedShared == true || selectedAddedTransactionsOnly) &&
-                    ((widget.budget != null &&
-                            widget.budget!.sharedKey == null &&
-                            widget.budget!.addedTransactionsOnly == false) ||
-                        widget.budget == null),
+                ((widget.budget != null &&
+                        widget.budget!.sharedKey == null &&
+                        widget.budget!.addedTransactionsOnly == false) ||
+                    widget.budget == null),
             sliver: SliverToBoxAdapter(
               child: AnimatedOpacity(
                 duration: Duration(milliseconds: 500),
-                opacity: (selectedCategoryPks == null ||
+                opacity:
+                    (selectedCategoryPks == null ||
                         selectedCategoryPks?.isEmpty == true)
                     ? 1
                     : 0.3,
                 child: Padding(
                   padding: const EdgeInsetsDirectional.only(bottom: 5),
                   child: AnimatedExpanded(
-                    expand: !(selectedShared == true ||
-                        selectedAddedTransactionsOnly),
+                    expand:
+                        !(selectedShared == true ||
+                            selectedAddedTransactionsOnly),
                     child: SelectCategory(
                       horizontalList: true,
                       selectedCategories: selectedCategoryPksExclude,
                       setSelectedCategories: (categories) {
                         checkPopupBalanceCorrectionSelectedWarning(
-                            context, categories);
+                          context,
+                          categories,
+                        );
                         setSelectedCategoriesExclude(categories);
                       },
                       showSelectedAllCategoriesIfNoneSelected: false,
@@ -1263,9 +1286,7 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
         ],
         listWidgets: [
           widget.budget != null && widget.budget!.sharedKey != null
-              ? SharedBudgetSettings(
-                  budget: widget.budget!,
-                )
+              ? SharedBudgetSettings(budget: widget.budget!)
               : SizedBox.shrink(),
           SizedBox(height: 13),
           Container(height: 70),
@@ -1276,11 +1297,12 @@ class _AddBudgetPageState extends State<AddBudgetPage> {
 }
 
 class WalletChipSelector extends StatefulWidget {
-  const WalletChipSelector(
-      {required this.expand,
-      required this.initiallySelectedWalletFks,
-      required this.onSelected,
-      super.key});
+  const WalletChipSelector({
+    required this.expand,
+    required this.initiallySelectedWalletFks,
+    required this.onSelected,
+    super.key,
+  });
   final bool expand;
   final List<String>? initiallySelectedWalletFks;
   final Function(List<String>?) onSelected;
@@ -1295,10 +1317,10 @@ class _WalletChipSelectorState extends State<WalletChipSelector> {
   @override
   void initState() {
     selectedWalletFks = widget.initiallySelectedWalletFks;
-    final Set<String> keysSet = Provider.of<AllWallets>(context, listen: false)
-        .indexedByPk
-        .keys
-        .toSet();
+    final Set<String> keysSet = Provider.of<AllWallets>(
+      context,
+      listen: false,
+    ).indexedByPk.keys.toSet();
     if (keysSet.any((value) => (selectedWalletFks ?? []).contains(value)) ==
         false) {
       selectedWalletFks = null;
@@ -1388,8 +1410,10 @@ class _WalletChipSelectorState extends State<WalletChipSelector> {
   }
 }
 
-String getSelectedCategoriesText(List<String>? categoryFks,
-    {String? defaultText}) {
+String getSelectedCategoriesText(
+  List<String>? categoryFks, {
+  String? defaultText,
+}) {
   if (categoryFks == null || categoryFks.isEmpty == true) {
     return defaultText ?? "all-categories".tr();
   } else {
@@ -1406,8 +1430,11 @@ String getSelectedCategoriesText(List<String>? categoryFks,
 }
 
 class ColumnSliver extends StatelessWidget {
-  const ColumnSliver(
-      {super.key, required this.children, this.centered = false});
+  const ColumnSliver({
+    super.key,
+    required this.children,
+    this.centered = false,
+  });
   final List<Widget> children;
   final bool centered;
 
@@ -1418,8 +1445,9 @@ class ColumnSliver extends StatelessWidget {
         children: children,
         mainAxisAlignment: MainAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment:
-            centered ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+        crossAxisAlignment: centered
+            ? CrossAxisAlignment.center
+            : CrossAxisAlignment.start,
       ),
     );
   }
@@ -1637,8 +1665,10 @@ class _BudgetDetailsState extends State<BudgetDetails> {
   }
 
   Future<void> selectStartDate(BuildContext context) async {
-    final DateTime? picked =
-        await showCustomDatePicker(context, selectedStartDate);
+    final DateTime? picked = await showCustomDatePicker(
+      context,
+      selectedStartDate,
+    );
     setSelectedStartDate(picked);
   }
 
@@ -1667,23 +1697,26 @@ class _BudgetDetailsState extends State<BudgetDetails> {
                   title: convertToMoney(
                     Provider.of<AllWallets>(context),
                     selectedAmount ?? 0,
-                    currencyKey: Provider.of<AllWallets>(context, listen: true)
-                        .indexedByPk[selectedWalletPk]
-                        ?.currency,
+                    currencyKey: Provider.of<AllWallets>(
+                      context,
+                      listen: true,
+                    ).indexedByPk[selectedWalletPk]?.currency,
                   ),
                   placeholder: convertToMoney(
                     Provider.of<AllWallets>(context),
                     0,
-                    currencyKey: Provider.of<AllWallets>(context, listen: true)
-                        .indexedByPk[selectedWalletPk]
-                        ?.currency,
+                    currencyKey: Provider.of<AllWallets>(
+                      context,
+                      listen: true,
+                    ).indexedByPk[selectedWalletPk]?.currency,
                   ),
                   showPlaceHolderWhenTextEquals: convertToMoney(
                     Provider.of<AllWallets>(context),
                     0,
-                    currencyKey: Provider.of<AllWallets>(context, listen: true)
-                        .indexedByPk[selectedWalletPk]
-                        ?.currency,
+                    currencyKey: Provider.of<AllWallets>(
+                      context,
+                      listen: true,
+                    ).indexedByPk[selectedWalletPk]?.currency,
                   ),
                   onTap: () {
                     selectAmount(context);
@@ -1691,9 +1724,13 @@ class _BudgetDetailsState extends State<BudgetDetails> {
                   fontSize: 35,
                   fontWeight: FontWeight.bold,
                   internalPadding: EdgeInsetsDirectional.symmetric(
-                      vertical: 2, horizontal: 4),
+                    vertical: 2,
+                    horizontal: 4,
+                  ),
                   padding: EdgeInsetsDirectional.symmetric(
-                      vertical: 10, horizontal: 3),
+                    vertical: 10,
+                    horizontal: 3,
+                  ),
                 ),
               ),
               IntrinsicWidth(
@@ -1710,9 +1747,13 @@ class _BudgetDetailsState extends State<BudgetDetails> {
                             fontSize: 25,
                             fontWeight: FontWeight.bold,
                             internalPadding: EdgeInsetsDirectional.symmetric(
-                                vertical: 4, horizontal: 4),
+                              vertical: 4,
+                              horizontal: 4,
+                            ),
                             padding: EdgeInsetsDirectional.symmetric(
-                                vertical: 10, horizontal: 3),
+                              vertical: 10,
+                              horizontal: 3,
+                            ),
                           )
                         : TextFont(
                             text: " /",
@@ -1732,9 +1773,13 @@ class _BudgetDetailsState extends State<BudgetDetails> {
                       fontSize: 25,
                       fontWeight: FontWeight.bold,
                       internalPadding: EdgeInsetsDirectional.symmetric(
-                          vertical: 4, horizontal: 4),
+                        vertical: 4,
+                        horizontal: 4,
+                      ),
                       padding: EdgeInsetsDirectional.symmetric(
-                          vertical: 10, horizontal: 3),
+                        vertical: 10,
+                        horizontal: 3,
+                      ),
                     ),
                   ],
                 ),
@@ -1744,10 +1789,9 @@ class _BudgetDetailsState extends State<BudgetDetails> {
         ),
         Transform.translate(
           offset: Offset(
-              0,
-              selectedEndDate == null && selectedRecurrence == "Custom"
-                  ? 0
-                  : -5),
+            0,
+            selectedEndDate == null && selectedRecurrence == "Custom" ? 0 : -5,
+          ),
           child: Padding(
             padding: const EdgeInsetsDirectional.symmetric(horizontal: 10),
             child: selectedRecurrence != "Custom"
@@ -1759,7 +1803,9 @@ class _BudgetDetailsState extends State<BudgetDetails> {
                     borderRadius: 15,
                     child: Container(
                       padding: EdgeInsetsDirectional.symmetric(
-                          horizontal: 5, vertical: 8),
+                        horizontal: 5,
+                        vertical: 8,
+                      ),
                       child: Center(
                         child: Wrap(
                           crossAxisAlignment: WrapCrossAlignment.end,
@@ -1767,8 +1813,9 @@ class _BudgetDetailsState extends State<BudgetDetails> {
                           alignment: WrapAlignment.center,
                           children: [
                             Padding(
-                              padding:
-                                  const EdgeInsetsDirectional.only(bottom: 5.8),
+                              padding: const EdgeInsetsDirectional.only(
+                                bottom: 5.8,
+                              ),
                               child: TextFont(
                                 text: "beginning".tr() + " ",
                                 fontSize: 17,
@@ -1777,17 +1824,22 @@ class _BudgetDetailsState extends State<BudgetDetails> {
                             ),
                             IgnorePointer(
                               child: TappableTextEntry(
-                                title:
-                                    getWordedDateShortMore(selectedStartDate),
+                                title: getWordedDateShortMore(
+                                  selectedStartDate,
+                                ),
                                 placeholder: "",
                                 onTap: () {},
                                 fontSize: 25,
                                 fontWeight: FontWeight.bold,
                                 internalPadding:
                                     EdgeInsetsDirectional.symmetric(
-                                        vertical: 2, horizontal: 4),
+                                      vertical: 2,
+                                      horizontal: 4,
+                                    ),
                                 padding: EdgeInsetsDirectional.symmetric(
-                                    vertical: 0, horizontal: 5),
+                                  vertical: 0,
+                                  horizontal: 5,
+                                ),
                               ),
                             ),
                           ],
@@ -1803,7 +1855,9 @@ class _BudgetDetailsState extends State<BudgetDetails> {
                     borderRadius: 15,
                     child: Container(
                       padding: EdgeInsetsDirectional.symmetric(
-                          horizontal: 5, vertical: 8),
+                        horizontal: 5,
+                        vertical: 8,
+                      ),
                       child: Center(
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.end,
@@ -1814,17 +1868,21 @@ class _BudgetDetailsState extends State<BudgetDetails> {
                                 title: selectedEndDate == null
                                     ? null
                                     : getWordedDateShort(selectedStartDate) +
-                                        " – " +
-                                        getWordedDateShort(selectedEndDate!),
+                                          " – " +
+                                          getWordedDateShort(selectedEndDate!),
                                 placeholder: "select-custom-period".tr(),
                                 onTap: () {},
                                 fontSize: 25,
                                 fontWeight: FontWeight.bold,
                                 internalPadding:
                                     EdgeInsetsDirectional.symmetric(
-                                        vertical: 2, horizontal: 4),
+                                      vertical: 2,
+                                      horizontal: 4,
+                                    ),
                                 padding: EdgeInsetsDirectional.symmetric(
-                                    vertical: 0, horizontal: 5),
+                                  vertical: 0,
+                                  horizontal: 5,
+                                ),
                               ),
                             ),
                           ],
@@ -1838,57 +1896,60 @@ class _BudgetDetailsState extends State<BudgetDetails> {
           AnimatedExpanded(
             expand:
                 enumRecurrence[selectedRecurrence] != BudgetReoccurence.custom,
-            child: Builder(builder: (context) {
-              DateTimeRange budgetRange = getBudgetDate(
-                Budget(
-                  startDate: selectedStartDate,
-                  periodLength: selectedPeriodLength,
-                  reoccurrence: enumRecurrence[selectedRecurrence],
-                  budgetPk: "-1",
-                  name: "",
-                  amount: 0,
-                  endDate: DateTime.now(),
-                  addedTransactionsOnly: false,
-                  dateCreated: DateTime.now(),
-                  pinned: false,
-                  order: -1,
-                  walletFk: "",
-                  isAbsoluteSpendingLimit: false,
-                  income: false,
-                  archived: false,
-                ),
-                DateTime.now(),
-              );
-              String text = "current-period".tr() +
-                  "\n" +
-                  getWordedDateShortMore(budgetRange.start) +
-                  " – " +
-                  getWordedDateShortMore(budgetRange.end);
-              return Row(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Flexible(
-                    child: Padding(
-                      padding: const EdgeInsetsDirectional.only(
-                        bottom: 10,
-                        top: 5,
-                      ),
-                      child: AnimatedSizeSwitcher(
-                        child: TextFont(
-                          key: ValueKey(text),
-                          text: text,
-                          fontSize: 14.5,
-                          maxLines: 4,
-                          textColor: getColor(context, "textLight"),
-                          textAlign: TextAlign.center,
+            child: Builder(
+              builder: (context) {
+                DateTimeRange budgetRange = getBudgetDate(
+                  Budget(
+                    startDate: selectedStartDate,
+                    periodLength: selectedPeriodLength,
+                    reoccurrence: enumRecurrence[selectedRecurrence],
+                    budgetPk: "-1",
+                    name: "",
+                    amount: 0,
+                    endDate: DateTime.now(),
+                    addedTransactionsOnly: false,
+                    dateCreated: DateTime.now(),
+                    pinned: false,
+                    order: -1,
+                    walletFk: "",
+                    isAbsoluteSpendingLimit: false,
+                    income: false,
+                    archived: false,
+                  ),
+                  DateTime.now(),
+                );
+                String text =
+                    "current-period".tr() +
+                    "\n" +
+                    getWordedDateShortMore(budgetRange.start) +
+                    " – " +
+                    getWordedDateShortMore(budgetRange.end);
+                return Row(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Flexible(
+                      child: Padding(
+                        padding: const EdgeInsetsDirectional.only(
+                          bottom: 10,
+                          top: 5,
+                        ),
+                        child: AnimatedSizeSwitcher(
+                          child: TextFont(
+                            key: ValueKey(text),
+                            text: text,
+                            fontSize: 14.5,
+                            maxLines: 4,
+                            textColor: getColor(context, "textLight"),
+                            textAlign: TextAlign.center,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
-              );
-            }),
+                  ],
+                );
+              },
+            ),
           ),
       ],
     );
@@ -1912,7 +1973,9 @@ class SelectBudgetIncomeTypePopup extends StatelessWidget {
                   alignStart: true,
                   alignBeside: true,
                   padding: EdgeInsetsDirectional.symmetric(
-                      horizontal: 20, vertical: 20),
+                    horizontal: 20,
+                    vertical: 20,
+                  ),
                   text: "savings-budget".tr(),
                   iconData: appStateSettings["outlinedIcons"]
                       ? Icons.savings_outlined
@@ -1924,11 +1987,7 @@ class SelectBudgetIncomeTypePopup extends StatelessWidget {
                   afterWidget: Column(
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      ListItem(
-                        "savings-budget-description-1".tr(),
-                      ),
-                    ],
+                    children: [ListItem("savings-budget-description-1".tr())],
                   ),
                 ),
               ),
@@ -1942,7 +2001,9 @@ class SelectBudgetIncomeTypePopup extends StatelessWidget {
                   alignStart: true,
                   alignBeside: true,
                   padding: EdgeInsetsDirectional.symmetric(
-                      horizontal: 20, vertical: 20),
+                    horizontal: 20,
+                    vertical: 20,
+                  ),
                   text: "expense-budget".tr(),
                   iconData: appStateSettings["outlinedIcons"]
                       ? Icons.request_quote_outlined
@@ -1954,11 +2015,7 @@ class SelectBudgetIncomeTypePopup extends StatelessWidget {
                   afterWidget: Column(
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      ListItem(
-                        "expense-budget-description-1".tr(),
-                      ),
-                    ],
+                    children: [ListItem("expense-budget-description-1".tr())],
                   ),
                 ),
               ),
@@ -1995,7 +2052,9 @@ class SelectBudgetTypePopup extends StatelessWidget {
                   alignStart: true,
                   alignBeside: true,
                   padding: EdgeInsetsDirectional.symmetric(
-                      horizontal: 20, vertical: 20),
+                    horizontal: 20,
+                    vertical: 20,
+                  ),
                   text: "added-only".tr(),
                   iconData: appStateSettings["outlinedIcons"]
                       ? Icons.folder_outlined
@@ -2008,17 +2067,11 @@ class SelectBudgetTypePopup extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      ListItem(
-                        "added-only-description-1".tr(),
-                      ),
-                      ListItem(
-                        "added-only-description-2".tr(),
-                      ),
+                      ListItem("added-only-description-1".tr()),
+                      ListItem("added-only-description-2".tr()),
                       Opacity(
                         opacity: 0.34,
-                        child: ListItem(
-                          "added-only-description-3".tr(),
-                        ),
+                        child: ListItem("added-only-description-3".tr()),
                       ),
                     ],
                   ),
@@ -2035,7 +2088,9 @@ class SelectBudgetTypePopup extends StatelessWidget {
                   alignStart: true,
                   alignBeside: true,
                   padding: EdgeInsetsDirectional.symmetric(
-                      horizontal: 20, vertical: 20),
+                    horizontal: 20,
+                    vertical: 20,
+                  ),
                   text: "all-transactions".tr(),
                   iconData: appStateSettings["outlinedIcons"]
                       ? Icons.category_outlined
@@ -2048,9 +2103,7 @@ class SelectBudgetTypePopup extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      ListItem(
-                        "all-transactions-description-1".tr(),
-                      ),
+                      ListItem("all-transactions-description-1".tr()),
                       ListItem("all-transactions-description-2".tr()),
                       Opacity(
                         opacity: 0.34,
@@ -2095,17 +2148,19 @@ class _ViewBudgetTransactionFilterInfoState
 
   onTap(BudgetTransactionFilters item) {
     if (item == BudgetTransactionFilters.defaultBudgetTransactionFilters) {
-      if (selectedBudgetFilters
-          .contains(BudgetTransactionFilters.defaultBudgetTransactionFilters)) {
+      if (selectedBudgetFilters.contains(
+        BudgetTransactionFilters.defaultBudgetTransactionFilters,
+      )) {
         selectedBudgetFilters = [];
       } else {
         selectedBudgetFilters = [
-          BudgetTransactionFilters.defaultBudgetTransactionFilters
+          BudgetTransactionFilters.defaultBudgetTransactionFilters,
         ];
       }
     } else {
-      if (selectedBudgetFilters
-          .contains(BudgetTransactionFilters.defaultBudgetTransactionFilters)) {
+      if (selectedBudgetFilters.contains(
+        BudgetTransactionFilters.defaultBudgetTransactionFilters,
+      )) {
         selectedBudgetFilters = [];
       }
       if (selectedBudgetFilters.contains(item)) {
@@ -2147,23 +2202,30 @@ class _ViewBudgetTransactionFilterInfoState
               Expanded(
                 child: OutlinedButtonStacked(
                   filled: selectedBudgetFilters.contains(
-                      BudgetTransactionFilters.defaultBudgetTransactionFilters),
+                    BudgetTransactionFilters.defaultBudgetTransactionFilters,
+                  ),
                   alignStart: true,
                   alignBeside: true,
                   padding: EdgeInsetsDirectional.symmetric(
-                      horizontal: 20, vertical: 20),
+                    horizontal: 20,
+                    vertical: 20,
+                  ),
                   text: "default".tr(),
                   iconData: appStateSettings["outlinedIcons"]
                       ? Icons.check_circle_outlined
                       : Icons.check_circle_rounded,
                   onTap: () {
                     if (widget.popOnDefault == true &&
-                        selectedBudgetFilters.contains(BudgetTransactionFilters
-                            .defaultBudgetTransactionFilters)) {
+                        selectedBudgetFilters.contains(
+                          BudgetTransactionFilters
+                              .defaultBudgetTransactionFilters,
+                        )) {
                       popRoute(context);
                     } else {
-                      onTap(BudgetTransactionFilters
-                          .defaultBudgetTransactionFilters);
+                      onTap(
+                        BudgetTransactionFilters
+                            .defaultBudgetTransactionFilters,
+                      );
                     }
                   },
                 ),
@@ -2177,12 +2239,8 @@ class _ViewBudgetTransactionFilterInfoState
               budgetTransactionFilter: BudgetTransactionFilters.includeIncome,
               title: "include-income".tr(),
               childrenDescription: [
-                ListItem(
-                  "include-income-description-1".tr(),
-                ),
-                ListItem(
-                  "include-income-description-2".tr(),
-                ),
+                ListItem("include-income-description-1".tr()),
+                ListItem("include-income-description-2".tr()),
               ],
               icon: appStateSettings["outlinedIcons"]
                   ? Icons.arrow_drop_up_outlined
@@ -2196,12 +2254,8 @@ class _ViewBudgetTransactionFilterInfoState
               budgetTransactionFilter: BudgetTransactionFilters.includeIncome,
               title: "include-expense".tr(),
               childrenDescription: [
-                ListItem(
-                  "include-expense-description-1".tr(),
-                ),
-                ListItem(
-                  "include-expense-description-2".tr(),
-                ),
+                ListItem("include-expense-description-1".tr()),
+                ListItem("include-expense-description-2".tr()),
               ],
               icon: appStateSettings["outlinedIcons"]
                   ? Icons.arrow_drop_down_outlined
@@ -2215,9 +2269,7 @@ class _ViewBudgetTransactionFilterInfoState
                 BudgetTransactionFilters.includeDebtAndCredit,
             title: "include-debt-and-credit".tr(),
             childrenDescription: [
-              ListItem(
-                "include-debt-and-credit-description-1".tr(),
-              ),
+              ListItem("include-debt-and-credit-description-1".tr()),
             ],
             icon: appStateSettings["outlinedIcons"]
                 ? Icons.archive_outlined
@@ -2231,9 +2283,7 @@ class _ViewBudgetTransactionFilterInfoState
                 BudgetTransactionFilters.addedToOtherBudget,
             title: "added-to-other-budgets".tr(),
             childrenDescription: [
-              ListItem(
-                "added-to-other-budgets-description-1".tr(),
-              ),
+              ListItem("added-to-other-budgets-description-1".tr()),
             ],
             icon: appStateSettings["outlinedIcons"]
                 ? Icons.add_outlined
@@ -2245,11 +2295,7 @@ class _ViewBudgetTransactionFilterInfoState
             setSelectedBudgetFilters: widget.setSelectedBudgetFilters,
             budgetTransactionFilter: BudgetTransactionFilters.addedToObjective,
             title: "added-to-goal".tr(),
-            childrenDescription: [
-              ListItem(
-                "added-to-goal-description-1".tr(),
-              ),
-            ],
+            childrenDescription: [ListItem("added-to-goal-description-1".tr())],
             icon: appStateSettings["outlinedIcons"]
                 ? Icons.savings_outlined
                 : Icons.savings_rounded,
@@ -2263,9 +2309,7 @@ class _ViewBudgetTransactionFilterInfoState
                   BudgetTransactionFilters.includeBalanceCorrection,
               title: "balance-correction".tr(),
               childrenDescription: [
-                ListItem(
-                  "balance-correction-description-1".tr(),
-                ),
+                ListItem("balance-correction-description-1".tr()),
               ],
               icon: appStateSettings["outlinedIcons"]
                   ? Icons.bar_chart_outlined
@@ -2302,8 +2346,10 @@ class FilterTypeInfoEntry extends StatelessWidget {
   Widget build(BuildContext context) {
     return AnimatedOpacity(
       duration: Duration(milliseconds: 500),
-      opacity: selectedBudgetFilters.contains(
-              BudgetTransactionFilters.defaultBudgetTransactionFilters)
+      opacity:
+          selectedBudgetFilters.contains(
+            BudgetTransactionFilters.defaultBudgetTransactionFilters,
+          )
           ? 0.5
           : 1,
       child: Padding(
@@ -2319,7 +2365,9 @@ class FilterTypeInfoEntry extends StatelessWidget {
                 alignStart: true,
                 alignBeside: true,
                 padding: EdgeInsetsDirectional.symmetric(
-                    horizontal: 20, vertical: 20),
+                  horizontal: 20,
+                  vertical: 20,
+                ),
                 text: title,
                 iconData: icon,
                 onTap: () {
