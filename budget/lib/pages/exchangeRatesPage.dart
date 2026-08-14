@@ -84,13 +84,6 @@ class _ExchangeRatesState extends State<ExchangeRates> {
       }
     }
 
-    // else {
-    //   for (String key in [...customCurrencies, ...currencyExchange.keys]) {
-    //     if (currenciesJSON.keys.contains(key) == false) {
-    //       currencyExchange.remove(key);
-    //     }
-    //   }
-    // }
     Map<dynamic, dynamic> currencyExchangeFiltered = {};
     if (searchCurrenciesText == "") {
       currencyExchangeFiltered = currencyExchange;
