@@ -1205,7 +1205,6 @@ void openFontPicker(BuildContext context) {
         displayFilter: fontNameDisplayFilter,
         onChanged: (value) async {
           updateSettings("font", value, updateGlobalState: true);
-          await Future.delayed(Duration(milliseconds: 50));
           popRoute(context);
         },
       ),
