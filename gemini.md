@@ -83,6 +83,9 @@
 - 2026-07-25: Iterative Enhancement - Added global `maxLength` fallback (5000 characters) to `TextInput` components across the application. This prevents unbounded strings from being pasted into form fields (such as notes, descriptions, or titles), mitigating resource exhaustion and Denial of Service (DoS) risks during UI rendering.
 **Next Planned Step:** Review database ORM input paths to ensure no raw statements bypass input sanitization when data comes from UI forms.
 
+- 2026-07-27: Iterative Enhancement - Secured raw database queries in `tables.dart`. Replaced unsafe string interpolation (e.g., `$threeMonthsAgo` in `customSelect`) with parameterized queries using `variables: [Variable(threeMonthsAgo)]`. This enforces proper separation of code and data, hardening the ORM layer against potential SQL injection vulnerabilities or syntax errors caused by unescaped inputs.
+**Next Planned Step:** Review and test file system or secure storage boundaries for proper encapsulation when storing user preferences or cache.
+
 ## 🚨 Critical Security Learnings
 - **2026-07-26 - Sensitive Data Exposure in Logs:**
   - **Vulnerability/Gap:** Recently deleted transaction data was inadvertently being printed to the console (`print(jsonString)`) before being saved to local storage. This exposes sensitive financial data and Personally Identifiable Information (PII) to application and device logs, which could be accessed by other applications or logging aggregators.
