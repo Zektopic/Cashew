@@ -3383,18 +3383,18 @@ class FinanceDatabase extends _$FinanceDatabase {
     List<CategoryBudgetLimit> limitsInserting = [];
     List<CategoryBudgetLimit> categorySpendingLimits = await (select(
       categoryBudgetLimits,
-    )..where((t) => t.budgetFk.equals(budgetPk)))
-        .get();
+    )..where((t) => t.budgetFk.equals(budgetPk))).get();
 
-    List<String> categoryPks =
-        categorySpendingLimits.map((e) => e.categoryFk).toList();
+    List<String> categoryPks = categorySpendingLimits
+        .map((e) => e.categoryFk)
+        .toList();
     List<TransactionCategory> fetchedCategories = categoryPks.isEmpty
         ? []
-        : await (select(categories)
-              ..where((t) => t.categoryPk.isIn(categoryPks)))
-            .get();
+        : await (select(
+            categories,
+          )..where((t) => t.categoryPk.isIn(categoryPks))).get();
     Map<String, TransactionCategory> categoryMap = {
-      for (var c in fetchedCategories) c.categoryPk: c
+      for (var c in fetchedCategories) c.categoryPk: c,
     };
     for (CategoryBudgetLimit categorySpendingLimit in categorySpendingLimits) {
       TransactionCategory? category =
@@ -8491,7 +8491,8 @@ class FinanceDatabase extends _$FinanceDatabase {
 
     return customSelect(
       // and name != \'\' (users may use subcategory transactions that are repeated, might not have a title)
-      'SELECT *, COUNT(*) as "count" FROM transactions WHERE date_created >= $threeMonthsAgo and type IS NULL GROUP BY transactions.category_fk, transactions.name ORDER BY count DESC, MAX(date_created) DESC LIMIT 5',
+      'SELECT *, COUNT(*) as "count" FROM transactions WHERE date_created >= ? and type IS NULL GROUP BY transactions.category_fk, transactions.name ORDER BY count DESC, MAX(date_created) DESC LIMIT 5',
+      variables: [Variable<int>(threeMonthsAgo)],
       readsFrom: {transactions},
     ).watch().map((rows) {
       return rows
