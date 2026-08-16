@@ -990,7 +990,9 @@ void restartAppPopup(
   String? description,
   String? codeBlock,
 }) async {
-  // For now, enforce this until better solution found
+  // For now, always take the restart-popup path until a better solution is
+  // found. The in-place restart below is kept for reference.
+  // ignore: dead_code
   if (kIsWeb || true) {
     // Lock the side navigation
     lockAppWaitForRestart = true;
@@ -1015,14 +1017,13 @@ void restartAppPopup(
       barrierDismissible: false,
       // Show code widget with the name of the file monospace font
     );
-  } else {
-    // Pop all routes, select home tab
-    RestartApp.restartApp(context);
-    popAllRoutes(context);
-    Future.delayed(Duration(milliseconds: 100), () {
-      PageNavigationFramework.changePage(context, 0, switchNavbar: true);
-    });
   }
+  // Previously, on non-web the app restarted in place instead of prompting:
+  //   RestartApp.restartApp(context);
+  //   popAllRoutes(context);
+  //   Future.delayed(Duration(milliseconds: 100), () {
+  //     PageNavigationFramework.changePage(context, 0, switchNavbar: true);
+  //   });
 }
 
 String filterEmailTitle(string) {
