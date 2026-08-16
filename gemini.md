@@ -143,3 +143,5 @@
   - **Vulnerability/Gap:** Form inputs (`TextInput`) lacked default max length limitations. Users could paste massive, unbounded payloads into input fields, causing the application to consume excessive memory, leading to frame drops, layout exceptions, and potential crashes (DoS).
   - **Learning:** Every entry point for user input must have an upper bound limit to enforce resource constraints and prevent abuse, regardless of whether a business rule dictates a max length.
   - **Prevention:** Enforce fallback upper limits (e.g., `maxLength ?? 5000`) on all input fields globally at the core widget level.
+- 2026-07-28: Iterative Enhancement - Replaced the manually implemented hold-to-reveal gesture on `BudgetSpenderSummary` with the `HoldToRevealListener` wrapper. This ensures the interaction pattern (holding touch keeps numbers revealed) is consistent with the rest of the application, such as `TransactionsAmountBox` and graphical charts.
+**Next Planned Step:** Review the hold-to-reveal implementation in other remaining UI components like `TransactionEntryAmount` and `WalletEntry` to ensure consistency.
