@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:budget/struct/settings.dart';
 import 'package:budget/widgets/accountAndBackup.dart';
 import 'package:budget/widgets/globalSnackbar.dart';
@@ -56,17 +55,11 @@ Future<String?> getPhotoAndUpload({required ImageSource source}) async {
 
 Future<String?> getFileAndUpload() async {
   dynamic result = await openLoadingPopupTryCatch(() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles();
+    PlatformFile? result = await FilePicker.pickFile();
     if (result == null) throw ("no-file-selected".tr());
 
-    Uint8List fileBytes;
-
-    if (kIsWeb) {
-      fileBytes = result.files.single.bytes!;
-    } else {
-      File file = File(result.files.single.path ?? "");
-      fileBytes = await file.readAsBytes();
-    }
+    // readAsBytes() works on web and native alike in file_picker 12.
+    Uint8List fileBytes = await result.readAsBytes();
 
     late Stream<List<int>> mediaStream;
     mediaStream = Stream.value(fileBytes);
@@ -74,7 +67,7 @@ Future<String?> getFileAndUpload() async {
     try {
       return await uploadFileToDrive(
         fileBytes: fileBytes,
-        fileName: result.files.single.name,
+        fileName: result.name,
         mediaStream: mediaStream,
       );
     } catch (e) {
@@ -85,7 +78,7 @@ Future<String?> getFileAndUpload() async {
       await signInGoogle(drivePermissionsAttachments: true);
       return await uploadFileToDrive(
         fileBytes: fileBytes,
-        fileName: result.files.single.name,
+        fileName: result.name,
         mediaStream: mediaStream,
       );
     }

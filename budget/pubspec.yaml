@@ -39,15 +39,21 @@ dependencies:
   sqlite3_flutter_libs: ^0.5.0
   path_provider: ^2.1.3
   path: ^1.9.0
-  math_expressions: ^2.5.0
-  share_plus: ^10.0.0
+  math_expressions: ^3.2.0
+  share_plus: ^13.0.0
   google_sign_in: ^6.2.1
   googleapis: ^13.1.0
   universal_html: ^2.2.4
   flutter_charset_detector: ^2.0.0
-  file_picker: ^8.0.0
+  file_picker: ^12.0.0
   auto_size_text: ^3.0.0
   shared_preferences: ^2.2.3
+  # csv is held at 6.x on purpose. Version 7.0.0 was a complete rewrite whose
+  # changelog says "If you need compatibility with the older API, please
+  # continue using version 6"; ListToCsvConverter/CsvToListConverter no longer
+  # exist, and 7.x added automatic delimiter detection, which is a silent
+  # behaviour change for the user-supplied CSVs this app imports. That path has
+  # no test coverage yet, so it needs tests before the migration, not after.
   csv: ^6.0.0
   sliding_sheet:
     path: ./packages/sliding_sheet-0.5.2-modified/
@@ -58,8 +64,8 @@ dependencies:
   # flutter_notification_listener: ^1.3.2
   # installed_apps: ^1.3.1
   url_launcher: ^6.2.6
-  flutter_launcher_icons: ^0.10.0
-  package_info_plus: ^8.0.0
+  flutter_launcher_icons: ^0.14.4
+  package_info_plus: ^10.2.1
   # mrx_charts: ^0.1.3
   transparent_image: ^2.0.0
   pausable_timer: ^3.1.0+3
@@ -78,9 +84,9 @@ dependencies:
       url: https://github.com/jameskokoska/reorderable_grid_view
   local_auth: ^2.2.0
   timer_builder: ^2.0.0
-  device_info_plus: ^10.1.0
-  flutter_lazy_indexed_stack: ^0.0.6 
-  app_settings: ^5.1.1
+  device_info_plus: ^13.2.0
+  flutter_lazy_indexed_stack: ^0.1.0 
+  app_settings: ^8.0.0
   provider: ^6.1.2
   in_app_review: ^2.0.9 
   flutter_timezone: ^5.0.2
@@ -93,13 +99,13 @@ dependencies:
   gradient_borders: ^1.0.1
   in_app_purchase: ^3.2.0
   visibility_detector: ^0.4.0+2
-  confetti: ^0.7.0
+  confetti: ^0.8.0
   image_picker: ^1.1.2
-  flutter_displaymode: ^0.6.0
-  notification_listener_service: ^0.3.3
-  home_widget: ^0.8.0
+  flutter_displaymode: ^0.7.0
+  notification_listener_service: ^1.0.0
+  home_widget: ^0.9.0
   material_symbols_icons: ^4.2768.0
-  app_links: ^6.1.4
+  app_links: ^7.0.0
   expandable_page_view: ^1.0.17
   flutter_staggered_grid_view: ^0.7.0
   flutter_colorpicker: ^1.1.0
@@ -124,9 +130,6 @@ dev_dependencies:
   build_runner: ^2.4.7
   flutter_lints: ^5.0.0
 
-dependency_overrides:
-  win32: ^5.5.4
-  flutter_local_notifications_linux: any
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

@@ -25,7 +25,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
-import 'dart:io';
 import 'package:csv/csv.dart';
 import 'package:flutter_charset_detector/flutter_charset_detector.dart';
 import 'package:budget/widgets/framework/popupFramework.dart';
@@ -54,19 +53,19 @@ class _ImportCSVState extends State<ImportCSV> {
   Future<String?> _getCSVStringFromBackupFile() async {
     dynamic csvStringOut = await openLoadingPopupTryCatch(
       () async {
-        FilePickerResult? result = await FilePicker.platform.pickFiles(
+        PlatformFile? result = await FilePicker.pickFile(
           allowedExtensions: ['csv'],
           type: FileType.custom,
         );
 
         if (result != null) {
           String csvString;
+          Uint8List fileBytes = await result.readAsBytes();
           if (kIsWeb) {
-            List<int> fileBytes = result.files.single.bytes!;
             csvString = utf8.decode(fileBytes);
           } else {
-            File file = File(result.files.single.path ?? "");
-            Uint8List fileBytes = await file.readAsBytes();
+            // Charset detection is native-only; the web path assumes UTF-8 as
+            // it always has.
             DecodingResult decoded = await CharsetDetector.autoDecode(
               fileBytes,
             );

@@ -8,7 +8,6 @@ import 'package:budget/widgets/globalSnackbar.dart';
 import 'package:budget/widgets/navigationFramework.dart';
 import 'package:budget/widgets/openPopup.dart';
 import 'package:budget/widgets/openSnackbar.dart';
-import 'package:budget/widgets/restartApp.dart';
 import 'package:budget/widgets/selectAmount.dart';
 import 'package:budget/widgets/textInput.dart';
 import 'package:budget/widgets/timeDigits.dart';
@@ -1315,9 +1314,11 @@ void copyToClipboard(
 Future shareToClipboard(String text, {required BuildContext context}) async {
   try {
     final box = context.findRenderObject() as RenderBox?;
-    await Share.share(
-      text,
-      sharePositionOrigin: box!.localToGlobal(Offset.zero) & box.size,
+    await SharePlus.instance.share(
+      ShareParams(
+        text: text,
+        sharePositionOrigin: box!.localToGlobal(Offset.zero) & box.size,
+      ),
     );
   } catch (e) {
     print("There was an error sharing: " + e.toString());
