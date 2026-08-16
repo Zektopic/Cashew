@@ -66,6 +66,41 @@ captureLogs(Function body) {
   );
 }
 
+/// Log export that is safe to reach from a release build.
+///
+/// The full DebugPage stays gated behind allowDebugFlags (see main.dart)
+/// because it exposes far more than logs, but collecting logs is a normal part
+/// of filing a bug report. This offers only the logging toggle and an export,
+/// and warns first: logs can contain transaction names, amounts and account
+/// details, so sharing them is a disclosure the user should make knowingly.
+void openLogExportPopup(BuildContext context) {
+  openPopup(
+    context,
+    title: "Export Logs",
+    description:
+        "Logs help diagnose a bug, but they can contain your transaction "
+        "names, amounts and account details. Only share them with someone you "
+        "trust.\n\n"
+        "If logging is off, turn it on, reproduce the problem, then export.",
+    icon: appStateSettings["outlinedIcons"]
+        ? Icons.bug_report_outlined
+        : Icons.bug_report_rounded,
+    onSubmitLabel: "Copy Logs",
+    onSubmit: () {
+      copyToClipboard(logService.exportLogs());
+      popRoute(context);
+    },
+    onCancelLabel: appStateSettings["logging"] == true
+        ? "Turn Off Logging"
+        : "Turn On Logging",
+    onCancel: () {
+      updateSettings("logging", appStateSettings["logging"] != true,
+          updateGlobalState: false);
+      popRoute(context);
+    },
+  );
+}
+
 class LogPage extends StatelessWidget {
   const LogPage({super.key});
 

@@ -87,10 +87,48 @@ jobs:
           name: cashew-apk
           path: budget/build/app/outputs/flutter-apk/app-debug.apk
 
+  # iOS had no CI coverage at all, so nothing verified the platform config.
+  # It matters now for two reasons: file_picker 12 raised the minimum iOS
+  # deployment target to 14.0 (changed in ios/Podfile and the Xcode project),
+  # and sqlite3 3.x bundles SQLite through Dart build hooks instead of the
+  # retired sqlite3_flutter_libs. Both are iOS-native concerns that only a
+  # macOS runner can exercise. --no-codesign keeps this working without any
+  # signing secrets.
+  build-ios:
+    name: Build iOS
+    runs-on: macos-latest
+    needs: analyze-and-test
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.41.4'
+          channel: 'stable'
+          cache: true
+
+      - name: Install dependencies
+        run: cd budget && flutter clean && flutter pub get
+
+      - name: Verify iOS deployment target is at least 14.0
+        run: |
+          cd budget
+          grep -q "platform :ios, '14.0'" ios/Podfile
+          ! grep -E "IPHONEOS_DEPLOYMENT_TARGET = 1[0-3]\." ios/Runner.xcodeproj/project.pbxproj
+          echo "iOS deployment target OK"
+
+      - name: Build iOS (no codesign)
+        run: cd budget && flutter build ios --debug --no-codesign
+
   build-linux:
     name: Build Linux
     runs-on: ubuntu-latest
-    continue-on-error: true
+    # NOT continue-on-error. Desktop used to get SQLite from
+    # sqlite3_flutter_libs; since that package was retired, sqlite3 3.x bundles
+    # it through Dart build hooks. A hook failure here must fail the build
+    # rather than be swallowed.
     permissions:
       contents: read
     steps:
@@ -133,7 +171,9 @@ jobs:
   build-windows:
     name: Build Windows
     runs-on: windows-latest
-    continue-on-error: true
+    # NOT continue-on-error -- see build-linux. This is also the only place the
+    # Windows build is exercised at all; it cannot run on a dev machine without
+    # Developer Mode enabled for symlink support.
     permissions:
       contents: read
     steps:

@@ -20,4 +20,6 @@ fix_*.sh
 budget/android/app/google-services*.json
 # Firebase build-time config consumed via --dart-define-from-file. Real keys.
 budget/firebase_config.json
+# iOS Firebase client config - provide your own, same policy as Android
+budget/ios/Runner/GoogleService-Info.plist
 !budget/android/app/google-services.json.example
