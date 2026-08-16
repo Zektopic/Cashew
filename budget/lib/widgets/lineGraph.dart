@@ -754,7 +754,7 @@ class LineChartWrapper extends StatelessWidget {
 
 double measureCurrencyStringExtraWidth(AllWallets allWallets) {
   String currencyString = getCurrencyString(allWallets);
-  if (currencyString.length == "1") {
+  if (currencyString.length == 1) {
     return 0;
   } else {
     return currencyString.length * 5;

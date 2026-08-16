@@ -69,6 +69,10 @@ class _HoldToRevealListenerState extends State<HoldToRevealListener>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.inactive) {
+      // Also collapse the app-wide "reveal all" state. Without this a global
+      // reveal keeps amounts visible in the OS app switcher for the remainder
+      // of its 60 second window, which is exactly what obscuring guards against.
+      cancelRevealAllAmounts();
       if (_isRevealed) {
         _revealTimer?.cancel();
         setState(() {

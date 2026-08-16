@@ -1156,13 +1156,17 @@ class _BudgetLineGraphState extends State<BudgetLineGraph> {
   List<DateTimeRange> dateTimeRanges = [];
   int longestDateRange = 0;
 
-  void didUpdateWidget(oldWidget) {
+  @override
+  void didUpdateWidget(covariant BudgetLineGraph oldWidget) {
+    super.didUpdateWidget(oldWidget);
     if (oldWidget != widget) {
       _init();
     }
   }
 
-  initState() {
+  @override
+  void initState() {
+    super.initState();
     _init();
   }
 
