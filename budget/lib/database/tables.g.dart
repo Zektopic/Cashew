@@ -6909,8 +6909,7 @@ final class $$WalletsTableReferences extends BaseReferences<_$FinanceDatabase,
   static MultiTypedResultKey<$ObjectivesTable, List<Objective>>
       _objectivesRefsTable(_$FinanceDatabase db) =>
           MultiTypedResultKey.fromTable(db.objectives,
-              aliasName: $_aliasNameGenerator(
-                  db.wallets.walletPk, db.objectives.walletFk));
+              aliasName: 'wallets__wallet_pk__objectives__wallet_fk');
 
   $$ObjectivesTableProcessedTableManager get objectivesRefs {
     final manager = $$ObjectivesTableTableManager($_db, $_db.objectives).filter(
@@ -6925,8 +6924,7 @@ final class $$WalletsTableReferences extends BaseReferences<_$FinanceDatabase,
   static MultiTypedResultKey<$TransactionsTable, List<Transaction>>
       _transactionsRefsTable(_$FinanceDatabase db) =>
           MultiTypedResultKey.fromTable(db.transactions,
-              aliasName: $_aliasNameGenerator(
-                  db.wallets.walletPk, db.transactions.walletFk));
+              aliasName: 'wallets__wallet_pk__transactions__wallet_fk');
 
   $$TransactionsTableProcessedTableManager get transactionsRefs {
     final manager = $$TransactionsTableTableManager($_db, $_db.transactions)
@@ -6941,8 +6939,7 @@ final class $$WalletsTableReferences extends BaseReferences<_$FinanceDatabase,
   static MultiTypedResultKey<$BudgetsTable, List<Budget>> _budgetsRefsTable(
           _$FinanceDatabase db) =>
       MultiTypedResultKey.fromTable(db.budgets,
-          aliasName:
-              $_aliasNameGenerator(db.wallets.walletPk, db.budgets.walletFk));
+          aliasName: 'wallets__wallet_pk__budgets__wallet_fk');
 
   $$BudgetsTableProcessedTableManager get budgetsRefs {
     final manager = $$BudgetsTableTableManager($_db, $_db.budgets).filter((f) =>
@@ -6957,8 +6954,7 @@ final class $$WalletsTableReferences extends BaseReferences<_$FinanceDatabase,
       List<CategoryBudgetLimit>> _categoryBudgetLimitsRefsTable(
           _$FinanceDatabase db) =>
       MultiTypedResultKey.fromTable(db.categoryBudgetLimits,
-          aliasName: $_aliasNameGenerator(
-              db.wallets.walletPk, db.categoryBudgetLimits.walletFk));
+          aliasName: 'wallets__wallet_pk__category_budget_limits__wallet_fk');
 
   $$CategoryBudgetLimitsTableProcessedTableManager
       get categoryBudgetLimitsRefs {
@@ -6976,8 +6972,7 @@ final class $$WalletsTableReferences extends BaseReferences<_$FinanceDatabase,
   static MultiTypedResultKey<$ScannerTemplatesTable, List<ScannerTemplate>>
       _scannerTemplatesRefsTable(_$FinanceDatabase db) =>
           MultiTypedResultKey.fromTable(db.scannerTemplates,
-              aliasName: $_aliasNameGenerator(
-                  db.wallets.walletPk, db.scannerTemplates.walletFk));
+              aliasName: 'wallets__wallet_pk__scanner_templates__wallet_fk');
 
   $$ScannerTemplatesTableProcessedTableManager get scannerTemplatesRefs {
     final manager = $$ScannerTemplatesTableTableManager(
@@ -7571,8 +7566,8 @@ final class $$CategoriesTableReferences extends BaseReferences<
   $$CategoriesTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
   static $CategoriesTable _mainCategoryPkTable(_$FinanceDatabase db) =>
-      db.categories.createAlias($_aliasNameGenerator(
-          db.categories.mainCategoryPk, db.categories.categoryPk));
+      db.categories
+          .createAlias('categories__main_category_pk__categories__category_pk');
 
   $$CategoriesTableProcessedTableManager? get mainCategoryPk {
     final $_column = $_itemColumn<String>('main_category_pk');
@@ -7589,8 +7584,8 @@ final class $$CategoriesTableReferences extends BaseReferences<
       List<CategoryBudgetLimit>> _categoryBudgetLimitsRefsTable(
           _$FinanceDatabase db) =>
       MultiTypedResultKey.fromTable(db.categoryBudgetLimits,
-          aliasName: $_aliasNameGenerator(
-              db.categories.categoryPk, db.categoryBudgetLimits.categoryFk));
+          aliasName:
+              'categories__category_pk__category_budget_limits__category_fk');
 
   $$CategoryBudgetLimitsTableProcessedTableManager
       get categoryBudgetLimitsRefs {
@@ -7609,8 +7604,7 @@ final class $$CategoriesTableReferences extends BaseReferences<
       List<TransactionAssociatedTitle>> _associatedTitlesRefsTable(
           _$FinanceDatabase db) =>
       MultiTypedResultKey.fromTable(db.associatedTitles,
-          aliasName: $_aliasNameGenerator(
-              db.categories.categoryPk, db.associatedTitles.categoryFk));
+          aliasName: 'categories__category_pk__associated_titles__category_fk');
 
   $$AssociatedTitlesTableProcessedTableManager get associatedTitlesRefs {
     final manager =
@@ -7624,11 +7618,12 @@ final class $$CategoriesTableReferences extends BaseReferences<
         manager.$state.copyWith(prefetchedData: cache));
   }
 
-  static MultiTypedResultKey<$ScannerTemplatesTable, List<ScannerTemplate>>
-      _scannerTemplatesRefsTable(_$FinanceDatabase db) =>
-          MultiTypedResultKey.fromTable(db.scannerTemplates,
-              aliasName: $_aliasNameGenerator(db.categories.categoryPk,
-                  db.scannerTemplates.defaultCategoryFk));
+  static MultiTypedResultKey<$ScannerTemplatesTable,
+      List<ScannerTemplate>> _scannerTemplatesRefsTable(
+          _$FinanceDatabase db) =>
+      MultiTypedResultKey.fromTable(db.scannerTemplates,
+          aliasName:
+              'categories__category_pk__scanner_templates__default_category_fk');
 
   $$ScannerTemplatesTableProcessedTableManager get scannerTemplatesRefs {
     final manager =
@@ -8191,8 +8186,7 @@ final class $$ObjectivesTableReferences
   $$ObjectivesTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
   static $WalletsTable _walletFkTable(_$FinanceDatabase db) =>
-      db.wallets.createAlias(
-          $_aliasNameGenerator(db.objectives.walletFk, db.wallets.walletPk));
+      db.wallets.createAlias('objectives__wallet_fk__wallets__wallet_pk');
 
   $$WalletsTableProcessedTableManager get walletFk {
     final $_column = $_itemColumn<String>('wallet_fk')!;
@@ -8653,8 +8647,8 @@ final class $$TransactionsTableReferences
   $$TransactionsTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
   static $TransactionsTable _pairedTransactionFkTable(_$FinanceDatabase db) =>
-      db.transactions.createAlias($_aliasNameGenerator(
-          db.transactions.pairedTransactionFk, db.transactions.transactionPk));
+      db.transactions.createAlias(
+          'transactions__paired_transaction_fk__transactions__transaction_pk');
 
   $$TransactionsTableProcessedTableManager? get pairedTransactionFk {
     final $_column = $_itemColumn<String>('paired_transaction_fk');
@@ -8668,8 +8662,8 @@ final class $$TransactionsTableReferences
   }
 
   static $CategoriesTable _categoryFkTable(_$FinanceDatabase db) =>
-      db.categories.createAlias($_aliasNameGenerator(
-          db.transactions.categoryFk, db.categories.categoryPk));
+      db.categories
+          .createAlias('transactions__category_fk__categories__category_pk');
 
   $$CategoriesTableProcessedTableManager get categoryFk {
     final $_column = $_itemColumn<String>('category_fk')!;
@@ -8682,9 +8676,9 @@ final class $$TransactionsTableReferences
         manager.$state.copyWith(prefetchedData: [item]));
   }
 
-  static $CategoriesTable _subCategoryFkTable(_$FinanceDatabase db) =>
-      db.categories.createAlias($_aliasNameGenerator(
-          db.transactions.subCategoryFk, db.categories.categoryPk));
+  static $CategoriesTable _subCategoryFkTable(_$FinanceDatabase db) => db
+      .categories
+      .createAlias('transactions__sub_category_fk__categories__category_pk');
 
   $$CategoriesTableProcessedTableManager? get subCategoryFk {
     final $_column = $_itemColumn<String>('sub_category_fk');
@@ -8698,8 +8692,7 @@ final class $$TransactionsTableReferences
   }
 
   static $WalletsTable _walletFkTable(_$FinanceDatabase db) =>
-      db.wallets.createAlias(
-          $_aliasNameGenerator(db.transactions.walletFk, db.wallets.walletPk));
+      db.wallets.createAlias('transactions__wallet_fk__wallets__wallet_pk');
 
   $$WalletsTableProcessedTableManager get walletFk {
     final $_column = $_itemColumn<String>('wallet_fk')!;
@@ -8713,8 +8706,8 @@ final class $$TransactionsTableReferences
   }
 
   static $ObjectivesTable _objectiveFkTable(_$FinanceDatabase db) =>
-      db.objectives.createAlias($_aliasNameGenerator(
-          db.transactions.objectiveFk, db.objectives.objectivePk));
+      db.objectives
+          .createAlias('transactions__objective_fk__objectives__objective_pk');
 
   $$ObjectivesTableProcessedTableManager? get objectiveFk {
     final $_column = $_itemColumn<String>('objective_fk');
@@ -8727,9 +8720,9 @@ final class $$TransactionsTableReferences
         manager.$state.copyWith(prefetchedData: [item]));
   }
 
-  static $ObjectivesTable _objectiveLoanFkTable(_$FinanceDatabase db) =>
-      db.objectives.createAlias($_aliasNameGenerator(
-          db.transactions.objectiveLoanFk, db.objectives.objectivePk));
+  static $ObjectivesTable _objectiveLoanFkTable(_$FinanceDatabase db) => db
+      .objectives
+      .createAlias('transactions__objective_loan_fk__objectives__objective_pk');
 
   $$ObjectivesTableProcessedTableManager? get objectiveLoanFk {
     final $_column = $_itemColumn<String>('objective_loan_fk');
@@ -9759,8 +9752,7 @@ final class $$BudgetsTableReferences
   $$BudgetsTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
   static $WalletsTable _walletFkTable(_$FinanceDatabase db) =>
-      db.wallets.createAlias(
-          $_aliasNameGenerator(db.budgets.walletFk, db.wallets.walletPk));
+      db.wallets.createAlias('budgets__wallet_fk__wallets__wallet_pk');
 
   $$WalletsTableProcessedTableManager get walletFk {
     final $_column = $_itemColumn<String>('wallet_fk')!;
@@ -9777,8 +9769,7 @@ final class $$BudgetsTableReferences
       List<CategoryBudgetLimit>> _categoryBudgetLimitsRefsTable(
           _$FinanceDatabase db) =>
       MultiTypedResultKey.fromTable(db.categoryBudgetLimits,
-          aliasName: $_aliasNameGenerator(
-              db.budgets.budgetPk, db.categoryBudgetLimits.budgetFk));
+          aliasName: 'budgets__budget_pk__category_budget_limits__budget_fk');
 
   $$CategoryBudgetLimitsTableProcessedTableManager
       get categoryBudgetLimitsRefs {
@@ -10450,8 +10441,8 @@ final class $$CategoryBudgetLimitsTableReferences extends BaseReferences<
       super.$_db, super.$_table, super.$_typedResult);
 
   static $CategoriesTable _categoryFkTable(_$FinanceDatabase db) =>
-      db.categories.createAlias($_aliasNameGenerator(
-          db.categoryBudgetLimits.categoryFk, db.categories.categoryPk));
+      db.categories.createAlias(
+          'category_budget_limits__category_fk__categories__category_pk');
 
   $$CategoriesTableProcessedTableManager get categoryFk {
     final $_column = $_itemColumn<String>('category_fk')!;
@@ -10464,9 +10455,8 @@ final class $$CategoryBudgetLimitsTableReferences extends BaseReferences<
         manager.$state.copyWith(prefetchedData: [item]));
   }
 
-  static $BudgetsTable _budgetFkTable(_$FinanceDatabase db) =>
-      db.budgets.createAlias($_aliasNameGenerator(
-          db.categoryBudgetLimits.budgetFk, db.budgets.budgetPk));
+  static $BudgetsTable _budgetFkTable(_$FinanceDatabase db) => db.budgets
+      .createAlias('category_budget_limits__budget_fk__budgets__budget_pk');
 
   $$BudgetsTableProcessedTableManager get budgetFk {
     final $_column = $_itemColumn<String>('budget_fk')!;
@@ -10479,9 +10469,8 @@ final class $$CategoryBudgetLimitsTableReferences extends BaseReferences<
         manager.$state.copyWith(prefetchedData: [item]));
   }
 
-  static $WalletsTable _walletFkTable(_$FinanceDatabase db) =>
-      db.wallets.createAlias($_aliasNameGenerator(
-          db.categoryBudgetLimits.walletFk, db.wallets.walletPk));
+  static $WalletsTable _walletFkTable(_$FinanceDatabase db) => db.wallets
+      .createAlias('category_budget_limits__wallet_fk__wallets__wallet_pk');
 
   $$WalletsTableProcessedTableManager get walletFk {
     final $_column = $_itemColumn<String>('wallet_fk')!;
@@ -10907,9 +10896,9 @@ final class $$AssociatedTitlesTableReferences extends BaseReferences<
   $$AssociatedTitlesTableReferences(
       super.$_db, super.$_table, super.$_typedResult);
 
-  static $CategoriesTable _categoryFkTable(_$FinanceDatabase db) =>
-      db.categories.createAlias($_aliasNameGenerator(
-          db.associatedTitles.categoryFk, db.categories.categoryPk));
+  static $CategoriesTable _categoryFkTable(_$FinanceDatabase db) => db
+      .categories
+      .createAlias('associated_titles__category_fk__categories__category_pk');
 
   $$CategoriesTableProcessedTableManager get categoryFk {
     final $_column = $_itemColumn<String>('category_fk')!;
@@ -11369,8 +11358,8 @@ final class $$ScannerTemplatesTableReferences extends BaseReferences<
       super.$_db, super.$_table, super.$_typedResult);
 
   static $CategoriesTable _defaultCategoryFkTable(_$FinanceDatabase db) =>
-      db.categories.createAlias($_aliasNameGenerator(
-          db.scannerTemplates.defaultCategoryFk, db.categories.categoryPk));
+      db.categories.createAlias(
+          'scanner_templates__default_category_fk__categories__category_pk');
 
   $$CategoriesTableProcessedTableManager get defaultCategoryFk {
     final $_column = $_itemColumn<String>('default_category_fk')!;
@@ -11383,9 +11372,8 @@ final class $$ScannerTemplatesTableReferences extends BaseReferences<
         manager.$state.copyWith(prefetchedData: [item]));
   }
 
-  static $WalletsTable _walletFkTable(_$FinanceDatabase db) =>
-      db.wallets.createAlias($_aliasNameGenerator(
-          db.scannerTemplates.walletFk, db.wallets.walletPk));
+  static $WalletsTable _walletFkTable(_$FinanceDatabase db) => db.wallets
+      .createAlias('scanner_templates__wallet_fk__wallets__wallet_pk');
 
   $$WalletsTableProcessedTableManager get walletFk {
     final $_column = $_itemColumn<String>('wallet_fk')!;

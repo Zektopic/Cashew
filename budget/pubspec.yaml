@@ -31,12 +31,10 @@ dependencies:
   sticky_and_expandable_list: ^1.1.3
   fl_chart: ^1.2.0
   # database dependencies
-  # drift is held below 2.32.0 on purpose: that release migrates to version 3.x
-  # of package:sqlite3, which obsoletes sqlite3_flutter_libs (now 0.6.0+eol),
-  # switches native library bundling to Dart build hooks, and requires shipping
-  # a new sqlite3.wasm for the web build. That is a separate, gated migration.
-  drift: ">=2.14.0 <2.32.0"
-  sqlite3_flutter_libs: ^0.5.0
+  # drift 2.32+ uses package:sqlite3 3.x, which bundles SQLite itself via Dart
+  # build hooks. sqlite3_flutter_libs is retired (0.6.0+eol) and removed.
+  drift: ^2.34.3
+  sqlite3: ^3.5.1
   path_provider: ^2.1.3
   path: ^1.9.0
   math_expressions: ^3.2.0
@@ -127,7 +125,7 @@ flutter_icons:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  drift_dev: ">=2.14.0 <2.32.0"
+  drift_dev: ^2.34.0
   build_runner: ^2.4.7
   flutter_lints: ^5.0.0
 
