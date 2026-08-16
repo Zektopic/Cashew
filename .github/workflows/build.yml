@@ -88,8 +88,8 @@ jobs:
           path: budget/build/app/outputs/flutter-apk/app-debug.apk
 
   # iOS had no CI coverage at all, so nothing verified the platform config.
-  # It matters now for two reasons: file_picker 12 raised the minimum iOS
-  # deployment target to 14.0 (changed in ios/Podfile and the Xcode project),
+  # It matters now for two reasons: the Firebase v6 cluster raised the minimum
+  # iOS deployment target to 15.0 (changed in ios/Podfile and the Xcode project),
   # and sqlite3 3.x bundles SQLite through Dart build hooks instead of the
   # retired sqlite3_flutter_libs. Both are iOS-native concerns that only a
   # macOS runner can exercise. --no-codesign keeps this working without any
@@ -112,11 +112,11 @@ jobs:
       - name: Install dependencies
         run: cd budget && flutter clean && flutter pub get
 
-      - name: Verify iOS deployment target is at least 14.0
+      - name: Verify iOS deployment target is at least 15.0
         run: |
           cd budget
-          grep -q "platform :ios, '14.0'" ios/Podfile
-          ! grep -E "IPHONEOS_DEPLOYMENT_TARGET = 1[0-3]\." ios/Runner.xcodeproj/project.pbxproj
+          grep -q "platform :ios, '15.0'" ios/Podfile
+          ! grep -E "IPHONEOS_DEPLOYMENT_TARGET = (1[0-4])\." ios/Runner.xcodeproj/project.pbxproj
           echo "iOS deployment target OK"
 
       - name: Build iOS (no codesign)
