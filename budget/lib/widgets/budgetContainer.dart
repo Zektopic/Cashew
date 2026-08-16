@@ -16,6 +16,7 @@ import 'package:budget/widgets/openContainerNavigation.dart';
 import 'package:budget/widgets/openPopup.dart';
 import 'package:budget/widgets/tappable.dart';
 import 'package:budget/widgets/textWidgets.dart';
+import 'package:budget/widgets/holdToRevealListener.dart';
 import 'package:budget/widgets/util/widgetSize.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
@@ -1321,14 +1322,6 @@ class BudgetSpenderSummary extends StatefulWidget {
 
 class _BudgetSpenderSummaryState extends State<BudgetSpenderSummary> {
   Stream<List<double?>>? mergedStreams;
-  bool _isRevealed = false;
-  Timer? _revealTimer;
-
-  @override
-  void dispose() {
-    _revealTimer?.cancel();
-    super.dispose();
-  }
 
   Set<String> members = {};
   String? selectedMember = null;
@@ -1394,37 +1387,20 @@ class _BudgetSpenderSummaryState extends State<BudgetSpenderSummary> {
 
           for (BudgetSpender spender in budgetSpenderList) {
             memberWidgets.add(
-              WillPopScope(
-                onWillPop: () async {
-                  if (widget.disableMemberSelection == false) {
-                    if (selectedMember == spender.member ||
-                        spender.amount == 0) {
-                      widget.setSelectedMember(null);
-                      setState(() {
-                        selectedMember = null;
-                      });
-                      return false;
+              HoldToRevealListener(
+                builder: (context, isRevealed) => WillPopScope(
+                  onWillPop: () async {
+                    if (widget.disableMemberSelection == false) {
+                      if (selectedMember == spender.member ||
+                          spender.amount == 0) {
+                        widget.setSelectedMember(null);
+                        setState(() {
+                          selectedMember = null;
+                        });
+                        return false;
+                      }
                     }
-                  }
-                  return true;
-                },
-                child: Listener(
-                  onPointerDown: (_) {
-                    HapticFeedback.selectionClick();
-                    setState(() => _isRevealed = true);
-                    _revealTimer?.cancel();
-                  },
-                  onPointerUp: (_) {
-                    _revealTimer?.cancel();
-                    _revealTimer = Timer(Duration(seconds: 2), () {
-                      if (mounted) setState(() => _isRevealed = false);
-                    });
-                  },
-                  onPointerCancel: (_) {
-                    _revealTimer?.cancel();
-                    _revealTimer = Timer(Duration(seconds: 2), () {
-                      if (mounted) setState(() => _isRevealed = false);
-                    });
+                    return true;
                   },
                   child: Tappable(
                     onTap: () {
@@ -1527,12 +1503,12 @@ class _BudgetSpenderSummaryState extends State<BudgetSpenderSummary> {
                               AnimatedSwitcher(
                                 duration: Duration(milliseconds: 200),
                                 child: TextFont(
-                                  key: ValueKey(_isRevealed),
+                                  key: ValueKey(isRevealed),
                                   fontWeight: FontWeight.bold,
                                   text: convertToMoney(
                                     Provider.of<AllWallets>(context),
                                     spender.amount,
-                                    forceReveal: _isRevealed,
+                                    forceReveal: isRevealed,
                                   ),
                                   fontSize: widget.isLarge ? 21 : 20,
                                 ),
