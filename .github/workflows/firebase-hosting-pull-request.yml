@@ -7,6 +7,12 @@ jobs:
   build_and_preview:
     if: '${{ github.event.pull_request.head.repo.full_name == github.repository }}'
     runs-on: ubuntu-latest
+    # The `secrets` context is not available in a step-level `if`. Referencing
+    # it there made the whole workflow invalid, so every run failed at 0s with
+    # no jobs at all -- which is why this had been red on every PR. Hoisting it
+    # into env lets the deploy step be skipped cleanly when the secret is unset.
+    env:
+      FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_BUDGET_APP_FLUTTER }}
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
@@ -17,11 +23,11 @@ jobs:
       # See build.yml: flutter clean avoids a stale generated plugin registrant.
       - run: cd budget && flutter clean && flutter pub get && flutter build web
       - uses: FirebaseExtended/action-hosting-deploy@v0
-        if: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_BUDGET_APP_FLUTTER != '' }}
+        if: ${{ env.FIREBASE_SERVICE_ACCOUNT != '' }}
         env:
           FIREBASE_CLI_EXPERIMENTS: webframeworks
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
-          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_BUDGET_APP_FLUTTER }}'
+          firebaseServiceAccount: '${{ env.FIREBASE_SERVICE_ACCOUNT }}'
           projectId: budget-app-flutter
           target: budget-app-flutter
