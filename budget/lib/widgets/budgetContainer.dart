@@ -20,7 +20,6 @@ import 'package:budget/widgets/util/widgetSize.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:sa3_liquid/sa3_liquid.dart';
 import 'dart:async';
@@ -28,6 +27,7 @@ import 'package:budget/colors.dart';
 import 'package:budget/functions.dart';
 import 'package:async/async.dart' show StreamZip;
 import 'package:budget/struct/randomConstants.dart';
+import 'package:budget/widgets/holdToRevealListener.dart';
 
 class BudgetContainer extends StatefulWidget {
   BudgetContainer({
@@ -51,37 +51,7 @@ class BudgetContainer extends StatefulWidget {
   State<BudgetContainer> createState() => _BudgetContainerState();
 }
 
-class _BudgetContainerState extends State<BudgetContainer>
-    with WidgetsBindingObserver {
-  bool _isRevealed = false;
-  Timer? _revealTimer;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addObserver(this);
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    _revealTimer?.cancel();
-    super.dispose();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused ||
-        state == AppLifecycleState.inactive) {
-      if (_isRevealed) {
-        _revealTimer?.cancel();
-        setState(() {
-          _isRevealed = false;
-        });
-      }
-    }
-  }
-
+class _BudgetContainerState extends State<BudgetContainer> {
   @override
   Widget build(BuildContext context) {
     double budgetAmount = budgetAmountToPrimaryCurrency(
@@ -95,7 +65,8 @@ class _BudgetContainerState extends State<BudgetContainer>
     bool isOutOfRange =
         budgetRange.end.difference(DateTime.now()).inDays < 0 ||
         budgetRange.start.difference(DateTime.now()).inDays > 0;
-    var innerWidget = StreamBuilder<List<CategoryWithTotal>>(
+    Widget buildInnerWidget(bool isRevealed) =>
+        StreamBuilder<List<CategoryWithTotal>>(
       stream: database.watchTotalSpentInEachCategoryInTimeRangeFromCategories(
         allWallets: Provider.of<AllWallets>(context),
         start: budgetRange.start,
@@ -178,7 +149,7 @@ class _BudgetContainerState extends State<BudgetContainer>
                                                 milliseconds: 300,
                                               ),
                                               child: TextFont(
-                                                key: ValueKey(_isRevealed),
+                                                key: ValueKey(isRevealed),
                                                 text: convertToMoney(
                                                   Provider.of<AllWallets>(
                                                     context,
@@ -189,7 +160,7 @@ class _BudgetContainerState extends State<BudgetContainer>
                                                       ? totalSpent
                                                       : budgetAmount -
                                                             totalSpent,
-                                                  forceReveal: _isRevealed,
+                                                  forceReveal: isRevealed,
                                                 ),
                                                 fontSize: 18,
                                                 textAlign: TextAlign.start,
@@ -212,7 +183,7 @@ class _BudgetContainerState extends State<BudgetContainer>
                                               ),
                                               child: TextFont(
                                                 key: ValueKey(
-                                                  'budget_1_${_isRevealed}',
+                                                  'budget_1_${isRevealed}',
                                                 ),
                                                 text:
                                                     getBudgetSpentText(
@@ -223,7 +194,7 @@ class _BudgetContainerState extends State<BudgetContainer>
                                                         context,
                                                       ),
                                                       budgetAmount,
-                                                      forceReveal: _isRevealed,
+                                                      forceReveal: isRevealed,
                                                     ),
                                                 fontSize: 13,
                                                 textAlign: TextAlign.start,
@@ -252,7 +223,7 @@ class _BudgetContainerState extends State<BudgetContainer>
                                                 milliseconds: 300,
                                               ),
                                               child: TextFont(
-                                                key: ValueKey(_isRevealed),
+                                                key: ValueKey(isRevealed),
                                                 text: convertToMoney(
                                                   Provider.of<AllWallets>(
                                                     context,
@@ -263,7 +234,7 @@ class _BudgetContainerState extends State<BudgetContainer>
                                                       ? totalSpent
                                                       : totalSpent -
                                                             budgetAmount,
-                                                  forceReveal: _isRevealed,
+                                                  forceReveal: isRevealed,
                                                 ),
                                                 fontSize: 18,
                                                 textAlign: TextAlign.start,
@@ -285,7 +256,7 @@ class _BudgetContainerState extends State<BudgetContainer>
                                             ),
                                             child: TextFont(
                                               key: ValueKey(
-                                                'budget_2_${_isRevealed}',
+                                                'budget_2_${isRevealed}',
                                               ),
                                               text:
                                                   getBudgetOverSpentText(
@@ -296,7 +267,7 @@ class _BudgetContainerState extends State<BudgetContainer>
                                                       context,
                                                     ),
                                                     budgetAmount,
-                                                    forceReveal: _isRevealed,
+                                                    forceReveal: isRevealed,
                                                   ),
                                               fontSize: 13,
                                               textAlign: TextAlign.start,
@@ -487,25 +458,8 @@ class _BudgetContainerState extends State<BudgetContainer>
       decoration: BoxDecoration(
         boxShadow: boxShadowCheck(boxShadowGeneral(context)),
       ),
-      child: Listener(
-        onPointerDown: (_) {
-          HapticFeedback.selectionClick();
-          setState(() => _isRevealed = true);
-          _revealTimer?.cancel();
-        },
-        onPointerUp: (_) {
-          _revealTimer?.cancel();
-          _revealTimer = Timer(Duration(seconds: 2), () {
-            if (mounted) setState(() => _isRevealed = false);
-          });
-        },
-        onPointerCancel: (_) {
-          _revealTimer?.cancel();
-          _revealTimer = Timer(Duration(seconds: 2), () {
-            if (mounted) setState(() => _isRevealed = false);
-          });
-        },
-        child: OpenContainerNavigation(
+      child: HoldToRevealListener(
+        builder: (context, isRevealed) => OpenContainerNavigation(
           borderRadius: 20,
           closedColor: backgroundColor,
           button: (openContainer) {
@@ -525,7 +479,7 @@ class _BudgetContainerState extends State<BudgetContainer>
                     }
                   : null,
               borderRadius: 20,
-              child: innerWidget,
+              child: buildInnerWidget(isRevealed),
               color: backgroundColor,
             );
           },
@@ -1321,14 +1275,6 @@ class BudgetSpenderSummary extends StatefulWidget {
 
 class _BudgetSpenderSummaryState extends State<BudgetSpenderSummary> {
   Stream<List<double?>>? mergedStreams;
-  bool _isRevealed = false;
-  Timer? _revealTimer;
-
-  @override
-  void dispose() {
-    _revealTimer?.cancel();
-    super.dispose();
-  }
 
   Set<String> members = {};
   String? selectedMember = null;
@@ -1408,25 +1354,8 @@ class _BudgetSpenderSummaryState extends State<BudgetSpenderSummary> {
                   }
                   return true;
                 },
-                child: Listener(
-                  onPointerDown: (_) {
-                    HapticFeedback.selectionClick();
-                    setState(() => _isRevealed = true);
-                    _revealTimer?.cancel();
-                  },
-                  onPointerUp: (_) {
-                    _revealTimer?.cancel();
-                    _revealTimer = Timer(Duration(seconds: 2), () {
-                      if (mounted) setState(() => _isRevealed = false);
-                    });
-                  },
-                  onPointerCancel: (_) {
-                    _revealTimer?.cancel();
-                    _revealTimer = Timer(Duration(seconds: 2), () {
-                      if (mounted) setState(() => _isRevealed = false);
-                    });
-                  },
-                  child: Tappable(
+                child: HoldToRevealListener(
+                  builder: (context, isRevealed) => Tappable(
                     onTap: () {
                       if (widget.disableMemberSelection == false) {
                         if (selectedMember == spender.member ||
@@ -1527,12 +1456,12 @@ class _BudgetSpenderSummaryState extends State<BudgetSpenderSummary> {
                               AnimatedSwitcher(
                                 duration: Duration(milliseconds: 200),
                                 child: TextFont(
-                                  key: ValueKey(_isRevealed),
+                                  key: ValueKey(isRevealed),
                                   fontWeight: FontWeight.bold,
                                   text: convertToMoney(
                                     Provider.of<AllWallets>(context),
                                     spender.amount,
-                                    forceReveal: _isRevealed,
+                                    forceReveal: isRevealed,
                                   ),
                                   fontSize: widget.isLarge ? 21 : 20,
                                 ),
