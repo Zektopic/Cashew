@@ -337,17 +337,26 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
                                     children: [
-                                      HomePageUsername(
-                                        animationControllerHeader:
-                                            _animationControllerHeader,
-                                        animationControllerHeader2:
-                                            _animationControllerHeader2,
-                                        showUsername: showUsername,
-                                        showGreeting: showGreeting,
-                                        enterNameBottomSheet:
-                                            enterNameBottomSheet,
-                                        username:
-                                            appStateSettings["username"] ?? "",
+                                      // Flexible so a long username cannot
+                                      // overflow the row it shares with the
+                                      // hide-amounts button. It also gives
+                                      // HomePageUsername a bounded width, which
+                                      // is what lets its AutoSizeText shrink
+                                      // instead of clipping.
+                                      Flexible(
+                                        child: HomePageUsername(
+                                          animationControllerHeader:
+                                              _animationControllerHeader,
+                                          animationControllerHeader2:
+                                              _animationControllerHeader2,
+                                          showUsername: showUsername,
+                                          showGreeting: showGreeting,
+                                          enterNameBottomSheet:
+                                              enterNameBottomSheet,
+                                          username:
+                                              appStateSettings["username"] ??
+                                                  "",
+                                        ),
                                       ),
                                       AnimatedBuilder(
                                         animation: _animationControllerHeader,
