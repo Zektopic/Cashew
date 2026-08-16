@@ -18,4 +18,6 @@ fix_*.sh
 # The glob also covers stale variants (-old, -laptop-dev, ...) that previously
 # slipped past the single-file rule and were committed with a live API key.
 budget/android/app/google-services*.json
+# Firebase build-time config consumed via --dart-define-from-file. Real keys.
+budget/firebase_config.json
 !budget/android/app/google-services.json.example

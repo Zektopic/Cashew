@@ -41,7 +41,7 @@ dependencies:
   path: ^1.9.0
   math_expressions: ^3.2.0
   share_plus: ^13.0.0
-  google_sign_in: ^6.2.1
+  google_sign_in: ^7.2.0
   googleapis: ^16.0.0
   universal_html: ^2.2.4
   # 6.x requires Flutter 3.47; this project is pinned to 3.41.4.

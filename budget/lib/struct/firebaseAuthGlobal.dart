@@ -44,10 +44,16 @@ Future<FirebaseFirestore?> firebaseGetDBInstance() async {
       }
       // GoogleSignInAccount? googleUser = googleUser;
 
-      GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
+      // In google_sign_in 7 GoogleSignInAuthentication carries only the
+      // idToken; the OAuth access token is scope-specific and comes from the
+      // authorization client.
+      final GoogleSignInAuthentication? googleAuth = googleUser?.authentication;
+      final GoogleSignInClientAuthorization? googleAuthz = await googleUser
+          ?.authorizationClient
+          .authorizationForScopes(googleScopesBase);
 
       _credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth?.accessToken,
+        accessToken: googleAuthz?.accessToken,
         idToken: googleAuth?.idToken,
       );
 

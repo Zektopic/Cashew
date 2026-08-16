@@ -123,7 +123,7 @@ Future<bool> createSyncBackup(
     return false;
   }
 
-  final authHeaders = await googleUser!.authHeaders;
+  final authHeaders = await googleAuthHeaders(googleScopesDrive);
   final authenticateClient = GoogleAuthClient(authHeaders);
   drive.DriveApi driveApi = drive.DriveApi(authenticateClient);
 
@@ -239,7 +239,7 @@ Future<bool> _syncData(BuildContext context) async {
     return false;
   }
 
-  final authHeaders = await googleUser!.authHeaders;
+  final authHeaders = await googleAuthHeaders(googleScopesDrive);
   final authenticateClient = GoogleAuthClient(authHeaders);
   drive.DriveApi driveApi = drive.DriveApi(authenticateClient);
 
