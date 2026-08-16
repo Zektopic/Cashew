@@ -8,6 +8,7 @@ import 'package:budget/main.dart';
 import 'package:budget/pages/aboutPage.dart';
 import 'package:budget/pages/accountsPage.dart';
 import 'package:budget/struct/databaseGlobal.dart';
+import 'package:budget/struct/encryptedBackup.dart';
 import 'package:budget/struct/settings.dart';
 import 'package:budget/struct/shareBudget.dart';
 import 'package:budget/struct/syncClient.dart';
@@ -15,6 +16,7 @@ import 'package:budget/widgets/animatedExpanded.dart';
 import 'package:budget/widgets/button.dart';
 import 'package:budget/widgets/exportCSV.dart';
 import 'package:budget/widgets/globalSnackbar.dart';
+import 'package:budget/widgets/exportDB.dart';
 import 'package:budget/widgets/importDB.dart';
 import 'package:budget/widgets/moreIcons.dart';
 import 'package:budget/widgets/navigationFramework.dart';
@@ -126,6 +128,35 @@ Future<Map<String, String>> googleAuthHeaders(
       .authorizationHeaders(scopes, promptIfNecessary: promptIfNecessary);
   if (headers == null) throw ("Google authorization was not granted");
   return headers;
+}
+
+/// The passphrase used to encrypt backups uploaded to Google Drive, or null
+/// when cloud backup encryption is off or no passphrase has been set.
+///
+/// Threat model, stated plainly: this protects the copy sitting in Google
+/// Drive — against a compromised Google account, or against anyone who can
+/// read the Drive appDataFolder. It does not protect the device, because the
+/// passphrase is stored in app settings so that automatic backups can run
+/// without prompting. Someone with the unlocked device can read both.
+String? getCloudBackupPassword() {
+  if (appStateSettings["encryptCloudBackups"] != true) return null;
+  final String password = appStateSettings["cloudBackupPassword"] ?? "";
+  return password.isEmpty ? null : password;
+}
+
+/// Decrypts [data] if it is an encrypted backup, otherwise returns it as-is.
+///
+/// Backups written before encryption was enabled stay readable: the format is
+/// identified by its magic bytes, so plaintext and ciphertext can coexist in
+/// Drive indefinitely.
+Future<Uint8List> decryptCloudBackupIfNeeded(List<int> data) async {
+  if (!isEncryptedBackupData(data)) return Uint8List.fromList(data);
+  final String? password = getCloudBackupPassword();
+  if (password == null) {
+    throw ("This backup is encrypted. Turn on encrypted cloud backups and "
+        "enter the same passphrase used to create it.");
+  }
+  return await decryptBackupData(data, password);
 }
 
 Future<bool> signInGoogle(
@@ -463,8 +494,20 @@ Future<void> createBackup(
     final authenticateClient = GoogleAuthClient(authHeaders);
     final driveApi = drive.DriveApi(authenticateClient);
 
-    var media = new drive.Media(
-        currentDBFileInfo.mediaStream, currentDBFileInfo.dbFileBytes.length);
+    // Encrypt the database before it leaves the device, when enabled. Applies
+    // to sync payloads too (clientIDForSync != null) -- encrypting only the
+    // manual backups would be pointless, since the sync file in the same
+    // appDataFolder is an equally complete copy of the database.
+    final String? cloudPassword = getCloudBackupPassword();
+    late drive.Media media;
+    if (cloudPassword != null) {
+      final Uint8List encrypted = await encryptBackupData(
+          currentDBFileInfo.dbFileBytes, cloudPassword);
+      media = new drive.Media(Stream.value(encrypted), encrypted.length);
+    } else {
+      media = new drive.Media(
+          currentDBFileInfo.mediaStream, currentDBFileInfo.dbFileBytes.length);
+    }
 
     var driveFile = new drive.File();
     // -$timestamp
@@ -610,7 +653,9 @@ Future<void> loadBackup(
         dataStore.insertAll(dataStore.length, data);
       },
       onDone: () async {
-        await overwriteDefaultDB(Uint8List.fromList(dataStore));
+        final Uint8List restored =
+            await decryptCloudBackupIfNeeded(dataStore);
+        await overwriteDefaultDB(restored);
 
         // if this is added, it doesn't restore the database properly on web
         // await database.close();
@@ -950,6 +995,52 @@ class _BackupManagementState extends State<BackupManagement> {
                   icon: appStateSettings["outlinedIcons"]
                       ? Icons.cloud_done_outlined
                       : Icons.cloud_done_rounded,
+                )
+              : SizedBox.shrink(),
+          widget.isManaging && widget.isClientSync == false
+              ? SettingsContainerSwitch(
+                  enableBorderRadius: true,
+                  onSwitched: (value) async {
+                    if (value == false) {
+                      await updateSettings("encryptCloudBackups", false,
+                          pagesNeedingRefresh: [], updateGlobalState: false);
+                      setState(() {});
+                      return;
+                    }
+                    // Turning it on requires a passphrase up front -- enabling
+                    // the flag without one would silently keep uploading
+                    // plaintext.
+                    final String? password = await promptBackupPassword(
+                      context,
+                      title: "Cloud Backup Passphrase",
+                    );
+                    if (password == null || password.isEmpty) {
+                      setState(() {});
+                      return;
+                    }
+                    await updateSettings("cloudBackupPassword", password,
+                        pagesNeedingRefresh: [], updateGlobalState: false);
+                    await updateSettings("encryptCloudBackups", true,
+                        pagesNeedingRefresh: [], updateGlobalState: false);
+                    setState(() {});
+                    openSnackbar(SnackbarMessage(
+                      title: "Cloud backups will be encrypted",
+                      description:
+                          "Existing backups stay readable. Use the same "
+                          "passphrase on your other devices, or they cannot "
+                          "sync.",
+                      icon: appStateSettings["outlinedIcons"]
+                          ? Icons.lock_outlined
+                          : Icons.lock_rounded,
+                    ));
+                  },
+                  initialValue: appStateSettings["encryptCloudBackups"] == true,
+                  title: "Encrypt Cloud Backups",
+                  description:
+                      "Encrypt backups before uploading to Google Drive",
+                  icon: appStateSettings["outlinedIcons"]
+                      ? Icons.lock_outlined
+                      : Icons.lock_rounded,
                 )
               : SizedBox.shrink(),
           widget.isClientSync
