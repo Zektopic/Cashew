@@ -33,23 +33,32 @@ Future saveCSV(
   );
 }
 
+/// Guards against CSV formula injection.
+///
+/// Spreadsheet applications execute a cell whose text begins with one of these
+/// characters, so a transaction titled "=HYPERLINK(...)" would run when the
+/// exported file is opened. Prefixing with a single quote forces the value to
+/// be read as text.
+String sanitizeCsvField(String entry) {
+  if (entry.startsWith('=') ||
+      entry.startsWith('+') ||
+      entry.startsWith('-') ||
+      entry.startsWith('@') ||
+      entry.startsWith('\t') ||
+      entry.startsWith('\r') ||
+      entry.startsWith('\n')) {
+    return "'" + entry;
+  }
+  return entry;
+}
+
 Map<String, String> createRowOutput(
   TransactionWithCategory transactionWithCategory,
   Map<String, String Function(TransactionWithCategory)> lookups,
 ) {
   Map<String, String> output = {};
   for (String key in lookups.keys) {
-    String entry = lookups[key]!(transactionWithCategory);
-    if (entry.startsWith('=') ||
-        entry.startsWith('+') ||
-        entry.startsWith('-') ||
-        entry.startsWith('@') ||
-        entry.startsWith('\t') ||
-        entry.startsWith('\r') ||
-        entry.startsWith('\n')) {
-      entry = "'" + entry;
-    }
-    output[key] = entry;
+    output[key] = sanitizeCsvField(lookups[key]!(transactionWithCategory));
   }
   return output;
 }

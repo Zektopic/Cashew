@@ -110,6 +110,12 @@ class _ImportCSVState extends State<ImportCSV> {
     bool importFromSheets = false,
   }) async {
     try {
+      // Normalize line endings before parsing. The converter is given a fixed
+      // eol of '\n', but ListToCsvConverter (used by our own export and by the
+      // downloadable import template) writes '\r\n'. Without this, re-importing
+      // a file this app produced leaves a trailing '\r' on the last column of
+      // every row. Also handles classic-Mac '\r'-only files.
+      csvString = csvString.replaceAll('\r\n', '\n').replaceAll('\r', '\n');
       List<List<String>> fileContents = CsvToListConverter().convert(
         csvString,
         eol: '\n',
