@@ -50,10 +50,18 @@ void main() {
     });
   });
 
-  group('date range chip year suppression', () {
+  // NOTE ON STRENGTH: the group above calls production code and was verified
+  // to fail when the fix is reverted. The group below does NOT — the predicate
+  // it checks lives inline inside a widget builder in transactionFilters.dart
+  // and is not reachable from a unit test. It pins the intended semantics so a
+  // future extraction has something to check against, but it will not catch a
+  // regression at the original call site. Properly covering that needs a widget
+  // test over the filter chip row, or the predicate lifted into a named
+  // function — either is a reasonable follow-up.
+  group('date range chip year suppression (semantics only, not a guard)', () {
     // Was: `searchFilters.dateTimeRange!.start != DateTime.now().year` — a
     // DateTime compared to an int, so it was always true and filter chips
-    // always rendered the year. This pins the intended predicate.
+    // always rendered the year.
     bool includeYearFor(DateTime date, DateTime now) => date.year != now.year;
 
     test('omits the year for a date in the current year', () {
@@ -66,14 +74,6 @@ void main() {
       final now = DateTime(2026, 8, 16);
       expect(includeYearFor(DateTime(2025, 12, 31), now), isTrue);
       expect(includeYearFor(DateTime(2027, 1, 1), now), isTrue);
-    });
-
-    test('comparing the DateTime itself to an int is always true', () {
-      // Documents the original defect: the old expression could never be false,
-      // which is why the year was always shown.
-      final date = DateTime(2026, 8, 16);
-      // ignore: unrelated_type_equality_checks
-      expect(date != DateTime(2026, 1, 1).year, isTrue);
     });
   });
 }

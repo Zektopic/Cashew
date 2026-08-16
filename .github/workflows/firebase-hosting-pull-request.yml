@@ -14,7 +14,8 @@ jobs:
           flutter-version: '3.41.4'
           channel: 'stable'
           cache: true
-      - run: cd budget && flutter pub get && flutter build web
+      # See build.yml: flutter clean avoids a stale generated plugin registrant.
+      - run: cd budget && flutter clean && flutter pub get && flutter build web
       - uses: FirebaseExtended/action-hosting-deploy@v0
         if: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_BUDGET_APP_FLUTTER != '' }}
         env:

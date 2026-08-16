@@ -20,8 +20,13 @@ jobs:
           channel: 'stable'
           cache: true
 
+      # flutter clean before pub get: the generated plugin registrants under
+      # .dart_tool/flutter_build are not invalidated when a plugin changes its
+      # layout. file_picker 12 moved web support into a separate package, and a
+      # stale registrant still importing file_picker/_internal/file_picker_web
+      # fails the web build. Cheap insurance on a cached runner.
       - name: Install dependencies
-        run: cd budget && flutter pub get
+        run: cd budget && flutter clean && flutter pub get
 
       # Gate on errors only: pre-existing warnings/infos are tracked but must
       # not block builds. Compile errors (e.g. duplicate fields from a bad
@@ -52,8 +57,13 @@ jobs:
           channel: 'stable'
           cache: true
 
+      # flutter clean before pub get: the generated plugin registrants under
+      # .dart_tool/flutter_build are not invalidated when a plugin changes its
+      # layout. file_picker 12 moved web support into a separate package, and a
+      # stale registrant still importing file_picker/_internal/file_picker_web
+      # fails the web build. Cheap insurance on a cached runner.
       - name: Install dependencies
-        run: cd budget && flutter pub get
+        run: cd budget && flutter clean && flutter pub get
 
       # google-services.json is not committed. Use the repo secret if
       # configured, otherwise fall back to the placeholder so debug builds
@@ -100,8 +110,13 @@ jobs:
       - name: Enable Linux desktop
         run: flutter config --enable-linux-desktop
 
+      # flutter clean before pub get: the generated plugin registrants under
+      # .dart_tool/flutter_build are not invalidated when a plugin changes its
+      # layout. file_picker 12 moved web support into a separate package, and a
+      # stale registrant still importing file_picker/_internal/file_picker_web
+      # fails the web build. Cheap insurance on a cached runner.
       - name: Install dependencies
-        run: cd budget && flutter pub get
+        run: cd budget && flutter clean && flutter pub get
 
       - name: Build Linux
         run: cd budget && flutter build linux --release
@@ -133,8 +148,13 @@ jobs:
       - name: Enable Windows desktop
         run: flutter config --enable-windows-desktop
 
+      # flutter clean before pub get: the generated plugin registrants under
+      # .dart_tool/flutter_build are not invalidated when a plugin changes its
+      # layout. file_picker 12 moved web support into a separate package, and a
+      # stale registrant still importing file_picker/_internal/file_picker_web
+      # fails the web build. Cheap insurance on a cached runner.
       - name: Install dependencies
-        run: cd budget && flutter pub get
+        run: cd budget && flutter clean && flutter pub get
 
       - name: Build Windows
         env:
