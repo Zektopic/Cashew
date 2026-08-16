@@ -11,7 +11,10 @@ import 'package:budget/struct/syncClient.dart';
 import 'package:budget/widgets/navigationFramework.dart';
 import 'package:budget/widgets/periodCyclePicker.dart';
 import 'package:budget/widgets/walletEntry.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+// cloud_firestore 6 exports Constant and Transaction, both of which collide
+// with drift's. Only these two symbols are needed here.
+import 'package:cloud_firestore/cloud_firestore.dart'
+    show FirebaseFirestore, DocumentReference;
 import 'dart:async';
 import 'package:async/async.dart';
 import 'package:drift/drift.dart';
