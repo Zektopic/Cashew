@@ -14,5 +14,8 @@ fix_*.patch
 patch_*.sh
 fix_*.sh
 
-# Firebase client config — provide your own (see google-services.json.example)
-budget/android/app/google-services.json
+# Firebase client config — provide your own (see google-services.json.example).
+# The glob also covers stale variants (-old, -laptop-dev, ...) that previously
+# slipped past the single-file rule and were committed with a live API key.
+budget/android/app/google-services*.json
+!budget/android/app/google-services.json.example
