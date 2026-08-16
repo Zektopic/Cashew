@@ -1552,14 +1552,14 @@ class AppliedFilterChips extends StatelessWidget {
       out.add(AppliedFilterChip(
         label: getWordedDateShortMore(
               searchFilters.dateTimeRange!.start,
-              includeYear:
-                  searchFilters.dateTimeRange!.start != DateTime.now().year,
+              includeYear: searchFilters.dateTimeRange!.start.year !=
+                  DateTime.now().year,
             ) +
             " – " +
             getWordedDateShortMore(
               searchFilters.dateTimeRange!.end,
               includeYear:
-                  searchFilters.dateTimeRange!.end != DateTime.now().year,
+                  searchFilters.dateTimeRange!.end.year != DateTime.now().year,
             ),
         openFiltersSelection: () => {openSelectDate!()},
       ));

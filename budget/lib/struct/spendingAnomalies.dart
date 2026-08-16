@@ -145,13 +145,13 @@ Future<void> runSpendingAnomalyCheckIfEnabled(AllWallets allWallets) async {
     for (int i = 0; i < anomalies.length && i < 3; i++) {
       final SpendingAnomaly anomaly = anomalies[i];
       await flutterLocalNotificationsPlugin.show(
-        _notificationIdBase + i,
-        "Spending Alert",
-        anomaly.category.name +
+        id: _notificationIdBase + i,
+        title: "Spending Alert",
+        body: anomaly.category.name +
             " is " +
             anomaly.percentOverUsual.toString() +
             "% above its usual pace this month",
-        details,
+        notificationDetails: details,
       );
     }
   } catch (e) {

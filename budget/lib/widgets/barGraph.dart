@@ -74,7 +74,7 @@ class BarGraphState extends State<BarGraph> {
                     amountLight: 0.2,
                     amountDark: 0.05,
                   ).withValues(alpha: 0.8),
-                  tooltipRoundedRadius: 8,
+                  tooltipBorderRadius: BorderRadius.circular(8),
                   getTooltipItem: (group, groupIndex, rod, rodIndex) {
                     return BarTooltipItem(
                       convertToMoney(

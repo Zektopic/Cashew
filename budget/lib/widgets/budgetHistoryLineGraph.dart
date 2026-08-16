@@ -510,7 +510,7 @@ class _BudgetHistoryLineGraphState extends State<_BudgetHistoryLineGraph> {
                         amountLight: 0.2,
                         amountDark: 0.05,
                       ).withValues(alpha: 0.8),
-                tooltipRoundedRadius: 8,
+                tooltipBorderRadius: BorderRadius.circular(8),
                 fitInsideVertically: true,
                 fitInsideHorizontally: true,
                 tooltipPadding: EdgeInsets.only(

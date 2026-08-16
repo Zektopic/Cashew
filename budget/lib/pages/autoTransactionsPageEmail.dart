@@ -464,7 +464,7 @@ Future<void> parseEmailsInBackground(
           appStateSettings["EmailAutoTransactions-amountOfEmails"] ?? 10;
       int newEmailCount = 0;
 
-      final authHeaders = await googleUser!.authHeaders;
+      final authHeaders = await googleAuthHeaders(googleScopesGmail);
       final authenticateClient = GoogleAuthClient(authHeaders);
       gMail.GmailApi gmailApi = gMail.GmailApi(authenticateClient);
       gMail.ListMessagesResponse results = await gmailApi.users.messages.list(
@@ -601,7 +601,7 @@ Future<void> parseEmailsInBackground(
         transactionsToAdd.add(transactionToAdd);
         openSnackbar(
           SnackbarMessage(
-            title: templateFound!.templateName + ": " + "From Email",
+            title: templateFound.templateName + ": " + "From Email",
             description: title,
             icon: appStateSettings["outlinedIcons"]
                 ? Icons.payments_outlined
@@ -720,7 +720,7 @@ class _GmailApiScreenState extends State<GmailApiScreen> {
     loading = true;
     if (googleUser != null) {
       try {
-        final authHeaders = await googleUser!.authHeaders;
+        final authHeaders = await googleAuthHeaders(googleScopesGmail);
         final authenticateClient = GoogleAuthClient(authHeaders);
         gMail.GmailApi gmailApi = gMail.GmailApi(authenticateClient);
         gMail.ListMessagesResponse results = await gmailApi.users.messages.list(

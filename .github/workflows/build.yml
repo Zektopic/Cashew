@@ -16,10 +16,17 @@ jobs:
 
       - uses: subosito/flutter-action@v2
         with:
+          flutter-version: '3.41.4'
           channel: 'stable'
+          cache: true
 
+      # flutter clean before pub get: the generated plugin registrants under
+      # .dart_tool/flutter_build are not invalidated when a plugin changes its
+      # layout. file_picker 12 moved web support into a separate package, and a
+      # stale registrant still importing file_picker/_internal/file_picker_web
+      # fails the web build. Cheap insurance on a cached runner.
       - name: Install dependencies
-        run: cd budget && flutter pub get
+        run: cd budget && flutter clean && flutter pub get
 
       # Gate on errors only: pre-existing warnings/infos are tracked but must
       # not block builds. Compile errors (e.g. duplicate fields from a bad
@@ -46,10 +53,17 @@ jobs:
 
       - uses: subosito/flutter-action@v2
         with:
+          flutter-version: '3.41.4'
           channel: 'stable'
+          cache: true
 
+      # flutter clean before pub get: the generated plugin registrants under
+      # .dart_tool/flutter_build are not invalidated when a plugin changes its
+      # layout. file_picker 12 moved web support into a separate package, and a
+      # stale registrant still importing file_picker/_internal/file_picker_web
+      # fails the web build. Cheap insurance on a cached runner.
       - name: Install dependencies
-        run: cd budget && flutter pub get
+        run: cd budget && flutter clean && flutter pub get
 
       # google-services.json is not committed. Use the repo secret if
       # configured, otherwise fall back to the placeholder so debug builds
@@ -73,10 +87,17 @@ jobs:
           name: cashew-apk
           path: budget/build/app/outputs/flutter-apk/app-debug.apk
 
-  build-linux:
-    name: Build Linux
-    runs-on: ubuntu-latest
-    continue-on-error: true
+  # iOS had no CI coverage at all, so nothing verified the platform config.
+  # It matters now for two reasons: the Firebase v6 cluster raised the minimum
+  # iOS deployment target to 15.0 (changed in ios/Podfile and the Xcode project),
+  # and sqlite3 3.x bundles SQLite through Dart build hooks instead of the
+  # retired sqlite3_flutter_libs. Both are iOS-native concerns that only a
+  # macOS runner can exercise. --no-codesign keeps this working without any
+  # signing secrets.
+  build-ios:
+    name: Build iOS
+    runs-on: macos-latest
+    needs: analyze-and-test
     permissions:
       contents: read
     steps:
@@ -84,7 +105,40 @@ jobs:
 
       - uses: subosito/flutter-action@v2
         with:
+          flutter-version: '3.41.4'
           channel: 'stable'
+          cache: true
+
+      - name: Install dependencies
+        run: cd budget && flutter clean && flutter pub get
+
+      - name: Verify iOS deployment target is at least 15.0
+        run: |
+          cd budget
+          grep -q "platform :ios, '15.0'" ios/Podfile
+          ! grep -E "IPHONEOS_DEPLOYMENT_TARGET = (1[0-4])\." ios/Runner.xcodeproj/project.pbxproj
+          echo "iOS deployment target OK"
+
+      - name: Build iOS (no codesign)
+        run: cd budget && flutter build ios --debug --no-codesign
+
+  build-linux:
+    name: Build Linux
+    runs-on: ubuntu-latest
+    # NOT continue-on-error. Desktop used to get SQLite from
+    # sqlite3_flutter_libs; since that package was retired, sqlite3 3.x bundles
+    # it through Dart build hooks. A hook failure here must fail the build
+    # rather than be swallowed.
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.41.4'
+          channel: 'stable'
+          cache: true
 
       - name: Install Linux build dependencies
         run: |
@@ -94,8 +148,13 @@ jobs:
       - name: Enable Linux desktop
         run: flutter config --enable-linux-desktop
 
+      # flutter clean before pub get: the generated plugin registrants under
+      # .dart_tool/flutter_build are not invalidated when a plugin changes its
+      # layout. file_picker 12 moved web support into a separate package, and a
+      # stale registrant still importing file_picker/_internal/file_picker_web
+      # fails the web build. Cheap insurance on a cached runner.
       - name: Install dependencies
-        run: cd budget && flutter pub get
+        run: cd budget && flutter clean && flutter pub get
 
       - name: Build Linux
         run: cd budget && flutter build linux --release
@@ -112,7 +171,9 @@ jobs:
   build-windows:
     name: Build Windows
     runs-on: windows-latest
-    continue-on-error: true
+    # NOT continue-on-error -- see build-linux. This is also the only place the
+    # Windows build is exercised at all; it cannot run on a dev machine without
+    # Developer Mode enabled for symlink support.
     permissions:
       contents: read
     steps:
@@ -120,13 +181,20 @@ jobs:
 
       - uses: subosito/flutter-action@v2
         with:
+          flutter-version: '3.41.4'
           channel: 'stable'
+          cache: true
 
       - name: Enable Windows desktop
         run: flutter config --enable-windows-desktop
 
+      # flutter clean before pub get: the generated plugin registrants under
+      # .dart_tool/flutter_build are not invalidated when a plugin changes its
+      # layout. file_picker 12 moved web support into a separate package, and a
+      # stale registrant still importing file_picker/_internal/file_picker_web
+      # fails the web build. Cheap insurance on a cached runner.
       - name: Install dependencies
-        run: cd budget && flutter pub get
+        run: cd budget && flutter clean && flutter pub get
 
       - name: Build Windows
         env:

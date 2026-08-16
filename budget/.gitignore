@@ -31,7 +31,8 @@
 .pub/
 /build/
 local.properties
-pubspec.lock
+# NOTE: pubspec.lock IS tracked. This is an application, not a library, so the
+# lockfile is committed to keep builds reproducible across machines and CI.
 
 # Web related
 ./firebase
@@ -43,6 +44,8 @@ app.*.symbols
 app.*.map.json
 
 # Android Studio will place build artifacts here
+/android/app/.cxx/
+/android/app/build/
 /android/app/debug
 /android/app/profile
 /android/app/release

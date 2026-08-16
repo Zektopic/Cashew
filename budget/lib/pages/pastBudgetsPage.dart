@@ -15,6 +15,7 @@ import 'package:budget/widgets/button.dart';
 import 'package:budget/widgets/categoryIcon.dart';
 import 'package:budget/widgets/editRowEntry.dart';
 import 'package:budget/widgets/fadeIn.dart';
+import 'package:budget/widgets/holdToRevealListener.dart';
 import 'package:budget/widgets/openBottomSheet.dart';
 import 'package:budget/widgets/openContainerNavigation.dart';
 import 'package:budget/widgets/framework/pageFramework.dart';
@@ -28,7 +29,6 @@ import 'package:budget/widgets/viewAllTransactionsButton.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:budget/colors.dart';
 import 'package:async/async.dart' show StreamZip;
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
@@ -69,8 +69,7 @@ class _PastBudgetsPageContent extends StatefulWidget {
       __PastBudgetsPageContentState();
 }
 
-class __PastBudgetsPageContentState extends State<_PastBudgetsPageContent>
-    with WidgetsBindingObserver {
+class __PastBudgetsPageContentState extends State<_PastBudgetsPageContent> {
   Stream<List<double?>>? mergedStreamsBudgetTotal;
   Stream<List<double?>>? mergedStreamsCategoriesTotal;
   List<DateTimeRange> dateTimeRanges = [];
@@ -82,35 +81,11 @@ class __PastBudgetsPageContentState extends State<_PastBudgetsPageContent>
   _pastBudgetContainerListStateStateKey = GlobalKey();
   GlobalKey<PageFrameworkState> budgetHistoryKey = GlobalKey();
 
-  bool _isRevealed = false;
-  Timer? _revealTimer;
-
   initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
     Future.delayed(Duration.zero, () async {
       loadLines(amountLoaded);
     });
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    _revealTimer?.cancel();
-    super.dispose();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused ||
-        state == AppLifecycleState.inactive) {
-      if (_isRevealed) {
-        _revealTimer?.cancel();
-        setState(() {
-          _isRevealed = false;
-        });
-      }
-    }
   }
 
   @override
@@ -675,7 +650,6 @@ class __PastBudgetsPageContentState extends State<_PastBudgetsPageContent>
                                     stream: mergedStreamsCategoriesTotal,
                                     builder: (context, snapshotCategoriesTotal) {
                                       if (snapshotCategoriesTotal.hasData) {
-                                        List<Widget> children = [];
                                         Map<String, double> categoryTotals = {};
                                         for (
                                           int period = 0;
@@ -705,73 +679,35 @@ class __PastBudgetsPageContentState extends State<_PastBudgetsPageContent>
                                                     0);
                                           }
                                         }
-                                        for (String categoryPk
-                                            in categoryTotals.keys) {
-                                          TransactionCategory? category =
-                                              snapshotCategoriesMapped
-                                                  .data![categoryPk];
-                                          if (category != null) {
-                                            children.add(
-                                              CategoryAverageSpent(
-                                                category: category,
-                                                amountPeriods:
-                                                    totalNonZeroPeriods,
-                                                amountSpent:
-                                                    categoryTotals[categoryPk] ??
-                                                    0,
-                                                onTap: () {
-                                                  openWatchCategoriesBottomSheet();
-                                                },
-                                                isSavingsBudget:
-                                                    widget.budget.income,
-                                                forceReveal: _isRevealed,
-                                              ),
-                                            );
-                                          }
-                                        }
-
-                                        return Listener(
-                                          onPointerDown: (_) {
-                                            if (appStateSettings["obscureAmounts"] ==
-                                                true) {
-                                              HapticFeedback.selectionClick();
-                                              setState(
-                                                () => _isRevealed = true,
-                                              );
-                                              _revealTimer?.cancel();
+                                        return HoldToRevealListener(
+                                          builder: (context, isRevealed) {
+                                            List<Widget> children = [];
+                                            for (String categoryPk
+                                                in categoryTotals.keys) {
+                                              TransactionCategory? category =
+                                                  snapshotCategoriesMapped
+                                                      .data![categoryPk];
+                                              if (category != null) {
+                                                children.add(
+                                                  CategoryAverageSpent(
+                                                    category: category,
+                                                    amountPeriods:
+                                                        totalNonZeroPeriods,
+                                                    amountSpent:
+                                                        categoryTotals[categoryPk] ??
+                                                        0,
+                                                    onTap: () {
+                                                      openWatchCategoriesBottomSheet();
+                                                    },
+                                                    isSavingsBudget:
+                                                        widget.budget.income,
+                                                    forceReveal: isRevealed,
+                                                  ),
+                                                );
+                                              }
                                             }
+                                            return Column(children: children);
                                           },
-                                          onPointerUp: (_) {
-                                            if (appStateSettings["obscureAmounts"] ==
-                                                true) {
-                                              _revealTimer?.cancel();
-                                              _revealTimer = Timer(
-                                                Duration(seconds: 2),
-                                                () {
-                                                  if (mounted)
-                                                    setState(
-                                                      () => _isRevealed = false,
-                                                    );
-                                                },
-                                              );
-                                            }
-                                          },
-                                          onPointerCancel: (_) {
-                                            if (appStateSettings["obscureAmounts"] ==
-                                                true) {
-                                              _revealTimer?.cancel();
-                                              _revealTimer = Timer(
-                                                Duration(seconds: 2),
-                                                () {
-                                                  if (mounted)
-                                                    setState(
-                                                      () => _isRevealed = false,
-                                                    );
-                                                },
-                                              );
-                                            }
-                                          },
-                                          child: Column(children: children),
                                         );
                                       } else {
                                         return SizedBox.shrink();
@@ -1081,37 +1017,7 @@ class PastBudgetContainer extends StatefulWidget {
   State<PastBudgetContainer> createState() => _PastBudgetContainerState();
 }
 
-class _PastBudgetContainerState extends State<PastBudgetContainer>
-    with WidgetsBindingObserver {
-  bool _isRevealed = false;
-  Timer? _revealTimer;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addObserver(this);
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    _revealTimer?.cancel();
-    super.dispose();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused ||
-        state == AppLifecycleState.inactive) {
-      if (_isRevealed) {
-        _revealTimer?.cancel();
-        setState(() {
-          _isRevealed = false;
-        });
-      }
-    }
-  }
-
+class _PastBudgetContainerState extends State<PastBudgetContainer> {
   @override
   Widget build(BuildContext context) {
     Budget budget = this.widget.budget;
@@ -1136,7 +1042,8 @@ class _PastBudgetContainerState extends State<PastBudgetContainer>
         ? DateTime.now()
         : dateForRange;
     DateTimeRange budgetRange = getBudgetDate(budget, dateForRangeLocal);
-    var widget = StreamBuilder<List<CategoryWithTotal>>(
+    Widget buildContainerContents(bool isRevealed) =>
+        StreamBuilder<List<CategoryWithTotal>>(
       stream: database.watchTotalSpentInEachCategoryInTimeRangeFromCategories(
         allWallets: Provider.of<AllWallets>(context),
         start: budgetRange.start,
@@ -1231,7 +1138,7 @@ class _PastBudgetContainerState extends State<PastBudgetContainer>
                                                 milliseconds: 300,
                                               ),
                                               child: TextFont(
-                                                key: ValueKey(_isRevealed),
+                                                key: ValueKey(isRevealed),
                                                 text: convertToMoney(
                                                   Provider.of<AllWallets>(
                                                     context,
@@ -1242,7 +1149,7 @@ class _PastBudgetContainerState extends State<PastBudgetContainer>
                                                       ? totalSpent
                                                       : budgetAmount -
                                                             totalSpent,
-                                                  forceReveal: _isRevealed,
+                                                  forceReveal: isRevealed,
                                                 ),
                                                 fontSize: 16,
                                                 textAlign: TextAlign.start,
@@ -1264,7 +1171,7 @@ class _PastBudgetContainerState extends State<PastBudgetContainer>
                                             ),
                                             child: TextFont(
                                               key: ValueKey(
-                                                'spent_$_isRevealed',
+                                                'spent_$isRevealed',
                                               ),
                                               text:
                                                   getBudgetSpentText(
@@ -1275,7 +1182,7 @@ class _PastBudgetContainerState extends State<PastBudgetContainer>
                                                       context,
                                                     ),
                                                     budgetAmount,
-                                                    forceReveal: _isRevealed,
+                                                    forceReveal: isRevealed,
                                                   ),
                                               fontSize: 12,
                                               textAlign: TextAlign.start,
@@ -1302,7 +1209,7 @@ class _PastBudgetContainerState extends State<PastBudgetContainer>
                                         return AnimatedSwitcher(
                                           duration: Duration(milliseconds: 300),
                                           child: TextFont(
-                                            key: ValueKey(_isRevealed),
+                                            key: ValueKey(isRevealed),
                                             text: convertToMoney(
                                               Provider.of<AllWallets>(context),
                                               number,
@@ -1310,7 +1217,7 @@ class _PastBudgetContainerState extends State<PastBudgetContainer>
                                                   appStateSettings["showTotalSpentForBudget"]
                                                   ? totalSpent
                                                   : totalSpent - budgetAmount,
-                                              forceReveal: _isRevealed,
+                                              forceReveal: isRevealed,
                                             ),
                                             fontSize: 16,
                                             textAlign: TextAlign.start,
@@ -1329,7 +1236,7 @@ class _PastBudgetContainerState extends State<PastBudgetContainer>
                                         duration: Duration(milliseconds: 300),
                                         child: TextFont(
                                           key: ValueKey(
-                                            'overspent_$_isRevealed',
+                                            'overspent_$isRevealed',
                                           ),
                                           text:
                                               getBudgetOverSpentText(
@@ -1340,7 +1247,7 @@ class _PastBudgetContainerState extends State<PastBudgetContainer>
                                                   context,
                                                 ),
                                                 budgetAmount,
-                                                forceReveal: _isRevealed,
+                                                forceReveal: isRevealed,
                                               ),
                                           fontSize: 12,
                                           textAlign: TextAlign.start,
@@ -1372,13 +1279,13 @@ class _PastBudgetContainerState extends State<PastBudgetContainer>
                             return AnimatedSwitcher(
                               duration: Duration(milliseconds: 300),
                               child: TextFont(
-                                key: ValueKey(_isRevealed),
+                                key: ValueKey(isRevealed),
                                 autoSizeText: true,
                                 text: convertToPercent(
                                   value,
                                   numberDecimals: 0,
                                   useLessThanZero: true,
-                                  forceReveal: _isRevealed,
+                                  forceReveal: isRevealed,
                                 ),
                                 fontSize: 16,
                                 textAlign: TextAlign.center,
@@ -1398,7 +1305,7 @@ class _PastBudgetContainerState extends State<PastBudgetContainer>
                       child: AnimatedCircularProgress(
                         percent:
                             appStateSettings["obscureAmounts"] == true &&
-                                !_isRevealed
+                                !isRevealed
                             ? 0
                             : (totalSpent / budgetAmount).abs(),
                         backgroundColor: progressBackgroundColor,
@@ -1418,25 +1325,8 @@ class _PastBudgetContainerState extends State<PastBudgetContainer>
       },
     );
     return Container(
-      child: Listener(
-        onPointerDown: (_) {
-          HapticFeedback.selectionClick();
-          setState(() => _isRevealed = true);
-          _revealTimer?.cancel();
-        },
-        onPointerUp: (_) {
-          _revealTimer?.cancel();
-          _revealTimer = Timer(Duration(seconds: 2), () {
-            if (mounted) setState(() => _isRevealed = false);
-          });
-        },
-        onPointerCancel: (_) {
-          _revealTimer?.cancel();
-          _revealTimer = Timer(Duration(seconds: 2), () {
-            if (mounted) setState(() => _isRevealed = false);
-          });
-        },
-        child: OpenContainerNavigation(
+      child: HoldToRevealListener(
+        builder: (context, isRevealed) => OpenContainerNavigation(
           borderRadius: getPlatform() == PlatformOS.isIOS ? 0 : 18,
           closedColor: getPlatform() == PlatformOS.isIOS
               ? backgroundColor
@@ -1462,7 +1352,7 @@ class _PastBudgetContainerState extends State<PastBudgetContainer>
                 );
               },
               borderRadius: getPlatform() == PlatformOS.isIOS ? 0 : 15,
-              child: widget,
+              child: buildContainerContents(isRevealed),
               color: getPlatform() == PlatformOS.isIOS
                   ? backgroundColor
                   : appStateSettings["materialYou"]

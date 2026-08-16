@@ -56,6 +56,7 @@ import 'package:material_symbols_icons/material_symbols_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:budget/functions.dart';
 import 'package:budget/struct/secureScreen.dart';
+import 'package:budget/struct/logging.dart';
 import 'package:budget/struct/settings.dart';
 import 'package:flutter/foundation.dart';
 import 'package:budget/widgets/framework/popupFramework.dart';
@@ -212,6 +213,24 @@ class MorePages extends StatelessWidget {
                     icon: appStateSettings["outlinedIcons"]
                         ? Icons.rate_review_outlined
                         : Icons.rate_review_rounded,
+                    isOutlined: true,
+                  ),
+                ),
+              ),
+              // Log export sits beside Feedback because that is the moment it
+              // is needed. The rest of DebugPage stays gated behind
+              // allowDebugFlags (see main.dart) -- collecting logs is part of
+              // filing a bug report, the debug page is not.
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsetsDirectional.symmetric(
+                      vertical: 5, horizontal: 4),
+                  child: SettingsContainer(
+                    onTap: () => openLogExportPopup(context),
+                    title: "Logs",
+                    icon: appStateSettings["outlinedIcons"]
+                        ? Icons.bug_report_outlined
+                        : Icons.bug_report_rounded,
                     isOutlined: true,
                   ),
                 ),

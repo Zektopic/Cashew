@@ -38,8 +38,17 @@ import 'firebase_options.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 // Requires hot restart when changed
-bool enableDevicePreview = false && kDebugMode;
-bool allowDebugFlags = true || kIsWeb;
+
+// Flip to true to enable the device preview harness. Gated on kDebugMode so it
+// can never reach a release build even if this is left on by accident.
+const bool _enableDevicePreviewOverride = false;
+bool enableDevicePreview = _enableDevicePreviewOverride && kDebugMode;
+
+// Gates the hidden long-press entry point to DebugPage (see aboutPage.dart),
+// which exposes the in-app log viewer. Logs can contain transaction data, so
+// this must not be reachable from a release mobile build. Web is a demo/PWA
+// target where the debug flags are intentionally available.
+bool allowDebugFlags = kDebugMode || kIsWeb;
 bool allowDangerousDebugFlags = kDebugMode;
 
 void main() async {

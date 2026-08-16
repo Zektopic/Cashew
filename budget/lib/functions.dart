@@ -8,7 +8,6 @@ import 'package:budget/widgets/globalSnackbar.dart';
 import 'package:budget/widgets/navigationFramework.dart';
 import 'package:budget/widgets/openPopup.dart';
 import 'package:budget/widgets/openSnackbar.dart';
-import 'package:budget/widgets/restartApp.dart';
 import 'package:budget/widgets/selectAmount.dart';
 import 'package:budget/widgets/textInput.dart';
 import 'package:budget/widgets/timeDigits.dart';
@@ -879,11 +878,10 @@ getTotalSubscriptions(
       subscription = subscription.copyWith(
         amount:
             subscription.amount *
-            (amountRatioToPrimaryCurrencyGivenPk(
-                  allWallets,
-                  subscription.walletFk,
-                ) ??
-                0),
+            amountRatioToPrimaryCurrencyGivenPk(
+              allWallets,
+              subscription.walletFk,
+            ),
       );
       if (subscription.type == TransactionSpecialType.upcoming) {
         total += subscription.amount;
@@ -991,7 +989,9 @@ void restartAppPopup(
   String? description,
   String? codeBlock,
 }) async {
-  // For now, enforce this until better solution found
+  // For now, always take the restart-popup path until a better solution is
+  // found. The in-place restart below is kept for reference.
+  // ignore: dead_code
   if (kIsWeb || true) {
     // Lock the side navigation
     lockAppWaitForRestart = true;
@@ -1016,14 +1016,13 @@ void restartAppPopup(
       barrierDismissible: false,
       // Show code widget with the name of the file monospace font
     );
-  } else {
-    // Pop all routes, select home tab
-    RestartApp.restartApp(context);
-    popAllRoutes(context);
-    Future.delayed(Duration(milliseconds: 100), () {
-      PageNavigationFramework.changePage(context, 0, switchNavbar: true);
-    });
   }
+  // Previously, on non-web the app restarted in place instead of prompting:
+  //   RestartApp.restartApp(context);
+  //   popAllRoutes(context);
+  //   Future.delayed(Duration(milliseconds: 100), () {
+  //     PageNavigationFramework.changePage(context, 0, switchNavbar: true);
+  //   });
 }
 
 String filterEmailTitle(string) {
@@ -1186,7 +1185,7 @@ Future<String> getDeviceInfo() async {
       return info.model;
     } else if (Platform.isIOS) {
       IosDeviceInfo info = await deviceInfo.iosInfo;
-      return info.utsname.machine ?? info.model ?? "iOS";
+      return info.utsname.machine;
     } else if (Platform.isLinux) {
       LinuxDeviceInfo info = await deviceInfo.linuxInfo;
       return info.machineId ?? "Linux";
@@ -1315,9 +1314,11 @@ void copyToClipboard(
 Future shareToClipboard(String text, {required BuildContext context}) async {
   try {
     final box = context.findRenderObject() as RenderBox?;
-    await Share.share(
-      text,
-      sharePositionOrigin: box!.localToGlobal(Offset.zero) & box.size,
+    await SharePlus.instance.share(
+      ShareParams(
+        text: text,
+        sharePositionOrigin: box!.localToGlobal(Offset.zero) & box.size,
+      ),
     );
   } catch (e) {
     print("There was an error sharing: " + e.toString());

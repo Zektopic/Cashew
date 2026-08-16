@@ -5,6 +5,9 @@ import 'package:budget/database/binary_string_conversion.dart';
 import 'package:budget/database/tables.dart';
 import 'package:budget/functions.dart';
 import 'package:budget/struct/databaseGlobal.dart';
+import 'package:budget/struct/encryptedBackup.dart';
+import 'package:budget/widgets/globalSnackbar.dart';
+import 'package:budget/widgets/openSnackbar.dart';
 import 'package:budget/struct/settings.dart';
 import 'package:budget/widgets/accountAndBackup.dart';
 import 'package:budget/widgets/navigationFramework.dart';
@@ -123,14 +126,9 @@ Future<bool> createSyncBackup(
     return false;
   }
 
-  final authHeaders = await googleUser!.authHeaders;
+  final authHeaders = await googleAuthHeaders(googleScopesDrive);
   final authenticateClient = GoogleAuthClient(authHeaders);
   drive.DriveApi driveApi = drive.DriveApi(authenticateClient);
-  if (driveApi == null) {
-    if (changeMadeSync)
-      loadingIndeterminateKey.currentState?.setVisibility(false);
-    throw "Failed to login to Google Drive";
-  }
 
   drive.FileList fileList = await driveApi.files.list(
       spaces: 'appDataFolder', $fields: 'files(id, name, modifiedTime, size)');
@@ -244,12 +242,9 @@ Future<bool> _syncData(BuildContext context) async {
     return false;
   }
 
-  final authHeaders = await googleUser!.authHeaders;
+  final authHeaders = await googleAuthHeaders(googleScopesDrive);
   final authenticateClient = GoogleAuthClient(authHeaders);
   drive.DriveApi driveApi = drive.DriveApi(authenticateClient);
-  if (driveApi == null) {
-    throw "Failed to login to Google Drive";
-  }
 
   await createSyncBackup();
 
@@ -317,6 +312,28 @@ Future<bool> _syncData(BuildContext context) async {
       dataStore.insertAll(dataStore.length, data);
     }
 
+    // Sync payloads are encrypted when cloud backup encryption is on. If this
+    // device does not have the passphrase, skip this file loudly instead of
+    // handing ciphertext to sqlite, which would fail with an opaque
+    // "file is not a database" error.
+    if (isEncryptedBackupData(dataStore)) {
+      try {
+        dataStore = await decryptCloudBackupIfNeeded(dataStore);
+      } catch (e) {
+        print("Could not decrypt sync file " + (file.name ?? "") + ": $e");
+        openSnackbar(
+          SnackbarMessage(
+            title: "syncing-failed".tr(),
+            description: e.toString(),
+            icon: appStateSettings["outlinedIcons"]
+                ? Icons.sync_problem_outlined
+                : Icons.sync_problem_rounded,
+          ),
+        );
+        continue;
+      }
+    }
+
     FinanceDatabase databaseSync;
 
     if (kIsWeb) {
@@ -346,7 +363,7 @@ Future<bool> _syncData(BuildContext context) async {
         );
         // final html.Storage localStorage = html.window.localStorage;
         // localStorage["moor_db_str_syncdb"] = "";
-        throw (e);
+        rethrow;
       }
     } else {
       final dbFolder = await getApplicationDocumentsDirectory();

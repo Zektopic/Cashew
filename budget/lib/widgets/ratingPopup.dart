@@ -27,13 +27,13 @@ import 'package:budget/widgets/framework/popupFramework.dart';
 final InAppReview inAppReview = InAppReview.instance;
 
 bool openRatingPopupCheck(BuildContext context) {
-  // Disable this for now, we have the new in-home page review popup
-  return false;
-  if ((appStateSettings["numLogins"] + 1) % 10 == 0 &&
-      appStateSettings["submittedFeedback"] != true) {
-    openBottomSheet(context, RatingPopup(), fullSnap: true);
-    return true;
-  }
+  // Disabled for now, we have the new in-home page review popup.
+  // The original every-10-logins trigger is kept for reference:
+  //   if ((appStateSettings["numLogins"] + 1) % 10 == 0 &&
+  //       appStateSettings["submittedFeedback"] != true) {
+  //     openBottomSheet(context, RatingPopup(), fullSnap: true);
+  //     return true;
+  //   }
   return false;
 }
 

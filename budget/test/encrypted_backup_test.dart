@@ -51,5 +51,51 @@ void main() {
         throwsA(isA<FormatException>()),
       );
     });
+
+    test('new backups are written in the v2 (Argon2id) format', () async {
+      final encrypted = await encryptBackupData(sample, "pw");
+      expect(
+        String.fromCharCodes(encrypted.sublist(0, 8)),
+        equals("CASHEWE2"),
+      );
+    });
+
+    group('backward compatibility with v1 (PBKDF2) backups', () {
+      // The whole point of versioning the magic bytes: a user restoring a
+      // backup taken before the KDF upgrade must still get their data back.
+
+      test('v1 backup is still recognised as an encrypted backup', () async {
+        final legacy = await encryptBackupDataV1ForTesting(sample, "pw");
+        expect(
+          String.fromCharCodes(legacy.sublist(0, 8)),
+          equals("CASHEWE1"),
+        );
+        expect(isEncryptedBackupData(legacy), isTrue);
+      });
+
+      test('v1 backup still decrypts with the correct password', () async {
+        final legacy = await encryptBackupDataV1ForTesting(sample, "hunter2");
+        final decrypted = await decryptBackupData(legacy, "hunter2");
+        expect(decrypted, equals(sample));
+      });
+
+      test('v1 backup rejects the wrong password', () async {
+        final legacy = await encryptBackupDataV1ForTesting(sample, "right");
+        expect(
+          () => decryptBackupData(legacy, "wrong"),
+          throwsA(isA<SecretBoxAuthenticationError>()),
+        );
+      });
+
+      test('v1 and v2 of the same payload derive different keys', () async {
+        // Guards against a future refactor accidentally routing v1 payloads
+        // through the v2 KDF, which would silently break every old backup.
+        final legacy = await encryptBackupDataV1ForTesting(sample, "pw");
+        final current = await encryptBackupData(sample, "pw");
+        expect(legacy.sublist(0, 8), isNot(equals(current.sublist(0, 8))));
+        expect(await decryptBackupData(legacy, "pw"), equals(sample));
+        expect(await decryptBackupData(current, "pw"), equals(sample));
+      });
+    });
   });
 }

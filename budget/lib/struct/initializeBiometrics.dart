@@ -42,7 +42,7 @@ Future<AuthResult> checkBiometrics({bool checkAlways = false}) async {
       //bool biometricsOnly = (await auth.canCheckBiometrics);
       return (await auth.authenticate(
         localizedReason: "verify-identity".tr(),
-        options: AuthenticationOptions(biometricOnly: false),
+        biometricOnly: false,
       ))
           ? AuthResult.authenticated
           : AuthResult.unauthenticated;

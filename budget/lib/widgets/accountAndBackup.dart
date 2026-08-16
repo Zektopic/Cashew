@@ -8,6 +8,7 @@ import 'package:budget/main.dart';
 import 'package:budget/pages/aboutPage.dart';
 import 'package:budget/pages/accountsPage.dart';
 import 'package:budget/struct/databaseGlobal.dart';
+import 'package:budget/struct/encryptedBackup.dart';
 import 'package:budget/struct/settings.dart';
 import 'package:budget/struct/shareBudget.dart';
 import 'package:budget/struct/syncClient.dart';
@@ -15,6 +16,7 @@ import 'package:budget/widgets/animatedExpanded.dart';
 import 'package:budget/widgets/button.dart';
 import 'package:budget/widgets/exportCSV.dart';
 import 'package:budget/widgets/globalSnackbar.dart';
+import 'package:budget/widgets/exportDB.dart';
 import 'package:budget/widgets/importDB.dart';
 import 'package:budget/widgets/moreIcons.dart';
 import 'package:budget/widgets/navigationFramework.dart';
@@ -70,8 +72,92 @@ class GoogleAuthClient extends http.BaseClient {
   }
 }
 
-signIn.GoogleSignIn? googleSignIn;
 signIn.GoogleSignInAccount? googleUser;
+
+// Whether GoogleSignIn.instance.initialize() has run. It must be called
+// exactly once, before any other method on the singleton.
+bool _googleSignInInitialized = false;
+
+// Scopes are no longer declared up-front on a GoogleSignIn instance; each
+// authorization request names the scopes it needs. These groupings mirror what
+// the 6.x code passed to GoogleSignIn(scopes: ...).
+const List<String> googleScopesBase = <String>[
+  // See https://github.com/flutter/flutter/issues/155490 and
+  // https://github.com/flutter/flutter/issues/155429
+  "https://www.googleapis.com/auth/userinfo.profile",
+  "https://www.googleapis.com/auth/userinfo.email",
+];
+final List<String> googleScopesDrive = <String>[
+  ...googleScopesBase,
+  drive.DriveApi.driveAppdataScope,
+];
+final List<String> googleScopesDriveFile = <String>[
+  ...googleScopesDrive,
+  drive.DriveApi.driveFileScope,
+];
+final List<String> googleScopesGmail = <String>[
+  ...googleScopesBase,
+  gMail.GmailApi.gmailReadonlyScope,
+  // So emails can be marked read
+  gMail.GmailApi.gmailModifyScope,
+];
+
+Future<void> _ensureGoogleSignInInitialized() async {
+  if (_googleSignInInitialized) return;
+  await signIn.GoogleSignIn.instance.initialize(
+    clientId: getPlatform() == PlatformOS.isIOS
+        ? DefaultFirebaseOptions.currentPlatform.iosClientId
+        : null,
+  );
+  _googleSignInInitialized = true;
+}
+
+/// Returns Authorization headers for [scopes].
+///
+/// Replaces `googleUser!.authHeaders` from google_sign_in 6.x. Tokens are now
+/// scope-specific: authorizationForScopes() returns one silently if the user
+/// already granted those scopes, otherwise authorizeScopes() prompts. Passing
+/// promptIfNecessary: false keeps a call silent (used to probe access).
+Future<Map<String, String>> googleAuthHeaders(
+  List<String> scopes, {
+  bool promptIfNecessary = true,
+}) async {
+  final signIn.GoogleSignInAccount? user = googleUser;
+  if (user == null) throw ("Not signed in to Google");
+  final Map<String, String>? headers = await user.authorizationClient
+      .authorizationHeaders(scopes, promptIfNecessary: promptIfNecessary);
+  if (headers == null) throw ("Google authorization was not granted");
+  return headers;
+}
+
+/// The passphrase used to encrypt backups uploaded to Google Drive, or null
+/// when cloud backup encryption is off or no passphrase has been set.
+///
+/// Threat model, stated plainly: this protects the copy sitting in Google
+/// Drive — against a compromised Google account, or against anyone who can
+/// read the Drive appDataFolder. It does not protect the device, because the
+/// passphrase is stored in app settings so that automatic backups can run
+/// without prompting. Someone with the unlocked device can read both.
+String? getCloudBackupPassword() {
+  if (appStateSettings["encryptCloudBackups"] != true) return null;
+  final String password = appStateSettings["cloudBackupPassword"] ?? "";
+  return password.isEmpty ? null : password;
+}
+
+/// Decrypts [data] if it is an encrypted backup, otherwise returns it as-is.
+///
+/// Backups written before encryption was enabled stay readable: the format is
+/// identified by its magic bytes, so plaintext and ciphertext can coexist in
+/// Drive indefinitely.
+Future<Uint8List> decryptCloudBackupIfNeeded(List<int> data) async {
+  if (!isEncryptedBackupData(data)) return Uint8List.fromList(data);
+  final String? password = getCloudBackupPassword();
+  if (password == null) {
+    throw ("This backup is encrypted. Turn on encrypted cloud backups and "
+        "enter the same passphrase used to create it.");
+  }
+  return await decryptBackupData(data, password);
+}
 
 Future<bool> signInGoogle(
     {BuildContext? context,
@@ -89,10 +175,8 @@ Future<bool> signInGoogle(
         googleUser != null &&
         !(await testIfHasGmailAccess())) {
       await signOutGoogle();
-      googleSignIn = null;
       settingsPageStateKey.currentState?.refreshState();
     } else if (googleUser == null) {
-      googleSignIn = null;
       settingsPageStateKey.currentState?.refreshState();
     }
     //Check connection
@@ -111,50 +195,33 @@ Future<bool> signInGoogle(
 
     if (waitForCompletion == true && context != null) openLoadingPopup(context);
     if (googleUser == null) {
-      List<String> scopes = [
-        // See https://github.com/flutter/flutter/issues/155490 and https://github.com/flutter/flutter/issues/155429
-        // Once an account is logged in with these scopes, they are not needed
-        // So we will keep these to apply for all users to prevent errors, especially on silent sign in
-        "https://www.googleapis.com/auth/userinfo.profile",
-        "https://www.googleapis.com/auth/userinfo.email",
-        drive.DriveApi.driveAppdataScope,
-        ...(drivePermissionsAttachments == true
-            ? [drive.DriveApi.driveFileScope]
-            : []),
-        ...(gMailPermissions == true
-            ? [
-                gMail.GmailApi.gmailReadonlyScope,
-                gMail.GmailApi
-                    .gmailModifyScope //We do this so the emails can be marked read
-              ]
-            : [])
-      ];
-      googleSignIn = getPlatform() == PlatformOS.isIOS
-          ? signIn.GoogleSignIn(
-              clientId: DefaultFirebaseOptions.currentPlatform.iosClientId,
-              scopes: scopes)
-          : signIn.GoogleSignIn.standard(scopes: scopes);
-      // googleSignIn?.currentUser?.clearAuthCache();
+      await _ensureGoogleSignInInitialized();
 
-      final signIn.GoogleSignInAccount? account = silentSignIn == true
-          ?
-          // kIsWeb
-          //     ? await googleSignIn?.signInSilently()
-          // Google Sign-in silent on web no longer gives access to the scopes
-          // https://pub.dev/packages/google_sign_in_web#differences-between-google-identity-services-sdk-and-google-sign-in-for-web-sdk
-          // await googleSignIn?.signInSilently().then((value) async {
-          //     return await googleSignIn?.signIn();
-          //   })
-          // Currently we do not use silent sign in anymore, as it does not allow any access
-          // to GDrive or other tools, so there is no point to get the username/email form silent
-          kIsWeb
-              ? await googleSignIn?.signIn()
-              : await googleSignIn?.signInSilently()
-          : await googleSignIn?.signIn();
+      // scopeHint lets platforms that support it combine the authentication and
+      // authorization prompts into one flow. It is only a hint -- the actual
+      // grant is still requested per-scope by googleAuthHeaders() later.
+      final List<String> scopeHint = <String>[
+        ...(drivePermissionsAttachments == true
+            ? googleScopesDriveFile
+            : googleScopesDrive),
+        ...(gMailPermissions == true ? googleScopesGmail : <String>[]),
+      ].toSet().toList();
+
+      final signIn.GoogleSignIn instance = signIn.GoogleSignIn.instance;
+      signIn.GoogleSignInAccount? account;
+      if (silentSignIn == true || !instance.supportsAuthenticate()) {
+        // supportsAuthenticate() is false on web, where the platform forbids
+        // app-provided UI from triggering sign-in; renderButton is the
+        // supported path there. attemptLightweightAuthentication still shows
+        // the platform's own account picker/One Tap card, so it is the closest
+        // available behaviour until a renderButton flow is added.
+        account = await instance.attemptLightweightAuthentication();
+      }
+      account ??= instance.supportsAuthenticate()
+          ? await instance.authenticate(scopeHint: scopeHint)
+          : null;
 
       if (account != null) {
-        // print("ACCOUNT");
-        // print(account);
         googleUser = account;
         await updateSettings("currentUserEmail", googleUser?.email ?? "",
             updateGlobalState: false);
@@ -217,7 +284,8 @@ void refreshUIAfterLoginChange() {
 Future<bool> testIfHasGmailAccess() async {
   print("TESTING GMAIL");
   try {
-    final authHeaders = await googleUser!.authHeaders;
+    final authHeaders =
+        await googleAuthHeaders(googleScopesGmail, promptIfNecessary: false);
     final authenticateClient = GoogleAuthClient(authHeaders);
     gMail.GmailApi gmailApi = gMail.GmailApi(authenticateClient);
     await gmailApi.users.messages
@@ -231,7 +299,7 @@ Future<bool> testIfHasGmailAccess() async {
 }
 
 Future<bool> signOutGoogle() async {
-  await googleSignIn?.signOut();
+  if (_googleSignInInitialized) await signIn.GoogleSignIn.instance.signOut();
   googleUser = null;
   await updateSettings("currentUserEmail", "", updateGlobalState: false);
   await updateSettings("hasSignedIn", false, updateGlobalState: false);
@@ -422,12 +490,24 @@ Future<void> createBackup(
 
     DBFileInfo currentDBFileInfo = await getCurrentDBFileInfo();
 
-    final authHeaders = await googleUser!.authHeaders;
+    final authHeaders = await googleAuthHeaders(googleScopesDrive);
     final authenticateClient = GoogleAuthClient(authHeaders);
     final driveApi = drive.DriveApi(authenticateClient);
 
-    var media = new drive.Media(
-        currentDBFileInfo.mediaStream, currentDBFileInfo.dbFileBytes.length);
+    // Encrypt the database before it leaves the device, when enabled. Applies
+    // to sync payloads too (clientIDForSync != null) -- encrypting only the
+    // manual backups would be pointless, since the sync file in the same
+    // appDataFolder is an equally complete copy of the database.
+    final String? cloudPassword = getCloudBackupPassword();
+    late drive.Media media;
+    if (cloudPassword != null) {
+      final Uint8List encrypted = await encryptBackupData(
+          currentDBFileInfo.dbFileBytes, cloudPassword);
+      media = new drive.Media(Stream.value(encrypted), encrypted.length);
+    } else {
+      media = new drive.Media(
+          currentDBFileInfo.mediaStream, currentDBFileInfo.dbFileBytes.length);
+    }
 
     var driveFile = new drive.File();
     // -$timestamp
@@ -485,7 +565,7 @@ Future<void> deleteRecentBackups(context, amountToKeep,
       loadingIndeterminateKey.currentState?.setVisibility(true);
     }
 
-    final authHeaders = await googleUser!.authHeaders;
+    final authHeaders = await googleAuthHeaders(googleScopesDrive);
     final authenticateClient = GoogleAuthClient(authHeaders);
     final driveApi = drive.DriveApi(authenticateClient);
 
@@ -573,7 +653,9 @@ Future<void> loadBackup(
         dataStore.insertAll(dataStore.length, data);
       },
       onDone: () async {
-        await overwriteDefaultDB(Uint8List.fromList(dataStore));
+        final Uint8List restored =
+            await decryptCloudBackupIfNeeded(dataStore);
+        await overwriteDefaultDB(restored);
 
         // if this is added, it doesn't restore the database properly on web
         // await database.close();
@@ -766,7 +848,7 @@ class GoogleAccountLoginButtonState extends State<GoogleAccountLoginButton> {
 
 Future<(drive.DriveApi? driveApi, List<drive.File>?)> getDriveFiles() async {
   try {
-    final authHeaders = await googleUser!.authHeaders;
+    final authHeaders = await googleAuthHeaders(googleScopesDrive);
     final authenticateClient = GoogleAuthClient(authHeaders);
     drive.DriveApi driveApi = drive.DriveApi(authenticateClient);
 
@@ -913,6 +995,52 @@ class _BackupManagementState extends State<BackupManagement> {
                   icon: appStateSettings["outlinedIcons"]
                       ? Icons.cloud_done_outlined
                       : Icons.cloud_done_rounded,
+                )
+              : SizedBox.shrink(),
+          widget.isManaging && widget.isClientSync == false
+              ? SettingsContainerSwitch(
+                  enableBorderRadius: true,
+                  onSwitched: (value) async {
+                    if (value == false) {
+                      await updateSettings("encryptCloudBackups", false,
+                          pagesNeedingRefresh: [], updateGlobalState: false);
+                      setState(() {});
+                      return;
+                    }
+                    // Turning it on requires a passphrase up front -- enabling
+                    // the flag without one would silently keep uploading
+                    // plaintext.
+                    final String? password = await promptBackupPassword(
+                      context,
+                      title: "Cloud Backup Passphrase",
+                    );
+                    if (password == null || password.isEmpty) {
+                      setState(() {});
+                      return;
+                    }
+                    await updateSettings("cloudBackupPassword", password,
+                        pagesNeedingRefresh: [], updateGlobalState: false);
+                    await updateSettings("encryptCloudBackups", true,
+                        pagesNeedingRefresh: [], updateGlobalState: false);
+                    setState(() {});
+                    openSnackbar(SnackbarMessage(
+                      title: "Cloud backups will be encrypted",
+                      description:
+                          "Existing backups stay readable. Use the same "
+                          "passphrase on your other devices, or they cannot "
+                          "sync.",
+                      icon: appStateSettings["outlinedIcons"]
+                          ? Icons.lock_outlined
+                          : Icons.lock_rounded,
+                    ));
+                  },
+                  initialValue: appStateSettings["encryptCloudBackups"] == true,
+                  title: "Encrypt Cloud Backups",
+                  description:
+                      "Encrypt backups before uploading to Google Drive",
+                  icon: appStateSettings["outlinedIcons"]
+                      ? Icons.lock_outlined
+                      : Icons.lock_rounded,
                 )
               : SizedBox.shrink(),
           widget.isClientSync

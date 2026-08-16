@@ -9,9 +9,11 @@ import 'package:sliding_sheet/sliding_sheet.dart';
 import 'package:budget/widgets/scrollbarWrap.dart';
 
 bool getIsFullScreen(context) {
+  // Full screen is driven by the navigation sidebar being visible. The
+  // width-threshold approach below is kept for reference:
+  //   double maxWidth = 700;
+  //   return MediaQuery.sizeOf(context).width > maxWidth;
   return getWidthNavigationSidebar(context) > 0;
-  double maxWidth = 700;
-  return MediaQuery.sizeOf(context).width > maxWidth;
 }
 
 double getWidthBottomSheet(context) {

@@ -88,6 +88,14 @@ class HomePageUsername extends StatelessWidget {
                   text: !showUsername ? "home".tr() : username,
                   fontWeight: FontWeight.bold,
                   fontSize: 33,
+                  // A long name (or a long localized "home") overflowed the
+                  // header — the row is scaled up by the header animation, so
+                  // there is no slack. Shrink to fit instead, down to a floor
+                  // that stays legible, and ellipsize past that.
+                  autoSizeText: true,
+                  minFontSize: 18,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   textColor: Theme.of(context).colorScheme.onPrimaryContainer,
                   // textColor: showGreeting && showUsername
                   //     ? Theme.of(context).colorScheme.onPrimaryContainer

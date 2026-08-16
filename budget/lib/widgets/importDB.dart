@@ -12,11 +12,10 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
-import 'dart:io';
 
 Future<String?> importDBFileFromDevice(BuildContext context) async {
   // Avoid using a file filter: PlatformException(FilePicker, Unsupported filter....
-  FilePickerResult? result = await FilePicker.platform.pickFiles();
+  PlatformFile? result = await FilePicker.pickFile();
   if (result == null) {
     openSnackbar(SnackbarMessage(
       title: "error-importing".tr(),
@@ -28,7 +27,7 @@ Future<String?> importDBFileFromDevice(BuildContext context) async {
     return null;
   }
 
-  String fileName = result.files.single.name;
+  String fileName = result.name;
   if (fileName.endsWith('.sql') == false &&
       fileName.endsWith('.sqlite') == false &&
       fileName.endsWith('.cashew') == false) {
@@ -41,13 +40,7 @@ Future<String?> importDBFileFromDevice(BuildContext context) async {
     ));
   }
 
-  Uint8List fileBytes;
-  if (kIsWeb) {
-    fileBytes = result.files.single.bytes!;
-  } else {
-    File file = File(result.files.single.path ?? "");
-    fileBytes = await file.readAsBytes();
-  }
+  Uint8List fileBytes = await result.readAsBytes();
 
   // Password-encrypted backups (.cashew) are decrypted before import
   if (isEncryptedBackupData(fileBytes)) {
@@ -78,7 +71,7 @@ Future<String?> importDBFileFromDevice(BuildContext context) async {
   await resetLanguageToSystem(context);
   await updateSettings("databaseJustImported", true,
       pagesNeedingRefresh: [], updateGlobalState: false);
-  return result.files.single.name;
+  return result.name;
 }
 
 Future importDB(BuildContext context, {ignoreOverwriteWarning = false}) async {

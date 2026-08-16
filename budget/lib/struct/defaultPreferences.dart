@@ -131,6 +131,8 @@ Future<Map<String, dynamic>> getDefaultPreferences() async {
     "netTotalsColorful": false,
     "EmailAutoTransactions-amountOfEmails": 10,
     "autoBackups": true,
+    "encryptCloudBackups": false,
+    "cloudBackupPassword": "",
     "autoBackupsFrequency": 3, //in days
     "hasSignedIn": false,
     "lastBackup": DateTime.now().subtract(Duration(days: 1)).toString(),

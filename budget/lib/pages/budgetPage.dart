@@ -17,6 +17,7 @@ import 'package:budget/struct/spendingSummaryHelper.dart';
 import 'package:budget/widgets/animatedExpanded.dart';
 import 'package:budget/widgets/dropdownSelect.dart';
 import 'package:budget/widgets/extraInfoBoxes.dart';
+import 'package:budget/widgets/holdToRevealListener.dart';
 import 'package:budget/widgets/iconButtonScaled.dart';
 import 'package:budget/widgets/openPopup.dart';
 import 'package:budget/widgets/selectedTransactionsAppBar.dart';
@@ -98,8 +99,7 @@ class _BudgetPageContent extends StatefulWidget {
   State<_BudgetPageContent> createState() => _BudgetPageContentState();
 }
 
-class _BudgetPageContentState extends State<_BudgetPageContent>
-    with WidgetsBindingObserver {
+class _BudgetPageContentState extends State<_BudgetPageContent> {
   String? selectedMember = null;
   bool showAllSubcategories = appStateSettings["showAllSubcategories"] == true;
   TransactionCategory? selectedCategory =
@@ -116,36 +116,12 @@ class _BudgetPageContentState extends State<_BudgetPageContent>
   bool get isPastBudget => dateForRangeIndex != 0;
   bool get isPastBudgetButCurrentPeriod => dateForRangeIndex == 0;
 
-  bool _isRevealed = false;
-  Timer? _revealTimer;
-
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
     Future.delayed(Duration.zero, () {
       if (isPastBudget == true) premiumPopupPastBudgets(context);
     });
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    _revealTimer?.cancel();
-    super.dispose();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused ||
-        state == AppLifecycleState.inactive) {
-      if (_isRevealed) {
-        _revealTimer?.cancel();
-        setState(() {
-          _isRevealed = false;
-        });
-      }
-    }
   }
 
   void changeSelectedDateRange(int delta) async {
@@ -334,34 +310,11 @@ class _BudgetPageContentState extends State<_BudgetPageContent>
             }
 
             if (snapshot.hasData) {
-              return Listener(
-                onPointerDown: (_) {
-                  if (appStateSettings["obscureAmounts"] == true) {
-                    HapticFeedback.selectionClick();
-                    setState(() => _isRevealed = true);
-                    _revealTimer?.cancel();
-                  }
-                },
-                onPointerUp: (_) {
-                  if (appStateSettings["obscureAmounts"] == true) {
-                    _revealTimer?.cancel();
-                    _revealTimer = Timer(Duration(seconds: 2), () {
-                      if (mounted) setState(() => _isRevealed = false);
-                    });
-                  }
-                },
-                onPointerCancel: (_) {
-                  if (appStateSettings["obscureAmounts"] == true) {
-                    _revealTimer?.cancel();
-                    _revealTimer = Timer(Duration(seconds: 2), () {
-                      if (mounted) setState(() => _isRevealed = false);
-                    });
-                  }
-                },
-                child: TotalSpent(
+              return HoldToRevealListener(
+                builder: (context, isRevealed) => TotalSpent(
                   budget: widget.budget,
                   totalSpent: totalSpent,
-                  forceReveal: _isRevealed,
+                  forceReveal: isRevealed,
                 ),
               );
             } else {
@@ -1156,13 +1109,17 @@ class _BudgetLineGraphState extends State<BudgetLineGraph> {
   List<DateTimeRange> dateTimeRanges = [];
   int longestDateRange = 0;
 
-  void didUpdateWidget(oldWidget) {
+  @override
+  void didUpdateWidget(covariant BudgetLineGraph oldWidget) {
+    super.didUpdateWidget(oldWidget);
     if (oldWidget != widget) {
       _init();
     }
   }
 
-  initState() {
+  @override
+  void initState() {
+    super.initState();
     _init();
   }
 
