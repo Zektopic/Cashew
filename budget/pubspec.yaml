@@ -71,7 +71,7 @@ dependencies:
   transparent_image: ^2.0.0
   pausable_timer: ^3.1.0+3
   animated_fractionally_sized_box: ^2.0.1
-  flutter_local_notifications: ^17.2.1+2
+  flutter_local_notifications: ^22.3.0
   system_theme: ^3.0.0
   firebase_core: ^3.2.0
   firebase_auth: ^5.1.2

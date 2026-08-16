@@ -19,9 +19,10 @@ Future<String?> initializeNotifications() async {
   if (getPlatform(ignoreEmulation: true) != PlatformOS.isIOS) {
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('notification_icon_android2');
-    final DarwinInitializationSettings initializationSettingsDarwin =
-        DarwinInitializationSettings(
-            onDidReceiveLocalNotification: (_, __, ___, ____) {});
+    // onDidReceiveLocalNotification was removed in v19 — it only ever fired
+    // on iOS 9 and below, which is far under this app's deployment target.
+    const DarwinInitializationSettings initializationSettingsDarwin =
+        DarwinInitializationSettings();
 
     final InitializationSettings initializationSettings =
         InitializationSettings(
@@ -29,7 +30,7 @@ Future<String?> initializeNotifications() async {
       iOS: initializationSettingsDarwin,
     );
     await flutterLocalNotificationsPlugin.initialize(
-      initializationSettings,
+      settings: initializationSettings,
       onDidReceiveBackgroundNotificationResponse: onSelectNotification,
       onDidReceiveNotificationResponse: onSelectNotification,
     );
