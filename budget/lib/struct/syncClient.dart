@@ -126,11 +126,6 @@ Future<bool> createSyncBackup(
   final authHeaders = await googleUser!.authHeaders;
   final authenticateClient = GoogleAuthClient(authHeaders);
   drive.DriveApi driveApi = drive.DriveApi(authenticateClient);
-  if (driveApi == null) {
-    if (changeMadeSync)
-      loadingIndeterminateKey.currentState?.setVisibility(false);
-    throw "Failed to login to Google Drive";
-  }
 
   drive.FileList fileList = await driveApi.files.list(
       spaces: 'appDataFolder', $fields: 'files(id, name, modifiedTime, size)');
@@ -247,9 +242,6 @@ Future<bool> _syncData(BuildContext context) async {
   final authHeaders = await googleUser!.authHeaders;
   final authenticateClient = GoogleAuthClient(authHeaders);
   drive.DriveApi driveApi = drive.DriveApi(authenticateClient);
-  if (driveApi == null) {
-    throw "Failed to login to Google Drive";
-  }
 
   await createSyncBackup();
 
@@ -346,7 +338,7 @@ Future<bool> _syncData(BuildContext context) async {
         );
         // final html.Storage localStorage = html.window.localStorage;
         // localStorage["moor_db_str_syncdb"] = "";
-        throw (e);
+        rethrow;
       }
     } else {
       final dbFolder = await getApplicationDocumentsDirectory();

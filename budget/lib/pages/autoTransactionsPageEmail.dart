@@ -601,7 +601,7 @@ Future<void> parseEmailsInBackground(
         transactionsToAdd.add(transactionToAdd);
         openSnackbar(
           SnackbarMessage(
-            title: templateFound!.templateName + ": " + "From Email",
+            title: templateFound.templateName + ": " + "From Email",
             description: title,
             icon: appStateSettings["outlinedIcons"]
                 ? Icons.payments_outlined

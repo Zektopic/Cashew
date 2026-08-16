@@ -54,7 +54,7 @@ class TappableTextEntry extends StatelessWidget {
                 titlePassed == "" ||
                 titlePassed == showPlaceHolderWhenTextEquals
             ? placeholder
-            : titlePassed ?? "",
+            : titlePassed,
         textColor: titlePassed == null ||
                 titlePassed == "" ||
                 titlePassed == showPlaceHolderWhenTextEquals

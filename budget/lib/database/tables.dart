@@ -7885,7 +7885,7 @@ class FinanceDatabase extends _$FinanceDatabase {
                   // Only apply this tab specific total when searching
                   : ((objectives.name
                         .collate(Collate.noCase)
-                        .like("%" + (searchString ?? "") + "%")))) &
+                        .like("%" + searchString + "%")))) &
               transactions.paid.equals(true) &
               transactions.walletFk.equals(wallet.walletPk) &
               (isCredit == null
@@ -7960,7 +7960,7 @@ class FinanceDatabase extends _$FinanceDatabase {
                   // Only apply this tab specific total when searching
                   : (objectives.name
                         .collate(Collate.noCase)
-                        .like("%" + (searchString ?? "") + "%"))) &
+                        .like("%" + searchString + "%"))) &
               (isCredit == null
                   ? Constant(true)
                   : isCredit

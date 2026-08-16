@@ -879,11 +879,10 @@ getTotalSubscriptions(
       subscription = subscription.copyWith(
         amount:
             subscription.amount *
-            (amountRatioToPrimaryCurrencyGivenPk(
-                  allWallets,
-                  subscription.walletFk,
-                ) ??
-                0),
+            amountRatioToPrimaryCurrencyGivenPk(
+              allWallets,
+              subscription.walletFk,
+            ),
       );
       if (subscription.type == TransactionSpecialType.upcoming) {
         total += subscription.amount;
@@ -1186,7 +1185,7 @@ Future<String> getDeviceInfo() async {
       return info.model;
     } else if (Platform.isIOS) {
       IosDeviceInfo info = await deviceInfo.iosInfo;
-      return info.utsname.machine ?? info.model ?? "iOS";
+      return info.utsname.machine;
     } else if (Platform.isLinux) {
       LinuxDeviceInfo info = await deviceInfo.linuxInfo;
       return info.machineId ?? "Linux";

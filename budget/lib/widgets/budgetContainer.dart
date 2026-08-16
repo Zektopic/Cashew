@@ -977,7 +977,6 @@ class AnimatedProgress extends StatefulWidget {
 class _AnimatedProgressState extends State<AnimatedProgress> {
   bool animateIn = false;
   bool fadeIn = false;
-  Future? _future;
   @override
   void initState() {
     Future.delayed(Duration.zero, () {
@@ -985,19 +984,13 @@ class _AnimatedProgressState extends State<AnimatedProgress> {
         animateIn = true;
       });
     });
-    _future = Future.delayed(Duration(milliseconds: 500), () {
+    Future.delayed(Duration(milliseconds: 500), () {
       if (mounted)
         setState(() {
           fadeIn = true;
         });
     });
     super.initState();
-  }
-
-  @override
-  void dispose() {
-    _future = null;
-    super.dispose();
   }
 
   @override
