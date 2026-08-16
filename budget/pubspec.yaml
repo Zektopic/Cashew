@@ -85,7 +85,13 @@ dependencies:
   timer_builder: ^2.0.0
   device_info_plus: ^13.2.0
   flutter_lazy_indexed_stack: ^0.1.0 
-  app_settings: ^8.0.0
+  # Held at 7.x: app_settings 8.0.0 is "BREAKING: Drop CocoaPods support for
+  # iOS and macOS. Consuming apps must build with Swift Package Manager".
+  # This project builds iOS with CocoaPods, so 8.x fails at pub get with
+  # "Plugin app_settings is only Swift Package Manager compatible". 7.0.0 is
+  # the highest CocoaPods-compatible release. Moving the app to SPM is a
+  # separate decision that touches the whole iOS project.
+  app_settings: ^7.0.0
   provider: ^6.1.2
   in_app_review: ^2.0.9 
   flutter_timezone: ^5.0.2
