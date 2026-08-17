@@ -183,17 +183,70 @@ The translations are available here: https://docs.google.com/spreadsheets/d/1QQq
 
 Unfortunately, I am currently not accepting contributions due to licensing and credits. Since this application turns some profits, I want to avoid any muddy water when it comes to compensation for contributions. You are free to submit an [issue](https://github.com/jameskokoska/Cashew/issues) and I can consider it!
 
+### Toolchain
+
+CI pins Flutter `3.41.4` (`.github/workflows/build.yml`). Local builds should match — several
+dependencies are held back specifically by that pin, so a different Flutter can resolve a
+different dependency set than CI does.
+
+Before opening a PR, from `budget/`:
+
+- `flutter analyze` — must report **0 errors** (warnings and infos are tracked but not gating)
+- `flutter test`
+
+### Firebase Configuration
+
+The Firebase client config is not committed. `lib/firebase_options.dart` reads every value
+through `String.fromEnvironment` with empty defaults, so supply them at build time:
+
+1. Copy `budget/firebase_config.json.example` to `budget/firebase_config.json` and fill in the
+   values from your own Firebase project. This file is gitignored — do not commit it.
+2. Pass it to every build: `flutter build <target> --dart-define-from-file=firebase_config.json`
+
+Android additionally needs `budget/android/app/google-services.json` (copy from
+`google-services.json.example`), and iOS needs `budget/ios/Runner/GoogleService-Info.plist`.
+Both are gitignored for the same reason.
+
+Builds without these still compile, but anything that touches Firebase — Google login, shared
+budgets, cloud sync — will not work.
+
 ### Android Release
 
 - To build an app-bundle Android release, run `flutter build appbundle --release`
 
-Note: required Android SDK.
+Note: requires the Android SDK, and NDK `28.2.13676358` (set in `budget/android/app/build.gradle`).
+The NDK is not installed by default — add it from the Android Studio SDK Manager, or with
+`sdkmanager "ndk;28.2.13676358"`. It is needed because `sqlite3` now compiles SQLite from source
+(see [SQLite and Build Hooks](#sqlite-and-build-hooks)).
 
 ### iOS Release
 
 - To build an IPA iOS release, run `flutter build ipa`
 
-Note: requires MacOS.
+Note: requires MacOS, and Xcode targeting **iOS 15.0 or newer**. The minimum used to be lower;
+the Firebase 6.x packages raised it. It is set in `budget/ios/Podfile` (`platform :ios, '15.0'`)
+and in the `IPHONEOS_DEPLOYMENT_TARGET` entries of `budget/ios/Runner.xcodeproj`. The CI job
+`Build iOS` checks both, so lowering one without the other fails the build.
+
+`budget/ios/Podfile.lock` is intentionally absent — the committed one predated the Firebase
+upgrade and was unsatisfiable. It will be regenerated on the first `pod install`.
+
+### SQLite and Build Hooks
+
+`sqlite3_flutter_libs` has been removed. It was retired upstream (published as `0.6.0+eol`) and
+as of that release provides no functionality. `drift` 2.32+ uses `package:sqlite3` 3.x, which
+bundles SQLite itself through Dart **build hooks** — so SQLite is now compiled as part of the
+normal build on every platform, including Windows and Linux desktop, which previously got it
+from the Flutter libs package.
+
+Practical consequences:
+
+- Android needs the NDK version pinned above.
+- Desktop builds need a working native toolchain (`ninja-build` + `libgtk-3-dev` on Linux;
+  Visual Studio with the C++ workload on Windows).
+- `flutter build windows` needs Developer Mode enabled on Windows, for symlink support.
+- If a build fails with a stale generated plugin registrant, run `flutter clean` before
+  `flutter pub get`. CI does this on every job.
 
 ### Firebase Deployment
 
@@ -209,6 +262,47 @@ Note: required Firebase.
 - `git push origin <version>`
 - Create the release and upload binaries
 - https://github.com/jameskokoska/Cashew/releases/new
+
+### Building the Release APK in CI
+
+`.github/workflows/release-apk.yml` builds a signed release APK. It is deliberately not part of
+`build.yml` — that workflow gates every push and PR, and a release build is far slower than the
+`--debug` one it already runs.
+
+It triggers on a pushed tag (`v*` or `1.2.3`) and via **Run workflow** in the Actions tab.
+
+`android/app/build.gradle` fails the release variant outright when the keystore is missing
+(`:app:validateSigningRelease > Keystore file ... not found`), so the workflow always provides
+one. Which one depends on the repository secrets:
+
+| Secret | Effect if unset |
+|---|---|
+| `ANDROID_KEYSTORE_BASE64` | Signs with a throwaway key generated per run. The APK installs and exercises the full release pipeline, but **cannot upgrade an existing install** and is never attached to a Release. |
+| `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD` | Required alongside the keystore. |
+| `GOOGLE_SERVICES_JSON` | Falls back to `google-services.json.example`; Firebase features will not work. |
+| `FIREBASE_CONFIG_JSON` | Built without `--dart-define-from-file`, so Google login is dead. |
+
+Signing locally uses the same two files, and they live in **different directories** —
+`build.gradle` reads `rootProject.file('key.properties')` but resolves `storeFile` with a bare
+`file(...)` inside the `:app` project:
+
+- `budget/android/key.properties`
+- `budget/android/app/keystore.jks` (i.e. `storeFile=keystore.jks` is relative to `android/app/`)
+
+Putting the keystore next to `key.properties` fails with
+`Keystore file ... not found for signing config 'release'`. Both paths are gitignored.
+
+To produce a publishable build in CI, set all the secrets above. The keystore is uploaded
+base64-encoded:
+
+```bash
+base64 -w0 keystore.jks          # Linux
+certutil -encodehex -f keystore.jks out.txt 0x40000000   # Windows
+```
+
+On a tag, a properly signed APK is attached to a **draft** GitHub Release — nothing is published
+without a human pressing the button. A throwaway-signed APK is only ever uploaded as a workflow
+artifact, clearly named so.
 
 ### Scripts
 
