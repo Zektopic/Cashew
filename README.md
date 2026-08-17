@@ -263,6 +263,47 @@ Note: required Firebase.
 - Create the release and upload binaries
 - https://github.com/jameskokoska/Cashew/releases/new
 
+### Building the Release APK in CI
+
+`.github/workflows/release-apk.yml` builds a signed release APK. It is deliberately not part of
+`build.yml` — that workflow gates every push and PR, and a release build is far slower than the
+`--debug` one it already runs.
+
+It triggers on a pushed tag (`v*` or `1.2.3`) and via **Run workflow** in the Actions tab.
+
+`android/app/build.gradle` fails the release variant outright when the keystore is missing
+(`:app:validateSigningRelease > Keystore file ... not found`), so the workflow always provides
+one. Which one depends on the repository secrets:
+
+| Secret | Effect if unset |
+|---|---|
+| `ANDROID_KEYSTORE_BASE64` | Signs with a throwaway key generated per run. The APK installs and exercises the full release pipeline, but **cannot upgrade an existing install** and is never attached to a Release. |
+| `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD` | Required alongside the keystore. |
+| `GOOGLE_SERVICES_JSON` | Falls back to `google-services.json.example`; Firebase features will not work. |
+| `FIREBASE_CONFIG_JSON` | Built without `--dart-define-from-file`, so Google login is dead. |
+
+Signing locally uses the same two files, and they live in **different directories** —
+`build.gradle` reads `rootProject.file('key.properties')` but resolves `storeFile` with a bare
+`file(...)` inside the `:app` project:
+
+- `budget/android/key.properties`
+- `budget/android/app/keystore.jks` (i.e. `storeFile=keystore.jks` is relative to `android/app/`)
+
+Putting the keystore next to `key.properties` fails with
+`Keystore file ... not found for signing config 'release'`. Both paths are gitignored.
+
+To produce a publishable build in CI, set all the secrets above. The keystore is uploaded
+base64-encoded:
+
+```bash
+base64 -w0 keystore.jks          # Linux
+certutil -encodehex -f keystore.jks out.txt 0x40000000   # Windows
+```
+
+On a tag, a properly signed APK is attached to a **draft** GitHub Release — nothing is published
+without a human pressing the button. A throwaway-signed APK is only ever uploaded as a workflow
+artifact, clearly named so.
+
 ### Scripts
 
 `deploy_and_build_windows.bat`
