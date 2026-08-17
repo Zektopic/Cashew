@@ -1,0 +1,174 @@
+name: Release APK
+
+# Kept out of build.yml on purpose. build.yml gates every push and PR, and a
+# release build is several times slower than the --debug one it already runs.
+# This runs only when a release is actually wanted.
+#
+# NOTE: workflow_dispatch only appears in the Actions UI once this file is on
+# the default branch. Until then, the tag trigger is the only way in.
+on:
+  workflow_dispatch:
+    inputs:
+      upload_to_release:
+        description: 'Attach the APK to a GitHub Release (tag builds only)'
+        type: boolean
+        default: false
+  push:
+    tags:
+      - 'v*'
+      - '[0-9]+.[0-9]+.[0-9]+'
+
+jobs:
+  build-release-apk:
+    name: Build Release APK
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # needed only by the optional release-upload step
+
+    # The `secrets` context is NOT valid in a step-level `if`. Using it there
+    # makes the whole workflow file invalid and every run fails at 0s with no
+    # jobs -- exactly the bug fixed in firebase-hosting-pull-request.yml.
+    # Hoisting into job-level env lets the steps branch on env.X != '' safely.
+    env:
+      ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+      ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+      ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+      ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+      GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+      FIREBASE_CONFIG_JSON: ${{ secrets.FIREBASE_CONFIG_JSON }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.41.4'
+          channel: 'stable'
+          cache: true
+
+      # See build.yml: the generated plugin registrants under
+      # .dart_tool/flutter_build are not invalidated when a plugin changes its
+      # layout, so clean before pub get.
+      - name: Install dependencies
+        run: cd budget && flutter clean && flutter pub get
+
+      # android/app/build.gradle fails the release variant outright when the
+      # keystore is missing (':app:validateSigningRelease > Keystore file ...
+      # not found'), so the workflow always provides one -- the real key when
+      # the secrets exist, a throwaway otherwise. No build.gradle change needed.
+      #
+      # Mind the two different base directories. build.gradle reads
+      # `rootProject.file('key.properties')`, which is android/key.properties,
+      # but resolves storeFile with a bare `file(...)` inside the :app project,
+      # so a relative storeFile lands in android/app/. Both paths are already
+      # covered by ignore rules (budget/.gitignore:55-57).
+      - name: Set up signing keystore
+        run: |
+          cd budget/android
+          if [ -n "$ANDROID_KEYSTORE_BASE64" ]; then
+            echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > app/keystore.jks
+            printf 'storePassword=%s\nkeyPassword=%s\nkeyAlias=%s\nstoreFile=keystore.jks\n' \
+              "$ANDROID_KEYSTORE_PASSWORD" "$ANDROID_KEY_PASSWORD" "$ANDROID_KEY_ALIAS" \
+              > key.properties
+            echo "SIGNED_WITH_RELEASE_KEY=true" >> "$GITHUB_ENV"
+            echo "Signing with the release keystore from secrets."
+          else
+            # A fresh key every run. The APK installs and exercises the full
+            # release pipeline (R8, NDK, build hooks), but it CANNOT be used to
+            # upgrade over an existing install and must not be published.
+            keytool -genkeypair -v \
+              -keystore app/keystore.jks -storetype JKS \
+              -keyalg RSA -keysize 2048 -validity 30 \
+              -alias ci-throwaway \
+              -storepass ci-throwaway -keypass ci-throwaway \
+              -dname "CN=Cashew CI, OU=None, O=None, L=None, S=None, C=US"
+            printf 'storePassword=ci-throwaway\nkeyPassword=ci-throwaway\nkeyAlias=ci-throwaway\nstoreFile=keystore.jks\n' \
+              > key.properties
+            echo "SIGNED_WITH_RELEASE_KEY=false" >> "$GITHUB_ENV"
+            echo "::warning::ANDROID_KEYSTORE_BASE64 is not set. Signing with a throwaway key -- this APK is for testing only and cannot upgrade an existing install."
+          fi
+
+      # The google-services plugin validates this file and fails the build if
+      # the package name does not match applicationId. The committed example
+      # uses com.budget.tracker_app, so the fallback is a valid build input.
+      - name: Provide google-services.json
+        run: |
+          if [ -n "$GOOGLE_SERVICES_JSON" ]; then
+            echo "$GOOGLE_SERVICES_JSON" > budget/android/app/google-services.json
+          else
+            cp budget/android/app/google-services.json.example budget/android/app/google-services.json
+            echo "::warning::GOOGLE_SERVICES_JSON is not set. Using the placeholder -- Firebase features will not work in this APK."
+          fi
+
+      # firebase_options.dart reads every value via String.fromEnvironment with
+      # an empty default, so the build succeeds without this -- it just ships a
+      # dead Google login. Pass the config when it is available.
+      - name: Provide firebase_config.json
+        run: |
+          if [ -n "$FIREBASE_CONFIG_JSON" ]; then
+            echo "$FIREBASE_CONFIG_JSON" > budget/firebase_config.json
+            echo "DART_DEFINE_ARGS=--dart-define-from-file=firebase_config.json" >> "$GITHUB_ENV"
+          else
+            echo "DART_DEFINE_ARGS=" >> "$GITHUB_ENV"
+            echo "::warning::FIREBASE_CONFIG_JSON is not set. Building without Firebase credentials."
+          fi
+
+      - name: Read app version
+        run: |
+          VERSION=$(grep -m1 '^version:' budget/pubspec.yaml | sed 's/version:[[:space:]]*//' | tr -d '[:space:]')
+          echo "APP_VERSION=$VERSION" >> "$GITHUB_ENV"
+          echo "Building Cashew $VERSION"
+
+      # Universal APK, matching the README's release instructions. Split-per-abi
+      # would produce smaller downloads but three artifacts to reason about.
+      - name: Build release APK
+        run: cd budget && flutter build apk --release $DART_DEFINE_ARGS
+
+      - name: Verify the APK is signed
+        run: |
+          APKSIGNER=$(find "$ANDROID_HOME/build-tools" -name apksigner 2>/dev/null | sort -V | tail -1)
+          if [ -z "$APKSIGNER" ]; then
+            echo "::warning::apksigner not found on the runner; skipping signature verification"
+            exit 0
+          fi
+          "$APKSIGNER" verify --verbose budget/build/app/outputs/flutter-apk/app-release.apk
+
+      - name: Name the artifact
+        run: |
+          if [ "$SIGNED_WITH_RELEASE_KEY" = "true" ]; then
+            echo "ARTIFACT_NAME=cashew-${APP_VERSION}-release" >> "$GITHUB_ENV"
+          else
+            echo "ARTIFACT_NAME=cashew-${APP_VERSION}-release-UNSIGNED-testing-only" >> "$GITHUB_ENV"
+          fi
+
+      - name: Upload release APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
+          path: budget/build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
+
+      # Only ever attaches a properly signed build. A throwaway-signed APK on a
+      # GitHub Release would be worse than no release at all -- users who
+      # installed it could never upgrade.
+      - name: Attach to GitHub Release
+        if: >
+          startsWith(github.ref, 'refs/tags/') &&
+          env.SIGNED_WITH_RELEASE_KEY == 'true' &&
+          (github.event_name == 'push' || inputs.upload_to_release)
+        uses: softprops/action-gh-release@v2
+        with:
+          files: budget/build/app/outputs/flutter-apk/app-release.apk
+          draft: true
+          generate_release_notes: true
+
+      # Belt and braces: the runner is ephemeral, but never leave signing
+      # material behind in a workspace that a later step could archive.
+      - name: Remove signing material
+        if: always()
+        run: rm -f budget/android/app/keystore.jks budget/android/key.properties
