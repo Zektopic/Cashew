@@ -183,17 +183,70 @@ The translations are available here: https://docs.google.com/spreadsheets/d/1QQq
 
 Unfortunately, I am currently not accepting contributions due to licensing and credits. Since this application turns some profits, I want to avoid any muddy water when it comes to compensation for contributions. You are free to submit an [issue](https://github.com/jameskokoska/Cashew/issues) and I can consider it!
 
+### Toolchain
+
+CI pins Flutter `3.41.4` (`.github/workflows/build.yml`). Local builds should match — several
+dependencies are held back specifically by that pin, so a different Flutter can resolve a
+different dependency set than CI does.
+
+Before opening a PR, from `budget/`:
+
+- `flutter analyze` — must report **0 errors** (warnings and infos are tracked but not gating)
+- `flutter test`
+
+### Firebase Configuration
+
+The Firebase client config is not committed. `lib/firebase_options.dart` reads every value
+through `String.fromEnvironment` with empty defaults, so supply them at build time:
+
+1. Copy `budget/firebase_config.json.example` to `budget/firebase_config.json` and fill in the
+   values from your own Firebase project. This file is gitignored — do not commit it.
+2. Pass it to every build: `flutter build <target> --dart-define-from-file=firebase_config.json`
+
+Android additionally needs `budget/android/app/google-services.json` (copy from
+`google-services.json.example`), and iOS needs `budget/ios/Runner/GoogleService-Info.plist`.
+Both are gitignored for the same reason.
+
+Builds without these still compile, but anything that touches Firebase — Google login, shared
+budgets, cloud sync — will not work.
+
 ### Android Release
 
 - To build an app-bundle Android release, run `flutter build appbundle --release`
 
-Note: required Android SDK.
+Note: requires the Android SDK, and NDK `28.2.13676358` (set in `budget/android/app/build.gradle`).
+The NDK is not installed by default — add it from the Android Studio SDK Manager, or with
+`sdkmanager "ndk;28.2.13676358"`. It is needed because `sqlite3` now compiles SQLite from source
+(see [SQLite and Build Hooks](#sqlite-and-build-hooks)).
 
 ### iOS Release
 
 - To build an IPA iOS release, run `flutter build ipa`
 
-Note: requires MacOS.
+Note: requires MacOS, and Xcode targeting **iOS 15.0 or newer**. The minimum used to be lower;
+the Firebase 6.x packages raised it. It is set in `budget/ios/Podfile` (`platform :ios, '15.0'`)
+and in the `IPHONEOS_DEPLOYMENT_TARGET` entries of `budget/ios/Runner.xcodeproj`. The CI job
+`Build iOS` checks both, so lowering one without the other fails the build.
+
+`budget/ios/Podfile.lock` is intentionally absent — the committed one predated the Firebase
+upgrade and was unsatisfiable. It will be regenerated on the first `pod install`.
+
+### SQLite and Build Hooks
+
+`sqlite3_flutter_libs` has been removed. It was retired upstream (published as `0.6.0+eol`) and
+as of that release provides no functionality. `drift` 2.32+ uses `package:sqlite3` 3.x, which
+bundles SQLite itself through Dart **build hooks** — so SQLite is now compiled as part of the
+normal build on every platform, including Windows and Linux desktop, which previously got it
+from the Flutter libs package.
+
+Practical consequences:
+
+- Android needs the NDK version pinned above.
+- Desktop builds need a working native toolchain (`ninja-build` + `libgtk-3-dev` on Linux;
+  Visual Studio with the C++ workload on Windows).
+- `flutter build windows` needs Developer Mode enabled on Windows, for symlink support.
+- If a build fails with a stale generated plugin registrant, run `flutter clean` before
+  `flutter pub get`. CI does this on every job.
 
 ### Firebase Deployment
 
