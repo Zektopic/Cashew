@@ -1,5 +1,7 @@
 gradle-wrapper.jar
 /.gradle
+# Kotlin 2.x build-session scratch directory, created by any Gradle build.
+/.kotlin/
 /captures/
 /gradlew
 /gradlew.bat
