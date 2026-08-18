@@ -16,7 +16,7 @@ import 'package:budget/widgets/holdToRevealListener.dart';
 // This is because the query transactionsAmountStream needs to be updated to have the new DateTime.now(),
 // as it won't catch the new transaction amount!
 
-class TransactionsAmountBox extends StatefulWidget {
+class TransactionsAmountBox extends StatelessWidget {
   const TransactionsAmountBox({
     this.openPage,
     this.onLongPress,
@@ -40,13 +40,6 @@ class TransactionsAmountBox extends StatefulWidget {
   final bool invertSign;
   final String? currencyKey;
   final Function(double)? getTextColor;
-
-  @override
-  State<TransactionsAmountBox> createState() => _TransactionsAmountBoxState();
-}
-
-class _TransactionsAmountBoxState extends State<TransactionsAmountBox> {
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -55,17 +48,17 @@ class _TransactionsAmountBoxState extends State<TransactionsAmountBox> {
       ),
       child: OpenContainerNavigation(
         closedColor: getColor(context, "lightDarkAccentHeavyLight"),
-        openPage: widget.openPage ?? SizedBox.shrink(),
+        openPage: openPage ?? SizedBox.shrink(),
         borderRadius: 15,
         button: (openContainer) {
           return HoldToRevealListener(
             builder: (context, isRevealed) => Tappable(
               color: getColor(context, "lightDarkAccentHeavyLight"),
               onTap: () {
-                if (widget.openPage != null) openContainer();
+                if (openPage != null) openContainer();
               },
               onLongPress: () {
-                if (widget.onLongPress != null) widget.onLongPress!();
+                if (onLongPress != null) onLongPress!();
               },
               child: Container(
                 child: Padding(
@@ -80,24 +73,23 @@ class _TransactionsAmountBoxState extends State<TransactionsAmountBox> {
                       TextFont(
                         textAlign: TextAlign.center,
                         maxLines: 3,
-                        text: widget.label,
+                        text: label,
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
                       SizedBox(height: 6),
                       DoubleTotalWithCountStreamBuilder(
-                        totalWithCountStream: widget.totalWithCountStream,
-                        totalWithCountStream2: widget.totalWithCountStream2,
+                        totalWithCountStream: totalWithCountStream,
+                        totalWithCountStream2: totalWithCountStream2,
                         builder: (context, snapshot) {
                           double totalSpent = snapshot.data?.total ?? 0;
                           int totalCount = snapshot.data?.count ?? 0;
-                          double finalAmount =
-                              snapshot.hasData == false || snapshot.data == null
-                                  ? 0
-                                  : widget.absolute == true
-                                      ? (totalSpent).abs()
-                                      : totalSpent *
-                                          (widget.invertSign == true ? -1 : 1);
+                          double finalAmount = snapshot.hasData == false ||
+                                  snapshot.data == null
+                              ? 0
+                              : absolute == true
+                                  ? (totalSpent).abs()
+                                  : totalSpent * (invertSign == true ? -1 : 1);
                           return Column(
                             children: [
                               CountNumber(
@@ -112,15 +104,14 @@ class _TransactionsAmountBoxState extends State<TransactionsAmountBox> {
                                       text: convertToMoney(
                                         Provider.of<AllWallets>(context),
                                         number,
-                                        currencyKey: widget.currencyKey,
-                                        addCurrencyName:
-                                            widget.currencyKey != null,
+                                        currencyKey: currencyKey,
+                                        addCurrencyName: currencyKey != null,
                                         finalNumber: finalAmount,
                                         forceReveal: isRevealed,
                                       ),
-                                      textColor: widget.getTextColor != null
-                                          ? widget.getTextColor!(totalSpent)
-                                          : widget.textColor,
+                                      textColor: getTextColor != null
+                                          ? getTextColor!(totalSpent)
+                                          : textColor,
                                       fontWeight: FontWeight.bold,
                                       textAlign: TextAlign.center,
                                       autoSizeText: true,

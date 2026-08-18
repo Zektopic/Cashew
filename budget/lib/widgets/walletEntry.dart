@@ -106,8 +106,8 @@ class WalletEntry extends StatelessWidget {
                                     ? "transaction".tr().toLowerCase()
                                     : "transactions".tr().toLowerCase()),
                             fontSize: 14,
-                            textColor:
-                                getColor(context, "black").withValues(alpha: 0.65),
+                            textColor: getColor(context, "black")
+                                .withValues(alpha: 0.65),
                           ),
                         ],
                       ),
@@ -317,7 +317,7 @@ class WalletEntryRow extends StatelessWidget {
   }
 }
 
-class AmountAccount extends StatefulWidget {
+class AmountAccount extends StatelessWidget {
   const AmountAccount({
     required this.walletWithDetails,
     required this.textAlign,
@@ -328,30 +328,23 @@ class AmountAccount extends StatefulWidget {
   final WalletWithDetails walletWithDetails;
   final TextAlign textAlign;
   final double fontSize;
-
-  @override
-  State<AmountAccount> createState() => _AmountAccountState();
-}
-
-class _AmountAccountState extends State<AmountAccount> {
-
   @override
   Widget build(BuildContext context) {
     double? roundedWalletWithTotal = (double.tryParse(
-        absoluteZero(widget.walletWithDetails.totalSpent ?? 0)
-            .toStringAsFixed(widget.walletWithDetails.wallet.decimals)));
+        absoluteZero(walletWithDetails.totalSpent ?? 0)
+            .toStringAsFixed(walletWithDetails.wallet.decimals)));
     Color textColor =
         appStateSettings["accountColorfulAmountsWithArrows"] == true
             ? roundedWalletWithTotal == 0
                 ? getColor(context, "black")
-                : (widget.walletWithDetails.totalSpent ?? 0) > 0
+                : (walletWithDetails.totalSpent ?? 0) > 0
                     ? getColor(context, "incomeAmount")
                     : getColor(context, "expenseAmount")
             : getColor(context, "black");
     double finalTotal =
         appStateSettings["accountColorfulAmountsWithArrows"] == true
-            ? (widget.walletWithDetails.totalSpent ?? 0).abs()
-            : (absoluteZero(widget.walletWithDetails.totalSpent ?? 0));
+            ? (walletWithDetails.totalSpent ?? 0).abs()
+            : (absoluteZero(walletWithDetails.totalSpent ?? 0));
     return HoldToRevealListener(
       builder: (context, isRevealed) => Row(
         mainAxisSize: MainAxisSize.min,
@@ -364,7 +357,7 @@ class _AmountAccountState extends State<AmountAccount> {
                     )
                   : IncomeOutcomeArrow(
                       key: ValueKey(2),
-                      isIncome: (widget.walletWithDetails.totalSpent ?? 0) > 0,
+                      isIncome: (walletWithDetails.totalSpent ?? 0) > 0,
                       iconSize: 24,
                       width: 14,
                       height: 10,
@@ -374,27 +367,27 @@ class _AmountAccountState extends State<AmountAccount> {
             lazyFirstRender: false,
             count: finalTotal,
             duration: Duration(milliseconds: 1000),
-            decimals: widget.walletWithDetails.wallet.decimals,
+            decimals: walletWithDetails.wallet.decimals,
             initialCount: 0,
             textBuilder: (number) {
               return AnimatedSwitcher(
                 duration: const Duration(milliseconds: 300),
                 child: TextFont(
                   key: ValueKey(isRevealed),
-                  textAlign: widget.textAlign,
+                  textAlign: textAlign,
                   text: convertToMoney(
                     Provider.of<AllWallets>(context),
                     number,
                     finalNumber: finalTotal,
-                    currencyKey: widget.walletWithDetails.wallet.currency,
-                    decimals: widget.walletWithDetails.wallet.decimals,
+                    currencyKey: walletWithDetails.wallet.currency,
+                    decimals: walletWithDetails.wallet.decimals,
                     addCurrencyName: Provider.of<AllWallets>(context)
                             .allContainSameCurrency() ==
                         false,
                     forceReveal: isRevealed,
                   ),
                   textColor: textColor,
-                  fontSize: widget.fontSize,
+                  fontSize: fontSize,
                   fontWeight: FontWeight.bold,
                 ),
               );
