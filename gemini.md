@@ -145,3 +145,6 @@
   - **Prevention:** Enforce fallback upper limits (e.g., `maxLength ?? 5000`) on all input fields globally at the core widget level.
 - 2026-07-28: Iterative Enhancement - Replaced the manually implemented hold-to-reveal gesture on `BudgetSpenderSummary` with the `HoldToRevealListener` wrapper. This ensures the interaction pattern (holding touch keeps numbers revealed) is consistent with the rest of the application, such as `TransactionsAmountBox` and graphical charts.
 **Next Planned Step:** Review the hold-to-reveal implementation in other remaining UI components like `TransactionEntryAmount` and `WalletEntry` to ensure consistency.
+
+- 2026-07-29: Security Patch - Mitigated SSRF and path traversal risks in Google Sheets and Drive integrations. Replaced fragile string prefix checking with strict `Uri.parse()` validation for `scheme` ('https') and `host` ('docs.google.com' or 'drive.google.com') in `convertGoogleSheetsUrlToCsvUrl` and `getFileIdFromUrl`. This ensures user-provided URLs cannot bypass security boundaries.
+**Next Planned Step:** Resume the previous planned step of reviewing the hold-to-reveal implementation in `TransactionEntryAmount` and `WalletEntry`.

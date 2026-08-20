@@ -2242,8 +2242,10 @@ class SelectIncludeAmount extends StatelessWidget {
               : Icons.cancel_rounded,
       title: "include-amount".tr(),
       enableBorderRadius: true,
-      backgroundColor:
-          Theme.of(context).colorScheme.secondaryContainer.withValues(alpha: 0.7),
+      backgroundColor: Theme.of(context)
+          .colorScheme
+          .secondaryContainer
+          .withValues(alpha: 0.7),
       initialValue: selectedPaid,
       onSwitched: onSwitched,
     );
@@ -4090,6 +4092,16 @@ class ReorderCategoriesPopup extends StatelessWidget {
 }
 
 String? getFileIdFromUrl(String url) {
+  try {
+    Uri uri = Uri.parse(url);
+    if (uri.scheme != 'https' ||
+        (uri.host != 'docs.google.com' && uri.host != 'drive.google.com')) {
+      return null;
+    }
+  } catch (e) {
+    return null;
+  }
+
   if (!url.startsWith("https://drive.google.com/file/d/") &&
       !url.startsWith("https://docs.google.com/document/d/") &&
       !url.startsWith("https://docs.google.com/spreadsheets/d/") &&
@@ -4754,10 +4766,11 @@ class SelectSubcategoryChips extends StatelessWidget {
                             ),
                             amountDark: 0.55,
                             amountLight: 0.3,
-                          ).withValues(alpha: 
-                            Theme.of(context).brightness == Brightness.light
-                                ? 0.8
-                                : 1,
+                          ).withValues(
+                            alpha:
+                                Theme.of(context).brightness == Brightness.light
+                                    ? 0.8
+                                    : 1,
                           );
                         },
                         getCustomBorderColor: (TransactionCategory category) {
@@ -4772,8 +4785,9 @@ class SelectSubcategoryChips extends StatelessWidget {
                                       Brightness.light
                                   ? 0.8
                                   : 0.4,
-                            ).withValues(alpha: 
-                              Theme.of(context).brightness == Brightness.light
+                            ).withValues(
+                              alpha: Theme.of(context).brightness ==
+                                      Brightness.light
                                   ? 0.8
                                   : 0.65,
                             );
@@ -4788,10 +4802,11 @@ class SelectSubcategoryChips extends StatelessWidget {
                               amount: 0.3,
                             ),
                             amount: 0.4,
-                          ).withValues(alpha: 
-                            Theme.of(context).brightness == Brightness.light
-                                ? 0.5
-                                : 0.7,
+                          ).withValues(
+                            alpha:
+                                Theme.of(context).brightness == Brightness.light
+                                    ? 0.5
+                                    : 0.7,
                           );
                         },
                         getLabel: (TransactionCategory category) {
