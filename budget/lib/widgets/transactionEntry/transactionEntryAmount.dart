@@ -12,7 +12,7 @@ import 'package:provider/src/provider.dart';
 import 'incomeAmountArrow.dart';
 import 'package:budget/widgets/holdToRevealListener.dart';
 
-class TransactionEntryAmount extends StatefulWidget {
+class TransactionEntryAmount extends StatelessWidget {
   const TransactionEntryAmount({
     required this.transaction,
     required this.showOtherCurrency,
@@ -24,16 +24,13 @@ class TransactionEntryAmount extends StatefulWidget {
   final bool unsetCustomCurrency;
 
   @override
-  State<TransactionEntryAmount> createState() => _TransactionEntryAmountState();
-}
-
-class _TransactionEntryAmountState extends State<TransactionEntryAmount> {
-
-  @override
   Widget build(BuildContext context) {
-    double count = widget.transaction.amount.abs() *
+    double count =
+        transaction.amount.abs() *
         (amountRatioToPrimaryCurrencyGivenPk(
-            Provider.of<AllWallets>(context), widget.transaction.walletFk));
+          Provider.of<AllWallets>(context),
+          transaction.walletFk,
+        ));
     return HoldToRevealListener(
       builder: (context, isRevealed) => Column(
         crossAxisAlignment: CrossAxisAlignment.end,
@@ -49,17 +46,18 @@ class _TransactionEntryAmountState extends State<TransactionEntryAmount> {
                   return Row(
                     children: [
                       AnimatedSizeSwitcher(
-                        child: ((widget.transaction.type ==
+                        child:
+                            ((transaction.type ==
                                         TransactionSpecialType.credit ||
-                                    widget.transaction.type ==
+                                    transaction.type ==
                                         TransactionSpecialType.debt) &&
-                                widget.transaction.paid == false)
+                                transaction.paid == false)
                             ? SizedBox.shrink()
                             : IncomeOutcomeArrow(
-                                isIncome: widget.transaction.income,
+                                isIncome: transaction.income,
                                 color: getTransactionAmountColor(
                                   context,
-                                  widget.transaction,
+                                  transaction,
                                 ),
                                 width: 15,
                                 iconSize: 24,
@@ -75,10 +73,12 @@ class _TransactionEntryAmountState extends State<TransactionEntryAmount> {
                             finalNumber: count,
                             forceReveal: isRevealed,
                           ),
-                          fontSize: 19 - (widget.showOtherCurrency ? 1 : 0),
+                          fontSize: 19 - (showOtherCurrency ? 1 : 0),
                           fontWeight: FontWeight.bold,
                           textColor: getTransactionAmountColor(
-                              context, widget.transaction),
+                            context,
+                            transaction,
+                          ),
                         ),
                       ),
                     ],
@@ -89,32 +89,33 @@ class _TransactionEntryAmountState extends State<TransactionEntryAmount> {
           ),
           // Original amount:
           AnimatedSizeSwitcher(
-            child: widget.showOtherCurrency
+            child: showOtherCurrency
                 ? AnimatedSwitcher(
                     duration: const Duration(milliseconds: 300),
                     child: TextFont(
                       key: ValueKey('other_curr_${isRevealed}'),
                       text: convertToMoney(
                         Provider.of<AllWallets>(context),
-                        widget.transaction.amount.abs(),
-                        decimals: Provider.of<AllWallets>(context)
-                                .indexedByPk[widget.transaction.walletFk]
-                                ?.decimals ??
+                        transaction.amount.abs(),
+                        decimals:
+                            Provider.of<AllWallets>(
+                              context,
+                            ).indexedByPk[transaction.walletFk]?.decimals ??
                             2,
-                        currencyKey: Provider.of<AllWallets>(context)
-                            .indexedByPk[widget.transaction.walletFk]
-                            ?.currency,
+                        currencyKey: Provider.of<AllWallets>(
+                          context,
+                        ).indexedByPk[transaction.walletFk]?.currency,
                         addCurrencyName: true,
                         forceReveal: isRevealed,
                       ),
                       fontSize: 12,
                       textColor: getTransactionAmountColor(
-                          context, widget.transaction),
+                        context,
+                        transaction,
+                      ),
                     ),
                   )
-                : Container(
-                    key: ValueKey(0),
-                  ),
+                : Container(key: ValueKey(0)),
           ),
         ],
       ),
@@ -125,37 +126,42 @@ class _TransactionEntryAmountState extends State<TransactionEntryAmount> {
 Color getTransactionAmountColor(BuildContext context, Transaction transaction) {
   Color color = transaction.objectiveLoanFk != null && transaction.paid
       ? transaction.income
-          ? getColor(context, "unPaidOverdue")
-          : getColor(context, "unPaidUpcoming")
+            ? getColor(context, "unPaidOverdue")
+            : getColor(context, "unPaidUpcoming")
       : (transaction.type == TransactionSpecialType.credit ||
-                  transaction.type == TransactionSpecialType.debt) &&
-              transaction.paid
-          ? transaction.type == TransactionSpecialType.credit
-              ? getColor(context, "unPaidUpcoming")
-              : transaction.type == TransactionSpecialType.debt
-                  ? getColor(context, "unPaidOverdue")
-                  : getColor(context, "textLight")
-          : (transaction.type == TransactionSpecialType.credit ||
-                      transaction.type == TransactionSpecialType.debt) &&
-                  transaction.paid == false
-              ? getColor(context, "textLight")
-              : transaction.paid
-                  ? transaction.income == true
-                      ? getColor(context, "incomeAmount")
-                      : getColor(context, "expenseAmount")
-                  : transaction.skipPaid
-                      ? getColor(context, "textLight")
-                      : transaction.dateCreated.millisecondsSinceEpoch <=
-                              DateTime.now().millisecondsSinceEpoch
-                          ? getColor(context, "textLight")
-                          // getColor(context, "unPaidOverdue")
-                          : getColor(context, "textLight");
+                transaction.type == TransactionSpecialType.debt) &&
+            transaction.paid
+      ? transaction.type == TransactionSpecialType.credit
+            ? getColor(context, "unPaidUpcoming")
+            : transaction.type == TransactionSpecialType.debt
+            ? getColor(context, "unPaidOverdue")
+            : getColor(context, "textLight")
+      : (transaction.type == TransactionSpecialType.credit ||
+                transaction.type == TransactionSpecialType.debt) &&
+            transaction.paid == false
+      ? getColor(context, "textLight")
+      : transaction.paid
+      ? transaction.income == true
+            ? getColor(context, "incomeAmount")
+            : getColor(context, "expenseAmount")
+      : transaction.skipPaid
+      ? getColor(context, "textLight")
+      : transaction.dateCreated.millisecondsSinceEpoch <=
+            DateTime.now().millisecondsSinceEpoch
+      ? getColor(context, "textLight")
+      // getColor(context, "unPaidOverdue")
+      : getColor(context, "textLight");
   if (transaction.paid == true && transaction.categoryFk == "0") {
     if (appStateSettings["balanceTransferAmountColor"] == "no-color") {
       return getColor(context, "black").withValues(alpha: 0.95);
     } else {
-      return dynamicPastel(context, color,
-          inverse: true, amountLight: 0.3, amountDark: 0.25);
+      return dynamicPastel(
+        context,
+        color,
+        inverse: true,
+        amountLight: 0.3,
+        amountDark: 0.25,
+      );
     }
   }
   return color;

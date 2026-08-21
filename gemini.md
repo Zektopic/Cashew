@@ -145,3 +145,6 @@
   - **Prevention:** Enforce fallback upper limits (e.g., `maxLength ?? 5000`) on all input fields globally at the core widget level.
 - 2026-07-28: Iterative Enhancement - Replaced the manually implemented hold-to-reveal gesture on `BudgetSpenderSummary` with the `HoldToRevealListener` wrapper. This ensures the interaction pattern (holding touch keeps numbers revealed) is consistent with the rest of the application, such as `TransactionsAmountBox` and graphical charts.
 **Next Planned Step:** Review the hold-to-reveal implementation in other remaining UI components like `TransactionEntryAmount` and `WalletEntry` to ensure consistency.
+
+- 2026-08-21: Iterative Enhancement - Refactored `TransactionEntryAmount` and `AmountAccount` (in `walletEntry.dart`) from `StatefulWidget` to `StatelessWidget`. Since the hold-to-reveal gesture and timer states were fully abstracted into the `HoldToRevealListener` wrapper, the parent widgets no longer needed to maintain their own redundant state classes, reducing widget tree overhead.
+**Next Planned Step:** Continue reviewing other UI components that utilize `HoldToRevealListener` to identify and remove further redundant `StatefulWidget` boilerplate where possible.
