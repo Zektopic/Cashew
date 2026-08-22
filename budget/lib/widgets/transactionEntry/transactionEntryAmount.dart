@@ -22,11 +22,15 @@ class TransactionEntryAmount extends StatelessWidget {
   final Transaction transaction;
   final bool showOtherCurrency;
   final bool unsetCustomCurrency;
+
   @override
   Widget build(BuildContext context) {
-    double count = transaction.amount.abs() *
+    double count =
+        transaction.amount.abs() *
         (amountRatioToPrimaryCurrencyGivenPk(
-            Provider.of<AllWallets>(context), transaction.walletFk));
+          Provider.of<AllWallets>(context),
+          transaction.walletFk,
+        ));
     return HoldToRevealListener(
       builder: (context, isRevealed) => Column(
         crossAxisAlignment: CrossAxisAlignment.end,
@@ -42,7 +46,8 @@ class TransactionEntryAmount extends StatelessWidget {
                   return Row(
                     children: [
                       AnimatedSizeSwitcher(
-                        child: ((transaction.type ==
+                        child:
+                            ((transaction.type ==
                                         TransactionSpecialType.credit ||
                                     transaction.type ==
                                         TransactionSpecialType.debt) &&
@@ -70,8 +75,10 @@ class TransactionEntryAmount extends StatelessWidget {
                           ),
                           fontSize: 19 - (showOtherCurrency ? 1 : 0),
                           fontWeight: FontWeight.bold,
-                          textColor:
-                              getTransactionAmountColor(context, transaction),
+                          textColor: getTransactionAmountColor(
+                            context,
+                            transaction,
+                          ),
                         ),
                       ),
                     ],
@@ -90,24 +97,25 @@ class TransactionEntryAmount extends StatelessWidget {
                       text: convertToMoney(
                         Provider.of<AllWallets>(context),
                         transaction.amount.abs(),
-                        decimals: Provider.of<AllWallets>(context)
-                                .indexedByPk[transaction.walletFk]
-                                ?.decimals ??
+                        decimals:
+                            Provider.of<AllWallets>(
+                              context,
+                            ).indexedByPk[transaction.walletFk]?.decimals ??
                             2,
-                        currencyKey: Provider.of<AllWallets>(context)
-                            .indexedByPk[transaction.walletFk]
-                            ?.currency,
+                        currencyKey: Provider.of<AllWallets>(
+                          context,
+                        ).indexedByPk[transaction.walletFk]?.currency,
                         addCurrencyName: true,
                         forceReveal: isRevealed,
                       ),
                       fontSize: 12,
-                      textColor:
-                          getTransactionAmountColor(context, transaction),
+                      textColor: getTransactionAmountColor(
+                        context,
+                        transaction,
+                      ),
                     ),
                   )
-                : Container(
-                    key: ValueKey(0),
-                  ),
+                : Container(key: ValueKey(0)),
           ),
         ],
       ),
@@ -118,37 +126,42 @@ class TransactionEntryAmount extends StatelessWidget {
 Color getTransactionAmountColor(BuildContext context, Transaction transaction) {
   Color color = transaction.objectiveLoanFk != null && transaction.paid
       ? transaction.income
-          ? getColor(context, "unPaidOverdue")
-          : getColor(context, "unPaidUpcoming")
+            ? getColor(context, "unPaidOverdue")
+            : getColor(context, "unPaidUpcoming")
       : (transaction.type == TransactionSpecialType.credit ||
-                  transaction.type == TransactionSpecialType.debt) &&
-              transaction.paid
-          ? transaction.type == TransactionSpecialType.credit
-              ? getColor(context, "unPaidUpcoming")
-              : transaction.type == TransactionSpecialType.debt
-                  ? getColor(context, "unPaidOverdue")
-                  : getColor(context, "textLight")
-          : (transaction.type == TransactionSpecialType.credit ||
-                      transaction.type == TransactionSpecialType.debt) &&
-                  transaction.paid == false
-              ? getColor(context, "textLight")
-              : transaction.paid
-                  ? transaction.income == true
-                      ? getColor(context, "incomeAmount")
-                      : getColor(context, "expenseAmount")
-                  : transaction.skipPaid
-                      ? getColor(context, "textLight")
-                      : transaction.dateCreated.millisecondsSinceEpoch <=
-                              DateTime.now().millisecondsSinceEpoch
-                          ? getColor(context, "textLight")
-                          // getColor(context, "unPaidOverdue")
-                          : getColor(context, "textLight");
+                transaction.type == TransactionSpecialType.debt) &&
+            transaction.paid
+      ? transaction.type == TransactionSpecialType.credit
+            ? getColor(context, "unPaidUpcoming")
+            : transaction.type == TransactionSpecialType.debt
+            ? getColor(context, "unPaidOverdue")
+            : getColor(context, "textLight")
+      : (transaction.type == TransactionSpecialType.credit ||
+                transaction.type == TransactionSpecialType.debt) &&
+            transaction.paid == false
+      ? getColor(context, "textLight")
+      : transaction.paid
+      ? transaction.income == true
+            ? getColor(context, "incomeAmount")
+            : getColor(context, "expenseAmount")
+      : transaction.skipPaid
+      ? getColor(context, "textLight")
+      : transaction.dateCreated.millisecondsSinceEpoch <=
+            DateTime.now().millisecondsSinceEpoch
+      ? getColor(context, "textLight")
+      // getColor(context, "unPaidOverdue")
+      : getColor(context, "textLight");
   if (transaction.paid == true && transaction.categoryFk == "0") {
     if (appStateSettings["balanceTransferAmountColor"] == "no-color") {
       return getColor(context, "black").withValues(alpha: 0.95);
     } else {
-      return dynamicPastel(context, color,
-          inverse: true, amountLight: 0.3, amountDark: 0.25);
+      return dynamicPastel(
+        context,
+        color,
+        inverse: true,
+        amountLight: 0.3,
+        amountDark: 0.25,
+      );
     }
   }
   return color;

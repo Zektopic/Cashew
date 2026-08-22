@@ -24,8 +24,11 @@ import 'package:budget/widgets/countNumber.dart';
 import 'package:budget/widgets/holdToRevealListener.dart';
 
 class WalletEntry extends StatelessWidget {
-  const WalletEntry(
-      {super.key, required this.walletWithDetails, required this.selected});
+  const WalletEntry({
+    super.key,
+    required this.walletWithDetails,
+    required this.selected,
+  });
   final WalletWithDetails walletWithDetails;
   final bool selected;
 
@@ -40,7 +43,8 @@ class WalletEntry extends StatelessWidget {
       child: OpenContainerNavigation(
         borderRadius: 15,
         openPage: WatchedWalletDetailsPage(
-            walletPk: walletWithDetails.wallet.walletPk),
+          walletPk: walletWithDetails.wallet.walletPk,
+        ),
         button: (openContainer) {
           return Tappable(
             color: getColor(context, "lightDarkAccentHeavyLight"),
@@ -51,17 +55,19 @@ class WalletEntry extends StatelessWidget {
                 border: Border.all(
                   width: 2,
                   color: selected
-                      ? HexColor(walletWithDetails.wallet.colour,
-                              defaultColor:
-                                  Theme.of(context).colorScheme.primary)
-                          .withValues(alpha: 0.7)
+                      ? HexColor(
+                          walletWithDetails.wallet.colour,
+                          defaultColor: Theme.of(context).colorScheme.primary,
+                        ).withValues(alpha: 0.7)
                       : Colors.transparent,
                 ),
               ),
               duration: Duration(milliseconds: 450),
               child: Padding(
                 padding: const EdgeInsetsDirectional.symmetric(
-                    horizontal: 18, vertical: 13),
+                  horizontal: 18,
+                  vertical: 13,
+                ),
                 child: Stack(
                   clipBehavior: Clip.none,
                   children: [
@@ -71,10 +77,10 @@ class WalletEntry extends StatelessWidget {
                       child: Container(
                         decoration: BoxDecoration(
                           borderRadius: BorderRadiusDirectional.circular(100),
-                          color: HexColor(walletWithDetails.wallet.colour,
-                                  defaultColor:
-                                      Theme.of(context).colorScheme.primary)
-                              .withValues(alpha: 0.7),
+                          color: HexColor(
+                            walletWithDetails.wallet.colour,
+                            defaultColor: Theme.of(context).colorScheme.primary,
+                          ).withValues(alpha: 0.7),
                         ),
                         width: 20,
                         height: 20,
@@ -99,15 +105,18 @@ class WalletEntry extends StatelessWidget {
                           ),
                           TextFont(
                             textAlign: TextAlign.start,
-                            text: walletWithDetails.numberTransactions
+                            text:
+                                walletWithDetails.numberTransactions
                                     .toString() +
                                 " " +
                                 (walletWithDetails.numberTransactions == 1
                                     ? "transaction".tr().toLowerCase()
                                     : "transactions".tr().toLowerCase()),
                             fontSize: 14,
-                            textColor: getColor(context, "black")
-                                .withValues(alpha: 0.65),
+                            textColor: getColor(
+                              context,
+                              "black",
+                            ).withValues(alpha: 0.65),
                           ),
                         ],
                       ),
@@ -120,9 +129,10 @@ class WalletEntry extends StatelessWidget {
               if (selected) {
                 openContainer();
               } else {
-                setPrimaryWallet(walletWithDetails.wallet.walletPk,
-                    allWallets:
-                        Provider.of<AllWallets>(context, listen: false));
+                setPrimaryWallet(
+                  walletWithDetails.wallet.walletPk,
+                  allWallets: Provider.of<AllWallets>(context, listen: false),
+                );
               }
             },
             onLongPress: () {
@@ -162,16 +172,18 @@ class WalletEntryRow extends StatelessWidget {
           ? WalletDetailsPage(
               wallet: null,
               initialSearchFilters: SearchFilters(
-                walletPks: Provider.of<AllWallets>(context)
-                    .list
-                    .where((wallet) =>
-                        wallet.currency == walletWithDetails.wallet.currency)
+                walletPks: Provider.of<AllWallets>(context).list
+                    .where(
+                      (wallet) =>
+                          wallet.currency == walletWithDetails.wallet.currency,
+                    )
                     .map((e) => e.walletPk)
                     .toList(),
               ),
             )
           : WatchedWalletDetailsPage(
-              walletPk: walletWithDetails.wallet.walletPk),
+              walletPk: walletWithDetails.wallet.walletPk,
+            ),
       closedColor: getColor(context, "lightDarkAccentHeavyLight"),
       button: (openContainer) {
         return Tappable(
@@ -179,7 +191,9 @@ class WalletEntryRow extends StatelessWidget {
           borderRadius: 0,
           child: Padding(
             padding: const EdgeInsetsDirectional.symmetric(
-                horizontal: 18, vertical: 8),
+              horizontal: 18,
+              vertical: 8,
+            ),
             child: Container(
               child: Row(
                 mainAxisSize: MainAxisSize.max,
@@ -198,8 +212,9 @@ class WalletEntryRow extends StatelessWidget {
                                         BorderRadiusDirectional.circular(100),
                                     color: HexColor(
                                       walletWithDetails.wallet.colour,
-                                      defaultColor:
-                                          Theme.of(context).colorScheme.primary,
+                                      defaultColor: Theme.of(
+                                        context,
+                                      ).colorScheme.primary,
                                     ).withValues(alpha: 0.7),
                                   ),
                                   width: 20,
@@ -215,9 +230,9 @@ class WalletEntryRow extends StatelessWidget {
                                         width: 2,
                                         color: HexColor(
                                           walletWithDetails.wallet.colour,
-                                          defaultColor: Theme.of(context)
-                                              .colorScheme
-                                              .primary,
+                                          defaultColor: Theme.of(
+                                            context,
+                                          ).colorScheme.primary,
                                         ).withValues(alpha: 0.7),
                                       ),
                                     ),
@@ -240,9 +255,9 @@ class WalletEntryRow extends StatelessWidget {
                                 TextSpan(
                                   text: isCurrencyRow
                                       ? (walletWithDetails.wallet.currency ??
-                                              "")
-                                          .toString()
-                                          .allCaps
+                                                "")
+                                            .toString()
+                                            .allCaps
                                       : walletWithDetails.wallet.name,
                                   style: TextStyle(
                                     fontSize: 18,
@@ -254,10 +269,13 @@ class WalletEntryRow extends StatelessWidget {
                                 ),
                                 if (percent != null)
                                   TextSpan(
-                                    text: "  " +
+                                    text:
+                                        "  " +
                                         "(" +
-                                        convertToPercent(percent ?? 0,
-                                            useLessThanZero: true) +
+                                        convertToPercent(
+                                          percent ?? 0,
+                                          useLessThanZero: true,
+                                        ) +
                                         ")",
                                     style: TextStyle(
                                       fontSize: 15,
@@ -277,7 +295,7 @@ class WalletEntryRow extends StatelessWidget {
                     walletWithDetails: walletWithDetails,
                     textAlign: TextAlign.end,
                     fontSize: 18,
-                  )
+                  ),
                 ],
               ),
             ),
@@ -286,8 +304,10 @@ class WalletEntryRow extends StatelessWidget {
             if (selected || isCurrencyRow) {
               openContainer();
             } else {
-              setPrimaryWallet(walletWithDetails.wallet.walletPk,
-                  allWallets: Provider.of<AllWallets>(context, listen: false));
+              setPrimaryWallet(
+                walletWithDetails.wallet.walletPk,
+                allWallets: Provider.of<AllWallets>(context, listen: false),
+              );
             }
           },
           onLongPress: () async {
@@ -328,23 +348,26 @@ class AmountAccount extends StatelessWidget {
   final WalletWithDetails walletWithDetails;
   final TextAlign textAlign;
   final double fontSize;
+
   @override
   Widget build(BuildContext context) {
     double? roundedWalletWithTotal = (double.tryParse(
-        absoluteZero(walletWithDetails.totalSpent ?? 0)
-            .toStringAsFixed(walletWithDetails.wallet.decimals)));
+      absoluteZero(
+        walletWithDetails.totalSpent ?? 0,
+      ).toStringAsFixed(walletWithDetails.wallet.decimals),
+    ));
     Color textColor =
         appStateSettings["accountColorfulAmountsWithArrows"] == true
-            ? roundedWalletWithTotal == 0
-                ? getColor(context, "black")
-                : (walletWithDetails.totalSpent ?? 0) > 0
-                    ? getColor(context, "incomeAmount")
-                    : getColor(context, "expenseAmount")
-            : getColor(context, "black");
+        ? roundedWalletWithTotal == 0
+              ? getColor(context, "black")
+              : (walletWithDetails.totalSpent ?? 0) > 0
+              ? getColor(context, "incomeAmount")
+              : getColor(context, "expenseAmount")
+        : getColor(context, "black");
     double finalTotal =
         appStateSettings["accountColorfulAmountsWithArrows"] == true
-            ? (walletWithDetails.totalSpent ?? 0).abs()
-            : (absoluteZero(walletWithDetails.totalSpent ?? 0));
+        ? (walletWithDetails.totalSpent ?? 0).abs()
+        : (absoluteZero(walletWithDetails.totalSpent ?? 0));
     return HoldToRevealListener(
       builder: (context, isRevealed) => Row(
         mainAxisSize: MainAxisSize.min,
@@ -352,9 +375,7 @@ class AmountAccount extends StatelessWidget {
           if (appStateSettings["accountColorfulAmountsWithArrows"] == true)
             AnimatedSizeSwitcher(
               child: roundedWalletWithTotal == 0
-                  ? Container(
-                      key: ValueKey(1),
-                    )
+                  ? Container(key: ValueKey(1))
                   : IncomeOutcomeArrow(
                       key: ValueKey(2),
                       isIncome: (walletWithDetails.totalSpent ?? 0) > 0,
@@ -381,8 +402,10 @@ class AmountAccount extends StatelessWidget {
                     finalNumber: finalTotal,
                     currencyKey: walletWithDetails.wallet.currency,
                     decimals: walletWithDetails.wallet.decimals,
-                    addCurrencyName: Provider.of<AllWallets>(context)
-                            .allContainSameCurrency() ==
+                    addCurrencyName:
+                        Provider.of<AllWallets>(
+                          context,
+                        ).allContainSameCurrency() ==
                         false,
                     forceReveal: isRevealed,
                   ),
@@ -413,8 +436,11 @@ Future<bool> setPrimaryWallet(String walletPk, {AllWallets? allWallets}) async {
       allWallets.indexedByPk[appStateSettings["selectedWalletPk"]]?.decimals ==
           allWallets.indexedByPk[walletPk]?.decimals) {
     // The currency has not changed, we do not need to refresh the global state!
-    await updateSettings("selectedWalletPk", walletPk,
-        updateGlobalState: false);
+    await updateSettings(
+      "selectedWalletPk",
+      walletPk,
+      updateGlobalState: false,
+    );
   } else {
     // The currency has changed, or we do not have access to allWallets, so we need to refresh the global state
     await updateSettings("selectedWalletPk", walletPk, updateGlobalState: true);
