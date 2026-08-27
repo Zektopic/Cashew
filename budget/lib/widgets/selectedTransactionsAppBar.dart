@@ -32,21 +32,13 @@ import 'package:budget/widgets/countNumber.dart';
 import 'package:budget/widgets/framework/popupFramework.dart';
 import 'package:budget/widgets/holdToRevealListener.dart';
 
-class SelectedTransactionsAppBar extends StatefulWidget {
+class SelectedTransactionsAppBar extends StatelessWidget {
   const SelectedTransactionsAppBar(
       {Key? key, required this.pageID, this.enableSettleAllButton = false})
       : super(key: key);
 
   final String pageID;
   final bool enableSettleAllButton;
-
-  @override
-  State<SelectedTransactionsAppBar> createState() =>
-      _SelectedTransactionsAppBarState();
-}
-
-class _SelectedTransactionsAppBarState
-    extends State<SelectedTransactionsAppBar> {
 
   Future shareSelectedTransactions(
       {required BuildContext context,
@@ -87,10 +79,10 @@ class _SelectedTransactionsAppBarState
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
       valueListenable: globalSelectedID.select(
-          (controller) => (controller.value[widget.pageID] ?? []).length),
+          (controller) => (controller.value[pageID] ?? []).length),
       builder: (context, _, __) {
-        List<String> listOfIDs = globalSelectedID.value[widget.pageID] ?? [];
-        bool animateIn = globalSelectedID.value[widget.pageID] != null &&
+        List<String> listOfIDs = globalSelectedID.value[pageID] ?? [];
+        bool animateIn = globalSelectedID.value[pageID] != null &&
             listOfIDs.length > 0;
         return AnimatedPositionedDirectional(
           start: 0,
@@ -132,7 +124,7 @@ class _SelectedTransactionsAppBarState
                           color: Theme.of(context).colorScheme.secondary,
                         ),
                         onPressed: () {
-                          globalSelectedID.value[widget.pageID] = [];
+                          globalSelectedID.value[pageID] = [];
                           globalSelectedID.notifyListeners();
                         },
                       ),
@@ -246,9 +238,9 @@ class _SelectedTransactionsAppBarState
                         ),
                       ),
                       SelectedTransactionsAppBarMenu(
-                        pageID: widget.pageID,
+                        pageID: pageID,
                         selectedTransactionPks: listOfIDs,
-                        enableSettleAllButton: widget.enableSettleAllButton,
+                        enableSettleAllButton: enableSettleAllButton,
                       )
                     ],
                   ),
