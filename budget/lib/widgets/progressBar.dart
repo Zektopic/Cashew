@@ -3,7 +3,7 @@ import 'package:budget/struct/settings.dart';
 import 'package:flutter/material.dart';
 import 'package:budget/widgets/holdToRevealListener.dart';
 
-class ProgressBar extends StatefulWidget {
+class ProgressBar extends StatelessWidget {
   final double currentPercent;
   final Color color;
   final double height;
@@ -16,27 +16,22 @@ class ProgressBar extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<ProgressBar> createState() => _ProgressBarState();
-}
-
-class _ProgressBarState extends State<ProgressBar> {
-
-  @override
   Widget build(BuildContext context) {
     bool obscureAmounts = appStateSettings["obscureAmounts"] == true;
 
     return HoldToRevealListener(
       builder: (context, isRevealed) => LayoutBuilder(
         builder: (_, boxConstraints) {
-          double effectivePercent =
-              obscureAmounts && !isRevealed ? 0 : widget.currentPercent;
+          double effectivePercent = obscureAmounts && !isRevealed
+              ? 0
+              : currentPercent;
           double x = boxConstraints.maxWidth;
           double progressWidth = (effectivePercent / 100) * x;
           return Stack(
             children: [
               Container(
                 width: x,
-                height: widget.height,
+                height: height,
                 decoration: BoxDecoration(
                   color: getColor(context, "lightDarkAccentHeavy"),
                   shape: BoxShape.rectangle,
@@ -46,9 +41,9 @@ class _ProgressBarState extends State<ProgressBar> {
               AnimatedContainer(
                 duration: Duration(milliseconds: 100),
                 width: progressWidth,
-                height: widget.height,
+                height: height,
                 decoration: BoxDecoration(
-                  color: widget.color,
+                  color: color,
                   shape: BoxShape.rectangle,
                   borderRadius: BorderRadiusDirectional.circular(100),
                 ),

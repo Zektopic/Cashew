@@ -133,10 +133,10 @@ class TransactionEntries extends StatefulWidget {
 class _TransactionEntriesState extends State<TransactionEntries> {
   late bool loadAll =
       appStateSettings["restrictAmountOfInitiallyLoadedTransactions"] == true
-          ? widget.initialLoadLimit == null
-              ? true
-              : false
-          : true;
+      ? widget.initialLoadLimit == null
+            ? true
+            : false
+      : true;
 
   Widget createTransactionEntry(
     List<TransactionWithCategory> transactionListForDay,
@@ -219,7 +219,8 @@ class _TransactionEntriesState extends State<TransactionEntries> {
           Set<String> futureTransactionPks = (data
               .where(
                 (transactionWithCategory) => transactionWithCategory
-                    .transaction.dateCreated
+                    .transaction
+                    .dateCreated
                     .justDay()
                     .isAfter(DateTime.now().justDay()),
               )
@@ -231,7 +232,7 @@ class _TransactionEntriesState extends State<TransactionEntries> {
 
           bool enableFutureTransactionsDivider =
               widget.enableFutureTransactionsCollapse &&
-                  futureTransactionPks.length >= 3;
+              futureTransactionPks.length >= 3;
           bool notYetAddedPastTransactionsDivider = true;
 
           if (totalNumberTransactions <= 0 &&
@@ -240,20 +241,21 @@ class _TransactionEntriesState extends State<TransactionEntries> {
               children: [
                 if (widget.showNoResults)
                   NoResults(
-                    message: widget.noResultsMessage ??
+                    message:
+                        widget.noResultsMessage ??
                         "no-transactions-within-time-range".tr() +
                             "." +
                             (widget.budget != null
                                 ? ("\n" +
-                                    "(" +
-                                    getWordedDateShortMore(
-                                      widget.startDay ?? DateTime.now(),
-                                    ) +
-                                    " – " +
-                                    getWordedDateShortMore(
-                                      widget.endDay ?? DateTime.now(),
-                                    ) +
-                                    ")")
+                                      "(" +
+                                      getWordedDateShortMore(
+                                        widget.startDay ?? DateTime.now(),
+                                      ) +
+                                      " – " +
+                                      getWordedDateShortMore(
+                                        widget.endDay ?? DateTime.now(),
+                                      ) +
+                                      ")")
                                 : ""),
                     tintColor: Theme.of(
                       context,
@@ -297,14 +299,18 @@ class _TransactionEntriesState extends State<TransactionEntries> {
 
           for (TransactionWithCategory transactionWithCategory in data) {
             if (widget.pastDaysLimitToShow != null &&
-                totalPastUniqueDays > widget.pastDaysLimitToShow!) break;
+                totalPastUniqueDays > widget.pastDaysLimitToShow!)
+              break;
 
-            DateTime currentTransactionDate =
-                transactionWithCategory.transaction.dateCreated.justDay();
+            DateTime currentTransactionDate = transactionWithCategory
+                .transaction
+                .dateCreated
+                .justDay();
             if (currentDate == null) {
               currentDate = currentTransactionDate;
               if (currentDate.millisecondsSinceEpoch <
-                  DateTime.now().millisecondsSinceEpoch) totalPastUniqueDays++;
+                  DateTime.now().millisecondsSinceEpoch)
+                totalPastUniqueDays++;
             }
             if (currentDate == currentTransactionDate) {
               transactionListForDay.add(transactionWithCategory);
@@ -312,19 +318,19 @@ class _TransactionEntriesState extends State<TransactionEntries> {
                 // Include balance correction when calculating the net
                 totalSpentForDayWithBalanceCorrection +=
                     transactionWithCategory.transaction.amount *
-                        (amountRatioToPrimaryCurrencyGivenPk(
-                          Provider.of<AllWallets>(context),
-                          transactionWithCategory.transaction.walletFk,
-                        ));
+                    (amountRatioToPrimaryCurrencyGivenPk(
+                      Provider.of<AllWallets>(context),
+                      transactionWithCategory.transaction.walletFk,
+                    ));
               }
               if (transactionWithCategory.transaction.paid &&
                   transactionWithCategory.transaction.categoryFk != "0") {
                 double amountForDay =
                     transactionWithCategory.transaction.amount *
-                        (amountRatioToPrimaryCurrencyGivenPk(
-                          Provider.of<AllWallets>(context),
-                          transactionWithCategory.transaction.walletFk,
-                        ));
+                    (amountRatioToPrimaryCurrencyGivenPk(
+                      Provider.of<AllWallets>(context),
+                      transactionWithCategory.transaction.walletFk,
+                    ));
                 totalSpentForDay += amountForDay;
                 if (amountForDay < 0) {
                   totalExpense += amountForDay;
@@ -335,8 +341,8 @@ class _TransactionEntriesState extends State<TransactionEntries> {
               }
             }
 
-            DateTime? nextTransactionDate = totalNumberTransactions ==
-                    currentTotalIndex + 1
+            DateTime? nextTransactionDate =
+                totalNumberTransactions == currentTotalIndex + 1
                 ? null
                 : data[currentTotalIndex + 1].transaction.dateCreated.justDay();
 
@@ -350,17 +356,17 @@ class _TransactionEntriesState extends State<TransactionEntries> {
 
                 Widget? pastTransactionsDivider =
                     enableFutureTransactionsDivider &&
-                            notYetAddedPastTransactionsDivider &&
-                            currentTransactionDate.justDay().isAfter(
-                                      DateTime.now().justDay(),
-                                    ) ==
-                                false
-                        ? PastTransactionsDivider(
-                            listID: widget.listID,
-                            useHorizontalPaddingConstrained:
-                                widget.useHorizontalPaddingConstrained,
-                          )
-                        : null;
+                        notYetAddedPastTransactionsDivider &&
+                        currentTransactionDate.justDay().isAfter(
+                              DateTime.now().justDay(),
+                            ) ==
+                            false
+                    ? PastTransactionsDivider(
+                        listID: widget.listID,
+                        useHorizontalPaddingConstrained:
+                            widget.useHorizontalPaddingConstrained,
+                      )
+                    : null;
 
                 if (pastTransactionsDivider != null)
                   notYetAddedPastTransactionsDivider = false;
@@ -377,27 +383,28 @@ class _TransactionEntriesState extends State<TransactionEntries> {
                               widget.useHorizontalPaddingConstrained,
                           color: widget.dateDividerColor,
                           date: currentTransactionDate,
-                          afterDate: daysDifference >= 0 ||
+                          afterDate:
+                              daysDifference >= 0 ||
                                   widget.showNumberOfDaysUntilForFutureDates ==
                                       false
                               ? ""
                               : " • " +
-                                  (daysDifference * -1).toString() +
-                                  " " +
-                                  (daysDifference * -1 == 1
-                                      ? "day".tr()
-                                      : "days".tr()),
+                                    (daysDifference * -1).toString() +
+                                    " " +
+                                    (daysDifference * -1 == 1
+                                        ? "day".tr()
+                                        : "days".tr()),
                           info: appStateSettings["netSpendingDayTotal"] == true
                               ? convertToMoney(
                                   Provider.of<AllWallets>(context),
                                   netSpent,
                                 )
                               : transactionListForDay.length > 1
-                                  ? convertToMoney(
-                                      Provider.of<AllWallets>(context),
-                                      totalSpentForDay,
-                                    )
-                                  : "",
+                              ? convertToMoney(
+                                  Provider.of<AllWallets>(context),
+                                  totalSpentForDay,
+                                )
+                              : "",
                         ),
                       );
 
@@ -418,9 +425,11 @@ class _TransactionEntriesState extends State<TransactionEntries> {
                         child: dateDividerWidget,
                       )
                       ..items = [
-                        for (int index = 0;
-                            index < transactionListForDay.length;
-                            index++)
+                        for (
+                          int index = 0;
+                          index < transactionListForDay.length;
+                          index++
+                        )
                           createTransactionEntry(
                             transactionListForDay,
                             transactionListForDay[index],
@@ -435,9 +444,11 @@ class _TransactionEntriesState extends State<TransactionEntries> {
                     widgetsOut.add(pastTransactionsDivider);
                   }
                   widgetsOut.add(dateDividerWidget);
-                  for (int index = 0;
-                      index < transactionListForDay.length;
-                      index++) {
+                  for (
+                    int index = 0;
+                    index < transactionListForDay.length;
+                    index++
+                  ) {
                     widgetsOut.add(
                       createTransactionEntry(
                         transactionListForDay,
@@ -462,40 +473,41 @@ class _TransactionEntriesState extends State<TransactionEntries> {
                         offset: Offset(0, -1),
                         child: transactionListForDay.length > 0
                             ? widget.includeDateDivider == false
-                                ? SizedBox.shrink()
-                                : dateDividerWidget
+                                  ? SizedBox.shrink()
+                                  : dateDividerWidget
                             : SizedBox.shrink(),
                       ),
                       sticky: true,
                       sliver:
                           SliverImplicitlyAnimatedList<TransactionWithCategory>(
-                        spawnIsolate: false,
-                        items: transactionListForDay,
-                        areItemsTheSame: (a, b) =>
-                            a.transaction.transactionPk ==
-                            b.transaction.transactionPk,
-                        insertDuration: Duration(milliseconds: 500),
-                        removeDuration: Duration(milliseconds: 500),
-                        updateDuration: Duration(milliseconds: 500),
-                        itemBuilder: (
-                          BuildContext context,
-                          Animation<double> animation,
-                          TransactionWithCategory item,
-                          int index,
-                        ) {
-                          return SizeFadeTransition(
-                            sizeFraction: 0.7,
-                            curve: Curves.easeInOut,
-                            animation: animation,
-                            child: createTransactionEntry(
-                              transactionListForDayCopy,
-                              item,
-                              index,
-                              enableFutureTransactionsDivider,
-                            ),
-                          );
-                        },
-                      ),
+                            spawnIsolate: false,
+                            items: transactionListForDay,
+                            areItemsTheSame: (a, b) =>
+                                a.transaction.transactionPk ==
+                                b.transaction.transactionPk,
+                            insertDuration: Duration(milliseconds: 500),
+                            removeDuration: Duration(milliseconds: 500),
+                            updateDuration: Duration(milliseconds: 500),
+                            itemBuilder:
+                                (
+                                  BuildContext context,
+                                  Animation<double> animation,
+                                  TransactionWithCategory item,
+                                  int index,
+                                ) {
+                                  return SizeFadeTransition(
+                                    sizeFraction: 0.7,
+                                    curve: Curves.easeInOut,
+                                    animation: animation,
+                                    child: createTransactionEntry(
+                                      transactionListForDayCopy,
+                                      item,
+                                      index,
+                                      enableFutureTransactionsDivider,
+                                    ),
+                                  );
+                                },
+                          ),
                     ),
                   );
                 } else if (widget.renderType ==
@@ -544,7 +556,8 @@ class _TransactionEntriesState extends State<TransactionEntries> {
                         bottom: 8,
                       ),
                       child: TextFont(
-                        text: "total-cash-flow".tr() +
+                        text:
+                            "total-cash-flow".tr() +
                             ": " +
                             convertToMoney(
                               Provider.of<AllWallets>(context),
@@ -632,8 +645,8 @@ class _TransactionEntriesState extends State<TransactionEntries> {
                     sectionList: sectionsOut,
                     headerBuilder:
                         (BuildContext context, int sectionIndex, int index) {
-                      return sectionsOut[sectionIndex].header;
-                    },
+                          return sectionsOut[sectionIndex].header;
+                        },
                     itemBuilder: (context, sectionIndex, itemIndex, index) {
                       Widget item = sectionsOut[sectionIndex].items[itemIndex];
                       return item;
@@ -667,19 +680,20 @@ class _TransactionEntriesState extends State<TransactionEntries> {
               insertDuration: Duration(milliseconds: 500),
               removeDuration: Duration(milliseconds: 500),
               updateDuration: Duration(milliseconds: 500),
-              itemBuilder: (
-                BuildContext context,
-                Animation<double> animation,
-                Widget item,
-                int index,
-              ) {
-                return SizeFadeTransition(
-                  sizeFraction: 0.7,
-                  curve: Curves.easeInOut,
-                  animation: animation,
-                  child: item,
-                );
-              },
+              itemBuilder:
+                  (
+                    BuildContext context,
+                    Animation<double> animation,
+                    Widget item,
+                    int index,
+                  ) {
+                    return SizeFadeTransition(
+                      sizeFraction: 0.7,
+                      curve: Curves.easeInOut,
+                      animation: animation,
+                      child: item,
+                    );
+                  },
               physics: ClampingScrollPhysics(),
               shrinkWrap: true,
             );
@@ -732,15 +746,16 @@ class _TransactionEntriesState extends State<TransactionEntries> {
       //
       // Ideally we refactor all the queries so they only rely on the search filters!
       stream: database.watchTotalNetBeforeStartDateTransactionCategoryWithDay(
-        end: widget.endDay == null &&
+        end:
+            widget.endDay == null &&
                 widget.searchFilters?.dateTimeRange?.end == null
             ? null
             : (widget.endDay ??
-                    widget.searchFilters?.dateTimeRange?.end ??
-                    DateTime.now())
-                //Add one because want the total from the start of the next day because we get everything BEFORE this date,
-                // Only add one if not a budget! because a different query is used if it is a budget
-                .justDay(dayOffset: widget.budget == null ? 1 : 0),
+                      widget.searchFilters?.dateTimeRange?.end ??
+                      DateTime.now())
+                  //Add one because want the total from the start of the next day because we get everything BEFORE this date,
+                  // Only add one if not a budget! because a different query is used if it is a budget
+                  .justDay(dayOffset: widget.budget == null ? 1 : 0),
         start: widget.startDay,
         allWallets: Provider.of<AllWallets>(context),
         search: widget.search,
@@ -757,14 +772,15 @@ class _TransactionEntriesState extends State<TransactionEntries> {
         budget: widget.budget,
       ),
       builder: (context, snapshotNetTotal) {
-        if (snapshotNetTotal.hasData == false) if (widget.renderType ==
-                TransactionEntriesRenderType.slivers ||
-            widget.renderType ==
-                TransactionEntriesRenderType.implicitlyAnimatedSlivers ||
-            widget.renderType == TransactionEntriesRenderType.sliversNotSticky)
-          return SliverToBoxAdapter(child: SizedBox.shrink());
-        else
-          return SizedBox.shrink();
+        if (snapshotNetTotal.hasData == false)
+          if (widget.renderType == TransactionEntriesRenderType.slivers ||
+              widget.renderType ==
+                  TransactionEntriesRenderType.implicitlyAnimatedSlivers ||
+              widget.renderType ==
+                  TransactionEntriesRenderType.sliversNotSticky)
+            return SliverToBoxAdapter(child: SizedBox.shrink());
+          else
+            return SizedBox.shrink();
         return transactionEntryListBuilder(snapshotNetTotal.data);
       },
     );
@@ -909,8 +925,9 @@ class FutureTransactionsDivider extends StatelessWidget {
                               return AnimatedOpacity(
                                 key: ValueKey("HiddenText"),
                                 duration: const Duration(milliseconds: 425),
-                                opacity: globalCollapsedFutureID
-                                            .value[listID ?? "0"] ==
+                                opacity:
+                                    globalCollapsedFutureID.value[listID ??
+                                            "0"] ==
                                         true
                                     ? 1
                                     : 0,
@@ -962,11 +979,11 @@ class FutureTransactionsDivider extends StatelessWidget {
                         onTap: () {
                           toggleFutureTransactionsSection(listID);
                         },
-                        color: Theme.of(context)
-                            .colorScheme
-                            .secondary
-                            .withValues(alpha: 
-                              Theme.of(context).brightness == Brightness.dark
+                        color: Theme.of(context).colorScheme.secondary
+                            .withValues(
+                              alpha:
+                                  Theme.of(context).brightness ==
+                                      Brightness.dark
                                   ? 0.1
                                   : 0.2,
                             ),
@@ -978,9 +995,9 @@ class FutureTransactionsDivider extends StatelessWidget {
                           child: AnimatedRotation(
                             turns:
                                 globalCollapsedFutureID.value[listID ?? "0"] ==
-                                        true
-                                    ? 0
-                                    : 0.5,
+                                    true
+                                ? 0
+                                : 0.5,
                             duration: const Duration(milliseconds: 425),
                             curve: Curves.fastOutSlowIn,
                             child: Icon(
@@ -1025,7 +1042,7 @@ class Section implements ExpandableListSection<Widget> {
   }
 }
 
-class TransactionsEntriesSpendingSummary extends StatefulWidget {
+class TransactionsEntriesSpendingSummary extends StatelessWidget {
   const TransactionsEntriesSpendingSummary({
     required this.show,
     required this.netSpending,
@@ -1044,19 +1061,11 @@ class TransactionsEntriesSpendingSummary extends StatefulWidget {
   final VoidCallback? onLongPress;
 
   @override
-  State<TransactionsEntriesSpendingSummary> createState() =>
-      _TransactionsEntriesSpendingSummaryState();
-}
-
-class _TransactionsEntriesSpendingSummaryState
-    extends State<TransactionsEntriesSpendingSummary> {
-
-  @override
   Widget build(BuildContext context) {
     double borderRadius = getPlatform() == PlatformOS.isIOS ? 5 : 10;
     return AnimatedExpanded(
       axis: Axis.vertical,
-      expand: widget.show,
+      expand: show,
       child: Padding(
         padding: EdgeInsetsDirectional.symmetric(
           horizontal: getHorizontalPaddingConstrained(context) + 13,
@@ -1066,9 +1075,7 @@ class _TransactionsEntriesSpendingSummaryState
           borderRadius: borderRadius,
           openPage: WalletDetailsPage(
             wallet: null,
-            initialSearchFilters: SearchFilters(
-              dateTimeRange: widget.dateTimeRange,
-            ),
+            initialSearchFilters: SearchFilters(dateTimeRange: dateTimeRange),
           ),
           button: (openContainer) {
             return HoldToRevealListener(
@@ -1083,12 +1090,9 @@ class _TransactionsEntriesSpendingSummaryState
                       )
                     : getColor(context, "canvasContainer"),
                 onTap: () {
-                  // setState(() {
-                  //   isExpanded = !isExpanded;
-                  // });
                   openContainer();
                 },
-                onLongPress: widget.onLongPress,
+                onLongPress: onLongPress,
                 child: Padding(
                   padding: const EdgeInsetsDirectional.symmetric(
                     vertical: 5,
@@ -1109,7 +1113,7 @@ class _TransactionsEntriesSpendingSummaryState
                             ),
                             Flexible(
                               child: CountNumber(
-                                count: widget.expense.abs(),
+                                count: expense.abs(),
                                 duration: Duration(milliseconds: 450),
                                 initialCount: (0),
                                 textBuilder: (number) {
@@ -1117,7 +1121,7 @@ class _TransactionsEntriesSpendingSummaryState
                                     text: convertToMoney(
                                       Provider.of<AllWallets>(context),
                                       number,
-                                      finalNumber: widget.expense.abs(),
+                                      finalNumber: expense.abs(),
                                       forceReveal: isRevealed,
                                     ),
                                     fontSize: 15,
@@ -1148,7 +1152,7 @@ class _TransactionsEntriesSpendingSummaryState
                             ),
                             Flexible(
                               child: CountNumber(
-                                count: widget.income.abs(),
+                                count: income.abs(),
                                 duration: Duration(milliseconds: 450),
                                 initialCount: (0),
                                 textBuilder: (number) {
@@ -1156,7 +1160,7 @@ class _TransactionsEntriesSpendingSummaryState
                                     text: convertToMoney(
                                       Provider.of<AllWallets>(context),
                                       number,
-                                      finalNumber: widget.income.abs(),
+                                      finalNumber: income.abs(),
                                       forceReveal: isRevealed,
                                     ),
                                     fontSize: 15,
@@ -1181,17 +1185,18 @@ class _TransactionsEntriesSpendingSummaryState
                           children: [
                             Flexible(
                               child: CountNumber(
-                                count: widget.netSpending,
+                                count: netSpending,
                                 duration: Duration(milliseconds: 450),
                                 initialCount: (0),
                                 textBuilder: (number) {
                                   return TextFont(
-                                    text: "=" +
+                                    text:
+                                        "=" +
                                         " " +
                                         convertToMoney(
                                           Provider.of<AllWallets>(context),
                                           number,
-                                          finalNumber: widget.netSpending.abs(),
+                                          finalNumber: netSpending.abs(),
                                           forceReveal: isRevealed,
                                         ),
                                     fontSize: 15,
