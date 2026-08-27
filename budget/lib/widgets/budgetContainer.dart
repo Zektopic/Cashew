@@ -16,7 +16,6 @@ import 'package:budget/widgets/openContainerNavigation.dart';
 import 'package:budget/widgets/openPopup.dart';
 import 'package:budget/widgets/tappable.dart';
 import 'package:budget/widgets/textWidgets.dart';
-import 'package:budget/widgets/holdToRevealListener.dart';
 import 'package:budget/widgets/util/widgetSize.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
@@ -1334,22 +1333,22 @@ class _BudgetSpenderSummaryState extends State<BudgetSpenderSummary> {
 
           for (BudgetSpender spender in budgetSpenderList) {
             memberWidgets.add(
-              HoldToRevealListener(
-                builder: (context, isRevealed) => WillPopScope(
-                  onWillPop: () async {
-                    if (widget.disableMemberSelection == false) {
-                      if (selectedMember == spender.member ||
-                          spender.amount == 0) {
-                        widget.setSelectedMember(null);
-                        setState(() {
-                          selectedMember = null;
-                        });
-                        return false;
-                      }
+              WillPopScope(
+                onWillPop: () async {
+                  if (widget.disableMemberSelection == false) {
+                    if (selectedMember == spender.member ||
+                        spender.amount == 0) {
+                      widget.setSelectedMember(null);
+                      setState(() {
+                        selectedMember = null;
+                      });
+                      return false;
                     }
-                    return true;
-                  },
-                  child: Tappable(
+                  }
+                  return true;
+                },
+                child: HoldToRevealListener(
+                  builder: (context, isRevealed) => Tappable(
                     onTap: () {
                       if (widget.disableMemberSelection == false) {
                         if (selectedMember == spender.member ||
