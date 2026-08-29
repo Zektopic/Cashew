@@ -517,14 +517,20 @@ Future<TransactionWallet?> getWalletFromParams(
 }
 
 String getApiEndpoint(Uri uri) {
-  return uri.pathSegments.isNotEmpty ? uri.pathSegments.first : '';
+  if (uri.pathSegments.isNotEmpty) {
+    return uri.pathSegments.first;
+  }
+  if (uri.host.isNotEmpty) {
+    return uri.host;
+  }
+  return '';
 }
 
 Map<String, String> parseAppLink(Uri uri) {
   Map<String, String> params = {};
 
   uri.queryParameters.forEach((key, value) {
-    params[key] = Uri.decodeComponent(value);
+    params[key] = value;
   });
 
   return params;
