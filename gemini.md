@@ -84,6 +84,7 @@
 **Next Planned Step:** Review database ORM input paths to ensure no raw statements bypass input sanitization when data comes from UI forms.
 
 - 2026-07-27: Iterative Enhancement - Secured raw database queries in `tables.dart`. Replaced unsafe string interpolation (e.g., `$threeMonthsAgo` in `customSelect`) with parameterized queries using `variables: [Variable(threeMonthsAgo)]`. This enforces proper separation of code and data, hardening the ORM layer against potential SQL injection vulnerabilities or syntax errors caused by unescaped inputs.
+- 2026-07-28: Iterative Enhancement - Secured URL parsing in `appLinks.dart`. Updated `getApiEndpoint` to inspect `uri.host` before `uri.pathSegments` to properly handle app scheme deep links where the endpoint is parsed as the host rather than the path. Removed redundant and unsafe `Uri.decodeComponent` from `parseAppLink` which caused crash loops (DoS) if URL-encoded percent signs (like `%`) were present in parameters since `uri.queryParameters` are automatically decoded.
 **Next Planned Step:** Review and test file system or secure storage boundaries for proper encapsulation when storing user preferences or cache.
 
 ## 🚨 Critical Security Learnings
@@ -143,6 +144,11 @@
   - **Vulnerability/Gap:** Form inputs (`TextInput`) lacked default max length limitations. Users could paste massive, unbounded payloads into input fields, causing the application to consume excessive memory, leading to frame drops, layout exceptions, and potential crashes (DoS).
   - **Learning:** Every entry point for user input must have an upper bound limit to enforce resource constraints and prevent abuse, regardless of whether a business rule dictates a max length.
   - **Prevention:** Enforce fallback upper limits (e.g., `maxLength ?? 5000`) on all input fields globally at the core widget level.
+
+- **2026-07-28 - URL Parameter Double-Decoding DoS Vulnerability:**
+  - **Vulnerability/Gap:** Deep link query parameters were being decoded manually (`Uri.decodeComponent`) despite Dart's `Uri.queryParameters` property already returning auto-decoded values. This caused `ArgumentError` crashes when processing values containing partial encodings or stray `%` symbols, opening an attack vector for continuous crash-loop Denial of Service.
+  - **Learning:** Redundant decoding of URL components not only breaks logic but can be weaponized as a DoS attack by passing invalid format tokens that throw uncaught errors.
+  - **Prevention:** Rely exclusively on Dart's native `Uri.queryParameters` map, which safely and automatically decodes components, avoiding manual decoding routines.
 - 2026-07-28: Iterative Enhancement - Replaced the manually implemented hold-to-reveal gesture on `BudgetSpenderSummary` with the `HoldToRevealListener` wrapper. This ensures the interaction pattern (holding touch keeps numbers revealed) is consistent with the rest of the application, such as `TransactionsAmountBox` and graphical charts.
 - 2026-07-29: Iterative Enhancement - Audited `TransactionEntryAmount`, `WalletEntry` (`AmountAccount`), and `TransactionsAmountBox` UI components. Since their local state management (`_isRevealed` and `_revealTimer`) for the privacy obfuscation feature was fully abstracted into the `HoldToRevealListener` wrapper in a previous iteration, these widgets were unnecessarily retaining `StatefulWidget` infrastructure. Refactored them to `StatelessWidget`s, simplifying the widget tree and improving rendering performance while maintaining consistent hold-to-reveal behavior across the app.
 

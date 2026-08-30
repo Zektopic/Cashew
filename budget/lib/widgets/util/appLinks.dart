@@ -126,9 +126,12 @@ class _AppLinksNativeState extends State<AppLinksNative> {
 // Don't forget to update the README if this changed
 
 Future<Transaction?> processAddTransactionFromParams(
-    BuildContext context, Map<String, String?> params) async {
-  MainAndSubcategory mainAndSubCategory =
-      await getMainAndSubcategoryFromParams(params);
+  BuildContext context,
+  Map<String, String?> params,
+) async {
+  MainAndSubcategory mainAndSubCategory = await getMainAndSubcategoryFromParams(
+    params,
+  );
   TransactionWallet? wallet = await getWalletFromParams(params);
   String walletPk = wallet?.walletPk ?? appStateSettings["selectedWalletPk"];
   DateTime? dateCreated = await getDateTimeFromParams(params, context);
@@ -162,13 +165,15 @@ Future<Transaction?> processAddTransactionFromParams(
     );
   }
   if (mainAndSubCategory.main?.categoryPk == null) {
-    openSnackbar(SnackbarMessage(
-      title: "category-not-selected".tr(),
-      description: "all-transactions-require-a-category".tr(),
-      icon: appStateSettings["outlinedIcons"]
-          ? Icons.warning_amber_outlined
-          : Icons.warning_amber_rounded,
-    ));
+    openSnackbar(
+      SnackbarMessage(
+        title: "category-not-selected".tr(),
+        description: "all-transactions-require-a-category".tr(),
+        icon: appStateSettings["outlinedIcons"]
+            ? Icons.warning_amber_outlined
+            : Icons.warning_amber_rounded,
+      ),
+    );
     return null;
   }
 
@@ -194,25 +199,30 @@ Future<Transaction?> processAddTransactionFromParams(
   }
 
   if (rowId != null) {
-    final Transaction transactionJustAdded =
-        await database.getTransactionFromRowId(rowId);
+    final Transaction transactionJustAdded = await database
+        .getTransactionFromRowId(rowId);
     flashTransaction(transactionJustAdded.transactionPk);
-    openSnackbar(SnackbarMessage(
-      title: "added-transaction".tr(),
-      description: await getTransactionLabel(transactionJustAdded),
-      icon: appStateSettings["outlinedIcons"]
-          ? Icons.post_add_outlined
-          : Icons.post_add_rounded,
-    ));
+    openSnackbar(
+      SnackbarMessage(
+        title: "added-transaction".tr(),
+        description: await getTransactionLabel(transactionJustAdded),
+        icon: appStateSettings["outlinedIcons"]
+            ? Icons.post_add_outlined
+            : Icons.post_add_rounded,
+      ),
+    );
     return transactionJustAdded;
   }
   return null;
 }
 
 Future processAddTransactionRouteFromParams(
-    BuildContext context, Map<String, String?> params) async {
-  MainAndSubcategory mainAndSubCategory =
-      await getMainAndSubcategoryFromParams(params);
+  BuildContext context,
+  Map<String, String?> params,
+) async {
+  MainAndSubcategory mainAndSubCategory = await getMainAndSubcategoryFromParams(
+    params,
+  );
   TransactionWallet? wallet = await getWalletFromParams(params);
   DateTime? dateCreated = await getDateTimeFromParams(params, context);
   double amount = getAmountFromParams(params);
@@ -235,7 +245,9 @@ Future processAddTransactionRouteFromParams(
 }
 
 Future processMessageToParse(
-    BuildContext context, Map<String, String?> params) async {
+  BuildContext context,
+  Map<String, String?> params,
+) async {
   String messageString = params["messageToParse"].toString();
   recentCapturedNotifications.insert(0, messageString);
   recentCapturedNotifications.take(50);
@@ -247,15 +259,16 @@ Future processMessageToParse(
   if (result == false) {
     pushRoute(
       null,
-      AddEmailTemplate(
-        messagesList: recentCapturedNotifications,
-      ),
+      AddEmailTemplate(messagesList: recentCapturedNotifications),
     );
   }
 }
 
-Future executeAppLink(BuildContext? context, Uri uri,
-    {Function(dynamic)? onDebug}) async {
+Future executeAppLink(
+  BuildContext? context,
+  Uri uri, {
+  Function(dynamic)? onDebug,
+}) async {
   if (appStateSettings["hasOnboarded"] != true) return;
   if (!appLinksThrottler.canProceed()) return;
 
@@ -277,18 +290,22 @@ Future executeAppLink(BuildContext? context, Uri uri,
               transactionObject.forEach((key, value) {
                 currentObject[key] = value.toString();
               });
-              dynamic res =
-                  await processAddTransactionFromParams(context, currentObject);
+              dynamic res = await processAddTransactionFromParams(
+                context,
+                currentObject,
+              );
               if (onDebug != null) onDebug(res);
             }
           } catch (e) {
-            openSnackbar(SnackbarMessage(
-              title: "error-parsing-json".tr(),
-              description: e.toString(),
-              icon: appStateSettings["outlinedIcons"]
-                  ? Icons.warning_outlined
-                  : Icons.warning_rounded,
-            ));
+            openSnackbar(
+              SnackbarMessage(
+                title: "error-parsing-json".tr(),
+                description: e.toString(),
+                icon: appStateSettings["outlinedIcons"]
+                    ? Icons.warning_outlined
+                    : Icons.warning_rounded,
+              ),
+            );
           }
         } else {
           dynamic res = await processAddTransactionFromParams(context, params);
@@ -310,21 +327,27 @@ Future executeAppLink(BuildContext? context, Uri uri,
                 currentObject[key] = value.toString();
               });
               dynamic res = await processAddTransactionRouteFromParams(
-                  context, currentObject);
+                context,
+                currentObject,
+              );
               if (onDebug != null) onDebug(res);
             }
           } catch (e) {
-            openSnackbar(SnackbarMessage(
-              title: "error-parsing-json".tr(),
-              description: e.toString(),
-              icon: appStateSettings["outlinedIcons"]
-                  ? Icons.warning_outlined
-                  : Icons.warning_rounded,
-            ));
+            openSnackbar(
+              SnackbarMessage(
+                title: "error-parsing-json".tr(),
+                description: e.toString(),
+                icon: appStateSettings["outlinedIcons"]
+                    ? Icons.warning_outlined
+                    : Icons.warning_rounded,
+              ),
+            );
           }
         } else {
-          dynamic res =
-              await processAddTransactionRouteFromParams(context, params);
+          dynamic res = await processAddTransactionRouteFromParams(
+            context,
+            params,
+          );
           if (onDebug != null) onDebug(res);
         }
       }
@@ -393,7 +416,9 @@ double getAmountFromParams(Map<String, String?> params) {
 }
 
 DateTime? getDateTimeFromParams(
-    Map<String, String?> params, BuildContext context) {
+  Map<String, String?> params,
+  BuildContext context,
+) {
   DateTime? dateCreated;
   String? dateToParse = params["date"] ?? params["dateCreated"];
   if (dateToParse != null) {
@@ -421,7 +446,8 @@ DateTime? getDateTimeFromParams(
 }
 
 Future<MainAndSubcategory> getMainAndSubcategoryFromParams(
-    Map<String, String?> params) async {
+  Map<String, String?> params,
+) async {
   MainAndSubcategory mainAndSubcategory = MainAndSubcategory();
 
   // Handle case where a category AND subcategory is passed in
@@ -431,8 +457,9 @@ Future<MainAndSubcategory> getMainAndSubcategoryFromParams(
       (params.containsKey("subcategory") ||
           params.containsKey("subcategoryPk"))) {
     if (params.containsKey("categoryPk")) {
-      mainAndSubcategory.main = await database
-          .getCategoryInstanceOrNull(params["categoryPk"].toString());
+      mainAndSubcategory.main = await database.getCategoryInstanceOrNull(
+        params["categoryPk"].toString(),
+      );
     }
     if (mainAndSubcategory.main == null && params.containsKey("category")) {
       mainAndSubcategory.main = await database.getRelatingCategory(
@@ -442,8 +469,9 @@ Future<MainAndSubcategory> getMainAndSubcategoryFromParams(
     }
     if (mainAndSubcategory.main != null) {
       if (params.containsKey("subcategoryPk")) {
-        mainAndSubcategory.sub = await database
-            .getCategoryInstanceOrNull(params["subcategoryPk"].toString());
+        mainAndSubcategory.sub = await database.getCategoryInstanceOrNull(
+          params["subcategoryPk"].toString(),
+        );
         // Try again if the subcategories main category is not the same
         if (mainAndSubcategory.sub?.mainCategoryPk !=
             mainAndSubcategory.main?.categoryPk) {
@@ -466,8 +494,9 @@ Future<MainAndSubcategory> getMainAndSubcategoryFromParams(
 
   // Subcategory takes precedence
   if (params.containsKey("subcategoryPk")) {
-    mainAndSubcategory.sub = await database
-        .getCategoryInstanceOrNull(params["subcategoryPk"].toString());
+    mainAndSubcategory.sub = await database.getCategoryInstanceOrNull(
+      params["subcategoryPk"].toString(),
+    );
   }
   if (mainAndSubcategory.sub == null && params.containsKey("subcategory")) {
     mainAndSubcategory.sub = await database.getRelatingCategory(
@@ -476,14 +505,16 @@ Future<MainAndSubcategory> getMainAndSubcategoryFromParams(
     );
   }
   if (mainAndSubcategory.sub?.mainCategoryPk != null) {
-    mainAndSubcategory.main =
-        await database.getCategory(mainAndSubcategory.sub!.mainCategoryPk!).$2;
+    mainAndSubcategory.main = await database
+        .getCategory(mainAndSubcategory.sub!.mainCategoryPk!)
+        .$2;
     return mainAndSubcategory;
   }
 
   if (params.containsKey("categoryPk")) {
-    mainAndSubcategory.main = await database
-        .getCategoryInstanceOrNull(params["categoryPk"].toString());
+    mainAndSubcategory.main = await database.getCategoryInstanceOrNull(
+      params["categoryPk"].toString(),
+    );
   }
   if (mainAndSubcategory.main == null && params.containsKey("category")) {
     mainAndSubcategory.main = await database.getRelatingCategory(
@@ -492,20 +523,24 @@ Future<MainAndSubcategory> getMainAndSubcategoryFromParams(
     );
   }
   if (mainAndSubcategory.main == null && params["title"] != null) {
-    TransactionAssociatedTitleWithCategory? foundTitle = (await database
-            .getSimilarAssociatedTitles(title: params["title"] ?? "", limit: 1))
-        .firstOrNull;
+    TransactionAssociatedTitleWithCategory? foundTitle =
+        (await database.getSimilarAssociatedTitles(
+          title: params["title"] ?? "",
+          limit: 1,
+        )).firstOrNull;
     mainAndSubcategory.main = foundTitle?.category;
   }
   return mainAndSubcategory;
 }
 
 Future<TransactionWallet?> getWalletFromParams(
-    Map<String, String?> params) async {
+  Map<String, String?> params,
+) async {
   TransactionWallet? result;
   if (params.containsKey("walletPk")) {
-    result =
-        await database.getWalletInstanceOrNull(params["walletPk"].toString());
+    result = await database.getWalletInstanceOrNull(
+      params["walletPk"].toString(),
+    );
   }
   if (result == null && params.containsKey("account")) {
     return await database.getRelatingWallet(params["account"] ?? "");
@@ -517,6 +552,7 @@ Future<TransactionWallet?> getWalletFromParams(
 }
 
 String getApiEndpoint(Uri uri) {
+  if (uri.host.isNotEmpty) return uri.host;
   return uri.pathSegments.isNotEmpty ? uri.pathSegments.first : '';
 }
 
@@ -524,7 +560,7 @@ Map<String, String> parseAppLink(Uri uri) {
   Map<String, String> params = {};
 
   uri.queryParameters.forEach((key, value) {
-    params[key] = Uri.decodeComponent(value);
+    params[key] = value;
   });
 
   return params;
@@ -552,7 +588,6 @@ class _AppLinkTableEntry extends StatefulWidget {
 }
 
 class _AppLinkTableEntryState extends State<_AppLinkTableEntry> {
-
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -566,9 +601,10 @@ class _AppLinkTableEntryState extends State<_AppLinkTableEntry> {
                 convertToMoney(
                   Provider.of<AllWallets>(context, listen: false),
                   widget.amount,
-                  currencyKey: Provider.of<AllWallets>(context, listen: false)
-                      .indexedByPk[widget.walletPk]
-                      ?.currency,
+                  currencyKey: Provider.of<AllWallets>(
+                    context,
+                    listen: false,
+                  ).indexedByPk[widget.walletPk]?.currency,
                   forceReveal: isRevealed,
                 ),
                 if (widget.dateCreated != null)
