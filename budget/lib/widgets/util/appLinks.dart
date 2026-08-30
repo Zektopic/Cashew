@@ -517,8 +517,12 @@ Future<TransactionWallet?> getWalletFromParams(
 }
 
 String getApiEndpoint(Uri uri) {
-  if (uri.pathSegments.isNotEmpty) return uri.pathSegments.first;
-  if (uri.host.isNotEmpty) return uri.host;
+  if (uri.pathSegments.isNotEmpty) {
+    return uri.pathSegments.first;
+  }
+  if (uri.host.isNotEmpty) {
+    return uri.host;
+  }
   return '';
 }
 
@@ -526,11 +530,7 @@ Map<String, String> parseAppLink(Uri uri) {
   Map<String, String> params = {};
 
   uri.queryParameters.forEach((key, value) {
-    try {
-      params[key] = Uri.decodeComponent(value);
-    } catch (e) {
-      params[key] = value;
-    }
+    params[key] = value;
   });
 
   return params;
@@ -558,6 +558,7 @@ class _AppLinkTableEntry extends StatefulWidget {
 }
 
 class _AppLinkTableEntryState extends State<_AppLinkTableEntry> {
+
   @override
   Widget build(BuildContext context) {
     return Row(
