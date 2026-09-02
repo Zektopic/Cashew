@@ -159,14 +159,16 @@ class _AddTransactionPageState extends State<AddTransactionPage>
   List<String> selectedExcludedBudgetPks = [];
   late bool isAddedToLoanObjective =
       widget.selectedObjective?.type == ObjectiveType.loan ||
-          widget.transaction?.objectiveLoanFk != null;
+      widget.transaction?.objectiveLoanFk != null;
   // bool isSettingUpBalanceTransfer = false;
 
   String? textAddTransaction = "add-transaction".tr();
 
   Future<void> selectEndDate(BuildContext context) async {
-    final DateTime? picked =
-        await showCustomDatePicker(context, selectedEndDate ?? DateTime.now());
+    final DateTime? picked = await showCustomDatePicker(
+      context,
+      selectedEndDate ?? DateTime.now(),
+    );
     if (picked != null) setSelectedEndDate(picked);
   }
 
@@ -185,8 +187,10 @@ class _AddTransactionPageState extends State<AddTransactionPage>
     });
   }
 
-  void setSelectedCategory(TransactionCategory category,
-      {bool setIncome = true}) {
+  void setSelectedCategory(
+    TransactionCategory category, {
+    bool setIncome = true,
+  }) {
     if (isAddedToLoanObjective == false &&
         setIncome &&
         category.categoryPk != "0" &&
@@ -296,11 +300,14 @@ class _AddTransactionPageState extends State<AddTransactionPage>
     return;
   }
 
-  void setSelectedBudgetPk(Budget? selectedBudgetPassed,
-      {bool isSharedBudget = false}) {
+  void setSelectedBudgetPk(
+    Budget? selectedBudgetPassed, {
+    bool isSharedBudget = false,
+  }) {
     setState(() {
-      selectedBudgetPk =
-          selectedBudgetPassed == null ? null : selectedBudgetPassed.budgetPk;
+      selectedBudgetPk = selectedBudgetPassed == null
+          ? null
+          : selectedBudgetPassed.budgetPk;
       selectedBudget = selectedBudgetPassed;
       selectedBudgetIsShared = isSharedBudget;
       if (selectedBudgetPk != null && selectedPayer == null)
@@ -344,8 +351,10 @@ class _AddTransactionPageState extends State<AddTransactionPage>
   }
 
   TransactionWallet? getSelectedWallet({required bool listen}) {
-    return Provider.of<AllWallets>(context, listen: listen)
-        .indexedByPk[selectedWalletPk];
+    return Provider.of<AllWallets>(
+      context,
+      listen: listen,
+    ).indexedByPk[selectedWalletPk];
   }
 
   void setSelectedIncome(bool value, {bool initiallySetting = false}) {
@@ -374,15 +383,16 @@ class _AddTransactionPageState extends State<AddTransactionPage>
     bool getSelectedPaid = selectedPaid;
     try {
       if ((widget.transaction?.budgetFksExclude?.length ?? 0) > 0) {
-        getSelectedPaid = (await database
-                .getTransactionFromPk(widget.transaction!.transactionPk))
-            .paid;
+        getSelectedPaid = (await database.getTransactionFromPk(
+          widget.transaction!.transactionPk,
+        )).paid;
       }
     } catch (e) {}
 
     return transaction.copyWith(
-      reoccurrence:
-          Value(transaction.reoccurrence ?? BudgetReoccurence.monthly),
+      reoccurrence: Value(
+        transaction.reoccurrence ?? BudgetReoccurence.monthly,
+      ),
       periodLength: Value(transaction.periodLength ?? 1),
       paid: getSelectedPaid,
     );
@@ -424,13 +434,16 @@ class _AddTransactionPageState extends State<AddTransactionPage>
                     Flexible(
                       child: Button(
                         color: Theme.of(context).colorScheme.tertiaryContainer,
-                        textColor:
-                            Theme.of(context).colorScheme.onTertiaryContainer,
+                        textColor: Theme.of(
+                          context,
+                        ).colorScheme.onTertiaryContainer,
                         label: "do-not-show-again".tr(),
                         onTap: () {
                           updateSettings(
-                              "canShowTransactionActionButtonTip", false,
-                              updateGlobalState: false);
+                            "canShowTransactionActionButtonTip",
+                            false,
+                            updateGlobalState: false,
+                          );
                           popRoute(context);
                         },
                         expandedLayout: true,
@@ -448,7 +461,7 @@ class _AddTransactionPageState extends State<AddTransactionPage>
                     ),
                   ],
                 ),
-              )
+              ),
             ],
           ),
         ),
@@ -496,7 +509,8 @@ class _AddTransactionPageState extends State<AddTransactionPage>
             )) {
           Transaction? closelyRelatedTransferCorrectionTransaction =
               await database.getCloselyRelatedBalanceCorrectionTransaction(
-                  widget.transaction!);
+                widget.transaction!,
+              );
 
           if (closelyRelatedTransferCorrectionTransaction != null) {
             await openPopup(
@@ -507,16 +521,15 @@ class _AddTransactionPageState extends State<AddTransactionPage>
                 child: Column(
                   children: [
                     HorizontalBreak(
-                        padding:
-                            EdgeInsetsDirectional.only(top: 15, bottom: 10)),
+                      padding: EdgeInsetsDirectional.only(top: 15, bottom: 10),
+                    ),
                     TransactionEntry(
                       useHorizontalPaddingConstrained: false,
                       openPage: Container(),
                       transaction: createTransaction(),
-                      containerColor: Theme.of(context)
-                          .colorScheme
-                          .secondaryContainer
-                          .withValues(alpha: 0.4),
+                      containerColor: Theme.of(
+                        context,
+                      ).colorScheme.secondaryContainer.withValues(alpha: 0.4),
                       customPadding: EdgeInsetsDirectional.zero,
                     ),
                     SizedBox(height: 5),
@@ -535,8 +548,10 @@ class _AddTransactionPageState extends State<AddTransactionPage>
               },
               onCancelLabel: "only-current".tr(),
               onSubmit: () async {
-                AllWallets allWallets =
-                    Provider.of<AllWallets>(context, listen: false);
+                AllWallets allWallets = Provider.of<AllWallets>(
+                  context,
+                  listen: false,
+                );
                 await database.updateCloselyRelatedBalanceTransfer(
                   allWallets,
                   createdTransaction,
@@ -557,8 +572,8 @@ class _AddTransactionPageState extends State<AddTransactionPage>
       );
 
       if (rowId != null) {
-        final Transaction transactionJustAdded =
-            await database.getTransactionFromRowId(rowId);
+        final Transaction transactionJustAdded = await database
+            .getTransactionFromRowId(rowId);
         print("Transaction just added:");
         print(transactionJustAdded);
 
@@ -570,9 +585,7 @@ class _AddTransactionPageState extends State<AddTransactionPage>
           // If a new transaction with an added date of 5 minutes of less before, flash only a bit
           if (widget.transaction == null &&
               transactionJustAdded.dateCreated.isAfter(
-                DateTime.now().subtract(
-                  Duration(minutes: 5),
-                ),
+                DateTime.now().subtract(Duration(minutes: 5)),
               )) {
             flashTransaction(transactionJustAdded.transactionPk, flashCount: 2);
           } else {
@@ -584,7 +597,7 @@ class _AddTransactionPageState extends State<AddTransactionPage>
       if ([
         TransactionSpecialType.repetitive,
         TransactionSpecialType.subscription,
-        TransactionSpecialType.upcoming
+        TransactionSpecialType.upcoming,
       ].contains(createdTransaction.type)) {
         setUpcomingNotifications(context);
       }
@@ -593,30 +606,36 @@ class _AddTransactionPageState extends State<AddTransactionPage>
 
       if (widget.transaction == null &&
           appStateSettings["purchaseID"] == null) {
-        updateSettings("premiumPopupAddTransactionCount",
-            (appStateSettings["premiumPopupAddTransactionCount"] ?? 0) + 1,
-            updateGlobalState: false);
+        updateSettings(
+          "premiumPopupAddTransactionCount",
+          (appStateSettings["premiumPopupAddTransactionCount"] ?? 0) + 1,
+          updateGlobalState: false,
+        );
       }
 
       return true;
     } catch (e) {
       if (e.toString() == "category-no-longer-exists") {
-        openSnackbar(SnackbarMessage(
-          title: "cannot-create-transaction".tr(),
-          description: "category-no-longer-exists".tr(),
-          icon: appStateSettings["outlinedIcons"]
-              ? Icons.warning_amber_outlined
-              : Icons.warning_amber_rounded,
-        ));
+        openSnackbar(
+          SnackbarMessage(
+            title: "cannot-create-transaction".tr(),
+            description: "category-no-longer-exists".tr(),
+            icon: appStateSettings["outlinedIcons"]
+                ? Icons.warning_amber_outlined
+                : Icons.warning_amber_rounded,
+          ),
+        );
         clearSelectedCategory();
       } else {
-        openSnackbar(SnackbarMessage(
-          title: "cannot-create-transaction".tr(),
-          description: e.toString(),
-          icon: appStateSettings["outlinedIcons"]
-              ? Icons.warning_amber_outlined
-              : Icons.warning_amber_rounded,
-        ));
+        openSnackbar(
+          SnackbarMessage(
+            title: "cannot-create-transaction".tr(),
+            description: e.toString(),
+            icon: appStateSettings["outlinedIcons"]
+                ? Icons.warning_amber_outlined
+                : Icons.warning_amber_rounded,
+          ),
+        );
       }
       return false;
     }
@@ -643,8 +662,10 @@ class _AddTransactionPageState extends State<AddTransactionPage>
         widget.transaction!.type != selectedType) {
       createdAnotherFutureTransaction = false;
 
-      if ([TransactionSpecialType.credit, TransactionSpecialType.debt]
-          .contains(selectedType)) {
+      if ([
+        TransactionSpecialType.credit,
+        TransactionSpecialType.debt,
+      ].contains(selectedType)) {
         paid = true;
         skipPaid = false;
       } else {
@@ -654,11 +675,15 @@ class _AddTransactionPageState extends State<AddTransactionPage>
     }
 
     Transaction createdTransaction = Transaction(
-      transactionPk:
-          widget.transaction != null ? widget.transaction!.transactionPk : "-1",
+      transactionPk: widget.transaction != null
+          ? widget.transaction!.transactionPk
+          : "-1",
       pairedTransactionFk: widget.transaction?.pairedTransactionFk,
       name: (selectedTitle ?? "").trim(),
-      amount: (selectedIncome || selectedAmount == 0 //Prevent negative 0
+      amount:
+          (selectedIncome ||
+              selectedAmount ==
+                  0 //Prevent negative 0
           ? (selectedAmount ?? 0).abs()
           : (selectedAmount ?? 0).abs() * -1),
       note: _noteInputController.text,
@@ -676,19 +701,21 @@ class _AddTransactionPageState extends State<AddTransactionPage>
       periodLength: selectedPeriodLength <= 0 && selectedType != null
           ? 1
           : selectedPeriodLength,
-      methodAdded:
-          widget.transaction != null ? widget.transaction!.methodAdded : null,
+      methodAdded: widget.transaction != null
+          ? widget.transaction!.methodAdded
+          : null,
       createdAnotherFutureTransaction: createdAnotherFutureTransaction,
       sharedKey: removeShared == false && widget.transaction != null
           ? widget.transaction!.sharedKey
           : null,
-      sharedOldKey:
-          widget.transaction != null ? widget.transaction!.sharedOldKey : null,
+      sharedOldKey: widget.transaction != null
+          ? widget.transaction!.sharedOldKey
+          : null,
       transactionOwnerEmail: selectedPayer,
       transactionOriginalOwnerEmail:
           removeShared == false && widget.transaction != null
-              ? widget.transaction!.transactionOriginalOwnerEmail
-              : null,
+          ? widget.transaction!.transactionOriginalOwnerEmail
+          : null,
       sharedStatus: removeShared == false && widget.transaction != null
           ? widget.transaction!.sharedStatus
           : null,
@@ -704,8 +731,9 @@ class _AddTransactionPageState extends State<AddTransactionPage>
           : null,
       objectiveFk: selectedObjectivePk,
       objectiveLoanFk: selectedObjectiveLoanPk,
-      budgetFksExclude:
-          selectedExcludedBudgetPks.isEmpty ? null : selectedExcludedBudgetPks,
+      budgetFksExclude: selectedExcludedBudgetPks.isEmpty
+          ? null
+          : selectedExcludedBudgetPks,
     );
 
     return createdTransaction;
@@ -734,10 +762,12 @@ class _AddTransactionPageState extends State<AddTransactionPage>
     if (widget.transaction != null) {
       //We are editing a transaction
       //Fill in the information from the passed in transaction
-      _titleInputController =
-          new TextEditingController(text: widget.transaction!.name);
-      _noteInputController =
-          new LinkHighlighter(initialText: widget.transaction!.note);
+      _titleInputController = new TextEditingController(
+        text: widget.transaction!.name,
+      );
+      _noteInputController = new LinkHighlighter(
+        initialText: widget.transaction!.note,
+      );
       selectedTitle = widget.transaction!.name;
       selectedDate = widget.transaction!.dateCreated;
       selectedEndDate = widget.transaction!.endDate;
@@ -870,27 +900,29 @@ class _AddTransactionPageState extends State<AddTransactionPage>
 
   updateInitial() async {
     if (widget.transaction != null) {
-      TransactionCategory? getSelectedCategory =
-          await database.getCategoryInstance(widget.transaction!.categoryFk);
+      TransactionCategory? getSelectedCategory = await database
+          .getCategoryInstance(widget.transaction!.categoryFk);
 
       TransactionCategory? getSelectedSubCategory =
           widget.transaction!.subCategoryFk == null
-              ? null
-              : await database.getCategoryInstanceOrNull(
-                  widget.transaction!.subCategoryFk!);
+          ? null
+          : await database.getCategoryInstanceOrNull(
+              widget.transaction!.subCategoryFk!,
+            );
       Budget? getBudget;
       try {
         getBudget = await database.getBudgetInstance(
-            widget.transaction!.sharedReferenceBudgetPk ?? "-1");
+          widget.transaction!.sharedReferenceBudgetPk ?? "-1",
+        );
       } catch (e) {}
 
       // Fix the default value when a transaction is opened but excluded from a budget
       bool getSelectedPaid = selectedPaid;
       try {
         if ((widget.transaction?.budgetFksExclude?.length ?? 0) > 0) {
-          getSelectedPaid = (await database
-                  .getTransactionFromPk(widget.transaction!.transactionPk))
-              .paid;
+          getSelectedPaid = (await database.getTransactionFromPk(
+            widget.transaction!.transactionPk,
+          )).paid;
         }
       } catch (e) {}
 
@@ -899,8 +931,9 @@ class _AddTransactionPageState extends State<AddTransactionPage>
         selectedCategory = getSelectedCategory;
         selectedSubCategory = getSelectedSubCategory;
         selectedBudget = getBudget;
-        selectedBudgetIsShared =
-            getBudget == null ? false : getBudget.sharedKey != null;
+        selectedBudgetIsShared = getBudget == null
+            ? false
+            : getBudget.sharedKey != null;
       });
     }
   }
@@ -910,8 +943,10 @@ class _AddTransactionPageState extends State<AddTransactionPage>
       context,
       selectedCategory: selectedCategory,
       setSelectedCategory: (TransactionCategory category) {
-        setSelectedCategory(category,
-            setIncome: initiallySettingSelectedIncome == false);
+        setSelectedCategory(
+          category,
+          setIncome: initiallySettingSelectedIncome == false,
+        );
       },
       selectedSubCategory: selectedSubCategory,
       setSelectedSubCategory: setSelectedSubCategory,
@@ -973,7 +1008,8 @@ class _AddTransactionPageState extends State<AddTransactionPage>
           onlyShowCurrencyIcon: true,
           amountPassed: (selectedAmount ?? "0").toString(),
           setSelectedAmount: setSelectedAmount,
-          next: next ??
+          next:
+              next ??
               () async {
                 popRoute(context);
               },
@@ -1014,8 +1050,10 @@ class _AddTransactionPageState extends State<AddTransactionPage>
       fullSnap: true,
       TransferBalancePopup(
         allowEditWallet: true,
-        wallet: Provider.of<AllWallets>(context, listen: false)
-            .indexedByPk[appStateSettings["selectedWalletPk"]]!,
+        wallet: Provider.of<AllWallets>(
+          context,
+          listen: false,
+        ).indexedByPk[appStateSettings["selectedWalletPk"]]!,
         showAllEditDetails: true,
         initialAmount: selectedAmount,
         initialDate: selectedDate,
@@ -1037,16 +1075,14 @@ class _AddTransactionPageState extends State<AddTransactionPage>
         title: "select-transaction-type".tr(),
         child: SelectTransactionTypePopup(
           setTransactionType: (type) {
-            setSelectedType(
-              transactionTypeDisplayToEnum[type],
-            );
+            setSelectedType(transactionTypeDisplayToEnum[type]);
           },
           selectedTransactionType: selectedType,
           transactionTypesToShow:
               getTransactionSpecialTypesToShowGivenInitialTypeWhenAddingTransaction(
-            widget.selectedType,
-            isAddedToLoanObjective,
-          ),
+                widget.selectedType,
+                isAddedToLoanObjective,
+              ),
         ),
       ),
     );
@@ -1114,17 +1150,25 @@ class _AddTransactionPageState extends State<AddTransactionPage>
                   duration: Duration(milliseconds: 300),
                   child: DateButton(
                     internalPadding: EdgeInsetsDirectional.only(
-                        start: 12, bottom: 6, top: 6, end: 8),
+                      start: 12,
+                      bottom: 6,
+                      top: 6,
+                      end: 8,
+                    ),
                     key: ValueKey(selectedDate.toString()),
                     initialSelectedDate: selectedDate,
                     initialSelectedTime: TimeOfDay(
-                        hour: selectedDate.hour, minute: selectedDate.minute),
+                      hour: selectedDate.hour,
+                      minute: selectedDate.minute,
+                    ),
                     setSelectedDate: (date) {
                       selectedDate = date;
                     },
                     setSelectedTime: (time) {
                       selectedDate = selectedDate.copyWith(
-                          hour: time.hour, minute: time.minute);
+                        hour: time.hour,
+                        minute: time.minute,
+                      );
                     },
                   ),
                 ),
@@ -1158,7 +1202,9 @@ class _AddTransactionPageState extends State<AddTransactionPage>
                     ),
                     items:
                         getTransactionSpecialTypesToShowGivenInitialTypeWhenAddingTransaction(
-                            widget.selectedType, isAddedToLoanObjective),
+                          widget.selectedType,
+                          isAddedToLoanObjective,
+                        ),
                     getLabel: (item) {
                       if (item is TransactionSpecialType || item == null) {
                         return transactionTypeDisplayToEnum[item]
@@ -1180,7 +1226,8 @@ class _AddTransactionPageState extends State<AddTransactionPage>
                           onSubmit: () async {
                             popRoute(context);
                             dynamic result = await startCreatingInstallment(
-                                context: context);
+                              context: context,
+                            );
                             if (result == true) popRoute(context);
                           },
                           onSubmitLabel: "ok".tr(),
@@ -1205,7 +1252,8 @@ class _AddTransactionPageState extends State<AddTransactionPage>
                 ),
               ),
               AnimatedExpanded(
-                expand: selectedType == TransactionSpecialType.repetitive ||
+                expand:
+                    selectedType == TransactionSpecialType.repetitive ||
                     selectedType == TransactionSpecialType.subscription,
                 child: Padding(
                   padding: const EdgeInsetsDirectional.only(bottom: 9),
@@ -1237,26 +1285,34 @@ class _AddTransactionPageState extends State<AddTransactionPage>
                                           selectedPeriodLength,
                                       setSelectedPeriodLength: (period) =>
                                           setSelectedPeriodLength(
-                                        period: period,
-                                        selectedRecurrence: selectedRecurrence,
-                                        setPeriodLength: (selectedPeriodLength,
-                                            selectedRecurrenceDisplay) {
-                                          this.selectedPeriodLength =
-                                              selectedPeriodLength;
-                                          this.selectedRecurrenceDisplay =
-                                              selectedRecurrenceDisplay;
-                                          setState(() {});
-                                        },
-                                      ),
+                                            period: period,
+                                            selectedRecurrence:
+                                                selectedRecurrence,
+                                            setPeriodLength:
+                                                (
+                                                  selectedPeriodLength,
+                                                  selectedRecurrenceDisplay,
+                                                ) {
+                                                  this.selectedPeriodLength =
+                                                      selectedPeriodLength;
+                                                  this.selectedRecurrenceDisplay =
+                                                      selectedRecurrenceDisplay;
+                                                  setState(() {});
+                                                },
+                                          ),
                                     );
                                   },
                                   fontSize: 23,
                                   fontWeight: FontWeight.bold,
                                   internalPadding:
                                       EdgeInsetsDirectional.symmetric(
-                                          vertical: 4, horizontal: 6),
+                                        vertical: 4,
+                                        horizontal: 6,
+                                      ),
                                   padding: EdgeInsetsDirectional.symmetric(
-                                      vertical: 0, horizontal: 4),
+                                    vertical: 0,
+                                    horizontal: 4,
+                                  ),
                                 ),
                                 TappableTextEntry(
                                   addTappableBackground: true,
@@ -1272,29 +1328,36 @@ class _AddTransactionPageState extends State<AddTransactionPage>
                                       selectedRecurrence: selectedRecurrence,
                                       selectedPeriodLength:
                                           selectedPeriodLength,
-                                      onChanged: (selectedRecurrence,
-                                          selectedRecurrenceEnum,
-                                          selectedRecurrenceDisplay) {
-                                        this.selectedRecurrence =
-                                            selectedRecurrence;
-                                        this.selectedRecurrenceEnum =
-                                            selectedRecurrenceEnum;
-                                        this.selectedRecurrenceDisplay =
-                                            selectedRecurrenceDisplay;
-                                        setState(() {});
-                                      },
+                                      onChanged:
+                                          (
+                                            selectedRecurrence,
+                                            selectedRecurrenceEnum,
+                                            selectedRecurrenceDisplay,
+                                          ) {
+                                            this.selectedRecurrence =
+                                                selectedRecurrence;
+                                            this.selectedRecurrenceEnum =
+                                                selectedRecurrenceEnum;
+                                            this.selectedRecurrenceDisplay =
+                                                selectedRecurrenceDisplay;
+                                            setState(() {});
+                                          },
                                     );
                                   },
                                   fontSize: 23,
                                   fontWeight: FontWeight.bold,
                                   internalPadding:
                                       EdgeInsetsDirectional.symmetric(
-                                          vertical: 4, horizontal: 6),
+                                        vertical: 4,
+                                        horizontal: 6,
+                                      ),
                                   padding: EdgeInsetsDirectional.symmetric(
-                                      vertical: 0, horizontal: 3),
+                                    vertical: 0,
+                                    horizontal: 3,
+                                  ),
                                 ),
                               ],
-                            )
+                            ),
                           ],
                         ),
                       ),
@@ -1318,14 +1381,15 @@ class _AddTransactionPageState extends State<AddTransactionPage>
                                     ? ""
                                     : getWordedDateShort(
                                         selectedEndDate!,
-                                        includeYear: selectedEndDate!.year !=
+                                        includeYear:
+                                            selectedEndDate!.year !=
                                             DateTime.now().year,
                                       )),
                                 placeholder: selectedObjectiveLoanPk != null
                                     ? "until-loan-reached".tr()
                                     : selectedObjectivePk != null
-                                        ? "until-goal-reached".tr()
-                                        : "until-forever".tr(),
+                                    ? "until-goal-reached".tr()
+                                    : "until-forever".tr(),
                                 showPlaceHolderWhenTextEquals: "",
                                 onTap: () {
                                   selectEndDate(context);
@@ -1334,43 +1398,54 @@ class _AddTransactionPageState extends State<AddTransactionPage>
                                 fontWeight: FontWeight.bold,
                                 internalPadding:
                                     EdgeInsetsDirectional.symmetric(
-                                        vertical: 5, horizontal: 4),
+                                      vertical: 5,
+                                      horizontal: 4,
+                                    ),
                                 padding: EdgeInsetsDirectional.symmetric(
-                                    vertical: 0, horizontal: 5),
+                                  vertical: 0,
+                                  horizontal: 5,
+                                ),
                               ),
                             ),
-                            Builder(builder: (context) {
-                              int? numberRepeats = widget.transaction
-                                          ?.createdAnotherFutureTransaction ==
-                                      true
-                                  ? null
-                                  : countTransactionOccurrences(
-                                      type: selectedType,
-                                      reoccurrence: selectedRecurrenceEnum,
-                                      periodLength: selectedPeriodLength,
-                                      dateCreated: selectedDate,
-                                      endDate: selectedEndDate,
-                                    );
-                              return AnimatedSizeSwitcher(
-                                child: numberRepeats != null
-                                    ? Padding(
-                                        padding: const EdgeInsetsDirectional
-                                            .symmetric(horizontal: 4),
-                                        child: TextFont(
-                                          key: ValueKey(1),
-                                          fontSize: 14.5,
-                                          textColor:
-                                              getColor(context, "textLight"),
-                                          text: "( ×" +
-                                              numberRepeats.toString() +
-                                              " )",
-                                        ),
-                                      )
-                                    : Container(
-                                        key: ValueKey(2),
-                                      ),
-                              );
-                            }),
+                            Builder(
+                              builder: (context) {
+                                int? numberRepeats =
+                                    widget
+                                            .transaction
+                                            ?.createdAnotherFutureTransaction ==
+                                        true
+                                    ? null
+                                    : countTransactionOccurrences(
+                                        type: selectedType,
+                                        reoccurrence: selectedRecurrenceEnum,
+                                        periodLength: selectedPeriodLength,
+                                        dateCreated: selectedDate,
+                                        endDate: selectedEndDate,
+                                      );
+                                return AnimatedSizeSwitcher(
+                                  child: numberRepeats != null
+                                      ? Padding(
+                                          padding:
+                                              const EdgeInsetsDirectional.symmetric(
+                                                horizontal: 4,
+                                              ),
+                                          child: TextFont(
+                                            key: ValueKey(1),
+                                            fontSize: 14.5,
+                                            textColor: getColor(
+                                              context,
+                                              "textLight",
+                                            ),
+                                            text:
+                                                "( ×" +
+                                                numberRepeats.toString() +
+                                                " )",
+                                          ),
+                                        )
+                                      : Container(key: ValueKey(2)),
+                                );
+                              },
+                            ),
                             AnimatedSizeSwitcher(
                               child: selectedEndDate != null
                                   ? Opacity(
@@ -1386,9 +1461,7 @@ class _AddTransactionPageState extends State<AddTransactionPage>
                                         },
                                       ),
                                     )
-                                  : Container(
-                                      key: ValueKey(2),
-                                    ),
+                                  : Container(key: ValueKey(2)),
                             ),
                           ],
                         ),
@@ -1426,10 +1499,11 @@ class _AddTransactionPageState extends State<AddTransactionPage>
                           onSelected: (TransactionWallet wallet) {
                             setSelectedWalletPk(wallet.walletPk);
                           },
-                          extraWidgetBefore: Provider.of<AllWallets>(context,
-                                              listen: false)
-                                          .indexedByPk
-                                          .length >
+                          extraWidgetBefore:
+                              Provider.of<AllWallets>(
+                                        context,
+                                        listen: false,
+                                      ).indexedByPk.length >
                                       3 &&
                                   enableDoubleColumn(context) == false
                               ? SelectChipsAddButtonExtraWidget(
@@ -1438,9 +1512,9 @@ class _AddTransactionPageState extends State<AddTransactionPage>
                                     dynamic result = await selectWalletPopup(
                                       context,
                                       selectedWallet: Provider.of<AllWallets>(
-                                              context,
-                                              listen: false)
-                                          .indexedByPk[selectedWalletPk],
+                                        context,
+                                        listen: false,
+                                      ).indexedByPk[selectedWalletPk],
                                       allowEditWallet: true,
                                       allowDeleteWallet: false,
                                     );
@@ -1459,8 +1533,9 @@ class _AddTransactionPageState extends State<AddTransactionPage>
                               lightenPastel(
                                 HexColor(
                                   item.colour,
-                                  defaultColor:
-                                      Theme.of(context).colorScheme.primary,
+                                  defaultColor: Theme.of(
+                                    context,
+                                  ).colorScheme.primary,
                                 ),
                                 amount: 0.3,
                               ),
@@ -1469,7 +1544,9 @@ class _AddTransactionPageState extends State<AddTransactionPage>
                           },
                           getLabel: (TransactionWallet wallet) {
                             return getWalletStringName(
-                                Provider.of<AllWallets>(context), wallet);
+                              Provider.of<AllWallets>(context),
+                              wallet,
+                            );
                           },
                           extraWidgetAfter: SelectChipsAddButtonExtraWidget(
                             openPage: AddWalletPage(
@@ -1531,7 +1608,8 @@ class _AddTransactionPageState extends State<AddTransactionPage>
                   : transactionTextInput,
               SizedBox(height: 10),
               AnimatedExpanded(
-                expand: showMoreOptions == false &&
+                expand:
+                    showMoreOptions == false &&
                     selectedType == null &&
                     widget.transaction?.paid == false,
                 child: Column(
@@ -1559,23 +1637,24 @@ class _AddTransactionPageState extends State<AddTransactionPage>
                 ),
               ),
               AnimatedExpanded(
-                  expand: showMoreOptions == false &&
-                      widget.transaction?.budgetFksExclude != null,
-                  child: Column(
-                    children: [
-                      HorizontalBreakAbove(
-                        enabled: enableDoubleColumn(context),
-                        child: StickyLabelDivider(
-                          info: "exclude-from-budget".tr(),
-                        ),
+                expand:
+                    showMoreOptions == false &&
+                    widget.transaction?.budgetFksExclude != null,
+                child: Column(
+                  children: [
+                    HorizontalBreakAbove(
+                      enabled: enableDoubleColumn(context),
+                      child: StickyLabelDivider(
+                        info: "exclude-from-budget".tr(),
                       ),
-                      SelectExcludeBudget(
-                        setSelectedExcludedBudgets:
-                            setSelectedExcludedBudgetPks,
-                        selectedExcludedBudgetPks: selectedExcludedBudgetPks,
-                      ),
-                    ],
-                  )),
+                    ),
+                    SelectExcludeBudget(
+                      setSelectedExcludedBudgets: setSelectedExcludedBudgetPks,
+                      selectedExcludedBudgetPks: selectedExcludedBudgetPks,
+                    ),
+                  ],
+                ),
+              ),
               AnimatedSizeSwitcher(
                 child: showMoreOptions == false
                     ? Padding(
@@ -1594,7 +1673,8 @@ class _AddTransactionPageState extends State<AddTransactionPage>
                         key: ValueKey(2),
                         children: [
                           HorizontalBreakAbove(
-                            enabled: enableDoubleColumn(context) &&
+                            enabled:
+                                enableDoubleColumn(context) &&
                                 (selectedType == null ||
                                     widget.transaction != null),
                             child: Column(
@@ -1633,22 +1713,26 @@ class _AddTransactionPageState extends State<AddTransactionPage>
                                       onTap: () async {
                                         bool result = await addTransaction();
                                         if (result) popRoute(context);
-                                        duplicateTransaction(context,
-                                            widget.transaction!.transactionPk);
+                                        duplicateTransaction(
+                                          context,
+                                          widget.transaction!.transactionPk,
+                                        );
                                       },
                                       onLongPress: () async {
                                         bool result = await addTransaction();
                                         if (result) popRoute(context);
-                                        duplicateTransaction(context,
-                                            widget.transaction!.transactionPk,
-                                            useCurrentDate: true);
+                                        duplicateTransaction(
+                                          context,
+                                          widget.transaction!.transactionPk,
+                                          useCurrentDate: true,
+                                        );
                                       },
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .secondaryContainer,
-                                      textColor: Theme.of(context)
-                                          .colorScheme
-                                          .onSecondaryContainer,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.secondaryContainer,
+                                      textColor: Theme.of(
+                                        context,
+                                      ).colorScheme.onSecondaryContainer,
                                     ),
                                   ),
                               ],
@@ -1677,13 +1761,17 @@ class _AddTransactionPageState extends State<AddTransactionPage>
                   appStateSettings["showMethodAdded"] == true)
                 Padding(
                   padding: const EdgeInsetsDirectional.only(
-                      start: 10, end: 10, top: 10),
+                    start: 10,
+                    end: 10,
+                    top: 10,
+                  ),
                   child: Column(
                     children: [
                       if (widget.transaction?.methodAdded != null &&
                           appStateSettings["showMethodAdded"] == true)
                         TextFont(
-                          text: "Added via: " +
+                          text:
+                              "Added via: " +
                               (widget.transaction?.methodAdded?.name
                                       .toString()
                                       .capitalizeFirstofEach ??
@@ -1710,15 +1798,19 @@ class _AddTransactionPageState extends State<AddTransactionPage>
                   ? SizedBox.shrink()
                   : Padding(
                       padding: const EdgeInsetsDirectional.symmetric(
-                          horizontal: 10, vertical: 28),
+                        horizontal: 10,
+                        vertical: 28,
+                      ),
                       child: TextFont(
-                        text: "synced".tr() +
+                        text:
+                            "synced".tr() +
                             " " +
                             getTimeAgo(
                               widget.transaction!.sharedDateUpdated!,
                             ).toLowerCase() +
                             "\n Created by " +
-                            (widget.transaction!
+                            (widget
+                                    .transaction!
                                     .transactionOriginalOwnerEmail ??
                                 ""),
                         fontSize: 13,
@@ -1734,7 +1826,8 @@ class _AddTransactionPageState extends State<AddTransactionPage>
       ),
     );
 
-    bool enableBalanceTransferTab = widget.transaction == null &&
+    bool enableBalanceTransferTab =
+        widget.transaction == null &&
         Provider.of<AllWallets>(context).indexedByPk.keys.length > 1;
 
     Widget transactionAmountAndCategoryHeader = AnimatedContainer(
@@ -1772,12 +1865,13 @@ class _AddTransactionPageState extends State<AddTransactionPage>
                       incomeLabel: isAddedToLoanObjective
                           ? "collected".tr()
                           : selectedType == TransactionSpecialType.debt ||
-                                  selectedType == TransactionSpecialType.credit
-                              ? "borrowed".tr()
-                              : selectedCategory?.categoryPk == "0"
-                                  ? "transfer-in".tr()
-                                  : null,
-                      incomeIconColor: isAddedToLoanObjective ||
+                                selectedType == TransactionSpecialType.credit
+                          ? "borrowed".tr()
+                          : selectedCategory?.categoryPk == "0"
+                          ? "transfer-in".tr()
+                          : null,
+                      incomeIconColor:
+                          isAddedToLoanObjective ||
                               selectedType == TransactionSpecialType.debt ||
                               selectedType == TransactionSpecialType.credit
                           ? getColor(context, "unPaidOverdue")
@@ -1785,12 +1879,13 @@ class _AddTransactionPageState extends State<AddTransactionPage>
                       expenseLabel: isAddedToLoanObjective
                           ? "paid".tr()
                           : selectedType == TransactionSpecialType.debt ||
-                                  selectedType == TransactionSpecialType.credit
-                              ? "lent".tr()
-                              : selectedCategory?.categoryPk == "0"
-                                  ? "transfer-out".tr()
-                                  : null,
-                      expenseIconColor: isAddedToLoanObjective ||
+                                selectedType == TransactionSpecialType.credit
+                          ? "lent".tr()
+                          : selectedCategory?.categoryPk == "0"
+                          ? "transfer-out".tr()
+                          : null,
+                      expenseIconColor:
+                          isAddedToLoanObjective ||
                               selectedType == TransactionSpecialType.debt ||
                               selectedType == TransactionSpecialType.credit
                           ? getColor(context, "unPaidUpcoming")
@@ -1845,8 +1940,10 @@ class _AddTransactionPageState extends State<AddTransactionPage>
                     TransactionCategory category = await database
                         .getCategory(selectedCategory!.categoryPk)
                         .$2;
-                    setSelectedCategory(category,
-                        setIncome: selectedCategory?.income != category.income);
+                    setSelectedCategory(
+                      category,
+                      setIncome: selectedCategory?.income != category.income,
+                    );
                   }
                 },
                 onTap: () async {
@@ -1893,14 +1990,15 @@ class _AddTransactionPageState extends State<AddTransactionPage>
                         copyToClipboard(
                           convertToMoney(
                             Provider.of<AllWallets>(context, listen: false),
-                            currencyKey:
-                                Provider.of<AllWallets>(context, listen: false)
-                                    .indexedByPk[selectedWalletPk]
-                                    ?.currency,
+                            currencyKey: Provider.of<AllWallets>(
+                              context,
+                              listen: false,
+                            ).indexedByPk[selectedWalletPk]?.currency,
                             selectedAmount ?? 0,
                             finalNumber: selectedAmount ?? 0,
-                            decimals:
-                                getSelectedWallet(listen: false)?.decimals,
+                            decimals: getSelectedWallet(
+                              listen: false,
+                            )?.decimals,
                           ),
                         );
                       },
@@ -1932,25 +2030,29 @@ class _AddTransactionPageState extends State<AddTransactionPage>
                             AnimatedSwitcher(
                               duration: Duration(milliseconds: 350),
                               child: Align(
-                                key: ValueKey(selectedWalletPk.toString() +
-                                    selectedAmount.toString()),
+                                key: ValueKey(
+                                  selectedWalletPk.toString() +
+                                      selectedAmount.toString(),
+                                ),
                                 alignment: AlignmentDirectional.centerEnd,
                                 child: TextFont(
                                   textAlign: TextAlign.end,
                                   text: convertToMoney(
                                     Provider.of<AllWallets>(context),
                                     selectedAmount ?? 0,
-                                    decimals: getSelectedWallet(listen: true)
-                                        ?.decimals,
-                                    currencyKey: getSelectedWallet(listen: true)
-                                        ?.currency,
+                                    decimals: getSelectedWallet(
+                                      listen: true,
+                                    )?.decimals,
+                                    currencyKey: getSelectedWallet(
+                                      listen: true,
+                                    )?.currency,
                                     addCurrencyName:
-                                        ((getSelectedWallet(listen: true)
-                                                ?.currency) !=
-                                            Provider.of<AllWallets>(context)
-                                                .indexedByPk[appStateSettings[
-                                                    "selectedWalletPk"]]
-                                                ?.currency),
+                                        ((getSelectedWallet(
+                                          listen: true,
+                                        )?.currency) !=
+                                        Provider.of<AllWallets>(context)
+                                            .indexedByPk[appStateSettings["selectedWalletPk"]]
+                                            ?.currency),
                                   ),
                                   fontSize: 32,
                                   fontWeight: FontWeight.bold,
@@ -1962,18 +2064,20 @@ class _AddTransactionPageState extends State<AddTransactionPage>
                             Provider.of<AllWallets>(context).list.length <= 1 ||
                                     selectedWalletPk ==
                                         appStateSettings["selectedWalletPk"] ||
-                                    ((getSelectedWallet(listen: true)
-                                            ?.currency) ==
+                                    ((getSelectedWallet(
+                                          listen: true,
+                                        )?.currency) ==
                                         Provider.of<AllWallets>(context)
-                                            .indexedByPk[appStateSettings[
-                                                "selectedWalletPk"]]
+                                            .indexedByPk[appStateSettings["selectedWalletPk"]]
                                             ?.currency)
                                 ? AnimatedSizeSwitcher(
-                                    switcherDuration:
-                                        Duration(milliseconds: 350),
+                                    switcherDuration: Duration(
+                                      milliseconds: 350,
+                                    ),
                                     child: Container(
                                       key: ValueKey(
-                                          selectedCategory?.name ?? ""),
+                                        selectedCategory?.name ?? "",
+                                      ),
                                       width: double.infinity,
                                       child: TextFont(
                                         textAlign: TextAlign.end,
@@ -1993,9 +2097,11 @@ class _AddTransactionPageState extends State<AddTransactionPage>
                                           Provider.of<AllWallets>(context),
                                           (selectedAmount ?? 0) *
                                               (amountRatioToPrimaryCurrencyGivenPk(
-                                                  Provider.of<AllWallets>(
-                                                      context),
-                                                  selectedWalletPk)),
+                                                Provider.of<AllWallets>(
+                                                  context,
+                                                ),
+                                                selectedWalletPk,
+                                              )),
                                         ),
                                         fontSize: 18,
                                         maxLines: 1,
@@ -2020,7 +2126,7 @@ class _AddTransactionPageState extends State<AddTransactionPage>
               selectedCategoryPk: selectedCategory!.categoryPk,
               selectedSubCategoryPk: selectedSubCategory?.categoryPk,
               padding: const EdgeInsetsDirectional.only(bottom: 6),
-            )
+            ),
         ],
       ),
     );
@@ -2043,18 +2149,19 @@ class _AddTransactionPageState extends State<AddTransactionPage>
         resizeToAvoidBottomInset: true,
         title: widget.transaction == null
             ? isAddedToLoanObjective
-                ? "add-record".tr()
-                : "add-transaction".tr()
+                  ? "add-record".tr()
+                  : "add-transaction".tr()
             : isAddedToLoanObjective
-                ? "edit-record".tr()
-                : "edit-transaction".tr(),
+            ? "edit-record".tr()
+            : "edit-transaction".tr(),
         dragDownToDismiss: true,
         onBackButton: () async {
           if (widget.transaction != null) {
             discardChangesPopup(
               context,
-              previousObject:
-                  await addDefaultMissingValues(widget.transaction!),
+              previousObject: await addDefaultMissingValues(
+                widget.transaction!,
+              ),
               currentObject: await createTransaction(),
             );
           } else {
@@ -2065,8 +2172,9 @@ class _AddTransactionPageState extends State<AddTransactionPage>
           if (widget.transaction != null) {
             discardChangesPopup(
               context,
-              previousObject:
-                  await addDefaultMissingValues(widget.transaction!),
+              previousObject: await addDefaultMissingValues(
+                widget.transaction!,
+              ),
               currentObject: await createTransaction(),
             );
           } else {
@@ -2086,11 +2194,13 @@ class _AddTransactionPageState extends State<AddTransactionPage>
                       routesToPopAfterDelete: widget.routesToPopAfterDelete,
                     );
                   },
-                  icon: Icon(appStateSettings["outlinedIcons"]
-                      ? Icons.delete_outlined
-                      : Icons.delete_rounded),
+                  icon: Icon(
+                    appStateSettings["outlinedIcons"]
+                        ? Icons.delete_outlined
+                        : Icons.delete_rounded,
+                  ),
                 )
-              : SizedBox.shrink()
+              : SizedBox.shrink(),
         ],
         overlay: MinimizeKeyboardFABOverlay(isEnabled: notesInputFocused),
         staticOverlay: Align(
@@ -2116,23 +2226,23 @@ class _AddTransactionPageState extends State<AddTransactionPage>
                           },
                         )
                       : selectedAmount == null
-                          ? Button(
-                              hasBottomExtraSafeArea: true,
-                              label: "enter-amount".tr(),
-                              onTap: () {
-                                selectAmountPopup();
-                              },
-                            )
-                          : Button(
-                              hasBottomExtraSafeArea: true,
-                              label: widget.transaction != null
-                                  ? "save-changes".tr()
-                                  : textAddTransaction ?? "",
-                              onTap: () async {
-                                bool result = await addTransaction();
-                                if (result) popRoute(context);
-                              },
-                            ),
+                      ? Button(
+                          hasBottomExtraSafeArea: true,
+                          label: "enter-amount".tr(),
+                          onTap: () {
+                            selectAmountPopup();
+                          },
+                        )
+                      : Button(
+                          hasBottomExtraSafeArea: true,
+                          label: widget.transaction != null
+                              ? "save-changes".tr()
+                              : textAddTransaction ?? "",
+                          onTap: () async {
+                            bool result = await addTransaction();
+                            if (result) popRoute(context);
+                          },
+                        ),
                 ),
                 AnimatedSizeSwitcher(
                   clipBehavior: Clip.none,
@@ -2142,22 +2252,26 @@ class _AddTransactionPageState extends State<AddTransactionPage>
                           padding: EdgeInsetsDirectional.only(start: 5),
                           child: Button(
                             hasBottomExtraSafeArea: true,
-                            color: isTransactionActionDealtWith(
-                                    createTransaction())
-                                ? Theme.of(context)
-                                    .colorScheme
-                                    .tertiaryContainer
+                            color:
+                                isTransactionActionDealtWith(
+                                  createTransaction(),
+                                )
+                                ? Theme.of(
+                                    context,
+                                  ).colorScheme.tertiaryContainer
                                 : null,
-                            textColor: isTransactionActionDealtWith(
-                                    createTransaction())
-                                ? Theme.of(context)
-                                    .colorScheme
-                                    .onTertiaryContainer
+                            textColor:
+                                isTransactionActionDealtWith(
+                                  createTransaction(),
+                                )
+                                ? Theme.of(
+                                    context,
+                                  ).colorScheme.onTertiaryContainer
                                 : null,
                             label: widget.transaction != null
                                 ? getTransactionActionNameFromType(
-                                        createTransaction())
-                                    .tr()
+                                    createTransaction(),
+                                  ).tr()
                                 : "",
                             onTap: () async {
                               if (widget.transaction != null &&
@@ -2174,9 +2288,7 @@ class _AddTransactionPageState extends State<AddTransactionPage>
                             },
                           ),
                         )
-                      : Container(
-                          key: ValueKey(2),
-                        ),
+                      : Container(key: ValueKey(2)),
                 ),
               ],
             ),
@@ -2203,11 +2315,13 @@ class _AddTransactionPageState extends State<AddTransactionPage>
                           children: [
                             Padding(
                               padding: const EdgeInsetsDirectional.symmetric(
-                                  horizontal: 13),
+                                horizontal: 13,
+                              ),
                               child: ClipRRect(
                                 child: transactionAmountAndCategoryHeader,
-                                borderRadius:
-                                    BorderRadiusDirectional.circular(15),
+                                borderRadius: BorderRadiusDirectional.circular(
+                                  15,
+                                ),
                               ),
                             ),
                             transactionTextInput,
@@ -2225,8 +2339,11 @@ class _AddTransactionPageState extends State<AddTransactionPage>
 }
 
 class SelectIncludeAmount extends StatelessWidget {
-  const SelectIncludeAmount(
-      {required this.selectedPaid, required this.onSwitched, super.key});
+  const SelectIncludeAmount({
+    required this.selectedPaid,
+    required this.onSwitched,
+    super.key,
+  });
   final bool selectedPaid;
   final Function(bool) onSwitched;
 
@@ -2235,17 +2352,16 @@ class SelectIncludeAmount extends StatelessWidget {
     return SettingsContainerSwitch(
       icon: selectedPaid
           ? appStateSettings["outlinedIcons"]
-              ? Icons.check_circle_outlined
-              : Icons.check_circle_rounded
+                ? Icons.check_circle_outlined
+                : Icons.check_circle_rounded
           : appStateSettings["outlinedIcons"]
-              ? Icons.cancel_outlined
-              : Icons.cancel_rounded,
+          ? Icons.cancel_outlined
+          : Icons.cancel_rounded,
       title: "include-amount".tr(),
       enableBorderRadius: true,
-      backgroundColor: Theme.of(context)
-          .colorScheme
-          .secondaryContainer
-          .withValues(alpha: 0.7),
+      backgroundColor: Theme.of(
+        context,
+      ).colorScheme.secondaryContainer.withValues(alpha: 0.7),
       initialValue: selectedPaid,
       onSwitched: onSwitched,
     );
@@ -2266,8 +2382,10 @@ class SelectedWalletButton extends StatelessWidget {
       onTap: onTap,
       borderRadius: 10,
       child: Padding(
-        padding:
-            const EdgeInsetsDirectional.symmetric(horizontal: 20, vertical: 6),
+        padding: const EdgeInsetsDirectional.symmetric(
+          horizontal: 20,
+          vertical: 6,
+        ),
         child: Row(
           children: [
             ButtonIcon(
@@ -2299,8 +2417,12 @@ class DateButton extends StatefulWidget {
     required this.initialSelectedTime,
     required this.setSelectedDate,
     required this.setSelectedTime,
-    this.internalPadding =
-        const EdgeInsetsDirectional.only(start: 20, top: 6, bottom: 6, end: 4),
+    this.internalPadding = const EdgeInsetsDirectional.only(
+      start: 20,
+      top: 6,
+      bottom: 6,
+      end: 4,
+    ),
     this.timeBackgroundColor,
   }) : super(key: key);
   final DateTime initialSelectedDate;
@@ -2320,10 +2442,14 @@ class _DateButtonState extends State<DateButton> {
 
   @override
   Widget build(BuildContext context) {
-    String wordedDate = getWordedDateShortMore(selectedDate,
-        includeYear: selectedDate.year != DateTime.now().year);
-    String wordedDateShort = getWordedDateShort(selectedDate,
-        includeYear: selectedDate.year != DateTime.now().year);
+    String wordedDate = getWordedDateShortMore(
+      selectedDate,
+      includeYear: selectedDate.year != DateTime.now().year,
+    );
+    String wordedDateShort = getWordedDateShort(
+      selectedDate,
+      includeYear: selectedDate.year != DateTime.now().year,
+    );
 
     return Tappable(
       color: Colors.transparent,
@@ -2468,7 +2594,7 @@ class SelectTitle extends StatefulWidget {
   final VoidCallback? next;
   final bool disableAskForNote;
   final Widget Function(FocusNode enterTitleFocus)?
-      customTitleInputWidgetBuilder;
+  customTitleInputWidgetBuilder;
 
   @override
   _SelectTitleState createState() => _SelectTitleState();
@@ -2508,8 +2634,11 @@ class _SelectTitleState extends State<SelectTitle> {
       if (selectedAssociatedTitle?.type == TitleType.SubCategoryName ||
           selectedAssociatedTitle?.category.mainCategoryPk != null) {
         if (selectedAssociatedTitle!.category.mainCategoryPk != null) {
-          widget.setSelectedCategory(await database.getCategoryInstance(
-              selectedAssociatedTitle!.category.mainCategoryPk!));
+          widget.setSelectedCategory(
+            await database.getCategoryInstance(
+              selectedAssociatedTitle!.category.mainCategoryPk!,
+            ),
+          );
           widget.setSelectedSubCategory(selectedAssociatedTitle!.category);
         }
       } else {
@@ -2541,7 +2670,8 @@ class _SelectTitleState extends State<SelectTitle> {
   @override
   Widget build(BuildContext context) {
     return PopupFramework(
-      title: customDateTimeSelected == true &&
+      title:
+          customDateTimeSelected == true &&
               getPlatform() == PlatformOS.isAndroid &&
               getIsFullScreen(context)
           ? null
@@ -2553,8 +2683,10 @@ class _SelectTitleState extends State<SelectTitle> {
                   ? Icons.calendar_month_outlined
                   : Icons.calendar_month_rounded,
               onPressed: () async {
-                DateTime? dateTimeSelected =
-                    await selectDateAndTimeSequence(context, selectedDateTime);
+                DateTime? dateTimeSelected = await selectDateAndTimeSequence(
+                  context,
+                  selectedDateTime,
+                );
                 if (dateTimeSelected != null) {
                   setState(() {
                     customDateTimeSelected = true;
@@ -2584,8 +2716,9 @@ class _SelectTitleState extends State<SelectTitle> {
                   key: ValueKey(selectedDateTime.toString()),
                   initialSelectedDate: selectedDateTime,
                   initialSelectedTime: TimeOfDay(
-                      hour: selectedDateTime.hour,
-                      minute: selectedDateTime.minute),
+                    hour: selectedDateTime.hour,
+                    minute: selectedDateTime.minute,
+                  ),
                   setSelectedDate: (date) {
                     selectedDateTime = date;
                     widget.setSelectedDateTime(selectedDateTime);
@@ -2593,7 +2726,9 @@ class _SelectTitleState extends State<SelectTitle> {
                   },
                   setSelectedTime: (time) {
                     selectedDateTime = selectedDateTime.copyWith(
-                        hour: time.hour, minute: time.minute);
+                      hour: time.hour,
+                      minute: time.minute,
+                    );
                     widget.setSelectedDateTime(selectedDateTime);
                     enterTitleFocus.requestFocus();
                   },
@@ -2625,10 +2760,11 @@ class _SelectTitleState extends State<SelectTitle> {
                       }
 
                       TransactionAssociatedTitleWithCategory?
-                          selectedTitleLocal =
+                      selectedTitleLocal =
                           (await database.getSimilarAssociatedTitles(
-                                  title: text, limit: 1))
-                              .firstOrNull;
+                            title: text,
+                            limit: 1,
+                          )).firstOrNull;
 
                       if (selectedTitleLocal != null) {
                         // Update the size of the bottom sheet
@@ -2649,12 +2785,11 @@ class _SelectTitleState extends State<SelectTitle> {
                     sizeDuration: Duration(milliseconds: 400),
                     sizeCurve: Curves.easeInOut,
                     child: selectedAssociatedTitle == null
-                        ? Container(
-                            key: ValueKey(0),
-                          )
+                        ? Container(key: ValueKey(0))
                         : Container(
                             key: ValueKey(
-                                selectedAssociatedTitle?.category.categoryPk),
+                              selectedAssociatedTitle?.category.categoryPk,
+                            ),
                             padding: EdgeInsetsDirectional.only(top: 13),
                             child: Tappable(
                               borderRadius: 15,
@@ -2680,8 +2815,10 @@ class _SelectTitleState extends State<SelectTitle> {
                                           CrossAxisAlignment.start,
                                       children: [
                                         TextFont(
-                                          text: selectedAssociatedTitle
-                                                  ?.category.name ??
+                                          text:
+                                              selectedAssociatedTitle
+                                                  ?.category
+                                                  .name ??
                                               "",
                                           fontSize: 18,
                                           fontWeight: FontWeight.bold,
@@ -2694,8 +2831,9 @@ class _SelectTitleState extends State<SelectTitle> {
                                                   fontSize: 16,
                                                   mainText:
                                                       selectedAssociatedTitle
-                                                              ?.title.title ??
-                                                          "",
+                                                          ?.title
+                                                          .title ??
+                                                      "",
                                                   boldedText:
                                                       selectedAssociatedTitle
                                                           ?.partialTitleString,
@@ -2704,7 +2842,7 @@ class _SelectTitleState extends State<SelectTitle> {
                                             : Container(),
                                       ],
                                     ),
-                                  )
+                                  ),
                                 ],
                               ),
                             ),
@@ -2719,11 +2857,13 @@ class _SelectTitleState extends State<SelectTitle> {
                         child: TransactionNotesTextInput(
                           noteInputController: widget.noteInputController,
                           setNotesInputFocused: (isFocused) {},
-                          setSelectedNoteController: (note,
-                              {bool setInput = true}) {
-                            widget.setSelectedNoteController(note,
-                                setInput: setInput);
-                          },
+                          setSelectedNoteController:
+                              (note, {bool setInput = true}) {
+                                widget.setSelectedNoteController(
+                                  note,
+                                  setInput: setInput,
+                                );
+                              },
                         ),
                       ),
                     ),
@@ -2764,7 +2904,7 @@ class _SelectTitleState extends State<SelectTitle> {
                           },
                         )
                       : SizedBox.shrink(),
-                ])
+                ]),
         ],
       ),
     );
@@ -2862,8 +3002,8 @@ class _SelectTextState extends State<SelectText> {
                 icon: widget.icon != null
                     ? widget.icon
                     : appStateSettings["outlinedIcons"]
-                        ? Icons.title_outlined
-                        : Icons.title_rounded,
+                    ? Icons.title_outlined
+                    : Icons.title_rounded,
                 initialValue: widget.selectedText,
                 autoFocus: widget.autoFocus,
                 readOnly: widget.readOnly,
@@ -2882,9 +3022,7 @@ class _SelectTextState extends State<SelectText> {
             if (widget.widgetBeside != null) widget.widgetBeside!,
           ],
         ),
-        SizedBox(
-          height: widget.buttonLabel != null ? 15 : 5,
-        ),
+        SizedBox(height: widget.buttonLabel != null ? 15 : 5),
         if (widget.buttonLabel != null)
           Button(
             label: widget.buttonLabel ?? "",
@@ -2968,15 +3106,16 @@ class _EnterTextButtonState extends State<EnterTextButton> {
 }
 
 Future<bool> addAssociatedTitles(
-    String selectedTitle, TransactionCategory selectedCategory) async {
+  String selectedTitle,
+  TransactionCategory selectedCategory,
+) async {
   if (appStateSettings["autoAddAssociatedTitles"]) {
     try {
       TransactionAssociatedTitleWithCategory? foundTitle =
           (await database.getSimilarAssociatedTitles(
-        title: selectedTitle,
-        limit: 1,
-      ))
-              .firstOrNull;
+            title: selectedTitle,
+            limit: 1,
+          )).firstOrNull;
 
       if (foundTitle?.type == TitleType.CategoryName ||
           foundTitle?.type == TitleType.SubCategoryName) {
@@ -2997,10 +3136,13 @@ Future<bool> addAssociatedTitles(
 
         // This is more efficient than shifting the associated title since this uses batching
         await database.deleteAssociatedTitle(
-            foundTitle.title.associatedTitlePk, foundTitle.title.order);
+          foundTitle.title.associatedTitlePk,
+          foundTitle.title.order,
+        );
         int length = await database.getAmountOfAssociatedTitles();
         await database.createOrUpdateAssociatedTitle(
-            foundTitle.title.copyWith(order: length));
+          foundTitle.title.copyWith(order: length),
+        );
         return true;
       } else {
         // If there is no existing title, create one
@@ -3069,57 +3211,58 @@ class _SelectAddedBudgetState extends State<SelectAddedBudget> {
             enabled:
                 enableDoubleColumn(context) && widget.horizontalBreak == true,
             child: Padding(
-                padding: const EdgeInsetsDirectional.only(top: 5),
-                child: SelectChips(
-                  allowMultipleSelected: false,
-                  wrapped: widget.wrapped ?? enableDoubleColumn(context),
-                  extraHorizontalPadding: widget.extraHorizontalPadding,
-                  onLongPress: (Budget? item) {
-                    pushRoute(
-                      context,
-                      AddBudgetPage(
-                        budget: item,
-                        routesToPopAfterDelete:
-                            RoutesToPopAfterDelete.PreventDelete,
-                      ),
-                    );
-                  },
-                  extraWidgetAfter: SelectChipsAddButtonExtraWidget(
-                    openPage: AddBudgetPage(
-                      isAddedOnlyBudget: true,
-                      routesToPopAfterDelete: RoutesToPopAfterDelete.One,
+              padding: const EdgeInsetsDirectional.only(top: 5),
+              child: SelectChips(
+                allowMultipleSelected: false,
+                wrapped: widget.wrapped ?? enableDoubleColumn(context),
+                extraHorizontalPadding: widget.extraHorizontalPadding,
+                onLongPress: (Budget? item) {
+                  pushRoute(
+                    context,
+                    AddBudgetPage(
+                      budget: item,
+                      routesToPopAfterDelete:
+                          RoutesToPopAfterDelete.PreventDelete,
                     ),
+                  );
+                },
+                extraWidgetAfter: SelectChipsAddButtonExtraWidget(
+                  openPage: AddBudgetPage(
+                    isAddedOnlyBudget: true,
+                    routesToPopAfterDelete: RoutesToPopAfterDelete.One,
                   ),
-                  items: [null, ...snapshot.data!],
-                  getLabel: (Budget? item) {
-                    return item?.name ?? "no-budget".tr();
-                  },
-                  onSelected: (Budget? item) {
-                    widget.setSelectedBudget(
-                      item,
-                      isSharedBudget: item?.sharedKey != null,
-                    );
-                    setState(() {
-                      selectedBudgetPk = item?.budgetPk;
-                    });
-                  },
-                  getSelected: (Budget? item) {
-                    return selectedBudgetPk == item?.budgetPk;
-                  },
-                  getCustomBorderColor: (Budget? item) {
-                    return dynamicPastel(
-                      context,
-                      lightenPastel(
-                        HexColor(
-                          item?.colour,
-                          defaultColor: Theme.of(context).colorScheme.primary,
-                        ),
-                        amount: 0.3,
+                ),
+                items: [null, ...snapshot.data!],
+                getLabel: (Budget? item) {
+                  return item?.name ?? "no-budget".tr();
+                },
+                onSelected: (Budget? item) {
+                  widget.setSelectedBudget(
+                    item,
+                    isSharedBudget: item?.sharedKey != null,
+                  );
+                  setState(() {
+                    selectedBudgetPk = item?.budgetPk;
+                  });
+                },
+                getSelected: (Budget? item) {
+                  return selectedBudgetPk == item?.budgetPk;
+                },
+                getCustomBorderColor: (Budget? item) {
+                  return dynamicPastel(
+                    context,
+                    lightenPastel(
+                      HexColor(
+                        item?.colour,
+                        defaultColor: Theme.of(context).colorScheme.primary,
                       ),
-                      amount: 0.4,
-                    );
-                  },
-                )),
+                      amount: 0.3,
+                    ),
+                    amount: 0.4,
+                  );
+                },
+              ),
+            ),
           );
         } else {
           return Container();
@@ -3169,7 +3312,9 @@ class _SelectObjectiveState extends State<SelectObjective> {
   Widget build(BuildContext context) {
     return StreamBuilder<List<Objective>>(
       stream: database.watchAllObjectives(
-          objectiveType: widget.objectiveType, archivedLast: true),
+        objectiveType: widget.objectiveType,
+        archivedLast: true,
+      ),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           if (snapshot.data!.length <= 0) return Container();
@@ -3177,64 +3322,63 @@ class _SelectObjectiveState extends State<SelectObjective> {
             enabled:
                 enableDoubleColumn(context) && widget.horizontalBreak == true,
             child: Padding(
-                padding: const EdgeInsetsDirectional.only(top: 5),
-                child: SelectChips(
-                  allowMultipleSelected: false,
-                  wrapped: widget.wrapped ?? enableDoubleColumn(context),
-                  extraHorizontalPadding: widget.extraHorizontalPadding,
-                  onLongPress: (Objective? item) {
-                    pushRoute(
-                      context,
-                      AddObjectivePage(
-                        objective: item,
-                        routesToPopAfterDelete:
-                            RoutesToPopAfterDelete.PreventDelete,
-                        objectiveType: widget.objectiveType,
-                      ),
-                    );
-                  },
-                  extraWidgetAfter: SelectChipsAddButtonExtraWidget(
-                    openPage: AddObjectivePage(
+              padding: const EdgeInsetsDirectional.only(top: 5),
+              child: SelectChips(
+                allowMultipleSelected: false,
+                wrapped: widget.wrapped ?? enableDoubleColumn(context),
+                extraHorizontalPadding: widget.extraHorizontalPadding,
+                onLongPress: (Objective? item) {
+                  pushRoute(
+                    context,
+                    AddObjectivePage(
+                      objective: item,
+                      routesToPopAfterDelete:
+                          RoutesToPopAfterDelete.PreventDelete,
                       objectiveType: widget.objectiveType,
-                      routesToPopAfterDelete: RoutesToPopAfterDelete.One,
                     ),
+                  );
+                },
+                extraWidgetAfter: SelectChipsAddButtonExtraWidget(
+                  openPage: AddObjectivePage(
+                    objectiveType: widget.objectiveType,
+                    routesToPopAfterDelete: RoutesToPopAfterDelete.One,
                   ),
-                  items: [null, ...snapshot.data!],
-                  getLabel: (Objective? item) {
-                    return item?.name ??
-                        (widget.objectiveType == ObjectiveType.loan
-                            ? "no-loan".tr()
-                            : "no-goal".tr());
-                  },
-                  onSelected: (Objective? item) {
-                    widget.setSelectedObjective(
-                      item?.objectivePk,
-                    );
-                    if (item?.type == ObjectiveType.loan &&
-                        widget.setSelectedIncome != null) {
-                      widget.setSelectedIncome!(item?.income ?? false);
-                    }
-                    setState(() {
-                      selectedObjectivePk = item?.objectivePk;
-                    });
-                  },
-                  getSelected: (Objective? item) {
-                    return selectedObjectivePk == item?.objectivePk;
-                  },
-                  getCustomBorderColor: (Objective? item) {
-                    return dynamicPastel(
-                      context,
-                      lightenPastel(
-                        HexColor(
-                          item?.colour,
-                          defaultColor: Theme.of(context).colorScheme.primary,
-                        ),
-                        amount: 0.3,
+                ),
+                items: [null, ...snapshot.data!],
+                getLabel: (Objective? item) {
+                  return item?.name ??
+                      (widget.objectiveType == ObjectiveType.loan
+                          ? "no-loan".tr()
+                          : "no-goal".tr());
+                },
+                onSelected: (Objective? item) {
+                  widget.setSelectedObjective(item?.objectivePk);
+                  if (item?.type == ObjectiveType.loan &&
+                      widget.setSelectedIncome != null) {
+                    widget.setSelectedIncome!(item?.income ?? false);
+                  }
+                  setState(() {
+                    selectedObjectivePk = item?.objectivePk;
+                  });
+                },
+                getSelected: (Objective? item) {
+                  return selectedObjectivePk == item?.objectivePk;
+                },
+                getCustomBorderColor: (Objective? item) {
+                  return dynamicPastel(
+                    context,
+                    lightenPastel(
+                      HexColor(
+                        item?.colour,
+                        defaultColor: Theme.of(context).colorScheme.primary,
                       ),
-                      amount: 0.4,
-                    );
-                  },
-                )),
+                      amount: 0.3,
+                    ),
+                    amount: 0.4,
+                  );
+                },
+              ),
+            ),
           );
         } else {
           return Container();
@@ -3284,7 +3428,11 @@ class _SelectExcludeBudgetState extends State<SelectExcludeBudget> {
           if (snapshot.data!.length <= 0)
             return Padding(
               padding: const EdgeInsetsDirectional.only(
-                  start: 17, end: 17, top: 6, bottom: 15),
+                start: 17,
+                end: 17,
+                top: 6,
+                bottom: 15,
+              ),
               child: Row(
                 children: [
                   TextFont(
@@ -3296,61 +3444,62 @@ class _SelectExcludeBudgetState extends State<SelectExcludeBudget> {
               ),
             );
           return Padding(
-              padding: const EdgeInsetsDirectional.only(top: 5),
-              child: SelectChips(
-                wrapped: widget.wrapped ?? enableDoubleColumn(context),
-                extraHorizontalPadding: widget.extraHorizontalPadding,
-                onLongPress: (Budget item) {
-                  pushRoute(
-                    context,
-                    AddBudgetPage(
-                      budget: item,
-                      routesToPopAfterDelete:
-                          RoutesToPopAfterDelete.PreventDelete,
-                    ),
-                  );
-                },
-                extraWidgetAfter: SelectChipsAddButtonExtraWidget(
-                  openPage: AddBudgetPage(
-                    routesToPopAfterDelete: RoutesToPopAfterDelete.One,
+            padding: const EdgeInsetsDirectional.only(top: 5),
+            child: SelectChips(
+              wrapped: widget.wrapped ?? enableDoubleColumn(context),
+              extraHorizontalPadding: widget.extraHorizontalPadding,
+              onLongPress: (Budget item) {
+                pushRoute(
+                  context,
+                  AddBudgetPage(
+                    budget: item,
+                    routesToPopAfterDelete:
+                        RoutesToPopAfterDelete.PreventDelete,
                   ),
+                );
+              },
+              extraWidgetAfter: SelectChipsAddButtonExtraWidget(
+                openPage: AddBudgetPage(
+                  routesToPopAfterDelete: RoutesToPopAfterDelete.One,
                 ),
-                items: snapshot.data!,
-                getLabel: (Budget item) {
-                  return item.name;
-                },
-                onSelected: (Budget item) {
-                  // widget.setSelectedBudget(
-                  //   item,
-                  //   isSharedBudget: item?.sharedKey != null,
-                  // );
-                  // setState(() {
-                  //   selectedBudgetPk = item?.budgetPk;
-                  // });
-                  if (selectedExcludedBudgetPks.contains(item.budgetPk)) {
-                    selectedExcludedBudgetPks.remove(item.budgetPk);
-                  } else {
-                    selectedExcludedBudgetPks.add(item.budgetPk);
-                  }
-                  widget.setSelectedExcludedBudgets(selectedExcludedBudgetPks);
-                },
-                getSelected: (Budget item) {
-                  return (selectedExcludedBudgetPks).contains(item.budgetPk);
-                },
-                getCustomBorderColor: (Budget? item) {
-                  return dynamicPastel(
-                    context,
-                    lightenPastel(
-                      HexColor(
-                        item?.colour,
-                        defaultColor: Theme.of(context).colorScheme.primary,
-                      ),
-                      amount: 0.3,
+              ),
+              items: snapshot.data!,
+              getLabel: (Budget item) {
+                return item.name;
+              },
+              onSelected: (Budget item) {
+                // widget.setSelectedBudget(
+                //   item,
+                //   isSharedBudget: item?.sharedKey != null,
+                // );
+                // setState(() {
+                //   selectedBudgetPk = item?.budgetPk;
+                // });
+                if (selectedExcludedBudgetPks.contains(item.budgetPk)) {
+                  selectedExcludedBudgetPks.remove(item.budgetPk);
+                } else {
+                  selectedExcludedBudgetPks.add(item.budgetPk);
+                }
+                widget.setSelectedExcludedBudgets(selectedExcludedBudgetPks);
+              },
+              getSelected: (Budget item) {
+                return (selectedExcludedBudgetPks).contains(item.budgetPk);
+              },
+              getCustomBorderColor: (Budget? item) {
+                return dynamicPastel(
+                  context,
+                  lightenPastel(
+                    HexColor(
+                      item?.colour,
+                      defaultColor: Theme.of(context).colorScheme.primary,
                     ),
-                    amount: 0.4,
-                  );
-                },
-              ));
+                    amount: 0.3,
+                  ),
+                  amount: 0.4,
+                );
+              },
+            ),
+          );
         } else {
           return Container();
         }
@@ -3384,10 +3533,11 @@ class HorizontalBreakAbove extends StatelessWidget {
 }
 
 class HorizontalBreak extends StatelessWidget {
-  const HorizontalBreak(
-      {this.padding = const EdgeInsetsDirectional.symmetric(vertical: 10),
-      this.color,
-      super.key});
+  const HorizontalBreak({
+    this.padding = const EdgeInsetsDirectional.symmetric(vertical: 10),
+    this.color,
+    super.key,
+  });
   final EdgeInsetsDirectional padding;
   final Color? color;
 
@@ -3410,16 +3560,20 @@ void deleteTransactionPopup(
   required TransactionCategory? category,
   required RoutesToPopAfterDelete routesToPopAfterDelete,
 }) async {
-  String? transactionName =
-      await getTransactionLabel(transaction, category: category);
+  String? transactionName = await getTransactionLabel(
+    transaction,
+    category: category,
+  );
   DeletePopupAction? action = await openDeletePopup(
     context,
     title: "delete-transaction-question".tr(),
     subtitle: transactionName,
   );
   if (action == DeletePopupAction.Delete) {
-    await checkToDeleteCloselyRelatedBalanceCorrectionTransaction(context,
-        transaction: transaction);
+    await checkToDeleteCloselyRelatedBalanceCorrectionTransaction(
+      context,
+      transaction: transaction,
+    );
     if (routesToPopAfterDelete == RoutesToPopAfterDelete.All) {
       popAllRoutes(context);
     } else if (routesToPopAfterDelete == RoutesToPopAfterDelete.One) {
@@ -3454,15 +3608,15 @@ Future checkToDeleteCloselyRelatedBalanceCorrectionTransaction(
           child: Column(
             children: [
               HorizontalBreak(
-                  padding: EdgeInsetsDirectional.only(top: 15, bottom: 10)),
+                padding: EdgeInsetsDirectional.only(top: 15, bottom: 10),
+              ),
               TransactionEntry(
                 useHorizontalPaddingConstrained: false,
                 openPage: Container(),
                 transaction: transaction,
-                containerColor: Theme.of(context)
-                    .colorScheme
-                    .secondaryContainer
-                    .withValues(alpha: 0.4),
+                containerColor: Theme.of(
+                  context,
+                ).colorScheme.secondaryContainer.withValues(alpha: 0.4),
                 customPadding: EdgeInsetsDirectional.zero,
               ),
               SizedBox(height: 5),
@@ -3483,7 +3637,8 @@ Future checkToDeleteCloselyRelatedBalanceCorrectionTransaction(
         onSubmit: () async {
           openLoadingPopupTryCatch(() async {
             await database.deleteTransaction(
-                closelyRelatedTransferCorrectionTransaction.transactionPk);
+              closelyRelatedTransferCorrectionTransaction.transactionPk,
+            );
           });
           popRoute(context);
         },
@@ -3501,7 +3656,8 @@ Future deleteTransactionsPopup(
   DeletePopupAction? action = await openDeletePopup(
     context,
     title: "delete-selected-transactions".tr(),
-    subtitle: transactionPks.length.toString() +
+    subtitle:
+        transactionPks.length.toString() +
         " " +
         (transactionPks.length == 1
             ? "transaction".tr().toLowerCase()
@@ -3519,7 +3675,8 @@ Future deleteTransactionsPopup(
         SnackbarMessage(
           title: "deleted-transactions".tr(),
           icon: Icons.delete,
-          description: transactionPks.length.toString() +
+          description:
+              transactionPks.length.toString() +
               " " +
               (transactionPks.length == 1
                   ? "transaction".tr().toLowerCase()
@@ -3570,12 +3727,8 @@ class SelectTransactionTypePopup extends StatelessWidget {
           transactionType: TransactionSpecialType.upcoming,
           title: "upcoming".tr(),
           childrenDescription: [
-            ListItem(
-              "upcoming-transaction-type-description-1".tr(),
-            ),
-            ListItem(
-              "upcoming-transaction-type-description-2".tr(),
-            ),
+            ListItem("upcoming-transaction-type-description-1".tr()),
+            ListItem("upcoming-transaction-type-description-2".tr()),
           ],
           onlyShowOneTransactionType: onlyShowOneTransactionType,
         ),
@@ -3586,12 +3739,8 @@ class SelectTransactionTypePopup extends StatelessWidget {
           transactionType: TransactionSpecialType.subscription,
           title: "subscription".tr(),
           childrenDescription: [
-            ListItem(
-              "subscription-transaction-type-description-1".tr(),
-            ),
-            ListItem(
-              "subscription-transaction-type-description-2".tr(),
-            ),
+            ListItem("subscription-transaction-type-description-1".tr()),
+            ListItem("subscription-transaction-type-description-2".tr()),
             ListItem(
               // Indicating the next one will be auto created when current marked as paid
               "repetitive-transaction-type-description-3".tr(),
@@ -3606,16 +3755,12 @@ class SelectTransactionTypePopup extends StatelessWidget {
           transactionType: TransactionSpecialType.repetitive,
           title: "repetitive".tr(),
           childrenDescription: [
-            ListItem(
-              "repetitive-transaction-type-description-1".tr(),
-            ),
+            ListItem("repetitive-transaction-type-description-1".tr()),
             ListItem(
               // Indicating the next one will be auto created when current marked as paid
               "repetitive-transaction-type-description-2".tr(),
             ),
-            ListItem(
-              "repetitive-transaction-type-description-3".tr(),
-            ),
+            ListItem("repetitive-transaction-type-description-3".tr()),
           ],
           onlyShowOneTransactionType: onlyShowOneTransactionType,
         ),
@@ -3626,12 +3771,8 @@ class SelectTransactionTypePopup extends StatelessWidget {
           transactionType: TransactionSpecialType.credit,
           title: "lent".tr(),
           childrenDescription: [
-            ListItem(
-              "lent-transaction-type-description-1".tr(),
-            ),
-            ListItem(
-              "lent-transaction-type-description-2".tr(),
-            ),
+            ListItem("lent-transaction-type-description-1".tr()),
+            ListItem("lent-transaction-type-description-2".tr()),
           ],
           onlyShowOneTransactionType: onlyShowOneTransactionType,
         ),
@@ -3642,12 +3783,8 @@ class SelectTransactionTypePopup extends StatelessWidget {
           transactionType: TransactionSpecialType.debt,
           title: "borrowed".tr(),
           childrenDescription: [
-            ListItem(
-              "borrowed-transaction-type-description-1".tr(),
-            ),
-            ListItem(
-              "borrowed-transaction-type-description-2".tr(),
-            ),
+            ListItem("borrowed-transaction-type-description-1".tr()),
+            ListItem("borrowed-transaction-type-description-2".tr()),
           ],
           onlyShowOneTransactionType: onlyShowOneTransactionType,
         ),
@@ -3667,8 +3804,9 @@ class SelectTransactionTypePopup extends StatelessWidget {
               children: [
                 SizedBox(height: 8),
                 Padding(
-                  padding:
-                      const EdgeInsetsDirectional.symmetric(horizontal: 20),
+                  padding: const EdgeInsetsDirectional.symmetric(
+                    horizontal: 20,
+                  ),
                   child: TextFont(
                     maxLines: 5,
                     fontSize: 16,
@@ -3682,10 +3820,9 @@ class SelectTransactionTypePopup extends StatelessWidget {
                     highlightActionButton: true,
                     useHorizontalPaddingConstrained: false,
                     openPage: Container(),
-                    containerColor: Theme.of(context)
-                        .colorScheme
-                        .background
-                        .withValues(alpha: 0.5),
+                    containerColor: Theme.of(
+                      context,
+                    ).colorScheme.background.withValues(alpha: 0.5),
                     transaction: Transaction(
                       transactionPk: "-1",
                       name: "",
@@ -3709,8 +3846,9 @@ class SelectTransactionTypePopup extends StatelessWidget {
                         in TransactionSpecialType.values)
                       IgnorePointer(
                         child: TransactionEntryActionButton(
-                          padding:
-                              EdgeInsetsDirectional.symmetric(horizontal: 6),
+                          padding: EdgeInsetsDirectional.symmetric(
+                            horizontal: 6,
+                          ),
                           allowOpenIntoObjectiveLoanPage: false,
                           transaction: Transaction(
                             transactionPk: "-1",
@@ -3722,10 +3860,11 @@ class SelectTransactionTypePopup extends StatelessWidget {
                             walletFk: "",
                             dateCreated: DateTime.now(),
                             income: false,
-                            paid: [
-                              TransactionSpecialType.credit,
-                              TransactionSpecialType.debt
-                            ].contains(type)
+                            paid:
+                                [
+                                  TransactionSpecialType.credit,
+                                  TransactionSpecialType.debt,
+                                ].contains(type)
                                 ? true
                                 : false,
                             skipPaid: false,
@@ -3785,10 +3924,13 @@ class TransactionTypeInfoEntry extends StatelessWidget {
                 alignStart: true,
                 alignBeside: true,
                 padding: EdgeInsetsDirectional.symmetric(
-                    horizontal: 20, vertical: 20),
+                  horizontal: 20,
+                  vertical: 20,
+                ),
                 text: title,
                 iconData: icon ?? getTransactionTypeIcon(transactionType),
-                onTap: onTap ??
+                onTap:
+                    onTap ??
                     () {
                       setTransactionType(transactionType);
                       popRoute(context);
@@ -3812,8 +3954,11 @@ class TransactionTypeInfoEntry extends StatelessWidget {
 }
 
 class MainAndSubcategory {
-  MainAndSubcategory(
-      {this.main, this.sub, this.ignoredSubcategorySelection = false});
+  MainAndSubcategory({
+    this.main,
+    this.sub,
+    this.ignoredSubcategorySelection = false,
+  });
 
   TransactionCategory? main;
   TransactionCategory? sub;
@@ -3837,7 +3982,7 @@ Future<MainAndSubcategory> selectCategorySequence(
   required Function(TransactionCategory?)? setSelectedSubCategory,
   Function(bool?)? setSelectedIncome,
   required bool?
-      selectedIncomeInitial, // if this is null, always show all categories
+  selectedIncomeInitial, // if this is null, always show all categories
   String? subtitle,
   bool allowReorder = true,
 }) async {
@@ -3860,8 +4005,9 @@ Future<MainAndSubcategory> selectCategorySequence(
   );
   if (result != null && result is TransactionCategory) {
     mainAndSubcategory.main = result;
-    int subCategoriesOfMain = await database
-        .getAmountOfSubCategories(mainAndSubcategory.main!.categoryPk);
+    int subCategoriesOfMain = await database.getAmountOfSubCategories(
+      mainAndSubcategory.main!.categoryPk,
+    );
     if (subCategoriesOfMain > 0) {
       dynamic result2 = await openBottomSheet(
         context,
@@ -3874,48 +4020,50 @@ Future<MainAndSubcategory> selectCategorySequence(
             mainCategoryPks: [mainAndSubcategory.main!.categoryPk],
             allowRearrange: false,
             header: [
-              LayoutBuilder(builder: (context, constraints) {
-                return Column(
-                  children: [
-                    Tappable(
-                      color: Theme.of(context).colorScheme.secondaryContainer,
-                      onTap: () {
-                        if (setSelectedSubCategory != null)
-                          setSelectedSubCategory(null);
-                        popRoute(context, false);
-                      },
-                      borderRadius: 18,
-                      child: Container(
-                        height: constraints.maxWidth < 70
-                            ? constraints.maxWidth
-                            : 66,
-                        width: constraints.maxWidth < 70
-                            ? constraints.maxWidth
-                            : 66,
-                        child: Center(
-                          child: Icon(
-                            appStateSettings["outlinedIcons"]
-                                ? Icons.block_outlined
-                                : Icons.block_rounded,
-                            size: 40,
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  return Column(
+                    children: [
+                      Tappable(
+                        color: Theme.of(context).colorScheme.secondaryContainer,
+                        onTap: () {
+                          if (setSelectedSubCategory != null)
+                            setSelectedSubCategory(null);
+                          popRoute(context, false);
+                        },
+                        borderRadius: 18,
+                        child: Container(
+                          height: constraints.maxWidth < 70
+                              ? constraints.maxWidth
+                              : 66,
+                          width: constraints.maxWidth < 70
+                              ? constraints.maxWidth
+                              : 66,
+                          child: Center(
+                            child: Icon(
+                              appStateSettings["outlinedIcons"]
+                                  ? Icons.block_outlined
+                                  : Icons.block_rounded,
+                              size: 40,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    Container(
-                      margin: EdgeInsetsDirectional.only(top: 2),
-                      child: Center(
-                        child: TextFont(
-                          textAlign: TextAlign.center,
-                          text: "none".tr(),
-                          fontSize: 10,
-                          maxLines: 1,
+                      Container(
+                        margin: EdgeInsetsDirectional.only(top: 2),
+                        child: Center(
+                          child: TextFont(
+                            textAlign: TextAlign.center,
+                            text: "none".tr(),
+                            fontSize: 10,
+                            maxLines: 1,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                );
-              }),
+                    ],
+                  );
+                },
+              ),
             ],
           ),
         ),
@@ -3971,8 +4119,8 @@ class _SelectCategoryWithIncomeExpenseSelectorState
     extends State<SelectCategoryWithIncomeExpenseSelector> {
   late bool? selectedIncome =
       appStateSettings["showAllCategoriesWhenSelecting"] == true
-          ? null
-          : widget.selectedIncomeInitial;
+      ? null
+      : widget.selectedIncomeInitial;
 
   void setSelectedIncome(bool? value) {
     if (widget.setSelectedIncome != null) widget.setSelectedIncome!(value);
@@ -3980,8 +4128,10 @@ class _SelectCategoryWithIncomeExpenseSelectorState
       selectedIncome = value;
     });
     Future.delayed(Duration(milliseconds: 100), () {
-      bottomSheetControllerGlobal.snapToExtent(0,
-          duration: Duration(milliseconds: 400));
+      bottomSheetControllerGlobal.snapToExtent(
+        0,
+        duration: Duration(milliseconds: 400),
+      );
     });
   }
 
@@ -4004,8 +4154,8 @@ class _SelectCategoryWithIncomeExpenseSelectorState
                     id: "toggle-selected-income",
                     label: selectedIncome == null
                         ? (widget.selectedIncomeInitial == true
-                            ? "only-income-categories".tr()
-                            : "only-expense-categories".tr())
+                              ? "only-income-categories".tr()
+                              : "only-expense-categories".tr())
                         : "show-all-categories".tr(),
                     icon: appStateSettings["outlinedIcons"]
                         ? Icons.grid_on_outlined
@@ -4013,12 +4163,18 @@ class _SelectCategoryWithIncomeExpenseSelectorState
                     action: () {
                       if (selectedIncome == null) {
                         setSelectedIncome(widget.selectedIncomeInitial);
-                        updateSettings("showAllCategoriesWhenSelecting", false,
-                            updateGlobalState: false);
+                        updateSettings(
+                          "showAllCategoriesWhenSelecting",
+                          false,
+                          updateGlobalState: false,
+                        );
                       } else {
                         setSelectedIncome(null);
-                        updateSettings("showAllCategoriesWhenSelecting", true,
-                            updateGlobalState: false);
+                        updateSettings(
+                          "showAllCategoriesWhenSelecting",
+                          true,
+                          updateGlobalState: false,
+                        );
                       }
                     },
                   ),
@@ -4040,9 +4196,11 @@ class _SelectCategoryWithIncomeExpenseSelectorState
         children: [
           if (widget.extraWidgetBefore != null) widget.extraWidgetBefore!,
           if (widget.setSelectedIncome != null)
-            IncomeExpenseButtonSelector(setSelectedIncome: (value) {
-              setSelectedIncome(value);
-            }),
+            IncomeExpenseButtonSelector(
+              setSelectedIncome: (value) {
+                setSelectedIncome(value);
+              },
+            ),
           Padding(
             padding: const EdgeInsetsDirectional.only(start: 18, end: 18),
             child: SelectCategory(
@@ -4084,7 +4242,7 @@ class ReorderCategoriesPopup extends StatelessWidget {
             onTap: () {
               popRoute(context);
             },
-          )
+          ),
         ],
       ),
     );
@@ -4092,8 +4250,9 @@ class ReorderCategoriesPopup extends StatelessWidget {
 }
 
 String? getFileIdFromUrl(String url) {
+  Uri uri;
   try {
-    Uri uri = Uri.parse(url);
+    uri = Uri.parse(url);
     if (uri.scheme != 'https' ||
         (uri.host != 'docs.google.com' && uri.host != 'drive.google.com')) {
       return null;
@@ -4102,14 +4261,14 @@ String? getFileIdFromUrl(String url) {
     return null;
   }
 
-  if (!url.startsWith("https://drive.google.com/file/d/") &&
-      !url.startsWith("https://docs.google.com/document/d/") &&
-      !url.startsWith("https://docs.google.com/spreadsheets/d/") &&
-      !url.startsWith("https://docs.google.com/presentation/d/")) {
+  if (!uri.path.startsWith("/file/d/") &&
+      !uri.path.startsWith("/document/d/") &&
+      !uri.path.startsWith("/spreadsheets/d/") &&
+      !uri.path.startsWith("/presentation/d/")) {
     return null;
   }
   RegExp regExp = RegExp(r"/d/([a-zA-Z0-9_-]+)");
-  Match? match = regExp.firstMatch(url);
+  Match? match = regExp.firstMatch(uri.path);
   if (match != null && match.groupCount >= 1) {
     String fileId = match.group(1)!;
     if (RegExp(r'[/?#@\\]|\.\.').hasMatch(fileId)) {
@@ -4141,8 +4300,10 @@ Future<List<int>?> getGoogleDriveFileImageData(String url) async {
           await driveApi.files.get(fileId, $fields: 'size') as drive.File;
       int totalBytes = int.parse(fileMetadata.size ?? "0");
 
-      dynamic response = await driveApi.files
-          .get(fileId, downloadOptions: drive.DownloadOptions.fullMedia);
+      dynamic response = await driveApi.files.get(
+        fileId,
+        downloadOptions: drive.DownloadOptions.fullMedia,
+      );
 
       num receivedBytes = 0;
 
@@ -4167,8 +4328,11 @@ Future<List<int>?> getGoogleDriveFileImageData(String url) async {
 }
 
 class RenderImageData extends StatelessWidget {
-  const RenderImageData(
-      {required this.imageData, required this.openLinkOnError, super.key});
+  const RenderImageData({
+    required this.imageData,
+    required this.openLinkOnError,
+    super.key,
+  });
   final List<int>? imageData;
   final VoidCallback openLinkOnError;
 
@@ -4187,7 +4351,9 @@ class RenderImageData extends StatelessWidget {
             borderRadius: 15,
             child: Padding(
               padding: const EdgeInsetsDirectional.symmetric(
-                  horizontal: 20, vertical: 25),
+                horizontal: 20,
+                vertical: 25,
+              ),
               child: Column(
                 children: [
                   TextFont(
@@ -4232,17 +4398,23 @@ class LinkInNotes extends StatelessWidget {
     return Tappable(
       onTap: onTap,
       onLongPress: onLongPress,
-      color: color ??
+      color:
+          color ??
           darkenPastel(
             (appStateSettings["materialYou"]
                 ? Theme.of(context).colorScheme.secondaryContainer
                 : getColor(context, "canvasContainer")),
-            amount:
-                Theme.of(context).brightness == Brightness.light ? 0.07 : 0.25,
+            amount: Theme.of(context).brightness == Brightness.light
+                ? 0.07
+                : 0.25,
           ),
       child: Padding(
         padding: EdgeInsetsDirectional.only(
-            start: 15, end: extraWidget == null ? 15 : 0, top: 10, bottom: 10),
+          start: 15,
+          end: extraWidget == null ? 15 : 0,
+          top: 10,
+          bottom: 10,
+        ),
         child: Row(
           children: [
             Icon(
@@ -4286,12 +4458,14 @@ class TransactionNotesTextInput extends StatefulWidget {
 
 class _TransactionNotesTextInputState extends State<TransactionNotesTextInput> {
   bool notesInputFocused = false;
-  late List<String> extractedLinks =
-      extractLinks(widget.noteInputController.text);
+  late List<String> extractedLinks = extractLinks(
+    widget.noteInputController.text,
+  );
 
   void addAttachmentLinkToNote(String? link) {
     if (link == null) return;
-    String noteUpdated = widget.noteInputController.text +
+    String noteUpdated =
+        widget.noteInputController.text +
         (widget.noteInputController.text == "" ? "" : "\n") +
         (link) +
         " ";
@@ -4302,8 +4476,10 @@ class _TransactionNotesTextInputState extends State<TransactionNotesTextInput> {
 
   void removeLinkFromNote(String link) {
     String originalText = widget.noteInputController.text;
-    String noteUpdated =
-        widget.noteInputController.text.replaceAll(link + " ", "");
+    String noteUpdated = widget.noteInputController.text.replaceAll(
+      link + " ",
+      "",
+    );
     if (noteUpdated == originalText) {
       noteUpdated = widget.noteInputController.text.replaceAll(link + "\n", "");
     }
@@ -4340,7 +4516,8 @@ class _TransactionNotesTextInputState extends State<TransactionNotesTextInput> {
   Widget build(BuildContext context) {
     return ClipRRect(
       borderRadius: BorderRadiusDirectional.circular(
-          getPlatform() == PlatformOS.isIOS ? 8 : 15),
+        getPlatform() == PlatformOS.isIOS ? 8 : 15,
+      ),
       child: Column(
         children: [
           Focus(
@@ -4418,7 +4595,9 @@ class _TransactionNotesTextInputState extends State<TransactionNotesTextInput> {
                                   alignStart: true,
                                   alignBeside: true,
                                   padding: EdgeInsetsDirectional.symmetric(
-                                      horizontal: 20, vertical: 20),
+                                    horizontal: 20,
+                                    vertical: 20,
+                                  ),
                                   text: "take-photo".tr(),
                                   iconData: appStateSettings["outlinedIcons"]
                                       ? Icons.camera_alt_outlined
@@ -4426,10 +4605,12 @@ class _TransactionNotesTextInputState extends State<TransactionNotesTextInput> {
                                   onTap: () async {
                                     popRoute(context);
                                     if (await checkLockedFeatureIfInDemoMode(
-                                            context) ==
+                                          context,
+                                        ) ==
                                         true) {
                                       String? result = await getPhotoAndUpload(
-                                          source: ImageSource.camera);
+                                        source: ImageSource.camera,
+                                      );
                                       if (result != null)
                                         addAttachmentLinkToNote(result);
                                     }
@@ -4450,7 +4631,9 @@ class _TransactionNotesTextInputState extends State<TransactionNotesTextInput> {
                                   alignStart: true,
                                   alignBeside: true,
                                   padding: EdgeInsetsDirectional.symmetric(
-                                      horizontal: 20, vertical: 20),
+                                    horizontal: 20,
+                                    vertical: 20,
+                                  ),
                                   text: "select-photo".tr(),
                                   iconData: appStateSettings["outlinedIcons"]
                                       ? Icons.photo_library_outlined
@@ -4458,10 +4641,12 @@ class _TransactionNotesTextInputState extends State<TransactionNotesTextInput> {
                                   onTap: () async {
                                     popRoute(context);
                                     if (await checkLockedFeatureIfInDemoMode(
-                                            context) ==
+                                          context,
+                                        ) ==
                                         true) {
                                       String? result = await getPhotoAndUpload(
-                                          source: ImageSource.gallery);
+                                        source: ImageSource.gallery,
+                                      );
                                       addAttachmentLinkToNote(result);
                                     }
                                   },
@@ -4480,7 +4665,9 @@ class _TransactionNotesTextInputState extends State<TransactionNotesTextInput> {
                                 alignStart: true,
                                 alignBeside: true,
                                 padding: EdgeInsetsDirectional.symmetric(
-                                    horizontal: 20, vertical: 20),
+                                  horizontal: 20,
+                                  vertical: 20,
+                                ),
                                 text: "select-file".tr(),
                                 iconData: appStateSettings["outlinedIcons"]
                                     ? Icons.file_open_outlined
@@ -4488,7 +4675,8 @@ class _TransactionNotesTextInputState extends State<TransactionNotesTextInput> {
                                 onTap: () async {
                                   popRoute(context);
                                   if (await checkLockedFeatureIfInDemoMode(
-                                          context) ==
+                                        context,
+                                      ) ==
                                       true) {
                                     String? result = await getFileAndUpload();
                                     addAttachmentLinkToNote(result);
@@ -4507,9 +4695,7 @@ class _TransactionNotesTextInputState extends State<TransactionNotesTextInput> {
           ),
           AnimatedSizeSwitcher(
             child: extractedLinks.length <= 0
-                ? Container(
-                    key: ValueKey(1),
-                  )
+                ? Container(key: ValueKey(1))
                 : Column(
                     children: [
                       for (String link in extractedLinks)
@@ -4526,7 +4712,9 @@ class _TransactionNotesTextInputState extends State<TransactionNotesTextInput> {
                               if (link.contains("drive.google.com"))
                                 Padding(
                                   padding: const EdgeInsetsDirectional.only(
-                                      end: 3, start: 5),
+                                    end: 3,
+                                    start: 5,
+                                  ),
                                   child: IconButtonScaled(
                                     iconData: appStateSettings["outlinedIcons"]
                                         ? Icons.photo_outlined
@@ -4536,7 +4724,8 @@ class _TransactionNotesTextInputState extends State<TransactionNotesTextInput> {
                                     onTap: () async {
                                       List<int>? result =
                                           await getGoogleDriveFileImageData(
-                                              link);
+                                            link,
+                                          );
                                       if (result == null) {
                                         openUrl(link);
                                       } else {
@@ -4545,11 +4734,12 @@ class _TransactionNotesTextInputState extends State<TransactionNotesTextInput> {
                                           PopupFramework(
                                             child: ClipRRect(
                                               borderRadius:
-                                                  BorderRadiusDirectional
-                                                      .circular(getPlatform() ==
-                                                              PlatformOS.isIOS
-                                                          ? 10
-                                                          : 15),
+                                                  BorderRadiusDirectional.circular(
+                                                    getPlatform() ==
+                                                            PlatformOS.isIOS
+                                                        ? 10
+                                                        : 15,
+                                                  ),
                                               child: RenderImageData(
                                                 imageData: result,
                                                 openLinkOnError: () {
@@ -4561,17 +4751,21 @@ class _TransactionNotesTextInputState extends State<TransactionNotesTextInput> {
                                         );
                                         // Update the size of the bottom sheet
                                         Future.delayed(
-                                            Duration(milliseconds: 300), () {
-                                          bottomSheetControllerGlobal
-                                              .snapToExtent(0);
-                                        });
+                                          Duration(milliseconds: 300),
+                                          () {
+                                            bottomSheetControllerGlobal
+                                                .snapToExtent(0);
+                                          },
+                                        );
                                       }
                                     },
                                   ),
                                 ),
                               Padding(
                                 padding: const EdgeInsetsDirectional.only(
-                                    end: 11, start: 5),
+                                  end: 11,
+                                  start: 5,
+                                ),
                                 child: IconButtonScaled(
                                   iconData: appStateSettings["outlinedIcons"]
                                       ? Icons.remove_outlined
@@ -4585,8 +4779,8 @@ class _TransactionNotesTextInputState extends State<TransactionNotesTextInput> {
                                           ? Icons.link_off_outlined
                                           : Icons.link_off_rounded,
                                       title: "remove-link-question".tr(),
-                                      description:
-                                          "remove-link-description".tr(),
+                                      description: "remove-link-description"
+                                          .tr(),
                                       onCancel: () {
                                         popRoute(context);
                                       },
@@ -4636,15 +4830,16 @@ Future<void> selectPeriodLength({
   );
 }
 
-Future<void> selectRecurrence(
-    {required BuildContext context,
-    required String selectedRecurrence,
-    required int selectedPeriodLength,
-    required onChanged(
-      String selectedRecurrence,
-      BudgetReoccurence selectedRecurrenceEnum,
-      String selectedRecurrenceDisplay,
-    )}) async {
+Future<void> selectRecurrence({
+  required BuildContext context,
+  required String selectedRecurrence,
+  required int selectedPeriodLength,
+  required onChanged(
+    String selectedRecurrence,
+    BudgetReoccurence selectedRecurrenceEnum,
+    String selectedRecurrenceDisplay,
+  ),
+}) async {
   openBottomSheet(
     context,
     PopupFramework(
@@ -4664,11 +4859,12 @@ Future<void> selectRecurrence(
           } else {
             selectedRecurrenceDisplay = namesRecurrence[value].toString().tr();
           }
-          onChanged(selectedRecurrence, selectedRecurrenceEnum,
-              selectedRecurrenceDisplay);
-          popRoute(
-            context,
+          onChanged(
+            selectedRecurrence,
+            selectedRecurrenceEnum,
+            selectedRecurrenceDisplay,
           );
+          popRoute(context);
         },
       ),
     ),
@@ -4707,12 +4903,13 @@ void setSelectedPeriodLength({
 }
 
 class SelectSubcategoryChips extends StatelessWidget {
-  const SelectSubcategoryChips(
-      {required this.selectedCategoryPk,
-      required this.selectedSubCategoryPk,
-      required this.setSelectedSubCategory,
-      this.padding = EdgeInsetsDirectional.zero,
-      super.key});
+  const SelectSubcategoryChips({
+    required this.selectedCategoryPk,
+    required this.selectedSubCategoryPk,
+    required this.setSelectedSubCategory,
+    this.padding = EdgeInsetsDirectional.zero,
+    super.key,
+  });
   final String selectedCategoryPk;
   final String? selectedSubCategoryPk;
   final Function(TransactionCategory category) setSelectedSubCategory;
@@ -4732,10 +4929,9 @@ class SelectSubcategoryChips extends StatelessWidget {
                       padding: padding,
                       child: SelectChips(
                         allowMultipleSelected: false,
-                        selectedColor: Theme.of(context)
-                            .colorScheme
-                            .background
-                            .withValues(alpha: 0.6),
+                        selectedColor: Theme.of(
+                          context,
+                        ).colorScheme.background.withValues(alpha: 0.6),
                         onLongPress: (category) {
                           pushRoute(
                             context,
@@ -4759,8 +4955,9 @@ class SelectSubcategoryChips extends StatelessWidget {
                             lightenPastel(
                               HexColor(
                                 category.colour,
-                                defaultColor:
-                                    Theme.of(context).colorScheme.primary,
+                                defaultColor: Theme.of(
+                                  context,
+                                ).colorScheme.primary,
                               ),
                               amount: 0.3,
                             ),
@@ -4769,8 +4966,8 @@ class SelectSubcategoryChips extends StatelessWidget {
                           ).withValues(
                             alpha:
                                 Theme.of(context).brightness == Brightness.light
-                                    ? 0.8
-                                    : 1,
+                                ? 0.8
+                                : 1,
                           );
                         },
                         getCustomBorderColor: (TransactionCategory category) {
@@ -4778,15 +4975,18 @@ class SelectSubcategoryChips extends StatelessWidget {
                             return lightenPastel(
                               HexColor(
                                 category.colour,
-                                defaultColor:
-                                    Theme.of(context).colorScheme.primary,
+                                defaultColor: Theme.of(
+                                  context,
+                                ).colorScheme.primary,
                               ),
-                              amount: Theme.of(context).brightness ==
+                              amount:
+                                  Theme.of(context).brightness ==
                                       Brightness.light
                                   ? 0.8
                                   : 0.4,
                             ).withValues(
-                              alpha: Theme.of(context).brightness ==
+                              alpha:
+                                  Theme.of(context).brightness ==
                                       Brightness.light
                                   ? 0.8
                                   : 0.65,
@@ -4796,8 +4996,9 @@ class SelectSubcategoryChips extends StatelessWidget {
                             lightenPastel(
                               HexColor(
                                 category.colour,
-                                defaultColor:
-                                    Theme.of(context).colorScheme.primary,
+                                defaultColor: Theme.of(
+                                  context,
+                                ).colorScheme.primary,
                               ),
                               amount: 0.3,
                             ),
@@ -4805,8 +5006,8 @@ class SelectSubcategoryChips extends StatelessWidget {
                           ).withValues(
                             alpha:
                                 Theme.of(context).brightness == Brightness.light
-                                    ? 0.5
-                                    : 0.7,
+                                ? 0.5
+                                : 0.7,
                           );
                         },
                         getLabel: (TransactionCategory category) {
@@ -4819,19 +5020,21 @@ class SelectSubcategoryChips extends StatelessWidget {
                           ),
                         ),
                         getAvatar: (TransactionCategory category) {
-                          return LayoutBuilder(builder: (context, constraints) {
-                            return CategoryIcon(
-                              categoryPk: "-1",
-                              category: category,
-                              emojiSize: constraints.maxWidth * 0.73,
-                              emojiScale: 1.2,
-                              size: constraints.maxWidth,
-                              sizePadding: 0,
-                              noBackground: true,
-                              canEditByLongPress: false,
-                              margin: EdgeInsetsDirectional.zero,
-                            );
-                          });
+                          return LayoutBuilder(
+                            builder: (context, constraints) {
+                              return CategoryIcon(
+                                categoryPk: "-1",
+                                category: category,
+                                emojiSize: constraints.maxWidth * 0.73,
+                                emojiScale: 1.2,
+                                size: constraints.maxWidth,
+                                sizePadding: 0,
+                                noBackground: true,
+                                canEditByLongPress: false,
+                                margin: EdgeInsetsDirectional.zero,
+                              );
+                            },
+                          );
                         },
                       ),
                     ),
@@ -4844,8 +5047,10 @@ class SelectSubcategoryChips extends StatelessWidget {
 }
 
 List<dynamic>
-    getTransactionSpecialTypesToShowGivenInitialTypeWhenAddingTransaction(
-        TransactionSpecialType? transactionType, bool isAddedToLoanObjective) {
+getTransactionSpecialTypesToShowGivenInitialTypeWhenAddingTransaction(
+  TransactionSpecialType? transactionType,
+  bool isAddedToLoanObjective,
+) {
   List<dynamic> defaultList = [
     null,
     ...TransactionSpecialType.values,
@@ -4860,12 +5065,12 @@ List<dynamic>
     ];
   else if (transactionType == null)
     return defaultList;
-  else if ([TransactionSpecialType.credit, TransactionSpecialType.debt]
-      .contains(transactionType))
-    return [TransactionSpecialType.credit, TransactionSpecialType.debt];
   else if ([
-    TransactionSpecialType.subscription,
+    TransactionSpecialType.credit,
+    TransactionSpecialType.debt,
   ].contains(transactionType))
+    return [TransactionSpecialType.credit, TransactionSpecialType.debt];
+  else if ([TransactionSpecialType.subscription].contains(transactionType))
     return [TransactionSpecialType.subscription];
   else if ([
     TransactionSpecialType.upcoming,
@@ -4875,7 +5080,7 @@ List<dynamic>
     return [
       TransactionSpecialType.upcoming,
       TransactionSpecialType.repetitive,
-      TransactionSpecialType.subscription
+      TransactionSpecialType.subscription,
     ];
   return defaultList;
 }
@@ -4916,7 +5121,7 @@ class TitleInput extends StatefulWidget {
   final bool alsoSearchCategories;
   final VoidCallback? onNewRecommendedTitle;
   final Function(TransactionAssociatedTitleWithCategory)?
-      onRecommendedTitleTapped;
+  onRecommendedTitleTapped;
   final bool handleOnRecommendedTitleTapped;
   final bool unfocusWhenRecommendedTapped;
   final Function(String)? onSubmitted;
@@ -4953,8 +5158,10 @@ class _TitleInputState extends State<TitleInput> {
 
   void fixResizingPopup() {
     Future.delayed(Duration(milliseconds: 100), () {
-      bottomSheetControllerGlobal.snapToExtent(1,
-          duration: Duration(milliseconds: 625));
+      bottomSheetControllerGlobal.snapToExtent(
+        1,
+        duration: Duration(milliseconds: 625),
+      );
     });
   }
 
@@ -4964,7 +5171,8 @@ class _TitleInputState extends State<TitleInput> {
       padding: widget.padding,
       child: ClipRRect(
         borderRadius: BorderRadiusDirectional.circular(
-            getPlatform() == PlatformOS.isIOS ? 8 : 15),
+          getPlatform() == PlatformOS.isIOS ? 8 : 15,
+        ),
         child: Column(
           children: [
             Focus(
@@ -4990,20 +5198,20 @@ class _TitleInputState extends State<TitleInput> {
                 onChanged: (text) async {
                   widget.setSelectedTitle(text);
                   List<TransactionAssociatedTitleWithCategory>
-                      newFoundAssociatedTitles = [];
+                  newFoundAssociatedTitles = [];
                   if (text.trim() != "") {
-                    newFoundAssociatedTitles =
-                        await database.getSimilarAssociatedTitles(
-                      title: widget.textToSearchFilter != null
-                          ? widget.textToSearchFilter!(text)
-                          : text,
-                      excludeTitles: widget.getTextToExclude != null
-                          ? widget.getTextToExclude!(text)
-                          : [],
-                      limit: enableDoubleColumn(context) ? 5 : 3,
-                      alsoSearchCategories: widget.alsoSearchCategories,
-                      tryToCompleteSearch: widget.tryToCompleteSearch,
-                    );
+                    newFoundAssociatedTitles = await database
+                        .getSimilarAssociatedTitles(
+                          title: widget.textToSearchFilter != null
+                              ? widget.textToSearchFilter!(text)
+                              : text,
+                          excludeTitles: widget.getTextToExclude != null
+                              ? widget.getTextToExclude!(text)
+                              : [],
+                          limit: enableDoubleColumn(context) ? 5 : 3,
+                          alsoSearchCategories: widget.alsoSearchCategories,
+                          tryToCompleteSearch: widget.tryToCompleteSearch,
+                        );
                   }
 
                   if (foundAssociatedTitles.toString() !=
@@ -5023,9 +5231,7 @@ class _TitleInputState extends State<TitleInput> {
             ),
             AnimatedSizeSwitcher(
               child: foundAssociatedTitles.length <= 0
-                  ? Container(
-                      key: ValueKey(0),
-                    )
+                  ? Container(key: ValueKey(0))
                   : AnimatedSize(
                       key: ValueKey(1),
                       duration: Duration(milliseconds: 250),
@@ -5042,13 +5248,14 @@ class _TitleInputState extends State<TitleInput> {
                               inverse: true,
                             ),
                           ),
-                          for (TransactionAssociatedTitleWithCategory foundAssociatedTitle
+                          for (TransactionAssociatedTitleWithCategory
+                              foundAssociatedTitle
                               in foundAssociatedTitles)
                             Container(
                               color: appStateSettings["materialYou"]
-                                  ? Theme.of(context)
-                                      .colorScheme
-                                      .secondaryContainer
+                                  ? Theme.of(
+                                      context,
+                                    ).colorScheme.secondaryContainer
                                   : getColor(context, "canvasContainer"),
                               child: Tappable(
                                 borderRadius: 0,
@@ -5056,17 +5263,23 @@ class _TitleInputState extends State<TitleInput> {
                                 onTap: () async {
                                   if (widget.handleOnRecommendedTitleTapped) {
                                     if (foundAssociatedTitle
-                                            .category.mainCategoryPk !=
+                                            .category
+                                            .mainCategoryPk !=
                                         null) {
                                       widget.setSelectedCategory(
-                                          await database.getCategoryInstance(
-                                              foundAssociatedTitle
-                                                  .category.mainCategoryPk!));
+                                        await database.getCategoryInstance(
+                                          foundAssociatedTitle
+                                              .category
+                                              .mainCategoryPk!,
+                                        ),
+                                      );
                                       widget.setSelectedSubCategory(
-                                          foundAssociatedTitle.category);
+                                        foundAssociatedTitle.category,
+                                      );
                                     } else {
                                       widget.setSelectedCategory(
-                                          foundAssociatedTitle.category);
+                                        foundAssociatedTitle.category,
+                                      );
                                     }
 
                                     if (foundAssociatedTitle.type !=
@@ -5074,9 +5287,12 @@ class _TitleInputState extends State<TitleInput> {
                                         foundAssociatedTitle.type !=
                                             TitleType.SubCategoryName) {
                                       widget.setSelectedTitle(
-                                          foundAssociatedTitle.title.title);
-                                      setTextInput(_titleInputController,
-                                          foundAssociatedTitle.title.title);
+                                        foundAssociatedTitle.title.title,
+                                      );
+                                      setTextInput(
+                                        _titleInputController,
+                                        foundAssociatedTitle.title.title,
+                                      );
                                     } else {
                                       widget.setSelectedTitle("");
                                       setTextInput(_titleInputController, "");
@@ -5092,7 +5308,8 @@ class _TitleInputState extends State<TitleInput> {
 
                                   if (widget.onRecommendedTitleTapped != null)
                                     widget.onRecommendedTitleTapped!(
-                                        foundAssociatedTitle);
+                                      foundAssociatedTitle,
+                                    );
                                   if (widget.resizePopupWhenChanged)
                                     fixResizingPopup();
                                 },
@@ -5103,7 +5320,8 @@ class _TitleInputState extends State<TitleInput> {
                                       IgnorePointer(
                                         child: CategoryIcon(
                                           categoryPk: foundAssociatedTitle
-                                              .title.categoryFk,
+                                              .title
+                                              .categoryFk,
                                           size: 23,
                                           margin: EdgeInsetsDirectional.zero,
                                           sizePadding: 16,
@@ -5112,46 +5330,52 @@ class _TitleInputState extends State<TitleInput> {
                                       ),
                                     SizedBox(width: 13),
                                     Expanded(
-                                        child: Padding(
-                                      padding: widget
-                                              .showCategoryIconForRecommendedTitles
-                                          ? EdgeInsetsDirectional.zero
-                                          : const EdgeInsetsDirectional.only(
-                                              bottom: 12, top: 11, start: 5),
-                                      child: TextFont(
-                                        text: "",
-                                        richTextSpan: generateSpans(
-                                          context: context,
-                                          fontSize: 16,
-                                          mainText:
-                                              foundAssociatedTitle.title.title,
-                                          boldedText: foundAssociatedTitle
-                                              .partialTitleString,
+                                      child: Padding(
+                                        padding:
+                                            widget
+                                                .showCategoryIconForRecommendedTitles
+                                            ? EdgeInsetsDirectional.zero
+                                            : const EdgeInsetsDirectional.only(
+                                                bottom: 12,
+                                                top: 11,
+                                                start: 5,
+                                              ),
+                                        child: TextFont(
+                                          text: "",
+                                          richTextSpan: generateSpans(
+                                            context: context,
+                                            fontSize: 16,
+                                            mainText: foundAssociatedTitle
+                                                .title
+                                                .title,
+                                            boldedText: foundAssociatedTitle
+                                                .partialTitleString,
+                                          ),
                                         ),
                                       ),
-                                    )),
+                                    ),
                                     Opacity(
                                       opacity: 0.65,
-                                      child: foundAssociatedTitle.type ==
+                                      child:
+                                          foundAssociatedTitle.type ==
                                                   TitleType.CategoryName ||
                                               foundAssociatedTitle.type ==
                                                   TitleType.SubCategoryName
                                           ? Padding(
                                               padding:
-                                                  const EdgeInsetsDirectional
-                                                      .symmetric(
-                                                      horizontal: 7.5),
+                                                  const EdgeInsetsDirectional.symmetric(
+                                                    horizontal: 7.5,
+                                                  ),
                                               child: Icon(
-                                                appStateSettings[
-                                                        "outlinedIcons"]
+                                                appStateSettings["outlinedIcons"]
                                                     ? Icons.category_outlined
                                                     : Icons.category_rounded,
                                                 size: 20,
                                               ),
                                             )
                                           : IconButtonScaled(
-                                              iconData: appStateSettings[
-                                                      "outlinedIcons"]
+                                              iconData:
+                                                  appStateSettings["outlinedIcons"]
                                                   ? Icons.clear_outlined
                                                   : Icons.clear_rounded,
                                               iconSize: 18,
@@ -5166,17 +5390,19 @@ class _TitleInputState extends State<TitleInput> {
 
                                                 DeletePopupAction? action =
                                                     await deleteAssociatedTitlePopup(
-                                                  context,
-                                                  title: foundAssociatedTitle
-                                                      .title,
-                                                  routesToPopAfterDelete:
-                                                      RoutesToPopAfterDelete
-                                                          .None,
-                                                );
+                                                      context,
+                                                      title:
+                                                          foundAssociatedTitle
+                                                              .title,
+                                                      routesToPopAfterDelete:
+                                                          RoutesToPopAfterDelete
+                                                              .None,
+                                                    );
                                                 if (action ==
                                                     DeletePopupAction.Delete) {
                                                   foundAssociatedTitles.remove(
-                                                      foundAssociatedTitle);
+                                                    foundAssociatedTitle,
+                                                  );
                                                   setState(() {});
                                                 }
                                               },

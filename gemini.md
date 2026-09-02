@@ -158,4 +158,12 @@
 - 2026-08-22: Iterative Enhancement - Converted `ProgressBar`, `TransactionsEntriesSpendingSummary`, `CategoryLimits`, and `CategoryLimitEntry` to `StatelessWidget`. These components delegate their hold-to-reveal states directly to the `HoldToRevealListener` abstraction and contained no other internal state, making their state class wrappers redundant.
 
 - 2026-08-23: Iterative Enhancement - Swept `SelectedTransactionsAppBar` and `BudgetContainer` which now utilize the abstracted `HoldToRevealListener`. Since they no longer manage residual local timer/reveal state, they were refactored from `StatefulWidget` to `StatelessWidget` to reduce widget tree overhead. `BarGraph` was evaluated but retained its `StatefulWidget` to support its entrance animations (`loaded` state).
-**Next Planned Step:** Conclude the initial privacy mode phase and pivot to addressing security vulnerabilities (like SSRF and Path Traversal) in URL parsing components, specifically targeting `getFileIdFromUrl`.
+- 2026-08-24: Security Patch - Fixed a query parameter injection vulnerability in `getFileIdFromUrl` and `convertGoogleSheetsUrlToCsvUrl`. Extracted the logic that enforced URL prefixes (e.g., `url.startsWith`) to evaluate strictly against `uri.path` rather than the raw URL string, closing an SSRF/injection bypass vector where malicious paths were hidden within query parameters (e.g., `https://drive.google.com/?q=/file/d/malicious`).
+
+**Next Planned Step:** Investigate custom URL schemes and deep link parsing in `appLinks.dart` to ensure robust authorization boundaries and strict input validation.
+
+## 🚨 Critical Security Learnings
+- **2026-08-24 - URL Query Parameter Injection Bypass:**
+  - **Vulnerability/Gap:** URL prefix validation (`startsWith`) and regular expression matching for extraction were performed on the raw, unparsed URL string. An attacker could bypass path prefix checks by placing the expected string inside a query parameter (e.g., `https://drive.google.com/?q=/file/d/malicious_payload`).
+  - **Learning:** Structural validation of URLs must be performed on parsed components (e.g., `uri.path`) rather than treating the URL as a flat string. Attackers can leverage the structure of URLs (query strings, fragments) to deceive naive string-matching algorithms.
+  - **Prevention:** Always use the parsed `Uri` object and validate specifically against `uri.path`, `uri.scheme`, and `uri.host`, avoiding operations like `startsWith` or `RegExp.match` on the full, raw URL string whenever validating resources or extracting identifiers.
