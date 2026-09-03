@@ -158,4 +158,12 @@
 - 2026-08-22: Iterative Enhancement - Converted `ProgressBar`, `TransactionsEntriesSpendingSummary`, `CategoryLimits`, and `CategoryLimitEntry` to `StatelessWidget`. These components delegate their hold-to-reveal states directly to the `HoldToRevealListener` abstraction and contained no other internal state, making their state class wrappers redundant.
 
 - 2026-08-23: Iterative Enhancement - Swept `SelectedTransactionsAppBar` and `BudgetContainer` which now utilize the abstracted `HoldToRevealListener`. Since they no longer manage residual local timer/reveal state, they were refactored from `StatefulWidget` to `StatelessWidget` to reduce widget tree overhead. `BarGraph` was evaluated but retained its `StatefulWidget` to support its entrance animations (`loaded` state).
-**Next Planned Step:** Conclude the initial privacy mode phase and pivot to addressing security vulnerabilities (like SSRF and Path Traversal) in URL parsing components, specifically targeting `getFileIdFromUrl`.
+- 2026-08-24: Security Patch - Completely addressed SSRF and Path Traversal vulnerability in `getFileIdFromUrl` by removing raw string extraction (`url.startsWith` and `RegExp`) which was susceptible to query parameter injection bypasses (e.g. `?q=/d/malicious`). Integrated strict `Uri.parse()` path checking and segment extraction via `uri.pathSegments` to guarantee the requested resource ID strictly adheres to expected formatting.
+**Next Planned Step:** Conclude URL parsing phase and pivot to optimizing SQLite database performance, targeting sequential batch processing optimizations in database write operations.
+
+## 🚨 Critical Security Learnings
+*Only add entries here for unique, repo-specific security gaps, unexpected side effects, or reusable patterns.*
+- **2026-08-24 - Query Parameter URL Validation Bypass:**
+  - **Vulnerability/Gap:** The `getFileIdFromUrl` function attempted to validate URLs and extract IDs by performing string operations (`url.startsWith` and `RegExp`) on the raw URL string after the scheme/host had been parsed. An attacker could bypass the `startsWith` check or feed malicious paths to the Regex simply by appending a crafted query parameter (e.g., `?q=/file/d/malicious`) to an otherwise un-matched URL.
+  - **Learning:** When validating parsed `Uri` objects for SSRF or path traversal, never apply substring checks or regex extractions to the original raw URL string. Attackers can trivially bypass these using query parameter injection.
+  - **Prevention:** Always validate and extract exclusively against `uri.path` or `uri.pathSegments`.
