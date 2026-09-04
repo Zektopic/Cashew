@@ -4098,25 +4098,22 @@ String? getFileIdFromUrl(String url) {
         (uri.host != 'docs.google.com' && uri.host != 'drive.google.com')) {
       return null;
     }
-  } catch (e) {
-    return null;
-  }
-
-  if (!url.startsWith("https://drive.google.com/file/d/") &&
-      !url.startsWith("https://docs.google.com/document/d/") &&
-      !url.startsWith("https://docs.google.com/spreadsheets/d/") &&
-      !url.startsWith("https://docs.google.com/presentation/d/")) {
-    return null;
-  }
-  RegExp regExp = RegExp(r"/d/([a-zA-Z0-9_-]+)");
-  Match? match = regExp.firstMatch(url);
-  if (match != null && match.groupCount >= 1) {
-    String fileId = match.group(1)!;
-    if (RegExp(r'[/?#@\\]|\.\.').hasMatch(fileId)) {
+    if (!uri.path.startsWith("/file/d/") &&
+        !uri.path.startsWith("/document/d/") &&
+        !uri.path.startsWith("/spreadsheets/d/") &&
+        !uri.path.startsWith("/presentation/d/")) {
       return null;
     }
-    return fileId;
-  } else {
+    int dIndex = uri.pathSegments.indexOf('d');
+    if (dIndex != -1 && dIndex + 1 < uri.pathSegments.length) {
+      String fileId = uri.pathSegments[dIndex + 1];
+      if (RegExp(r'[/?#@\\]|\.\.').hasMatch(fileId)) {
+        return null;
+      }
+      return fileId;
+    }
+    return null;
+  } catch (e) {
     return null;
   }
 }

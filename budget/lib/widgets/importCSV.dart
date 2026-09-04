@@ -620,27 +620,29 @@ class _ImportCSVState extends State<ImportCSV> {
   }
 
   static String? convertGoogleSheetsUrlToCsvUrl(String googleSheetsUrl) {
-    Uri uri = Uri.parse(googleSheetsUrl);
-    if (uri.scheme != 'https' || uri.host != 'docs.google.com') {
-      throw ("Invalid URL format");
-    }
-    if (!googleSheetsUrl.startsWith(
-      "https://docs.google.com/spreadsheets/d/",
-    )) {
-      throw ("Invalid URL format");
-    }
-    RegExp regExp = RegExp(r"/d/([a-zA-Z0-9_-]+)");
-    Match? match = regExp.firstMatch(googleSheetsUrl);
-    if (match != null && match.groupCount >= 1) {
-      String spreadsheetId = match.group(1)!;
-      if (RegExp(r'[/?#@\\]|\.\.').hasMatch(spreadsheetId)) {
-        throw ("Invalid spreadsheet ID");
+    try {
+      Uri uri = Uri.parse(googleSheetsUrl);
+      if (uri.scheme != 'https' || uri.host != 'docs.google.com') {
+        throw ("Invalid URL format");
       }
-      String csvUrl =
-          "https://docs.google.com/spreadsheets/d/$spreadsheetId/gviz/tq?tqx=out:csv";
-      return csvUrl;
+      if (!uri.path.startsWith("/spreadsheets/d/")) {
+        throw ("Invalid URL format");
+      }
+      int dIndex = uri.pathSegments.indexOf('d');
+      if (dIndex != -1 && dIndex + 1 < uri.pathSegments.length) {
+        String spreadsheetId = uri.pathSegments[dIndex + 1];
+        if (RegExp(r'[/?#@\\]|\.\.').hasMatch(spreadsheetId)) {
+          throw ("Invalid spreadsheet ID");
+        }
+        String csvUrl =
+            "https://docs.google.com/spreadsheets/d/$spreadsheetId/gviz/tq?tqx=out:csv";
+        return csvUrl;
+      }
+      throw ("Error parsing URL");
+    } catch (e) {
+      if (e is String) rethrow;
+      throw ("Error parsing URL");
     }
-    throw ("Error parsing URL");
   }
 
   static Future<String?> fetchDataFromCsvUrl(String? csvUrl) async {
