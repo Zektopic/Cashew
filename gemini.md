@@ -4,6 +4,8 @@
 **Currently Improving:** Privacy Obfuscation (Hide Balances)
 **Growth Context:** As the app scales and users carry their devices into more public spaces, they need a way to protect sensitive financial data from shoulder surfers. Competitors often offer a "Privacy Mode" or "Hide Balances" toggle.
 **Iteration History:**
+- 2026-08-24: Security Patch - Mitigated SSRF and path traversal risks in Google Sheets and Drive integrations. Replaced vulnerable raw string prefix checking (`url.startsWith`) and regex extraction with strict `uri.path.startsWith` and `uri.pathSegments` indexing in `getFileIdFromUrl` and `convertGoogleSheetsUrlToCsvUrl`.
+
 - 2024-03-24: Implementing initial base: added `obscureAmounts` setting and tied it to the `convertToMoney` core formatting function so that global balances and amounts display as "•••". Added a basic toggle in the settings.
 - 2024-05-14: Iterative Enhancement - Added an eye-icon quick-toggle button on the main dashboard. This allows users to quickly obscure balances in public spaces without opening settings, reducing the window of exposure.
 - 2024-05-15: Iterative Enhancement - Added a toast notification (Snackbar) when the privacy mode is toggled from the dashboard to improve user feedback.
@@ -72,7 +74,7 @@
 - 2026-05-20: Iterative Enhancement - Audited `budgetContainer.dart` and lifted the `_isRevealed` local state from `DaySpending` sub-widget up to the parent `BudgetContainer` as planned. Passed `forceReveal` flag to `DaySpending` to ensure a single, synchronous hold-to-reveal privacy obfuscation interaction is handled by the parent widget rather than relying on redundant, individual touch targets inside smaller text nodes.
 - 2026-05-20: Iterative Enhancement - Refined Privacy Obfuscation interactions in `budgetContainer.dart` and `budgetHistoryLineGraph.dart`. Updated `Listener` implementations in `_BudgetContainerState`, `_BudgetSpenderSummaryState`, and `_BudgetHistoryLineGraphState` to consistently enforce the 2-second auto-collapse timer on `onPointerUp` and `onPointerCancel` events, preventing sensitive amounts from instantly hiding before the user can read them after releasing the touch.
 - 2026-05-21: Iterative Enhancement - Audited `budgetContainer.dart` architecture and lifted local `_isRevealed` control. Added `forceReveal` parameters to `DaySpending` and `BudgetSpenderSummary`, allowing the parent `BudgetContainer` to propagate its hold-to-reveal state downward. This ensures a single, synchronous reveal interaction across the dashboard widget without conflicting localized listeners.
-**Next Planned Step:** Conclude the initial privacy mode phase and pivot to addressing security vulnerabilities (like SSRF and Path Traversal) in URL parsing components, specifically targeting `getFileIdFromUrl`.
+**Next Planned Step:** Review and harden file parsing and validation logic in CSV/data import features to ensure strict bounds checking.
 - 2026-07-04: Iterative Enhancement - Secured `DaySpending` widget across the budget dashboard. Refactored `DaySpending` to accept a `forceReveal` parameter and lifted its temporary reveal state up to the parent `BudgetContainer`. This unifies the hold-to-reveal gesture, preventing sub-components from having fragmented or missing privacy obfuscation logic.
 - 2026-07-05: Iterative Enhancement - Secured `BudgetSpenderSummary` widget across the budget dashboard. Refactored `BudgetSpenderSummary` to accept a `forceReveal` parameter and lifted its temporary reveal state up to the parent `BudgetPage` and `PastBudgetsPage` (`_BudgetPageContentState` and `__PastBudgetsPageContentState`), completely unifying the hold-to-reveal gesture on the dashboard view.
 - 2026-07-06: Iterative Enhancement - Addressed SSRF and Path Traversal risk in `getFileIdFromUrl` by replacing broad domain validation with strict path-prefix validation (`https://drive.google.com/file/d/`, `https://docs.google.com/spreadsheets/d/`, etc.). This ensures only well-formed identifiers for specific resources are queried, restricting external fetching capabilities and adhering to defense-in-depth principles.
@@ -88,6 +90,10 @@
 **Next Planned Step:** Review and test file system or secure storage boundaries for proper encapsulation when storing user preferences or cache.
 
 ## 🚨 Critical Security Learnings
+- **2026-08-24 - SSRF and Path Traversal via URL Query Parameter Injection:**
+  - **Vulnerability/Gap:** The `getFileIdFromUrl` and `convertGoogleSheetsUrlToCsvUrl` functions relied on substring checks (`url.startsWith()`) against the raw URL string to validate the path, and regex to extract identifiers. This allowed an attacker to bypass prefix checks by embedding the required prefix into query parameters (e.g., `https://example.com/?q=https://drive.google.com/file/d/...`) while tricking the regex into extracting an invalid ID.
+  - **Learning:** When validating parsed `Uri` objects for SSRF or path traversal, avoid applying substring checks or regex extractions to the original raw URL string, as attackers can bypass this via query parameter injection.
+  - **Prevention:** Always validate and extract exclusively against `uri.path` or `uri.pathSegments`.
 - **2026-07-26 - Sensitive Data Exposure in Logs:**
   - **Vulnerability/Gap:** Recently deleted transaction data was inadvertently being printed to the console (`print(jsonString)`) before being saved to local storage. This exposes sensitive financial data and Personally Identifiable Information (PII) to application and device logs, which could be accessed by other applications or logging aggregators.
   - **Learning:** Development `print` statements or loggers should never be left in production code paths that handle sensitive user data. Console outputs are often globally accessible on devices or collected by analytics, posing a severe privacy risk.
@@ -158,21 +164,4 @@
 - 2026-08-22: Iterative Enhancement - Converted `ProgressBar`, `TransactionsEntriesSpendingSummary`, `CategoryLimits`, and `CategoryLimitEntry` to `StatelessWidget`. These components delegate their hold-to-reveal states directly to the `HoldToRevealListener` abstraction and contained no other internal state, making their state class wrappers redundant.
 
 - 2026-08-23: Iterative Enhancement - Swept `SelectedTransactionsAppBar` and `BudgetContainer` which now utilize the abstracted `HoldToRevealListener`. Since they no longer manage residual local timer/reveal state, they were refactored from `StatefulWidget` to `StatelessWidget` to reduce widget tree overhead. `BarGraph` was evaluated but retained its `StatefulWidget` to support its entrance animations (`loaded` state).
-- 2026-08-24: Security Patch - Fixed a query parameter injection vulnerability in `getFileIdFromUrl` and `convertGoogleSheetsUrlToCsvUrl`. Extracted the logic that enforced URL prefixes (e.g., `url.startsWith`) to evaluate strictly against `uri.path` rather than the raw URL string, closing an SSRF/injection bypass vector where malicious paths were hidden within query parameters (e.g., `https://drive.google.com/?q=/file/d/malicious`).
-
-**Next Planned Step:** Investigate custom URL schemes and deep link parsing in `appLinks.dart` to ensure robust authorization boundaries and strict input validation.
-
-## 🚨 Critical Security Learnings
-- **2026-08-24 - URL Query Parameter Injection Bypass:**
-  - **Vulnerability/Gap:** URL prefix validation (`startsWith`) and regular expression matching for extraction were performed on the raw, unparsed URL string. An attacker could bypass path prefix checks by placing the expected string inside a query parameter (e.g., `https://drive.google.com/?q=/file/d/malicious_payload`).
-  - **Learning:** Structural validation of URLs must be performed on parsed components (e.g., `uri.path`) rather than treating the URL as a flat string. Attackers can leverage the structure of URLs (query strings, fragments) to deceive naive string-matching algorithms.
-  - **Prevention:** Always use the parsed `Uri` object and validate specifically against `uri.path`, `uri.scheme`, and `uri.host`, avoiding operations like `startsWith` or `RegExp.match` on the full, raw URL string whenever validating resources or extracting identifiers.
-- 2026-08-24: Security Patch - Completely addressed SSRF and Path Traversal vulnerability in `getFileIdFromUrl` by removing raw string extraction (`url.startsWith` and `RegExp`) which was susceptible to query parameter injection bypasses (e.g. `?q=/d/malicious`). Integrated strict `Uri.parse()` path checking and segment extraction via `uri.pathSegments` to guarantee the requested resource ID strictly adheres to expected formatting.
-**Next Planned Step:** Conclude URL parsing phase and pivot to optimizing SQLite database performance, targeting sequential batch processing optimizations in database write operations.
-
-## 🚨 Critical Security Learnings
-*Only add entries here for unique, repo-specific security gaps, unexpected side effects, or reusable patterns.*
-- **2026-08-24 - Query Parameter URL Validation Bypass:**
-  - **Vulnerability/Gap:** The `getFileIdFromUrl` function attempted to validate URLs and extract IDs by performing string operations (`url.startsWith` and `RegExp`) on the raw URL string after the scheme/host had been parsed. An attacker could bypass the `startsWith` check or feed malicious paths to the Regex simply by appending a crafted query parameter (e.g., `?q=/file/d/malicious`) to an otherwise un-matched URL.
-  - **Learning:** When validating parsed `Uri` objects for SSRF or path traversal, never apply substring checks or regex extractions to the original raw URL string. Attackers can trivially bypass these using query parameter injection.
-  - **Prevention:** Always validate and extract exclusively against `uri.path` or `uri.pathSegments`.
+**Next Planned Step:** Review and harden file parsing and validation logic in CSV/data import features to ensure strict bounds checking.
