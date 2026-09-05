@@ -624,15 +624,12 @@ class _ImportCSVState extends State<ImportCSV> {
     if (uri.scheme != 'https' || uri.host != 'docs.google.com') {
       throw ("Invalid URL format");
     }
-    if (!googleSheetsUrl.startsWith(
-      "https://docs.google.com/spreadsheets/d/",
-    )) {
+    if (!uri.path.startsWith("/spreadsheets/d/")) {
       throw ("Invalid URL format");
     }
-    RegExp regExp = RegExp(r"/d/([a-zA-Z0-9_-]+)");
-    Match? match = regExp.firstMatch(googleSheetsUrl);
-    if (match != null && match.groupCount >= 1) {
-      String spreadsheetId = match.group(1)!;
+    int index = uri.pathSegments.indexOf('d');
+    if (index != -1 && index + 1 < uri.pathSegments.length) {
+      String spreadsheetId = uri.pathSegments[index + 1];
       if (RegExp(r'[/?#@\\]|\.\.').hasMatch(spreadsheetId)) {
         throw ("Invalid spreadsheet ID");
       }
