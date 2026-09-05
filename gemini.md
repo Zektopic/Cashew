@@ -167,3 +167,12 @@
   - **Vulnerability/Gap:** URL prefix validation (`startsWith`) and regular expression matching for extraction were performed on the raw, unparsed URL string. An attacker could bypass path prefix checks by placing the expected string inside a query parameter (e.g., `https://drive.google.com/?q=/file/d/malicious_payload`).
   - **Learning:** Structural validation of URLs must be performed on parsed components (e.g., `uri.path`) rather than treating the URL as a flat string. Attackers can leverage the structure of URLs (query strings, fragments) to deceive naive string-matching algorithms.
   - **Prevention:** Always use the parsed `Uri` object and validate specifically against `uri.path`, `uri.scheme`, and `uri.host`, avoiding operations like `startsWith` or `RegExp.match` on the full, raw URL string whenever validating resources or extracting identifiers.
+- 2026-08-24: Security Patch - Completely addressed SSRF and Path Traversal vulnerability in `getFileIdFromUrl` by removing raw string extraction (`url.startsWith` and `RegExp`) which was susceptible to query parameter injection bypasses (e.g. `?q=/d/malicious`). Integrated strict `Uri.parse()` path checking and segment extraction via `uri.pathSegments` to guarantee the requested resource ID strictly adheres to expected formatting.
+**Next Planned Step:** Conclude URL parsing phase and pivot to optimizing SQLite database performance, targeting sequential batch processing optimizations in database write operations.
+
+## 🚨 Critical Security Learnings
+*Only add entries here for unique, repo-specific security gaps, unexpected side effects, or reusable patterns.*
+- **2026-08-24 - Query Parameter URL Validation Bypass:**
+  - **Vulnerability/Gap:** The `getFileIdFromUrl` function attempted to validate URLs and extract IDs by performing string operations (`url.startsWith` and `RegExp`) on the raw URL string after the scheme/host had been parsed. An attacker could bypass the `startsWith` check or feed malicious paths to the Regex simply by appending a crafted query parameter (e.g., `?q=/file/d/malicious`) to an otherwise un-matched URL.
+  - **Learning:** When validating parsed `Uri` objects for SSRF or path traversal, never apply substring checks or regex extractions to the original raw URL string. Attackers can trivially bypass these using query parameter injection.
+  - **Prevention:** Always validate and extract exclusively against `uri.path` or `uri.pathSegments`.
