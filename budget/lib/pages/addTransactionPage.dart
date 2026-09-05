@@ -4098,14 +4098,12 @@ String? getFileIdFromUrl(String url) {
         (uri.host != 'docs.google.com' && uri.host != 'drive.google.com')) {
       return null;
     }
-
     if (!uri.path.startsWith("/file/d/") &&
         !uri.path.startsWith("/document/d/") &&
         !uri.path.startsWith("/spreadsheets/d/") &&
         !uri.path.startsWith("/presentation/d/")) {
       return null;
     }
-
     int dIndex = uri.pathSegments.indexOf('d');
     if (dIndex != -1 && dIndex + 1 < uri.pathSegments.length) {
       String fileId = uri.pathSegments[dIndex + 1];
@@ -4114,10 +4112,10 @@ String? getFileIdFromUrl(String url) {
       }
       return fileId;
     }
+    return null;
   } catch (e) {
     return null;
   }
-  return null;
 }
 
 Future<List<int>?> getGoogleDriveFileImageData(String url) async {
