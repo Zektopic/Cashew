@@ -585,7 +585,7 @@ List<double> getInstallmentPaymentCalculations({
   ];
 }
 
-class ObjectiveRowAmountDisplay extends StatefulWidget {
+class ObjectiveRowAmountDisplay extends StatelessWidget {
   final Objective objective;
 
   const ObjectiveRowAmountDisplay({
@@ -594,60 +594,54 @@ class ObjectiveRowAmountDisplay extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<ObjectiveRowAmountDisplay> createState() =>
-      _ObjectiveRowAmountDisplayState();
-}
-
-class _ObjectiveRowAmountDisplayState extends State<ObjectiveRowAmountDisplay> {
-
-  @override
   Widget build(BuildContext context) {
     return WatchTotalAndAmountOfObjective(
-      objective: widget.objective,
+      objective: objective,
       builder: (double objectiveAmount, double totalAmount,
           double percentageTowardsGoal) {
         return HoldToRevealListener(builder: (context, isRevealed) {
-        bool showTotalSpent = appStateSettings["showTotalSpentForObjective"];
-        String amountSpentLabel = getObjectiveAmountSpentLabel(
-          objective: widget.objective,
-          context: context,
-          showTotalSpent: showTotalSpent,
-          objectiveAmount: objectiveAmount,
-          totalAmount: totalAmount,
-          forceReveal: isRevealed,
-        );
-        String amountRemainingLabel = objectiveRemainingAmountText(
-          objectiveAmount: objectiveAmount,
-          totalAmount: totalAmount,
-          context: context,
-          forceReveal: isRevealed,
-        );
-        String differenceOnlyLoanLabel =
-            getIsDifferenceOnlyLoan(widget.objective)
-                ? (percentageTowardsGoal == 1
-                    ? "all-settled".tr()
-                    : (getDifferenceOfLoan(widget.objective, totalAmount,
-                                objectiveAmount) >
-                            0)
-                        ? "to-pay".tr()
-                        : "to-collect".tr())
-                : "";
+          bool showTotalSpent = appStateSettings["showTotalSpentForObjective"];
+          String amountSpentLabel = getObjectiveAmountSpentLabel(
+            objective: objective,
+            context: context,
+            showTotalSpent: showTotalSpent,
+            objectiveAmount: objectiveAmount,
+            totalAmount: totalAmount,
+            forceReveal: isRevealed,
+          );
+          String amountRemainingLabel = objectiveRemainingAmountText(
+            objectiveAmount: objectiveAmount,
+            totalAmount: totalAmount,
+            context: context,
+            forceReveal: isRevealed,
+          );
+          String differenceOnlyLoanLabel = getIsDifferenceOnlyLoan(objective)
+              ? (percentageTowardsGoal == 1
+                  ? "all-settled".tr()
+                  : (getDifferenceOfLoan(
+                              objective, totalAmount, objectiveAmount) >
+                          0)
+                      ? "to-pay".tr()
+                      : "to-collect".tr())
+              : "";
 
-        Widget textWidget = TextFont(
-          key: ValueKey(isRevealed),
-          textAlign: TextAlign.start,
-          text: getIsDifferenceOnlyLoan(widget.objective)
-              ? (amountSpentLabel + " " + differenceOnlyLoanLabel.toLowerCase())
-              : (amountSpentLabel + amountRemainingLabel),
-          fontSize: 14,
-          textColor: getColor(context, "black").withValues(alpha: 0.65),
-          maxLines: 2,
-        );
+          Widget textWidget = TextFont(
+            key: ValueKey(isRevealed),
+            textAlign: TextAlign.start,
+            text: getIsDifferenceOnlyLoan(objective)
+                ? (amountSpentLabel +
+                    " " +
+                    differenceOnlyLoanLabel.toLowerCase())
+                : (amountSpentLabel + amountRemainingLabel),
+            fontSize: 14,
+            textColor: getColor(context, "black").withValues(alpha: 0.65),
+            maxLines: 2,
+          );
 
-        return AnimatedSwitcher(
-          duration: const Duration(milliseconds: 300),
-          child: textWidget,
-        );
+          return AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            child: textWidget,
+          );
         });
       },
     );

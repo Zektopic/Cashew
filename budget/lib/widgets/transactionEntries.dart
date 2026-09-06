@@ -962,14 +962,13 @@ class FutureTransactionsDivider extends StatelessWidget {
                         onTap: () {
                           toggleFutureTransactionsSection(listID);
                         },
-                        color: Theme.of(context)
-                            .colorScheme
-                            .secondary
-                            .withValues(alpha: 
-                              Theme.of(context).brightness == Brightness.dark
-                                  ? 0.1
-                                  : 0.2,
-                            ),
+                        color:
+                            Theme.of(context).colorScheme.secondary.withValues(
+                                  alpha: Theme.of(context).brightness ==
+                                          Brightness.dark
+                                      ? 0.1
+                                      : 0.2,
+                                ),
                         borderRadius: 5,
                         child: Padding(
                           padding: const EdgeInsetsDirectional.symmetric(
@@ -1025,7 +1024,7 @@ class Section implements ExpandableListSection<Widget> {
   }
 }
 
-class TransactionsEntriesSpendingSummary extends StatefulWidget {
+class TransactionsEntriesSpendingSummary extends StatelessWidget {
   const TransactionsEntriesSpendingSummary({
     required this.show,
     required this.netSpending,
@@ -1044,19 +1043,11 @@ class TransactionsEntriesSpendingSummary extends StatefulWidget {
   final VoidCallback? onLongPress;
 
   @override
-  State<TransactionsEntriesSpendingSummary> createState() =>
-      _TransactionsEntriesSpendingSummaryState();
-}
-
-class _TransactionsEntriesSpendingSummaryState
-    extends State<TransactionsEntriesSpendingSummary> {
-
-  @override
   Widget build(BuildContext context) {
     double borderRadius = getPlatform() == PlatformOS.isIOS ? 5 : 10;
     return AnimatedExpanded(
       axis: Axis.vertical,
-      expand: widget.show,
+      expand: show,
       child: Padding(
         padding: EdgeInsetsDirectional.symmetric(
           horizontal: getHorizontalPaddingConstrained(context) + 13,
@@ -1067,7 +1058,7 @@ class _TransactionsEntriesSpendingSummaryState
           openPage: WalletDetailsPage(
             wallet: null,
             initialSearchFilters: SearchFilters(
-              dateTimeRange: widget.dateTimeRange,
+              dateTimeRange: dateTimeRange,
             ),
           ),
           button: (openContainer) {
@@ -1088,7 +1079,7 @@ class _TransactionsEntriesSpendingSummaryState
                   // });
                   openContainer();
                 },
-                onLongPress: widget.onLongPress,
+                onLongPress: onLongPress,
                 child: Padding(
                   padding: const EdgeInsetsDirectional.symmetric(
                     vertical: 5,
@@ -1109,7 +1100,7 @@ class _TransactionsEntriesSpendingSummaryState
                             ),
                             Flexible(
                               child: CountNumber(
-                                count: widget.expense.abs(),
+                                count: expense.abs(),
                                 duration: Duration(milliseconds: 450),
                                 initialCount: (0),
                                 textBuilder: (number) {
@@ -1117,7 +1108,7 @@ class _TransactionsEntriesSpendingSummaryState
                                     text: convertToMoney(
                                       Provider.of<AllWallets>(context),
                                       number,
-                                      finalNumber: widget.expense.abs(),
+                                      finalNumber: expense.abs(),
                                       forceReveal: isRevealed,
                                     ),
                                     fontSize: 15,
@@ -1148,7 +1139,7 @@ class _TransactionsEntriesSpendingSummaryState
                             ),
                             Flexible(
                               child: CountNumber(
-                                count: widget.income.abs(),
+                                count: income.abs(),
                                 duration: Duration(milliseconds: 450),
                                 initialCount: (0),
                                 textBuilder: (number) {
@@ -1156,7 +1147,7 @@ class _TransactionsEntriesSpendingSummaryState
                                     text: convertToMoney(
                                       Provider.of<AllWallets>(context),
                                       number,
-                                      finalNumber: widget.income.abs(),
+                                      finalNumber: income.abs(),
                                       forceReveal: isRevealed,
                                     ),
                                     fontSize: 15,
@@ -1181,7 +1172,7 @@ class _TransactionsEntriesSpendingSummaryState
                           children: [
                             Flexible(
                               child: CountNumber(
-                                count: widget.netSpending,
+                                count: netSpending,
                                 duration: Duration(milliseconds: 450),
                                 initialCount: (0),
                                 textBuilder: (number) {
@@ -1191,7 +1182,7 @@ class _TransactionsEntriesSpendingSummaryState
                                         convertToMoney(
                                           Provider.of<AllWallets>(context),
                                           number,
-                                          finalNumber: widget.netSpending.abs(),
+                                          finalNumber: netSpending.abs(),
                                           forceReveal: isRevealed,
                                         ),
                                     fontSize: 15,
