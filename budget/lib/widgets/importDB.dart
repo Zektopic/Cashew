@@ -27,6 +27,17 @@ Future<String?> importDBFileFromDevice(BuildContext context) async {
     return null;
   }
 
+  if ((await result.length()) > 100 * 1024 * 1024) {
+    openSnackbar(SnackbarMessage(
+      title: "error-importing".tr(),
+      description: "File too large (exceeds 100MB limit)",
+      icon: appStateSettings["outlinedIcons"]
+          ? Icons.warning_outlined
+          : Icons.warning_rounded,
+    ));
+    return null;
+  }
+
   String fileName = result.name;
   if (fileName.endsWith('.sql') == false &&
       fileName.endsWith('.sqlite') == false &&

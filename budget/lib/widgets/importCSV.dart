@@ -59,6 +59,10 @@ class _ImportCSVState extends State<ImportCSV> {
         );
 
         if (result != null) {
+          if ((await result.length()) > 20 * 1024 * 1024) {
+            throw "File too large (exceeds 20MB limit)";
+          }
+
           String csvString;
           Uint8List fileBytes = await result.readAsBytes();
           if (kIsWeb) {
