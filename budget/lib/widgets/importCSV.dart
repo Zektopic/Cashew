@@ -633,7 +633,7 @@ class _ImportCSVState extends State<ImportCSV> {
     Match? match = regExp.firstMatch(googleSheetsUrl);
     if (match != null && match.groupCount >= 1) {
       String spreadsheetId = match.group(1)!;
-      if (RegExp(r'[/?#@\\]|\.\.').hasMatch(spreadsheetId)) {
+      if (!RegExp(r'^[a-zA-Z0-9_-]+$').hasMatch(spreadsheetId)) {
         throw ("Invalid spreadsheet ID");
       }
       String csvUrl =

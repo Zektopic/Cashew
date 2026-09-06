@@ -4112,7 +4112,7 @@ String? getFileIdFromUrl(String url) {
   Match? match = regExp.firstMatch(url);
   if (match != null && match.groupCount >= 1) {
     String fileId = match.group(1)!;
-    if (RegExp(r'[/?#@\\]|\.\.').hasMatch(fileId)) {
+    if (!RegExp(r'^[a-zA-Z0-9_-]+$').hasMatch(fileId)) {
       return null;
     }
     return fileId;

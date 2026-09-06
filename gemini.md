@@ -158,4 +158,6 @@
 - 2026-08-22: Iterative Enhancement - Converted `ProgressBar`, `TransactionsEntriesSpendingSummary`, `CategoryLimits`, and `CategoryLimitEntry` to `StatelessWidget`. These components delegate their hold-to-reveal states directly to the `HoldToRevealListener` abstraction and contained no other internal state, making their state class wrappers redundant.
 
 - 2026-08-23: Iterative Enhancement - Swept `SelectedTransactionsAppBar` and `BudgetContainer` which now utilize the abstracted `HoldToRevealListener`. Since they no longer manage residual local timer/reveal state, they were refactored from `StatefulWidget` to `StatelessWidget` to reduce widget tree overhead. `BarGraph` was evaluated but retained its `StatefulWidget` to support its entrance animations (`loaded` state).
-**Next Planned Step:** Conclude the initial privacy mode phase and pivot to addressing security vulnerabilities (like SSRF and Path Traversal) in URL parsing components, specifically targeting `getFileIdFromUrl`.
+
+- 2026-08-24: Security Patch - Fortified SSRF and path traversal protections in Google Sheets and Drive integrations. Replaced weak blacklist regex checks with strict whitelist regex bounds `RegExp(r'^[a-zA-Z0-9_-]+$')` to enforce explicit file identifier structural requirements in `convertGoogleSheetsUrlToCsvUrl` and `getFileIdFromUrl`.
+**Next Planned Step:** Pivot to auditing deep link implementations (like `executeAppLink` and query parameters) for potential injection vectors.
