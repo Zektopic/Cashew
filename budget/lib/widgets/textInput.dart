@@ -169,6 +169,13 @@ class TextInput extends StatelessWidget {
                     },
               scrollController: scrollController,
               maxLength: maxLength ?? 5000,
+              buildCounter:
+                  (
+                    BuildContext context, {
+                    int? currentLength,
+                    int? maxLength,
+                    bool? isFocused,
+                  }) => null,
               inputFormatters: inputFormatters,
               textInputAction: textInputAction,
               textCapitalization:
