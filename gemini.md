@@ -1,8 +1,8 @@
 # Sentinel Evolution Ledger 🛡️
 
 ## 📈 Feature Iteration Track
-**Currently Improving:** Privacy Obfuscation (Hide Balances)
-**Growth Context:** As the app scales and users carry their devices into more public spaces, they need a way to protect sensitive financial data from shoulder surfers. Competitors often offer a "Privacy Mode" or "Hide Balances" toggle.
+**Currently Improving:** Data Import Constraints
+**Growth Context:** As the application scales and users import larger datasets from external sources (like Mint, Google Sheets, or custom CSVs), the application must gracefully handle extreme payloads without crashing or exhausting device memory (OOM), ensuring a stable user experience.
 **Iteration History:**
 - 2026-08-24: Security Patch - Mitigated SSRF and path traversal risks in Google Sheets and Drive integrations. Replaced vulnerable raw string prefix checking (`url.startsWith`) and regex extraction with strict `uri.path.startsWith` and `uri.pathSegments` indexing in `getFileIdFromUrl` and `convertGoogleSheetsUrlToCsvUrl`.
 
@@ -164,4 +164,10 @@
 - 2026-08-22: Iterative Enhancement - Converted `ProgressBar`, `TransactionsEntriesSpendingSummary`, `CategoryLimits`, and `CategoryLimitEntry` to `StatelessWidget`. These components delegate their hold-to-reveal states directly to the `HoldToRevealListener` abstraction and contained no other internal state, making their state class wrappers redundant.
 
 - 2026-08-23: Iterative Enhancement - Swept `SelectedTransactionsAppBar` and `BudgetContainer` which now utilize the abstracted `HoldToRevealListener`. Since they no longer manage residual local timer/reveal state, they were refactored from `StatefulWidget` to `StatelessWidget` to reduce widget tree overhead. `BarGraph` was evaluated but retained its `StatefulWidget` to support its entrance animations (`loaded` state).
-**Next Planned Step:** Review and harden file parsing and validation logic in CSV/data import features to ensure strict bounds checking.
+- 2026-08-24: Iterative Enhancement - Added strict bounds checking to `_assignColumns` in `importCSV.dart`. Implemented limits to reject files larger than 20MB, payloads containing over 100,000 rows, or tables with more than 200 columns before they are mapped into memory. This prevents unbounded memory allocation (OOM) and DoS attacks during CSV parsing.
+**Next Planned Step:** Investigate file system bounds checking when caching or saving imported files locally to ensure storage limits are respected.
+
+- **2026-08-24 - Unbounded CSV Data Parsing DoS Vulnerability:**
+  - **Vulnerability/Gap:** The CSV import process read entire files into memory and mapped unbounded row/column structures. A maliciously crafted or exceptionally large CSV file could cause the application to allocate massive amounts of memory, leading to out-of-memory (OOM) crashes and Denial of Service (DoS) for the user.
+  - **Learning:** Applications must enforce hard upper bounds on data ingestion processes, particularly when dealing with structured data parsing (like CSV or JSON) that requires contiguous memory allocation.
+  - **Prevention:** Implement strict file size limits and explicit row/column bounds checks early in the parsing pipeline, throwing graceful errors before large memory mapping operations occur.

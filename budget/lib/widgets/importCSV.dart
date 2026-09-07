@@ -110,6 +110,11 @@ class _ImportCSVState extends State<ImportCSV> {
     bool importFromSheets = false,
   }) async {
     try {
+      // Security bounds check for massive strings
+      if (csvString.length > 20000000) {
+        throw ("Import file is too large. Maximum supported size is approximately 20MB.");
+      }
+
       // Normalize line endings before parsing. The converter is given a fixed
       // eol of '\n', but ListToCsvConverter (used by our own export and by the
       // downloadable import template) writes '\r\n'. Without this, re-importing
@@ -121,10 +126,21 @@ class _ImportCSVState extends State<ImportCSV> {
         eol: '\n',
         shouldParseNumbers: false,
       );
+
+      // Security bounds check for extreme row counts that could cause DoS during list mapping
+      if (fileContents.length > 100000) {
+        throw ("Row limit exceeded. Maximum supported rows: 100,000.");
+      }
+
       int maxColumns = fileContents.fold(
         0,
         (prev, element) => element.length > prev ? element.length : prev,
       );
+
+      // Security bounds check for extreme column counts that could cause DoS during list mapping
+      if (maxColumns > 200) {
+        throw ("Column limit exceeded. Maximum supported columns: 200.");
+      }
 
       // Add missing values to rows with fewer columns
       fileContents = fileContents
