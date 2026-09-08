@@ -90,6 +90,10 @@
 **Next Planned Step:** Review and test file system or secure storage boundaries for proper encapsulation when storing user preferences or cache.
 
 ## 🚨 Critical Security Learnings
+- **2026-09-08 - OOM/DoS via Unbounded Data Parsing:**
+  - **Vulnerability/Gap:** The `_assignColumns` method in `budget/lib/widgets/importCSV.dart` lacked restrictions on the size of CSV data it processed. Parsing excessively large strings or files with unbounded rows and columns could lead to Out of Memory (OOM) exceptions and Denial of Service (DoS) attacks.
+  - **Learning:** Applications must enforce strict bounds on all data inputs, particularly during file parsing and memory allocation operations, to protect against resource exhaustion.
+  - **Prevention:** Implement bounds checking prior to parsing, enforcing maximum allowed string length, number of rows, and number of columns.
 - **2026-08-24 - SSRF and Path Traversal via URL Query Parameter Injection:**
   - **Vulnerability/Gap:** The `getFileIdFromUrl` and `convertGoogleSheetsUrlToCsvUrl` functions relied on substring checks (`url.startsWith()`) against the raw URL string to validate the path, and regex to extract identifiers. This allowed an attacker to bypass prefix checks by embedding the required prefix into query parameters (e.g., `https://example.com/?q=https://drive.google.com/file/d/...`) while tricking the regex into extracting an invalid ID.
   - **Learning:** When validating parsed `Uri` objects for SSRF or path traversal, avoid applying substring checks or regex extractions to the original raw URL string, as attackers can bypass this via query parameter injection.
@@ -164,4 +168,5 @@
 - 2026-08-22: Iterative Enhancement - Converted `ProgressBar`, `TransactionsEntriesSpendingSummary`, `CategoryLimits`, and `CategoryLimitEntry` to `StatelessWidget`. These components delegate their hold-to-reveal states directly to the `HoldToRevealListener` abstraction and contained no other internal state, making their state class wrappers redundant.
 
 - 2026-08-23: Iterative Enhancement - Swept `SelectedTransactionsAppBar` and `BudgetContainer` which now utilize the abstracted `HoldToRevealListener`. Since they no longer manage residual local timer/reveal state, they were refactored from `StatefulWidget` to `StatelessWidget` to reduce widget tree overhead. `BarGraph` was evaluated but retained its `StatefulWidget` to support its entrance animations (`loaded` state).
-**Next Planned Step:** Review and harden file parsing and validation logic in CSV/data import features to ensure strict bounds checking.
+- 2026-09-08: Iterative Enhancement - Hardened file parsing and validation logic in CSV import features. Added strict bounds checking in `_assignColumns` within `budget/lib/widgets/importCSV.dart` prior to parsing the input. Limits set: 50MB string size, 100,000 maximum rows, and 200 maximum columns, to prevent potential Denial of Service (DoS) and Out of Memory (OOM) attacks from unbound memory allocation.
+**Next Planned Step:** Continue auditing file import logic (e.g., verifying custom URL scheme bounds, checking memory consumption of ZIP files if any).
