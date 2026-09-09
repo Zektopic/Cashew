@@ -33,10 +33,7 @@ import 'package:budget/pages/addButton.dart';
 import 'package:budget/widgets/holdToRevealListener.dart';
 
 class EditObjectivesPage extends StatefulWidget {
-  EditObjectivesPage({
-    required this.objectiveType,
-    Key? key,
-  }) : super(key: key);
+  EditObjectivesPage({required this.objectiveType, Key? key}) : super(key: key);
   final ObjectiveType objectiveType;
 
   @override
@@ -198,26 +195,30 @@ class _EditObjectivesPageState extends State<EditObjectivesPage> {
                       key: ValueKey(objective.objectivePk),
                       extraIcon: objective.archived
                           ? appStateSettings["outlinedIcons"]
-                              ? Icons.visibility_off_outlined
-                              : Icons.visibility_off_rounded
+                                ? Icons.visibility_off_outlined
+                                : Icons.visibility_off_rounded
                           : appStateSettings["outlinedIcons"]
-                              ? Icons.visibility_outlined
-                              : Icons.visibility_rounded,
+                          ? Icons.visibility_outlined
+                          : Icons.visibility_rounded,
                       onExtra: () async {
                         Objective updatedObjective = objective.copyWith(
                           archived: !objective.archived,
                           pinned: objective.archived,
                         );
-                        await database
-                            .createOrUpdateObjective(updatedObjective);
+                        await database.createOrUpdateObjective(
+                          updatedObjective,
+                        );
                       },
                       opacity: objective.archived ? 0.5 : 1,
-                      canReorder: searchValue == "" &&
+                      canReorder:
+                          searchValue == "" &&
                           (snapshot.data ?? []).length != 1,
                       currentReorder:
                           currentReorder != -1 && currentReorder != index,
                       padding: EdgeInsetsDirectional.symmetric(
-                          horizontal: 10, vertical: 5),
+                        horizontal: 10,
+                        vertical: 5,
+                      ),
                       content: Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
@@ -255,21 +256,21 @@ class _EditObjectivesPageState extends State<EditObjectivesPage> {
                                   text: getIsDifferenceOnlyLoan(objective)
                                       ? "difference-loan".tr()
                                       : objective.income
-                                          ? widget.objectiveType ==
-                                                  ObjectiveType.loan
-                                              ? "lent-funds".tr()
-                                              : "savings-goal".tr()
-                                          : widget.objectiveType ==
-                                                  ObjectiveType.loan
-                                              ? "borrowed-funds".tr()
-                                              : "expense-goal".tr(),
+                                      ? widget.objectiveType ==
+                                                ObjectiveType.loan
+                                            ? "lent-funds".tr()
+                                            : "savings-goal".tr()
+                                      : widget.objectiveType ==
+                                            ObjectiveType.loan
+                                      ? "borrowed-funds".tr()
+                                      : "expense-goal".tr(),
                                   fontSize: 14,
-                                  textColor: getColor(context, "black")
-                                      .withValues(alpha: 0.65),
+                                  textColor: getColor(
+                                    context,
+                                    "black",
+                                  ).withValues(alpha: 0.65),
                                 ),
-                                ObjectiveRowAmountDisplay(
-                                  objective: objective,
-                                ),
+                                ObjectiveRowAmountDisplay(objective: objective),
                                 // StreamBuilder<int?>(
                                 //   stream: database
                                 //       .getTotalCountOfTransactionsInObjective(
@@ -313,10 +314,11 @@ class _EditObjectivesPageState extends State<EditObjectivesPage> {
                       ),
                       index: index,
                       onDelete: () async {
-                        deleteObjectivePopup(context,
-                            objective: objective,
-                            routesToPopAfterDelete:
-                                RoutesToPopAfterDelete.None);
+                        deleteObjectivePopup(
+                          context,
+                          objective: objective,
+                          routesToPopAfterDelete: RoutesToPopAfterDelete.None,
+                        );
                         return true;
                       },
                       openPage: AddObjectivePage(
@@ -329,26 +331,28 @@ class _EditObjectivesPageState extends State<EditObjectivesPage> {
                   onReorder: (_intPrevious, _intNew) async {
                     Objective oldObjective = snapshot.data![_intPrevious];
                     if (_intNew > _intPrevious) {
-                      await database.moveObjective(oldObjective.objectivePk,
-                          _intNew - 1, oldObjective.order,
-                          objectiveType: widget.objectiveType);
+                      await database.moveObjective(
+                        oldObjective.objectivePk,
+                        _intNew - 1,
+                        oldObjective.order,
+                        objectiveType: widget.objectiveType,
+                      );
                     } else {
                       await database.moveObjective(
-                          oldObjective.objectivePk, _intNew, oldObjective.order,
-                          objectiveType: widget.objectiveType);
+                        oldObjective.objectivePk,
+                        _intNew,
+                        oldObjective.order,
+                        objectiveType: widget.objectiveType,
+                      );
                     }
                     return true;
                   },
                 );
               }
-              return SliverToBoxAdapter(
-                child: Container(),
-              );
+              return SliverToBoxAdapter(child: Container());
             },
           ),
-          SliverToBoxAdapter(
-            child: SizedBox(height: 75),
-          ),
+          SliverToBoxAdapter(child: SizedBox(height: 75)),
         ],
       ),
     );
@@ -478,14 +482,15 @@ Future<dynamic> selectObjectivePopup(
                                 objective != null &&
                                 objectiveType != ObjectiveType.loan
                             ? (" (" +
-                                convertToMoney(
-                                  Provider.of<AllWallets>(context),
-                                  objectiveAmountToPrimaryCurrency(
+                                  convertToMoney(
+                                    Provider.of<AllWallets>(context),
+                                    objectiveAmountToPrimaryCurrency(
                                           Provider.of<AllWallets>(context),
-                                          objective) *
-                                      ((objective.income) ? 1 : -1),
-                                ) +
-                                ")")
+                                          objective,
+                                        ) *
+                                        ((objective.income) ? 1 : -1),
+                                  ) +
+                                  ")")
                             : "");
                   },
                   initial: selectedObjective,
@@ -526,7 +531,7 @@ Future<dynamic> selectObjectivePopup(
                   ),
                 ),
               ],
-            )
+            ),
         ],
       ),
     ),
@@ -557,10 +562,14 @@ List<double> getInstallmentPaymentCalculations({
 }) {
   double amountPerInstallmentPaymentInCurrentCurrency =
       (amountPerInstallmentPayment ?? 0) *
-          amountRatioToPrimaryCurrencyGivenPk(
-              allWallets, amountPerInstallmentPaymentWalletPk);
-  double objectiveTotalInCurrentCurrency =
-      objectiveAmountToPrimaryCurrency(allWallets, objective);
+      amountRatioToPrimaryCurrencyGivenPk(
+        allWallets,
+        amountPerInstallmentPaymentWalletPk,
+      );
+  double objectiveTotalInCurrentCurrency = objectiveAmountToPrimaryCurrency(
+    allWallets,
+    objective,
+  );
   double numberOfInstallmentPaymentsDisplay =
       (numberOfInstallmentPayments ?? 0) * 1.0;
   double amountPerInstallmentPaymentDisplay =
@@ -575,75 +584,84 @@ List<double> getInstallmentPaymentCalculations({
     // And also so we actually achieve our goal
     amountPerInstallmentPaymentDisplay =
         objectiveTotalInCurrentCurrency / numberOfInstallmentPaymentsDisplay +
-            0.00000000000001;
+        0.00000000000001;
   }
   amountPerInstallmentPaymentDisplay =
       amountPerInstallmentPaymentDisplay * (objective.income ? 1 : -1);
   return [
     numberOfInstallmentPaymentsDisplay,
-    amountPerInstallmentPaymentDisplay
+    amountPerInstallmentPaymentDisplay,
   ];
 }
 
 class ObjectiveRowAmountDisplay extends StatelessWidget {
   final Objective objective;
 
-  const ObjectiveRowAmountDisplay({
-    required this.objective,
-    Key? key,
-  }) : super(key: key);
+  const ObjectiveRowAmountDisplay({required this.objective, Key? key})
+    : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return WatchTotalAndAmountOfObjective(
       objective: objective,
-      builder: (double objectiveAmount, double totalAmount,
-          double percentageTowardsGoal) {
-        return HoldToRevealListener(builder: (context, isRevealed) {
-          bool showTotalSpent = appStateSettings["showTotalSpentForObjective"];
-          String amountSpentLabel = getObjectiveAmountSpentLabel(
-            objective: objective,
-            context: context,
-            showTotalSpent: showTotalSpent,
-            objectiveAmount: objectiveAmount,
-            totalAmount: totalAmount,
-            forceReveal: isRevealed,
-          );
-          String amountRemainingLabel = objectiveRemainingAmountText(
-            objectiveAmount: objectiveAmount,
-            totalAmount: totalAmount,
-            context: context,
-            forceReveal: isRevealed,
-          );
-          String differenceOnlyLoanLabel = getIsDifferenceOnlyLoan(objective)
-              ? (percentageTowardsGoal == 1
-                  ? "all-settled".tr()
-                  : (getDifferenceOfLoan(
-                              objective, totalAmount, objectiveAmount) >
-                          0)
-                      ? "to-pay".tr()
-                      : "to-collect".tr())
-              : "";
+      builder:
+          (
+            double objectiveAmount,
+            double totalAmount,
+            double percentageTowardsGoal,
+          ) {
+            return HoldToRevealListener(
+              builder: (context, isRevealed) {
+                bool showTotalSpent =
+                    appStateSettings["showTotalSpentForObjective"];
+                String amountSpentLabel = getObjectiveAmountSpentLabel(
+                  objective: objective,
+                  context: context,
+                  showTotalSpent: showTotalSpent,
+                  objectiveAmount: objectiveAmount,
+                  totalAmount: totalAmount,
+                  forceReveal: isRevealed,
+                );
+                String amountRemainingLabel = objectiveRemainingAmountText(
+                  objectiveAmount: objectiveAmount,
+                  totalAmount: totalAmount,
+                  context: context,
+                  forceReveal: isRevealed,
+                );
+                String differenceOnlyLoanLabel =
+                    getIsDifferenceOnlyLoan(objective)
+                    ? (percentageTowardsGoal == 1
+                          ? "all-settled".tr()
+                          : (getDifferenceOfLoan(
+                                  objective,
+                                  totalAmount,
+                                  objectiveAmount,
+                                ) >
+                                0)
+                          ? "to-pay".tr()
+                          : "to-collect".tr())
+                    : "";
 
-          Widget textWidget = TextFont(
-            key: ValueKey(isRevealed),
-            textAlign: TextAlign.start,
-            text: getIsDifferenceOnlyLoan(objective)
-                ? (amountSpentLabel +
-                    " " +
-                    differenceOnlyLoanLabel.toLowerCase())
-                : (amountSpentLabel + amountRemainingLabel),
-            fontSize: 14,
-            textColor: getColor(context, "black").withValues(alpha: 0.65),
-            maxLines: 2,
-          );
+                Widget textWidget = TextFont(
+                  key: ValueKey(isRevealed),
+                  textAlign: TextAlign.start,
+                  text: getIsDifferenceOnlyLoan(objective)
+                      ? (amountSpentLabel +
+                            " " +
+                            differenceOnlyLoanLabel.toLowerCase())
+                      : (amountSpentLabel + amountRemainingLabel),
+                  fontSize: 14,
+                  textColor: getColor(context, "black").withValues(alpha: 0.65),
+                  maxLines: 2,
+                );
 
-          return AnimatedSwitcher(
-            duration: const Duration(milliseconds: 300),
-            child: textWidget,
-          );
-        });
-      },
+                return AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  child: textWidget,
+                );
+              },
+            );
+          },
     );
   }
 }

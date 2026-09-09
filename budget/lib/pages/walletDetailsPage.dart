@@ -2197,6 +2197,7 @@ class _AllSpendingPastSpendingGraphState
   int amountLoaded = 8;
   bool amountLoadedPressedOnce = false;
 
+
   initState() {
     Future.delayed(Duration.zero, () async {
       loadLines(amountLoaded);
@@ -2870,38 +2871,38 @@ class AmountSpentEntryRow extends StatelessWidget {
       totalWithCountStream2: totalWithCountStream2,
       builder: (context, snapshot) {
         return HoldToRevealListener(builder: (context, isRevealed) {
-          double totalSpent = absolute
-              ? (snapshot.data?.total ?? 0).abs()
-              : (snapshot.data?.total ?? 0) * (invertSign == true ? -1 : 1);
-          int totalCount = snapshot.data?.count ?? 0;
-          return CustomContextMenu(
-            buttonItems: [
-              ContextMenuButtonItem(
-                type: ContextMenuButtonType.copy,
-                onPressed: () {
-                  ContextMenuController.removeAny();
-                  copyToClipboard(label +
-                      addAmountToString("", totalCount, extraText: extraText) +
-                      " • " +
-                      convertToMoney(
-                        Provider.of<AllWallets>(context, listen: false),
-                        totalSpent,
-                        finalNumber: totalSpent.abs(),
-                        forceReveal: isRevealed,
-                      ));
-                },
-              ),
-            ],
-            tappableBuilder: (onLongPress) => AnimatedExpanded(
-              axis: Axis.vertical,
-              expand: forceShow ||
-                  ((totalCount > 0 || totalSpent != 0) && hide == false),
-              child: OpenContainerNavigation(
-                borderRadius: 0,
-                openPage: openPage,
-                closedColor: getColor(context, "lightDarkAccentHeavyLight"),
-                button: (openContainer) {
-                  return Tappable(
+        double totalSpent = absolute
+            ? (snapshot.data?.total ?? 0).abs()
+            : (snapshot.data?.total ?? 0) * (invertSign == true ? -1 : 1);
+        int totalCount = snapshot.data?.count ?? 0;
+        return CustomContextMenu(
+          buttonItems: [
+            ContextMenuButtonItem(
+              type: ContextMenuButtonType.copy,
+              onPressed: () {
+                ContextMenuController.removeAny();
+                copyToClipboard(label +
+                    addAmountToString("", totalCount, extraText: extraText) +
+                    " • " +
+                    convertToMoney(
+                      Provider.of<AllWallets>(context, listen: false),
+                      totalSpent,
+                      finalNumber: totalSpent.abs(),
+                      forceReveal: isRevealed,
+                    ));
+              },
+            ),
+          ],
+          tappableBuilder: (onLongPress) => AnimatedExpanded(
+            axis: Axis.vertical,
+            expand: forceShow ||
+                ((totalCount > 0 || totalSpent != 0) && hide == false),
+            child: OpenContainerNavigation(
+              borderRadius: 0,
+              openPage: openPage,
+              closedColor: getColor(context, "lightDarkAccentHeavyLight"),
+              button: (openContainer) {
+                return Tappable(
                     color: getColor(context, "lightDarkAccentHeavyLight"),
                     borderRadius: 0,
                     onTap: () async {
@@ -2912,109 +2913,107 @@ class AmountSpentEntryRow extends StatelessWidget {
                       padding: const EdgeInsetsDirectional.symmetric(
                           horizontal: 20, vertical: 6),
                       child: Container(
-                        child: Row(
-                          mainAxisSize: MainAxisSize.max,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: LayoutBuilder(
-                                builder: (context, constraints) {
-                                  return Row(
-                                    children: [
-                                      // Constrained box allows us to achieve a full width expander
-                                      // Constrained box allows for text wrapping/cut-off since we set a maxWidth
-                                      // We can get a layout that is more dynamic and looks like:
-                                      // [-----------------------Full Width-------------------------]
-                                      // [---Label----] [-------------------------------------------]
-                                      // [--------------------Label--------------------] [----------]
-                                      // Compared to
-                                      // [-----------------------Full Width-------------------------]
-                                      // [---------Expanded---------][--Flexible--]
-                                      // Where expanded is limited to 50%
-                                      // Can see this issue: https://stackoverflow.com/a/74310309
-                                      ConstrainedBox(
-                                        constraints: BoxConstraints(
-                                            maxWidth:
-                                                constraints.maxWidth - 10),
-                                        child: TextFont(
-                                          text: "",
-                                          maxLines: 1,
-                                          textAlign: TextAlign.start,
-                                          richTextSpan: [
-                                            TextSpan(
-                                              text: label,
-                                              style: TextStyle(
-                                                fontSize: 18,
-                                                color:
-                                                    getColor(context, "black"),
-                                                fontFamily:
-                                                    appStateSettings["font"],
-                                                fontFamilyFallback: ['Inter'],
-                                                fontWeight: FontWeight.bold,
-                                              ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.max,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: LayoutBuilder(
+                              builder: (context, constraints) {
+                                return Row(
+                                  children: [
+                                    // Constrained box allows us to achieve a full width expander
+                                    // Constrained box allows for text wrapping/cut-off since we set a maxWidth
+                                    // We can get a layout that is more dynamic and looks like:
+                                    // [-----------------------Full Width-------------------------]
+                                    // [---Label----] [-------------------------------------------]
+                                    // [--------------------Label--------------------] [----------]
+                                    // Compared to
+                                    // [-----------------------Full Width-------------------------]
+                                    // [---------Expanded---------][--Flexible--]
+                                    // Where expanded is limited to 50%
+                                    // Can see this issue: https://stackoverflow.com/a/74310309
+                                    ConstrainedBox(
+                                      constraints: BoxConstraints(
+                                          maxWidth: constraints.maxWidth - 10),
+                                      child: TextFont(
+                                        text: "",
+                                        maxLines: 1,
+                                        textAlign: TextAlign.start,
+                                        richTextSpan: [
+                                          TextSpan(
+                                            text: label,
+                                            style: TextStyle(
+                                              fontSize: 18,
+                                              color: getColor(context, "black"),
+                                              fontFamily:
+                                                  appStateSettings["font"],
+                                              fontFamilyFallback: ['Inter'],
+                                              fontWeight: FontWeight.bold,
                                             ),
-                                            TextSpan(
-                                              text: addAmountToString(
-                                                  " ", totalCount,
-                                                  extraText: extraText),
-                                              style: TextStyle(
-                                                fontSize: 15,
-                                                color: getColor(
-                                                    context, "textLight"),
-                                                fontFamily:
-                                                    appStateSettings["font"],
-                                                fontFamilyFallback: ['Inter'],
-                                              ),
+                                          ),
+                                          TextSpan(
+                                            text: addAmountToString(
+                                                " ", totalCount,
+                                                extraText: extraText),
+                                            style: TextStyle(
+                                              fontSize: 15,
+                                              color: getColor(
+                                                  context, "textLight"),
+                                              fontFamily:
+                                                  appStateSettings["font"],
+                                              fontFamilyFallback: ['Inter'],
                                             ),
-                                          ],
-                                        ),
+                                          ),
+                                        ],
                                       ),
-                                      Expanded(
-                                        child: Container(
-                                          margin: EdgeInsetsDirectional.only(
-                                              start: 10, end: 10, top: 1),
-                                          height: 2,
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .secondaryContainer
-                                              .withValues(alpha: 0.5),
-                                        ),
+                                    ),
+                                    Expanded(
+                                      child: Container(
+                                        margin: EdgeInsetsDirectional.only(
+                                            start: 10, end: 10, top: 1),
+                                        height: 2,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .secondaryContainer
+                                            .withValues(alpha: 0.5),
                                       ),
-                                    ],
-                                  );
-                                },
-                              ),
-                            ),
-                            CountNumber(
-                              lazyFirstRender: false,
-                              count: totalSpent,
-                              duration: Duration(milliseconds: 1000),
-                              initialCount: 0,
-                              textBuilder: (number) {
-                                return TextFont(
-                                  textAlign: TextAlign.end,
-                                  text: convertToMoney(
-                                    Provider.of<AllWallets>(context),
-                                    number,
-                                    finalNumber: totalSpent.abs(),
-                                    forceReveal: isRevealed,
-                                  ),
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  textColor: textColor,
+                                    ),
+                                  ],
                                 );
                               },
                             ),
-                          ],
-                        ),
+                          ),
+                          CountNumber(
+                            lazyFirstRender: false,
+                            count: totalSpent,
+                            duration: Duration(milliseconds: 1000),
+                            initialCount: 0,
+                            textBuilder: (number) {
+                              return TextFont(
+                                textAlign: TextAlign.end,
+                                text: convertToMoney(
+                                  Provider.of<AllWallets>(context),
+                                  number,
+                                  finalNumber: totalSpent.abs(),
+                                  forceReveal: isRevealed,
+                                ),
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                textColor: textColor,
+                              );
+                            },
+                          ),
+                        ],
                       ),
                     ),
+                    ),
                   );
-                },
-              ),
+              },
             ),
-          );
+          ),
+        );
         });
       },
     );

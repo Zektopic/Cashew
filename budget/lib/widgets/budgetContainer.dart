@@ -16,7 +16,6 @@ import 'package:budget/widgets/openContainerNavigation.dart';
 import 'package:budget/widgets/openPopup.dart';
 import 'package:budget/widgets/tappable.dart';
 import 'package:budget/widgets/textWidgets.dart';
-import 'package:budget/widgets/holdToRevealListener.dart';
 import 'package:budget/widgets/util/widgetSize.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
@@ -30,7 +29,7 @@ import 'package:async/async.dart' show StreamZip;
 import 'package:budget/struct/randomConstants.dart';
 import 'package:budget/widgets/holdToRevealListener.dart';
 
-class BudgetContainer extends StatefulWidget {
+class BudgetContainer extends StatelessWidget {
   BudgetContainer({
     Key? key,
     required this.budget,
@@ -49,20 +48,15 @@ class BudgetContainer extends StatefulWidget {
   final bool squishInactiveBudgetContainerHeight;
 
   @override
-  State<BudgetContainer> createState() => _BudgetContainerState();
-}
-
-class _BudgetContainerState extends State<BudgetContainer> {
-  @override
   Widget build(BuildContext context) {
     double budgetAmount = budgetAmountToPrimaryCurrency(
       Provider.of<AllWallets>(context, listen: true),
-      widget.budget,
+      budget,
     );
-    DateTime dateForRangeLocal = widget.dateForRange == null
+    DateTime dateForRangeLocal = dateForRange == null
         ? DateTime.now()
-        : widget.dateForRange!;
-    DateTimeRange budgetRange = getBudgetDate(widget.budget, dateForRangeLocal);
+        : dateForRange!;
+    DateTimeRange budgetRange = getBudgetDate(budget, dateForRangeLocal);
     bool isOutOfRange =
         budgetRange.end.difference(DateTime.now()).inDays < 0 ||
         budgetRange.start.difference(DateTime.now()).inDays > 0;
@@ -72,16 +66,16 @@ class _BudgetContainerState extends State<BudgetContainer> {
         allWallets: Provider.of<AllWallets>(context),
         start: budgetRange.start,
         end: budgetRange.end,
-        categoryFks: widget.budget.categoryFks,
-        categoryFksExclude: widget.budget.categoryFksExclude,
-        budgetTransactionFilters: widget.budget.budgetTransactionFilters,
-        memberTransactionFilters: widget.budget.memberTransactionFilters,
+        categoryFks: budget.categoryFks,
+        categoryFksExclude: budget.categoryFksExclude,
+        budgetTransactionFilters: budget.budgetTransactionFilters,
+        memberTransactionFilters: budget.memberTransactionFilters,
         onlyShowTransactionsBelongingToBudgetPk:
-            widget.budget.sharedKey != null ||
-                widget.budget.addedTransactionsOnly == true
-            ? widget.budget.budgetPk
+            budget.sharedKey != null ||
+                budget.addedTransactionsOnly == true
+            ? budget.budgetPk
             : null,
-        budget: widget.budget,
+        budget: budget,
       ),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
@@ -89,7 +83,7 @@ class _BudgetContainerState extends State<BudgetContainer> {
           snapshot.data!.forEach((category) {
             totalSpent = totalSpent + category.total;
           });
-          totalSpent = totalSpent * determineBudgetPolarity(widget.budget);
+          totalSpent = totalSpent * determineBudgetPolarity(budget);
           return Container(
             // height: height,
             child: ClipRRect(
@@ -102,9 +96,9 @@ class _BudgetContainerState extends State<BudgetContainer> {
                     children: [
                       Positioned.fill(
                         child: AnimatedGooBackground(
-                          randomOffset: widget.budget.name.length,
+                          randomOffset: budget.name.length,
                           color: HexColor(
-                            widget.budget.colour,
+                            budget.colour,
                             defaultColor: Theme.of(context).colorScheme.primary,
                           ).withOpacity(0.8),
                         ),
@@ -123,7 +117,7 @@ class _BudgetContainerState extends State<BudgetContainer> {
                               children: [
                                 Flexible(
                                   child: TextFont(
-                                    text: widget.budget.name,
+                                    text: budget.name,
                                     fontWeight: FontWeight.bold,
                                     fontSize: 24,
                                     textAlign: TextAlign.start,
@@ -188,7 +182,7 @@ class _BudgetContainerState extends State<BudgetContainer> {
                                                 ),
                                                 text:
                                                     getBudgetSpentText(
-                                                      widget.budget.income,
+                                                      budget.income,
                                                     ) +
                                                     convertToMoney(
                                                       Provider.of<AllWallets>(
@@ -261,7 +255,7 @@ class _BudgetContainerState extends State<BudgetContainer> {
                                               ),
                                               text:
                                                   getBudgetOverSpentText(
-                                                    widget.budget.income,
+                                                    budget.income,
                                                   ) +
                                                   convertToMoney(
                                                     Provider.of<AllWallets>(
@@ -290,7 +284,7 @@ class _BudgetContainerState extends State<BudgetContainer> {
                             start: 10,
                           ),
                           child:
-                              widget.budget.reoccurrence ==
+                              budget.reoccurrence ==
                                   BudgetReoccurence.custom
                               ? SizedBox.shrink()
                               : ButtonIcon(
@@ -298,7 +292,7 @@ class _BudgetContainerState extends State<BudgetContainer> {
                                     pushRoute(
                                       context,
                                       PastBudgetsPage(
-                                        budgetPk: widget.budget.budgetPk,
+                                        budgetPk: budget.budgetPk,
                                       ),
                                     );
                                   },
@@ -308,7 +302,7 @@ class _BudgetContainerState extends State<BudgetContainer> {
                                   color: dynamicPastel(
                                     context,
                                     HexColor(
-                                      widget.budget.colour,
+                                      budget.colour,
                                       defaultColor: Theme.of(
                                         context,
                                       ).colorScheme.primary,
@@ -318,7 +312,7 @@ class _BudgetContainerState extends State<BudgetContainer> {
                                   iconColor: dynamicPastel(
                                     context,
                                     HexColor(
-                                      widget.budget.colour,
+                                      budget.colour,
                                       defaultColor: Theme.of(
                                         context,
                                       ).colorScheme.primary,
@@ -334,18 +328,18 @@ class _BudgetContainerState extends State<BudgetContainer> {
                     ],
                   ),
                   Padding(
-                    padding: widget.intermediatePadding
+                    padding: intermediatePadding
                         ? EdgeInsetsDirectional.only(
                             start: 15,
                             end: 15,
                             top:
-                                widget.squishInactiveBudgetContainerHeight ==
+                                squishInactiveBudgetContainerHeight ==
                                         true &&
                                     isOutOfRange
                                 ? 8.5
                                 : 16.5,
                             bottom:
-                                widget.squishInactiveBudgetContainerHeight ==
+                                squishInactiveBudgetContainerHeight ==
                                         true &&
                                     isOutOfRange
                                 ? 0
@@ -357,18 +351,18 @@ class _BudgetContainerState extends State<BudgetContainer> {
                         allWallets: Provider.of<AllWallets>(context),
                         start: budgetRange.start,
                         end: budgetRange.end,
-                        categoryFks: widget.budget.categoryFks,
-                        categoryFksExclude: widget.budget.categoryFksExclude,
+                        categoryFks: budget.categoryFks,
+                        categoryFksExclude: budget.categoryFksExclude,
                         budgetTransactionFilters:
-                            widget.budget.budgetTransactionFilters,
+                            budget.budgetTransactionFilters,
                         memberTransactionFilters:
-                            widget.budget.memberTransactionFilters,
+                            budget.memberTransactionFilters,
                         onlyShowTransactionsBelongingToBudgetPk:
-                            widget.budget.sharedKey != null ||
-                                widget.budget.addedTransactionsOnly == true
-                            ? widget.budget.budgetPk
+                            budget.sharedKey != null ||
+                                budget.addedTransactionsOnly == true
+                            ? budget.budgetPk
                             : null,
-                        budget: widget.budget,
+                        budget: budget,
                         searchFilters: SearchFilters(
                           paidStatus: [PaidStatus.notPaid],
                         ),
@@ -376,7 +370,7 @@ class _BudgetContainerState extends State<BudgetContainer> {
                       ),
                       builder: (context, snapshot) {
                         return BudgetTimeline(
-                          budget: widget.budget,
+                          budget: budget,
                           percent: budgetAmount == 0
                               ? 0
                               : (totalSpent / budgetAmount * 100),
@@ -390,7 +384,7 @@ class _BudgetContainerState extends State<BudgetContainer> {
                               ? 0
                               : (((snapshot.data ?? 0) *
                                             determineBudgetPolarity(
-                                              widget.budget,
+                                              budget,
                                             )) /
                                         budgetAmount) *
                                     100,
@@ -399,14 +393,14 @@ class _BudgetContainerState extends State<BudgetContainer> {
                     ),
                   ),
                   DaySpending(
-                    budget: widget.budget,
+                    budget: budget,
                     totalAmount: totalSpent,
                     budgetRange: budgetRange,
                     padding: EdgeInsetsDirectional.only(
                       start: 10,
                       end: 10,
                       bottom:
-                          widget.squishInactiveBudgetContainerHeight == true &&
+                          squishInactiveBudgetContainerHeight == true &&
                               isOutOfRange
                           ? 4
                           : 17,
@@ -418,19 +412,19 @@ class _BudgetContainerState extends State<BudgetContainer> {
             ),
           );
         } else {
-          return Container(height: widget.height, width: double.infinity);
+          return Container(height: height, width: double.infinity);
         }
       },
     );
     ColorScheme budgetColorScheme = ColorScheme.fromSeed(
       seedColor: HexColor(
-        widget.budget.colour,
+        budget.colour,
         defaultColor: Theme.of(context).colorScheme.primary,
       ),
       brightness: determineBrightnessTheme(context),
     );
     Color backgroundColor = appStateSettings["materialYou"]
-        ? widget.budget.colour == null
+        ? budget.colour == null
               ? appStateSettings["accentSystemColor"] == true &&
                         appStateSettings["materialYou"] &&
                         appStateSettings["batterySaver"] == false
@@ -468,12 +462,12 @@ class _BudgetContainerState extends State<BudgetContainer> {
               onTap: () {
                 openContainer();
               },
-              onLongPress: widget.longPressToEdit
+              onLongPress: longPressToEdit
                   ? () {
                       pushRoute(
                         context,
                         AddBudgetPage(
-                          budget: widget.budget,
+                          budget: budget,
                           routesToPopAfterDelete: RoutesToPopAfterDelete.One,
                         ),
                       );
@@ -485,7 +479,7 @@ class _BudgetContainerState extends State<BudgetContainer> {
             );
           },
           openPage: BudgetPage(
-            budgetPk: widget.budget.budgetPk,
+            budgetPk: budget.budgetPk,
             dateForRange: dateForRangeLocal,
           ),
         ),
@@ -1334,22 +1328,22 @@ class _BudgetSpenderSummaryState extends State<BudgetSpenderSummary> {
 
           for (BudgetSpender spender in budgetSpenderList) {
             memberWidgets.add(
-              HoldToRevealListener(
-                builder: (context, isRevealed) => WillPopScope(
-                  onWillPop: () async {
-                    if (widget.disableMemberSelection == false) {
-                      if (selectedMember == spender.member ||
-                          spender.amount == 0) {
-                        widget.setSelectedMember(null);
-                        setState(() {
-                          selectedMember = null;
-                        });
-                        return false;
-                      }
+              WillPopScope(
+                onWillPop: () async {
+                  if (widget.disableMemberSelection == false) {
+                    if (selectedMember == spender.member ||
+                        spender.amount == 0) {
+                      widget.setSelectedMember(null);
+                      setState(() {
+                        selectedMember = null;
+                      });
+                      return false;
                     }
-                    return true;
-                  },
-                  child: Tappable(
+                  }
+                  return true;
+                },
+                child: HoldToRevealListener(
+                  builder: (context, isRevealed) => Tappable(
                     onTap: () {
                       if (widget.disableMemberSelection == false) {
                         if (selectedMember == spender.member ||
