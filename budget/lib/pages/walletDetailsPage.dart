@@ -2839,7 +2839,7 @@ class SelectedPeriodHeaderLabel extends StatelessWidget {
   }
 }
 
-class AmountSpentEntryRow extends StatefulWidget {
+class AmountSpentEntryRow extends StatelessWidget {
   const AmountSpentEntryRow({
     super.key,
     required this.openPage,
@@ -2865,21 +2865,15 @@ class AmountSpentEntryRow extends StatefulWidget {
   final bool invertSign;
 
   @override
-  State<AmountSpentEntryRow> createState() => _AmountSpentEntryRowState();
-}
-
-class _AmountSpentEntryRowState extends State<AmountSpentEntryRow> {
-
-  @override
   Widget build(BuildContext context) {
     return DoubleTotalWithCountStreamBuilder(
-      totalWithCountStream: widget.totalWithCountStream,
-      totalWithCountStream2: widget.totalWithCountStream2,
+      totalWithCountStream: totalWithCountStream,
+      totalWithCountStream2: totalWithCountStream2,
       builder: (context, snapshot) {
         return HoldToRevealListener(builder: (context, isRevealed) {
-        double totalSpent = widget.absolute
+        double totalSpent = absolute
             ? (snapshot.data?.total ?? 0).abs()
-            : (snapshot.data?.total ?? 0) * (widget.invertSign == true ? -1 : 1);
+            : (snapshot.data?.total ?? 0) * (invertSign == true ? -1 : 1);
         int totalCount = snapshot.data?.count ?? 0;
         return CustomContextMenu(
           buttonItems: [
@@ -2887,8 +2881,8 @@ class _AmountSpentEntryRowState extends State<AmountSpentEntryRow> {
               type: ContextMenuButtonType.copy,
               onPressed: () {
                 ContextMenuController.removeAny();
-                copyToClipboard(widget.label +
-                    addAmountToString("", totalCount, extraText: widget.extraText) +
+                copyToClipboard(label +
+                    addAmountToString("", totalCount, extraText: extraText) +
                     " • " +
                     convertToMoney(
                       Provider.of<AllWallets>(context, listen: false),
@@ -2901,11 +2895,11 @@ class _AmountSpentEntryRowState extends State<AmountSpentEntryRow> {
           ],
           tappableBuilder: (onLongPress) => AnimatedExpanded(
             axis: Axis.vertical,
-            expand: widget.forceShow ||
-                ((totalCount > 0 || totalSpent != 0) && widget.hide == false),
+            expand: forceShow ||
+                ((totalCount > 0 || totalSpent != 0) && hide == false),
             child: OpenContainerNavigation(
               borderRadius: 0,
-              openPage: widget.openPage,
+              openPage: openPage,
               closedColor: getColor(context, "lightDarkAccentHeavyLight"),
               button: (openContainer) {
                 return Tappable(
@@ -2949,7 +2943,7 @@ class _AmountSpentEntryRowState extends State<AmountSpentEntryRow> {
                                         textAlign: TextAlign.start,
                                         richTextSpan: [
                                           TextSpan(
-                                            text: widget.label,
+                                            text: label,
                                             style: TextStyle(
                                               fontSize: 18,
                                               color: getColor(context, "black"),
@@ -2962,7 +2956,7 @@ class _AmountSpentEntryRowState extends State<AmountSpentEntryRow> {
                                           TextSpan(
                                             text: addAmountToString(
                                                 " ", totalCount,
-                                                extraText: widget.extraText),
+                                                extraText: extraText),
                                             style: TextStyle(
                                               fontSize: 15,
                                               color: getColor(
@@ -3007,7 +3001,7 @@ class _AmountSpentEntryRowState extends State<AmountSpentEntryRow> {
                                 ),
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
-                                textColor: widget.textColor,
+                                textColor: textColor,
                               );
                             },
                           ),

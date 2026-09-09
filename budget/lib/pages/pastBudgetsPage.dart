@@ -1367,7 +1367,7 @@ class PastBudgetContainer extends StatelessWidget {
   }
 }
 
-class CategoryAverageSpent extends StatefulWidget {
+class CategoryAverageSpent extends StatelessWidget {
   const CategoryAverageSpent({
     required this.category,
     required this.amountPeriods,
@@ -1385,23 +1385,18 @@ class CategoryAverageSpent extends StatefulWidget {
   final bool forceReveal;
 
   @override
-  State<CategoryAverageSpent> createState() => _CategoryAverageSpentState();
-}
-
-class _CategoryAverageSpentState extends State<CategoryAverageSpent> {
-  @override
   Widget build(BuildContext context) {
     return Tappable(
       onLongPress: () {
         pushRoute(
           context,
           AddCategoryPage(
-            category: widget.category,
+            category: category,
             routesToPopAfterDelete: RoutesToPopAfterDelete.One,
           ),
         );
       },
-      onTap: widget.onTap,
+      onTap: onTap,
       color: Colors.transparent,
       child: Padding(
         padding: EdgeInsetsDirectional.symmetric(
@@ -1415,7 +1410,7 @@ class _CategoryAverageSpentState extends State<CategoryAverageSpent> {
           child: Row(
             children: [
               CategoryIcon(
-                category: widget.category,
+                category: category,
                 size: 30,
                 margin: EdgeInsetsDirectional.zero,
                 borderRadius: 1000,
@@ -1428,7 +1423,7 @@ class _CategoryAverageSpentState extends State<CategoryAverageSpent> {
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       TextFont(
-                        text: widget.category.name,
+                        text: category.name,
                         fontSize: 17,
                         maxLines: 1,
                       ),
@@ -1438,33 +1433,33 @@ class _CategoryAverageSpentState extends State<CategoryAverageSpent> {
                         children: [
                           Expanded(
                             child: CountNumber(
-                              count: widget.amountPeriods == 0
+                              count: amountPeriods == 0
                                   ? 0
-                                  : (widget.amountSpent / widget.amountPeriods)
+                                  : (amountSpent / amountPeriods)
                                         .abs(),
                               duration: Duration(milliseconds: 400),
-                              initialCount: widget.amountPeriods == 0
+                              initialCount: amountPeriods == 0
                                   ? 0
-                                  : (widget.amountSpent / widget.amountPeriods)
+                                  : (amountSpent / amountPeriods)
                                         .abs(),
                               textBuilder: (number) {
                                 return AnimatedSwitcher(
                                   duration: Duration(milliseconds: 300),
                                   child: TextFont(
-                                    key: ValueKey(widget.forceReveal),
+                                    key: ValueKey(forceReveal),
                                     text:
                                         convertToMoney(
                                           Provider.of<AllWallets>(context),
                                           number,
-                                          finalNumber: widget.amountPeriods == 0
+                                          finalNumber: amountPeriods == 0
                                               ? 0
-                                              : (widget.amountSpent /
-                                                        widget.amountPeriods)
+                                              : (amountSpent /
+                                                        amountPeriods)
                                                     .abs(),
-                                          forceReveal: widget.forceReveal,
+                                          forceReveal: forceReveal,
                                         ) +
                                         " " +
-                                        (widget.isSavingsBudget
+                                        (isSavingsBudget
                                             ? "average-saved".tr().toLowerCase()
                                             : "average-spent"
                                                   .tr()
@@ -1495,20 +1490,20 @@ class _CategoryAverageSpentState extends State<CategoryAverageSpent> {
               ),
               SizedBox(width: 10),
               CountNumber(
-                count: widget.amountSpent.abs(),
+                count: amountSpent.abs(),
                 duration: Duration(milliseconds: 400),
-                initialCount: widget.amountSpent.abs(),
+                initialCount: amountSpent.abs(),
                 textBuilder: (number) {
                   return AnimatedSwitcher(
                     duration: Duration(milliseconds: 300),
                     child: TextFont(
-                      key: ValueKey(widget.forceReveal),
+                      key: ValueKey(forceReveal),
                       fontWeight: FontWeight.bold,
                       text: convertToMoney(
                         Provider.of<AllWallets>(context),
                         number,
-                        finalNumber: widget.amountSpent.abs(),
-                        forceReveal: widget.forceReveal,
+                        finalNumber: amountSpent.abs(),
+                        forceReveal: forceReveal,
                       ),
                       fontSize: 20,
                       textColor: getColor(context, "black"),

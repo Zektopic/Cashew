@@ -167,4 +167,6 @@
 
 - 2026-08-24: Security Patch - Fortified SSRF and path traversal protections in Google Sheets and Drive integrations. Replaced blacklist regex checks with strict whitelist regex `RegExp(r'^[a-zA-Z0-9_-]+$')` to enforce explicit file identifier validation in `convertGoogleSheetsUrlToCsvUrl` and `getFileIdFromUrl`.
 
-**Next Planned Step:** Continue reviewing other UI components that utilize `HoldToRevealListener` to identify and remove further redundant `StatefulWidget` boilerplate where possible.
+- 2026-08-25: Iterative Enhancement - Refactored `CategoryAverageSpent` and `AmountSpentEntryRow` from `StatefulWidget` to `StatelessWidget`. Following the abstraction of hold-to-reveal states into `HoldToRevealListener`, these widgets no longer manage local state, reducing widget tree overhead and improving performance.
+
+**Next Planned Step:** Review custom text formatting logic across exported data tables to ensure no XSS or injection vectors remain un-sanitized.
