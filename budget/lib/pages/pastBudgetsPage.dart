@@ -995,7 +995,7 @@ class _PastBudgetContainerListState extends State<PastBudgetContainerList> {
   }
 }
 
-class PastBudgetContainer extends StatefulWidget {
+class PastBudgetContainer extends StatelessWidget {
   PastBudgetContainer({
     Key? key,
     required this.budget,
@@ -1014,16 +1014,7 @@ class PastBudgetContainer extends StatefulWidget {
   final int dateForRangeIndex;
 
   @override
-  State<PastBudgetContainer> createState() => _PastBudgetContainerState();
-}
-
-class _PastBudgetContainerState extends State<PastBudgetContainer> {
-  @override
   Widget build(BuildContext context) {
-    Budget budget = this.widget.budget;
-    DateTime? dateForRange = this.widget.dateForRange;
-    Color backgroundColor = this.widget.backgroundColor;
-    int dateForRangeIndex = this.widget.dateForRangeIndex;
     Color progressForegroundColor = dynamicPastel(
       context,
       Theme.of(context).colorScheme.primary,
@@ -1040,7 +1031,7 @@ class _PastBudgetContainerState extends State<PastBudgetContainer> {
     );
     DateTime dateForRangeLocal = dateForRange == null
         ? DateTime.now()
-        : dateForRange;
+        : dateForRange!;
     DateTimeRange budgetRange = getBudgetDate(budget, dateForRangeLocal);
     Widget buildContainerContents(bool isRevealed) =>
         StreamBuilder<List<CategoryWithTotal>>(
