@@ -31,6 +31,11 @@ import 'package:budget/widgets/framework/popupFramework.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 
+const int maxCsvImportFileSizeBytes = 20 * 1024 * 1024;
+const int maxCsvImportStringLength = 25 * 1024 * 1024;
+const int maxCsvImportRows = 100000;
+const int maxCsvImportColumns = 200;
+
 class ImportCSV extends StatefulWidget {
   const ImportCSV({Key? key}) : super(key: key);
 
@@ -39,13 +44,11 @@ class ImportCSV extends StatefulWidget {
 }
 
 class _ImportCSVState extends State<ImportCSV> {
-  _getHeaderIndex(List<String> headers, String header) {
-    int index = 0;
-    for (String headerEntry in headers) {
-      if (header == headerEntry) {
-        return index;
+  int _getHeaderIndex(List<String> headers, String header) {
+    for (int i = 0; i < headers.length; i++) {
+      if (headers[i] == header) {
+        return i;
       }
-      index++;
     }
     return -1;
   }
@@ -59,6 +62,10 @@ class _ImportCSVState extends State<ImportCSV> {
         );
 
         if (result != null) {
+          if (result.size > maxCsvImportFileSizeBytes) {
+            throw "File too large (exceeds 20MB limit)";
+          }
+
           String csvString;
           Uint8List fileBytes = await result.readAsBytes();
           if (kIsWeb) {
@@ -110,6 +117,10 @@ class _ImportCSVState extends State<ImportCSV> {
     bool importFromSheets = false,
   }) async {
     try {
+      if (csvString.length > maxCsvImportStringLength) {
+        throw "Import file is too large. Maximum supported size is approximately 20MB.";
+      }
+
       // Normalize line endings before parsing. The converter is given a fixed
       // eol of '\n', but ListToCsvConverter (used by our own export and by the
       // downloadable import template) writes '\r\n'. Without this, re-importing
@@ -121,10 +132,19 @@ class _ImportCSVState extends State<ImportCSV> {
         eol: '\n',
         shouldParseNumbers: false,
       );
+
+      if (fileContents.length > maxCsvImportRows) {
+        throw "Row limit exceeded. Maximum supported rows: 100,000.";
+      }
+
       int maxColumns = fileContents.fold(
         0,
         (prev, element) => element.length > prev ? element.length : prev,
       );
+
+      if (maxColumns > maxCsvImportColumns) {
+        throw "Column limit exceeded. Maximum supported columns: 200.";
+      }
 
       // Add missing values to rows with fewer columns
       fileContents = fileContents

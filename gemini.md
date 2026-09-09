@@ -163,4 +163,6 @@
 - 2026-08-21: Iterative Enhancement - Refactored `TransactionEntryAmount` and `AmountAccount` (in `walletEntry.dart`) from `StatefulWidget` to `StatelessWidget`. Since the hold-to-reveal gesture and timer states were fully abstracted into the `HoldToRevealListener` wrapper, the parent widgets no longer needed to maintain their own redundant state classes, reducing widget tree overhead.
 - 2026-08-22: Iterative Enhancement - Refactored `PastBudgetContainer` from `StatefulWidget` to `StatelessWidget`. Following the previous extraction of hold-to-reveal gesture and timer states into the `HoldToRevealListener` wrapper, this widget no longer needed to maintain its own redundant state class, simplifying the widget tree and reducing overhead.
 
-**Next Planned Step:** Review and harden file parsing and validation logic in CSV/data import features to ensure strict bounds checking.
+- 2026-08-24: Iterative Enhancement - Hardened file parsing and validation logic in CSV and DB import features. Implemented strict file size limits (20MB for CSV, 100MB for SQLite DB) on the file picker, and strict string length (25MB), row (100,000), and column (200) boundaries in `_assignColumns` within `budget/lib/widgets/importCSV.dart`. This prevents unbounded memory allocation (OOM) and DoS attacks during parsing and mapping.
+
+**Next Planned Step:** Harden URL identifier validation in Google Sheets and Drive integrations with explicit regex whitelisting.

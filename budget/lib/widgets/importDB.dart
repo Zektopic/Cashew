@@ -13,6 +13,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 
+const int maxDbImportFileSizeBytes = 100 * 1024 * 1024; // 100MB
+
 Future<String?> importDBFileFromDevice(BuildContext context) async {
   // Avoid using a file filter: PlatformException(FilePicker, Unsupported filter....
   PlatformFile? result = await FilePicker.pickFile();
@@ -20,6 +22,17 @@ Future<String?> importDBFileFromDevice(BuildContext context) async {
     openSnackbar(SnackbarMessage(
       title: "error-importing".tr(),
       description: "no-file-selected".tr(),
+      icon: appStateSettings["outlinedIcons"]
+          ? Icons.warning_outlined
+          : Icons.warning_rounded,
+    ));
+    return null;
+  }
+
+  if (result.size > maxDbImportFileSizeBytes) {
+    openSnackbar(SnackbarMessage(
+      title: "error-importing".tr(),
+      description: "File too large (exceeds 100MB limit)",
       icon: appStateSettings["outlinedIcons"]
           ? Icons.warning_outlined
           : Icons.warning_rounded,
