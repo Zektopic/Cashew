@@ -650,7 +650,7 @@ class _ImportCSVState extends State<ImportCSV> {
     int index = uri.pathSegments.indexOf('d');
     if (index != -1 && index + 1 < uri.pathSegments.length) {
       String spreadsheetId = uri.pathSegments[index + 1];
-      if (RegExp(r'[/?#@\\]|\.\.').hasMatch(spreadsheetId)) {
+      if (!RegExp(r'^[a-zA-Z0-9_-]+$').hasMatch(spreadsheetId)) {
         throw ("Invalid spreadsheet ID");
       }
       String csvUrl =

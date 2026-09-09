@@ -4234,7 +4234,7 @@ String? getFileIdFromUrl(String url) {
     int index = uri.pathSegments.indexOf('d');
     if (index != -1 && index + 1 < uri.pathSegments.length) {
       String fileId = uri.pathSegments[index + 1];
-      if (RegExp(r'[/?#@\\]|\.\.').hasMatch(fileId)) {
+      if (!RegExp(r'^[a-zA-Z0-9_-]+$').hasMatch(fileId)) {
         return null;
       }
       return fileId;

@@ -165,4 +165,6 @@
 
 - 2026-08-24: Iterative Enhancement - Hardened file parsing and validation logic in CSV and DB import features. Implemented strict file size limits (20MB for CSV, 100MB for SQLite DB) on the file picker, and strict string length (25MB), row (100,000), and column (200) boundaries in `_assignColumns` within `budget/lib/widgets/importCSV.dart`. This prevents unbounded memory allocation (OOM) and DoS attacks during parsing and mapping.
 
-**Next Planned Step:** Harden URL identifier validation in Google Sheets and Drive integrations with explicit regex whitelisting.
+- 2026-08-24: Security Patch - Fortified SSRF and path traversal protections in Google Sheets and Drive integrations. Replaced blacklist regex checks with strict whitelist regex `RegExp(r'^[a-zA-Z0-9_-]+$')` to enforce explicit file identifier validation in `convertGoogleSheetsUrlToCsvUrl` and `getFileIdFromUrl`.
+
+**Next Planned Step:** Continue reviewing other UI components that utilize `HoldToRevealListener` to identify and remove further redundant `StatefulWidget` boilerplate where possible.
