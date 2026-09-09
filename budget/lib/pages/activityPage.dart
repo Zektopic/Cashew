@@ -3,7 +3,6 @@ import 'package:budget/colors.dart';
 import 'package:budget/database/tables.dart' hide AppSettings;
 import 'package:budget/pages/addTransactionPage.dart';
 import 'package:budget/struct/databaseGlobal.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:budget/struct/settings.dart';
 import 'package:budget/widgets/dateDivider.dart';
 import 'package:budget/widgets/fab.dart';
@@ -52,28 +51,13 @@ Future<void> saveRecentlyDeletedTransactions() async {
       .map((entry) => {'key': entry.key, 'value': entry.value.toJson()})
       .toList();
   String jsonString = jsonEncode(encodedData);
-  const secureStorage = FlutterSecureStorage();
-  await secureStorage.write(
-      key: "recentlyDeletedTransactions", value: jsonString);
+  await sharedPreferences.setString("recentlyDeletedTransactions", jsonString);
 }
 
 Future<void> loadRecentlyDeletedTransactions() async {
-  const secureStorage = FlutterSecureStorage();
-  String? jsonString = await secureStorage.read(
-    key: "recentlyDeletedTransactions",
+  String? jsonString = sharedPreferences.getString(
+    "recentlyDeletedTransactions",
   );
-
-  // Migration path: Check unencrypted storage if secure storage is empty
-  if (jsonString == null) {
-    String? legacyJsonString = sharedPreferences.getString("recentlyDeletedTransactions");
-    if (legacyJsonString != null) {
-      jsonString = legacyJsonString;
-      // Migrate to secure storage
-      await secureStorage.write(key: "recentlyDeletedTransactions", value: legacyJsonString);
-      // Securely clean up the unencrypted legacy data
-      await sharedPreferences.remove("recentlyDeletedTransactions");
-    }
-  }
 
   if (jsonString != null) {
     try {
@@ -257,9 +241,9 @@ class ActivityPageState extends State<ActivityPage> {
                                     child: Padding(
                                       padding:
                                           const EdgeInsetsDirectional.symmetric(
-                                        vertical: 8.0,
-                                        horizontal: 10,
-                                      ),
+                                            vertical: 8.0,
+                                            horizontal: 10,
+                                          ),
                                       child: TextFont(
                                         text: "transaction-no-longer-available"
                                             .tr(),
@@ -329,7 +313,8 @@ class ActivityPageState extends State<ActivityPage> {
                               DateDivider(
                                 date: transaction?.dateCreated ?? item.dateTime,
                                 maxLines: 2,
-                                afterDate: " • " +
+                                afterDate:
+                                    " • " +
                                     (wasADeletedTransaction
                                             ? "deleted"
                                             : "modified")

@@ -85,8 +85,7 @@
 
 - 2026-07-27: Iterative Enhancement - Secured raw database queries in `tables.dart`. Replaced unsafe string interpolation (e.g., `$threeMonthsAgo` in `customSelect`) with parameterized queries using `variables: [Variable(threeMonthsAgo)]`. This enforces proper separation of code and data, hardening the ORM layer against potential SQL injection vulnerabilities or syntax errors caused by unescaped inputs.
 - 2026-07-28: Iterative Enhancement - Secured URL parsing in `appLinks.dart`. Updated `getApiEndpoint` to inspect `uri.host` before `uri.pathSegments` to properly handle app scheme deep links where the endpoint is parsed as the host rather than the path. Removed redundant and unsafe `Uri.decodeComponent` from `parseAppLink` which caused crash loops (DoS) if URL-encoded percent signs (like `%`) were present in parameters since `uri.queryParameters` are automatically decoded.
-- 2026-08-25: Iterative Enhancement - Secured sensitive data storage for recently deleted transactions by migrating from unencrypted `SharedPreferences` to `flutter_secure_storage`. Implemented a seamless migration path that transfers legacy plaintext data into the secure vault and definitively removes it from device preferences, resolving potential PII exposure in the cache.
-**Next Planned Step:** Review database ORM input paths to ensure no raw statements bypass input sanitization when data comes from UI forms.
+**Next Planned Step:** Review and test file system or secure storage boundaries for proper encapsulation when storing user preferences or cache.
 
 ## 🚨 Critical Security Learnings
 - **2026-07-26 - Sensitive Data Exposure in Logs:**
@@ -145,11 +144,6 @@
   - **Vulnerability/Gap:** Form inputs (`TextInput`) lacked default max length limitations. Users could paste massive, unbounded payloads into input fields, causing the application to consume excessive memory, leading to frame drops, layout exceptions, and potential crashes (DoS).
   - **Learning:** Every entry point for user input must have an upper bound limit to enforce resource constraints and prevent abuse, regardless of whether a business rule dictates a max length.
   - **Prevention:** Enforce fallback upper limits (e.g., `maxLength ?? 5000`) on all input fields globally at the core widget level.
-
-- **2026-08-25 - Insecure Storage of Sensitive Cache Data:**
-  - **Vulnerability/Gap:** Recently deleted transactions (which contain sensitive PII and financial data) were being stored in `SharedPreferences` in plain text. Existing logic would persist this data indefinitely or until rotated out, exposing it to backup extractors, rooted devices, or logging systems.
-  - **Learning:** Just removing `print` statements is insufficient if the data rests unencrypted. Any user-generated sensitive data, even when cached temporarily for "undo" functionality, must be protected at rest. Furthermore, simply switching to secure storage without cleaning up the old location leaves existing users permanently vulnerable.
-  - **Prevention:** Always use secure storage vaults (like `flutter_secure_storage` or EncryptedSharedPreferences/Keychain) for PII. Ensure migrations explicitly delete the legacy, unencrypted copies of the data upon successful transfer.
 
 - **2026-07-28 - URL Parameter Double-Decoding DoS Vulnerability:**
   - **Vulnerability/Gap:** Deep link query parameters were being decoded manually (`Uri.decodeComponent`) despite Dart's `Uri.queryParameters` property already returning auto-decoded values. This caused `ArgumentError` crashes when processing values containing partial encodings or stray `%` symbols, opening an attack vector for continuous crash-loop Denial of Service.
