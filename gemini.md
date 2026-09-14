@@ -90,6 +90,11 @@
 **Next Planned Step:** Review and test file system or secure storage boundaries for proper encapsulation when storing user preferences or cache.
 
 ## 🚨 Critical Security Learnings
+- **2026-08-26 - Sensitive Data Exposure in Local Preferences:**
+  - **Vulnerability/Gap:** The `cloudBackupPassword`, which is used to encrypt user database backups before uploading them to Google Drive, was stored in plaintext within the global `appStateSettings` (backed by `SharedPreferences`).
+  - **Learning:** While the backup is secure at rest in the cloud, storing its encryption key in plaintext locally defeats the purpose if the device itself is compromised. Anyone who can read the appData folder or preferences file can access both the key and the encrypted backups, rendering the encryption ineffective against local threats.
+  - **Prevention:** Always use OS-backed secure storage (e.g., Keychain on iOS, Keystore on Android via `flutter_secure_storage`) when persisting sensitive cryptographic material or passwords across app sessions.
+
 - **2026-08-24 - SSRF and Path Traversal via URL Query Parameter Injection:**
   - **Vulnerability/Gap:** The `getFileIdFromUrl` and `convertGoogleSheetsUrlToCsvUrl` functions relied on substring checks (`url.startsWith()`) against the raw URL string to validate the path, and regex to extract identifiers. This allowed an attacker to bypass prefix checks by embedding the required prefix into query parameters (e.g., `https://example.com/?q=https://drive.google.com/file/d/...`) while tricking the regex into extracting an invalid ID.
   - **Learning:** When validating parsed `Uri` objects for SSRF or path traversal, avoid applying substring checks or regex extractions to the original raw URL string, as attackers can bypass this via query parameter injection.
@@ -168,5 +173,7 @@
 - 2026-08-24: Security Patch - Fortified SSRF and path traversal protections in Google Sheets and Drive integrations. Replaced blacklist regex checks with strict whitelist regex `RegExp(r'^[a-zA-Z0-9_-]+$')` to enforce explicit file identifier validation in `convertGoogleSheetsUrlToCsvUrl` and `getFileIdFromUrl`.
 
 - 2026-08-25: Iterative Enhancement - Refactored `CategoryAverageSpent` and `AmountSpentEntryRow` from `StatefulWidget` to `StatelessWidget`. Following the abstraction of hold-to-reveal states into `HoldToRevealListener`, these widgets no longer manage local state, reducing widget tree overhead and improving performance.
+
+- 2026-08-26: Security Patch - Mitigated local sensitive data exposure. Migrated the `cloudBackupPassword` from being stored in unencrypted `SharedPreferences` to `flutter_secure_storage`. This addresses a critical vulnerability where an attacker with physical access to an unlocked device (or another malicious app) could read the local preferences file to extract the cloud encryption passphrase, compromising the security of the remote encrypted backups on Google Drive.
 
 **Next Planned Step:** Review custom text formatting logic across exported data tables to ensure no XSS or injection vectors remain un-sanitized.

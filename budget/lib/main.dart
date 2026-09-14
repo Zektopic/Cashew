@@ -65,6 +65,7 @@ void main() async {
     }
     await EasyLocalization.ensureInitialized();
     sharedPreferences = await SharedPreferences.getInstance();
+    secureStorage = const FlutterSecureStorage();
     database = await constructDb('db');
     notificationPayload = await initializeNotifications();
     entireAppLoaded = false;

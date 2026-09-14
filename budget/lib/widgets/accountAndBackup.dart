@@ -138,10 +138,18 @@ Future<Map<String, String>> googleAuthHeaders(
 /// read the Drive appDataFolder. It does not protect the device, because the
 /// passphrase is stored in app settings so that automatic backups can run
 /// without prompting. Someone with the unlocked device can read both.
-String? getCloudBackupPassword() {
+Future<String?> getCloudBackupPassword() async {
   if (appStateSettings["encryptCloudBackups"] != true) return null;
-  final String password = appStateSettings["cloudBackupPassword"] ?? "";
-  return password.isEmpty ? null : password;
+  String? password = await secureStorage.read(key: "cloudBackupPassword");
+  if (password == null) {
+    password = appStateSettings["cloudBackupPassword"] ?? "";
+    if (password != null && password.isNotEmpty) {
+      await secureStorage.write(key: "cloudBackupPassword", value: password);
+      await updateSettings("cloudBackupPassword", "",
+          pagesNeedingRefresh: [], updateGlobalState: false);
+    }
+  }
+  return (password != null && password.isEmpty) ? null : password;
 }
 
 /// Decrypts [data] if it is an encrypted backup, otherwise returns it as-is.
@@ -151,7 +159,7 @@ String? getCloudBackupPassword() {
 /// Drive indefinitely.
 Future<Uint8List> decryptCloudBackupIfNeeded(List<int> data) async {
   if (!isEncryptedBackupData(data)) return Uint8List.fromList(data);
-  final String? password = getCloudBackupPassword();
+  final String? password = await getCloudBackupPassword();
   if (password == null) {
     throw ("This backup is encrypted. Turn on encrypted cloud backups and "
         "enter the same passphrase used to create it.");
@@ -498,11 +506,11 @@ Future<void> createBackup(
     // to sync payloads too (clientIDForSync != null) -- encrypting only the
     // manual backups would be pointless, since the sync file in the same
     // appDataFolder is an equally complete copy of the database.
-    final String? cloudPassword = getCloudBackupPassword();
+    final String? cloudPassword = await getCloudBackupPassword();
     late drive.Media media;
     if (cloudPassword != null) {
-      final Uint8List encrypted = await encryptBackupData(
-          currentDBFileInfo.dbFileBytes, cloudPassword);
+      final Uint8List encrypted =
+          await encryptBackupData(currentDBFileInfo.dbFileBytes, cloudPassword);
       media = new drive.Media(Stream.value(encrypted), encrypted.length);
     } else {
       media = new drive.Media(
@@ -653,8 +661,7 @@ Future<void> loadBackup(
         dataStore.insertAll(dataStore.length, data);
       },
       onDone: () async {
-        final Uint8List restored =
-            await decryptCloudBackupIfNeeded(dataStore);
+        final Uint8List restored = await decryptCloudBackupIfNeeded(dataStore);
         await overwriteDefaultDB(restored);
 
         // if this is added, it doesn't restore the database properly on web
@@ -1018,8 +1025,8 @@ class _BackupManagementState extends State<BackupManagement> {
                       setState(() {});
                       return;
                     }
-                    await updateSettings("cloudBackupPassword", password,
-                        pagesNeedingRefresh: [], updateGlobalState: false);
+                    await secureStorage.write(
+                        key: "cloudBackupPassword", value: password);
                     await updateSettings("encryptCloudBackups", true,
                         pagesNeedingRefresh: [], updateGlobalState: false);
                     setState(() {});
@@ -1349,12 +1356,12 @@ class _BackupManagementState extends State<BackupManagement> {
                                                             ? Theme.of(context)
                                                                 .colorScheme
                                                                 .onSecondaryContainer
-                                                                .withValues(alpha: 
-                                                                    0.08)
+                                                                .withValues(
+                                                                    alpha: 0.08)
                                                             : getColor(context,
                                                                     "lightDarkAccentHeavy")
-                                                                .withValues(alpha: 
-                                                                    0.7),
+                                                                .withValues(
+                                                                    alpha: 0.7),
                                                         onTap: () {
                                                           saveDriveFileToDevice(
                                                             boxContext:
@@ -1550,7 +1557,10 @@ class LoadingShimmerDriveFiles extends StatelessWidget {
           ? Theme.of(context).colorScheme.secondaryContainer
           : getColor(context, "lightDarkAccentHeavyLight"),
       highlightColor: appStateSettings["materialYou"]
-          ? Theme.of(context).colorScheme.secondaryContainer.withValues(alpha: 0.2)
+          ? Theme.of(context)
+              .colorScheme
+              .secondaryContainer
+              .withValues(alpha: 0.2)
           : getColor(context, "lightDarkAccentHeavy").withAlpha(20),
       child: Padding(
         padding: const EdgeInsetsDirectional.only(bottom: 8.0),
@@ -1562,7 +1572,8 @@ class LoadingShimmerDriveFiles extends StatelessWidget {
                   .colorScheme
                   .secondaryContainer
                   .withValues(alpha: 0.5)
-              : getColor(context, "lightDarkAccentHeavy").withValues(alpha: 0.5),
+              : getColor(context, "lightDarkAccentHeavy")
+                  .withValues(alpha: 0.5),
           child: Container(
               padding:
                   EdgeInsetsDirectional.symmetric(horizontal: 20, vertical: 15),
