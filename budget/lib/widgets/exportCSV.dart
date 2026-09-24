@@ -40,10 +40,11 @@ Future saveCSV(
 /// exported file is opened. Prefixing with a single quote forces the value to
 /// be read as text.
 String sanitizeCsvField(String entry) {
-  if (entry.startsWith('=') ||
-      entry.startsWith('+') ||
-      entry.startsWith('-') ||
-      entry.startsWith('@') ||
+  final String trimmed = entry.trimLeft();
+  if (trimmed.startsWith('=') ||
+      trimmed.startsWith('+') ||
+      trimmed.startsWith('-') ||
+      trimmed.startsWith('@') ||
       entry.startsWith('\t') ||
       entry.startsWith('\r') ||
       entry.startsWith('\n')) {

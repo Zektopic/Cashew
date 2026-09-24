@@ -168,5 +168,6 @@
 - 2026-08-24: Security Patch - Fortified SSRF and path traversal protections in Google Sheets and Drive integrations. Replaced blacklist regex checks with strict whitelist regex `RegExp(r'^[a-zA-Z0-9_-]+$')` to enforce explicit file identifier validation in `convertGoogleSheetsUrlToCsvUrl` and `getFileIdFromUrl`.
 
 - 2026-08-25: Iterative Enhancement - Refactored `CategoryAverageSpent` and `AmountSpentEntryRow` from `StatefulWidget` to `StatelessWidget`. Following the abstraction of hold-to-reveal states into `HoldToRevealListener`, these widgets no longer manage local state, reducing widget tree overhead and improving performance.
+- 2026-08-26: Security Patch - Fixed CSV Injection (Formula Injection) bypass in `exportCSV.dart`. Implemented `trimLeft()` on exported fields before checking for dangerous characters in `sanitizeCsvField`. This ensures that malicious payloads starting with whitespace cannot bypass the single-quote prefix sanitization.
 
-**Next Planned Step:** Review custom text formatting logic across exported data tables to ensure no XSS or injection vectors remain un-sanitized.
+**Next Planned Step:** Review custom text formatting logic across exported PDF reports or other formats to ensure no injection vectors remain.
