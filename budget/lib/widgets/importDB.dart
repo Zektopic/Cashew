@@ -29,7 +29,7 @@ Future<String?> importDBFileFromDevice(BuildContext context) async {
     return null;
   }
 
-  if (result.size > maxDbImportFileSizeBytes) {
+  if (await result.length() > maxDbImportFileSizeBytes) {
     openSnackbar(SnackbarMessage(
       title: "error-importing".tr(),
       description: "File too large (exceeds 100MB limit)",
