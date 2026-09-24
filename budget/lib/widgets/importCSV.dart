@@ -41,6 +41,46 @@ class ImportCSV extends StatefulWidget {
 
   @override
   State<ImportCSV> createState() => _ImportCSVState();
+
+  static String? convertGoogleSheetsUrlToCsvUrl(String googleSheetsUrl) {
+    Uri uri = Uri.parse(googleSheetsUrl);
+    if (uri.scheme != 'https' || uri.host != 'docs.google.com') {
+      throw ("Invalid URL format");
+    }
+    if (!uri.path.startsWith("/spreadsheets/d/")) {
+      throw ("Invalid URL format");
+    }
+    int index = uri.pathSegments.indexOf('d');
+    if (index != -1 && index + 1 < uri.pathSegments.length) {
+      String spreadsheetId = uri.pathSegments[index + 1];
+      if (!RegExp(r'^[a-zA-Z0-9_-]+$').hasMatch(spreadsheetId)) {
+        throw ("Invalid spreadsheet ID");
+      }
+      String csvUrl =
+          "https://docs.google.com/spreadsheets/d/$spreadsheetId/gviz/tq?tqx=out:csv";
+      return csvUrl;
+    }
+    throw ("Error parsing URL");
+  }
+
+  static Future<String?> fetchDataFromCsvUrl(String? csvUrl) async {
+    if (csvUrl == null) throw ("URL Parsing error.");
+
+    final Uri uri = Uri.parse(csvUrl);
+
+    // SSRF Protection: Strictly validate scheme and host
+    if (uri.scheme != 'https' || uri.host != 'docs.google.com') {
+      throw ("Security Error: Invalid URL domain or scheme.");
+    }
+
+    final response = await http.get(uri);
+    if (response.statusCode == 200) {
+      String data = response.body;
+      return data;
+    } else {
+      throw ("HTTP Request failed with status code: ${response.statusCode}");
+    }
+  }
 }
 
 class _ImportCSVState extends State<ImportCSV> {
@@ -62,7 +102,7 @@ class _ImportCSVState extends State<ImportCSV> {
         );
 
         if (result != null) {
-          if (result.size > maxCsvImportFileSizeBytes) {
+          if (await result.length() > maxCsvImportFileSizeBytes) {
             throw "File too large (exceeds 20MB limit)";
           }
 
@@ -602,8 +642,8 @@ class _ImportCSVState extends State<ImportCSV> {
             String? csvString;
             await openLoadingPopupTryCatch(
               () async {
-                String? csvURL = convertGoogleSheetsUrlToCsvUrl(url);
-                csvString = await fetchDataFromCsvUrl(csvURL);
+                String? csvURL = ImportCSV.convertGoogleSheetsUrlToCsvUrl(url);
+                csvString = await ImportCSV.fetchDataFromCsvUrl(csvURL);
               },
               onError: (e) {
                 openPopup(
@@ -639,45 +679,6 @@ class _ImportCSVState extends State<ImportCSV> {
     );
   }
 
-  static String? convertGoogleSheetsUrlToCsvUrl(String googleSheetsUrl) {
-    Uri uri = Uri.parse(googleSheetsUrl);
-    if (uri.scheme != 'https' || uri.host != 'docs.google.com') {
-      throw ("Invalid URL format");
-    }
-    if (!uri.path.startsWith("/spreadsheets/d/")) {
-      throw ("Invalid URL format");
-    }
-    int index = uri.pathSegments.indexOf('d');
-    if (index != -1 && index + 1 < uri.pathSegments.length) {
-      String spreadsheetId = uri.pathSegments[index + 1];
-      if (!RegExp(r'^[a-zA-Z0-9_-]+$').hasMatch(spreadsheetId)) {
-        throw ("Invalid spreadsheet ID");
-      }
-      String csvUrl =
-          "https://docs.google.com/spreadsheets/d/$spreadsheetId/gviz/tq?tqx=out:csv";
-      return csvUrl;
-    }
-    throw ("Error parsing URL");
-  }
-
-  static Future<String?> fetchDataFromCsvUrl(String? csvUrl) async {
-    if (csvUrl == null) throw ("URL Parsing error.");
-
-    final Uri uri = Uri.parse(csvUrl);
-
-    // SSRF Protection: Strictly validate scheme and host
-    if (uri.scheme != 'https' || uri.host != 'docs.google.com') {
-      throw ("Security Error: Invalid URL domain or scheme.");
-    }
-
-    final response = await http.get(uri);
-    if (response.statusCode == 200) {
-      String data = response.body;
-      return data;
-    } else {
-      throw ("HTTP Request failed with status code: ${response.statusCode}");
-    }
-  }
 
   @override
   Widget build(BuildContext context) {

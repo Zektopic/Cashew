@@ -50,7 +50,7 @@ void main() {
         null,
       );
       expect(
-        getFileIdFromUrl('https://drive.google.com/file/d/invalid#id'),
+        getFileIdFromUrl('https://drive.google.com/file/d/invalid.id'),
         null,
       );
     });
