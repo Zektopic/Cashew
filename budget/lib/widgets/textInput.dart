@@ -160,6 +160,13 @@ class TextInput extends StatelessWidget {
           ),
           child: Center(
             child: TextFormField(
+              buildCounter:
+                  (
+                    context, {
+                    required currentLength,
+                    required isFocused,
+                    maxLength,
+                  }) => null,
               contextMenuBuilder: contextMenuBuilder,
               // magnifierConfiguration: TextMagnifierConfiguration.disabled,
               onTapOutside: handleOnTapOutside == false

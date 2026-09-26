@@ -169,5 +169,6 @@
 
 - 2026-08-25: Iterative Enhancement - Refactored `CategoryAverageSpent` and `AmountSpentEntryRow` from `StatefulWidget` to `StatelessWidget`. Following the abstraction of hold-to-reveal states into `HoldToRevealListener`, these widgets no longer manage local state, reducing widget tree overhead and improving performance.
 - 2026-08-26: Security Patch - Fixed CSV Injection (Formula Injection) bypass in `exportCSV.dart`. Implemented `trimLeft()` on exported fields before checking for dangerous characters in `sanitizeCsvField`. This ensures that malicious payloads starting with whitespace cannot bypass the single-quote prefix sanitization.
+- 2026-08-27: Iterative Enhancement - Added `buildCounter` callback returning `null` to `TextFormField` within the `TextInput` component to fully suppress the character counter UI that appears when `maxLength` is specified. This fixes a visual regression introduced by adding global DoS protection via `maxLength`.
 
-**Next Planned Step:** Review custom text formatting logic across exported PDF reports or other formats to ensure no injection vectors remain.
+**Next Planned Step:** Review text formatting configurations for other inputs across the app to ensure visual components properly respect global `maxLength` fallbacks without unwanted layout shifts.
