@@ -5081,7 +5081,9 @@ class FinanceDatabase extends _$FinanceDatabase {
                     : Constant(true)) &
                 (allCategories != false
                     ? Constant(true)
-                    : c.categoryPk.isIn(categoryFks ?? []))),
+                    : ((categoryFks ?? []).isEmpty
+                        ? Constant(false)
+                        : c.categoryPk.isIn(categoryFks ?? [])))),
           )
           ..orderBy([(c) => OrderingTerm.asc(c.order)])
           ..limit(limit ?? DEFAULT_LIMIT, offset: offset ?? DEFAULT_OFFSET))
