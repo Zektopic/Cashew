@@ -21,7 +21,7 @@ on:
 jobs:
   build-release-apk:
     name: Build Release APK
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, manupa-hnx]
     permissions:
       contents: write # needed only by the optional release-upload step
 
@@ -40,6 +40,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Configure Git safe directory
+        run: git config --global --add safe.directory '*'
+
       - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
@@ -49,7 +52,7 @@ jobs:
         with:
           flutter-version: '3.41.4'
           channel: 'stable'
-          cache: true
+          cache: false
 
       # See build.yml: the generated plugin registrants under
       # .dart_tool/flutter_build are not invalidated when a plugin changes its

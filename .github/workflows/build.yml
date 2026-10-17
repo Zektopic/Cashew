@@ -8,17 +8,20 @@ on:
 jobs:
   analyze-and-test:
     name: Analyze & Test
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, manupa-hnx]
     permissions:
       contents: read
     steps:
       - uses: actions/checkout@v4
 
+      - name: Configure Git safe directory
+        run: git config --global --add safe.directory '*'
+
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.41.4'
           channel: 'stable'
-          cache: true
+          cache: false
 
       # flutter clean before pub get: the generated plugin registrants under
       # .dart_tool/flutter_build are not invalidated when a plugin changes its
@@ -39,12 +42,15 @@ jobs:
 
   build-apk:
     name: Build APK
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, manupa-hnx]
     needs: analyze-and-test
     permissions:
       contents: read
     steps:
       - uses: actions/checkout@v4
+
+      - name: Configure Git safe directory
+        run: git config --global --add safe.directory '*'
 
       - uses: actions/setup-java@v4
         with:
@@ -55,7 +61,7 @@ jobs:
         with:
           flutter-version: '3.41.4'
           channel: 'stable'
-          cache: true
+          cache: false
 
       # flutter clean before pub get: the generated plugin registrants under
       # .dart_tool/flutter_build are not invalidated when a plugin changes its
@@ -124,7 +130,7 @@ jobs:
 
   build-linux:
     name: Build Linux
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, manupa-hnx]
     # NOT continue-on-error. Desktop used to get SQLite from
     # sqlite3_flutter_libs; since that package was retired, sqlite3 3.x bundles
     # it through Dart build hooks. A hook failure here must fail the build
@@ -134,11 +140,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Configure Git safe directory
+        run: git config --global --add safe.directory '*'
+
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.41.4'
           channel: 'stable'
-          cache: true
+          cache: false
 
       - name: Install Linux build dependencies
         run: |
