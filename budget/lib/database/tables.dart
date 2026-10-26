@@ -2266,7 +2266,9 @@ class FinanceDatabase extends _$FinanceDatabase {
                     associatedTitles.title
                             .collate(Collate.noCase)
                             .like("%" + title + "%") &
-                        associatedTitles.title.isNotIn(excludeTitles),
+                        (excludeTitles.isEmpty
+                            ? Constant(true)
+                            : associatedTitles.title.isNotIn(excludeTitles)),
                   )
                   // Group by happens before the orderby,
                   // so we get titles with the least order if they are grouped
@@ -4800,7 +4802,9 @@ class FinanceDatabase extends _$FinanceDatabase {
             (c) =>
                 ((mainCategoryPks == null
                     ? onlyShowMainCategoryListing(c)
-                    : c.mainCategoryPk.isIn(mainCategoryPks)) &
+                    : (mainCategoryPks.isEmpty
+                          ? Constant(false)
+                          : c.mainCategoryPk.isIn(mainCategoryPks))) &
                 (selectedIncome == true
                     ? c.income.equals(true) & c.categoryPk.equals("0").not()
                     : selectedIncome == false
@@ -5082,8 +5086,8 @@ class FinanceDatabase extends _$FinanceDatabase {
                 (allCategories != false
                     ? Constant(true)
                     : ((categoryFks ?? []).isEmpty
-                        ? Constant(false)
-                        : c.categoryPk.isIn(categoryFks ?? [])))),
+                          ? Constant(false)
+                          : c.categoryPk.isIn(categoryFks ?? [])))),
           )
           ..orderBy([(c) => OrderingTerm.asc(c.order)])
           ..limit(limit ?? DEFAULT_LIMIT, offset: offset ?? DEFAULT_OFFSET))
@@ -6069,9 +6073,13 @@ class FinanceDatabase extends _$FinanceDatabase {
   Future<bool> fixWanderingCategoryLimitsInBudget({
     required AllWallets allWallets,
   }) async {
-    List<CategoryBudgetLimit> wanderingLimits = await (select(
-      categoryBudgetLimits,
-    )..where((t) => t.walletFk.isNotIn(allWallets.indexedByPk.keys))).get();
+    List<CategoryBudgetLimit> wanderingLimits =
+        await (select(categoryBudgetLimits)..where(
+              (t) => allWallets.indexedByPk.keys.isEmpty
+                  ? Constant(true)
+                  : t.walletFk.isNotIn(allWallets.indexedByPk.keys),
+            ))
+            .get();
     for (CategoryBudgetLimit limit in wanderingLimits) {
       await createOrUpdateCategoryLimit(
         limit.copyWith(walletFk: appStateSettings["selectedWalletPk"]),
@@ -6081,9 +6089,13 @@ class FinanceDatabase extends _$FinanceDatabase {
     //Remove limits not belonging to a category
     List<TransactionCategory> allCategories = await select(categories).get();
     List<String> categoryKeys = allCategories.map((e) => e.categoryPk).toList();
-    List<CategoryBudgetLimit> wanderingCategoryLimits = await (select(
-      categoryBudgetLimits,
-    )..where((t) => t.categoryFk.isNotIn(categoryKeys))).get();
+    List<CategoryBudgetLimit> wanderingCategoryLimits =
+        await (select(categoryBudgetLimits)..where(
+              (t) => categoryKeys.isEmpty
+                  ? Constant(true)
+                  : t.categoryFk.isNotIn(categoryKeys),
+            ))
+            .get();
     if (wanderingCategoryLimits.isNotEmpty) {
       List<String> wanderingCategoryLimitsKeys = wanderingCategoryLimits
           .map((e) => e.categoryLimitPk)
@@ -6101,9 +6113,13 @@ class FinanceDatabase extends _$FinanceDatabase {
     //Remove limits not belonging to a budget
     List<Budget> allBudgets = await select(budgets).get();
     List<String> budgetKeys = allBudgets.map((e) => e.budgetPk).toList();
-    List<CategoryBudgetLimit> wanderingBudgetLimits = await (select(
-      categoryBudgetLimits,
-    )..where((t) => t.budgetFk.isNotIn(budgetKeys))).get();
+    List<CategoryBudgetLimit> wanderingBudgetLimits =
+        await (select(categoryBudgetLimits)..where(
+              (t) => budgetKeys.isEmpty
+                  ? Constant(true)
+                  : t.budgetFk.isNotIn(budgetKeys),
+            ))
+            .get();
     if (wanderingBudgetLimits.isNotEmpty) {
       List<String> wanderingBudgetLimitsKeys = wanderingBudgetLimits
           .map((e) => e.categoryLimitPk)
@@ -8433,9 +8449,13 @@ class FinanceDatabase extends _$FinanceDatabase {
     List<String> categoryPks = allCategories
         .map((category) => category.categoryPk)
         .toList();
-    List<Transaction> wanderingTransactions = await (select(
-      transactions,
-    )..where((t) => t.categoryFk.isNotIn(categoryPks))).get();
+    List<Transaction> wanderingTransactions =
+        await (select(transactions)..where(
+              (t) => categoryPks.isEmpty
+                  ? Constant(true)
+                  : t.categoryFk.isNotIn(categoryPks),
+            ))
+            .get();
     if (wanderingTransactions.isNotEmpty) {
       await deleteTransactions(
         wanderingTransactions.map((t) => t.transactionPk).toList(),
@@ -8458,9 +8478,12 @@ class FinanceDatabase extends _$FinanceDatabase {
         .toList();
 
     Set<String> wanderingTitles =
-        (await (select(
-              associatedTitles,
-            )..where((t) => t.categoryFk.isNotIn(categoryPks))).get())
+        (await (select(associatedTitles)..where(
+                  (t) => categoryPks.isEmpty
+                      ? Constant(true)
+                      : t.categoryFk.isNotIn(categoryPks),
+                ))
+                .get())
             .map((e) => e.associatedTitlePk)
             .toSet();
 
