@@ -3749,14 +3749,14 @@ class FinanceDatabase extends _$FinanceDatabase {
       }
     }
 
-    if (duplicatedTitles.length > 0) {
+    if (duplicatedTitles.length > 0 && titlesToDelete.isNotEmpty) {
       await batch((batch) {
         batch.deleteWhere(
           associatedTitles,
           (t) => t.associatedTitlePk.isIn(titlesToDelete),
         );
       });
-      print("Removed " + duplicatedTitles.length.toString() + " titles");
+      print("Removed " + titlesToDelete.length.toString() + " titles");
     }
 
     return true;
@@ -5443,6 +5443,7 @@ class FinanceDatabase extends _$FinanceDatabase {
     List<String> transactionPks, {
     bool updateSharedEntry = true,
   }) async {
+    if (transactionPks.isEmpty) return;
     if (updateSharedEntry == true && appStateSettings["sharedBudgets"] == false)
       updateSharedEntry = false;
     // Send the delete log to the server
@@ -5468,10 +5469,12 @@ class FinanceDatabase extends _$FinanceDatabase {
   }
 
   Future forceDeleteBudgets(List<String> budgetPks) async {
+    if (budgetPks.isEmpty) return;
     return (delete(budgets)..where((t) => t.budgetPk.isIn(budgetPks))).go();
   }
 
   Future forceDeleteObjectives(List<String> objectivePks) async {
+    if (objectivePks.isEmpty) return;
     return (delete(
       objectives,
     )..where((t) => t.objectivePk.isIn(objectivePks))).go();
@@ -6419,7 +6422,9 @@ class FinanceDatabase extends _$FinanceDatabase {
       query = (selectOnly(transactions)
         ..addColumns([totalAmt])
         ..where(
-          transactions.transactionPk.isIn(transactionPks) &
+          (transactionPks.isEmpty
+                  ? Constant(false)
+                  : transactions.transactionPk.isIn(transactionPks)) &
               transactions.walletFk.equals(wallet.walletPk),
         ));
       mergedStreams.add(
@@ -6802,7 +6807,11 @@ class FinanceDatabase extends _$FinanceDatabase {
     Expression<bool> memberIncluded = memberTransactionFilters == null
         ? Constant(true)
         : (tbl.sharedKey.isNotNull() &
-                  tbl.transactionOwnerEmail.isIn(memberTransactionFilters) |
+                  (memberTransactionFilters.isEmpty
+                      ? Constant(false)
+                      : tbl.transactionOwnerEmail.isIn(
+                          memberTransactionFilters,
+                        )) |
               tbl.sharedKey.isNull());
 
     Expression<bool> includeShared =
@@ -7037,11 +7046,19 @@ class FinanceDatabase extends _$FinanceDatabase {
     return categoryFks == null && categoryFksExclude == null
         ? tbl.categoryFk.isNotNull()
         : categoryFks != null && categoryFksExclude == null
-        ? tbl.categoryFk.isIn(categoryFks)
+        ? (categoryFks.isEmpty
+              ? Constant(false)
+              : tbl.categoryFk.isIn(categoryFks))
         : categoryFks == null && categoryFksExclude != null
-        ? tbl.categoryFk.isNotIn(categoryFksExclude)
-        : tbl.categoryFk.isIn(categoryFks ?? []) &
-              tbl.categoryFk.isNotIn(categoryFksExclude ?? []);
+        ? (categoryFksExclude.isEmpty
+              ? Constant(true)
+              : tbl.categoryFk.isNotIn(categoryFksExclude))
+        : ((categoryFks ?? []).isEmpty
+                  ? Constant(false)
+                  : tbl.categoryFk.isIn(categoryFks ?? [])) &
+              ((categoryFksExclude ?? []).isEmpty
+                  ? Constant(true)
+                  : tbl.categoryFk.isNotIn(categoryFksExclude ?? []));
   }
 
   bool isInCategoryCheck(
@@ -8414,6 +8431,7 @@ class FinanceDatabase extends _$FinanceDatabase {
   }
 
   Future<List<Transaction>> getTransactionsFromPk(List<String> transactionPks) {
+    if (transactionPks.isEmpty) return Future.value([]);
     return (select(
       transactions,
     )..where((t) => t.transactionPk.isIn(transactionPks))).get();
@@ -8422,6 +8440,7 @@ class FinanceDatabase extends _$FinanceDatabase {
   Future<List<Transaction>> getTransactionsSortedFromPk(
     List<String> transactionPks,
   ) {
+    if (transactionPks.isEmpty) return Future.value([]);
     return (select(transactions)
           ..where((t) => t.transactionPk.isIn(transactionPks))
           ..orderBy([(t) => OrderingTerm.desc(t.dateCreated)]))
