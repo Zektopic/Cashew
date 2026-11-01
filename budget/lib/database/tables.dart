@@ -3397,7 +3397,7 @@ class FinanceDatabase extends _$FinanceDatabase {
         ? []
         : await (select(
             categories,
-          )..where((t) => t.categoryPk.isIn(categoryPks))).get();
+          )..where((t) => categoryPks.isEmpty ? Constant(false) : t.categoryPk.isIn(categoryPks))).get();
     Map<String, TransactionCategory> categoryMap = {
       for (var c in fetchedCategories) c.categoryPk: c,
     };
@@ -3753,7 +3753,7 @@ class FinanceDatabase extends _$FinanceDatabase {
       await batch((batch) {
         batch.deleteWhere(
           associatedTitles,
-          (t) => t.associatedTitlePk.isIn(titlesToDelete),
+          (t) => titlesToDelete.isEmpty ? Constant(false) : t.associatedTitlePk.isIn(titlesToDelete),
         );
       });
       print("Removed " + titlesToDelete.length.toString() + " titles");
@@ -4804,7 +4804,7 @@ class FinanceDatabase extends _$FinanceDatabase {
                     ? onlyShowMainCategoryListing(c)
                     : (mainCategoryPks.isEmpty
                           ? Constant(false)
-                          : c.mainCategoryPk.isIn(mainCategoryPks))) &
+                          : (mainCategoryPks.isEmpty ? Constant(false) : c.mainCategoryPk.isIn(mainCategoryPks)))) &
                 (selectedIncome == true
                     ? c.income.equals(true) & c.categoryPk.equals("0").not()
                     : selectedIncome == false
@@ -5087,7 +5087,7 @@ class FinanceDatabase extends _$FinanceDatabase {
                     ? Constant(true)
                     : ((categoryFks ?? []).isEmpty
                           ? Constant(false)
-                          : c.categoryPk.isIn(categoryFks ?? [])))),
+                          : ((categoryFks ?? []).isEmpty ? Constant(false) : c.categoryPk.isIn(categoryFks ?? []))))),
           )
           ..orderBy([(c) => OrderingTerm.asc(c.order)])
           ..limit(limit ?? DEFAULT_LIMIT, offset: offset ?? DEFAULT_OFFSET))
@@ -5465,19 +5465,19 @@ class FinanceDatabase extends _$FinanceDatabase {
     await createDeleteLogs(DeleteLogType.Transaction, transactionPks);
     return (delete(
       transactions,
-    )..where((t) => t.transactionPk.isIn(transactionPks))).go();
+    )..where((t) => transactionPks.isEmpty ? Constant(false) : t.transactionPk.isIn(transactionPks))).go();
   }
 
   Future forceDeleteBudgets(List<String> budgetPks) async {
     if (budgetPks.isEmpty) return;
-    return (delete(budgets)..where((t) => t.budgetPk.isIn(budgetPks))).go();
+    return (delete(budgets)..where((t) => budgetPks.isEmpty ? Constant(false) : t.budgetPk.isIn(budgetPks))).go();
   }
 
   Future forceDeleteObjectives(List<String> objectivePks) async {
     if (objectivePks.isEmpty) return;
     return (delete(
       objectives,
-    )..where((t) => t.objectivePk.isIn(objectivePks))).go();
+    )..where((t) => objectivePks.isEmpty ? Constant(false) : t.objectivePk.isIn(objectivePks))).go();
   }
 
   Future deleteCategoryBudgetLimit(String categoryLimitPk) async {
@@ -6108,7 +6108,7 @@ class FinanceDatabase extends _$FinanceDatabase {
         wanderingCategoryLimitsKeys,
       );
       await (delete(categoryBudgetLimits)
-            ..where((t) => t.categoryLimitPk.isIn(wanderingCategoryLimitsKeys)))
+            ..where((t) => wanderingCategoryLimitsKeys.isEmpty ? Constant(false) : t.categoryLimitPk.isIn(wanderingCategoryLimitsKeys)))
           .go();
       print("Deleted wandering spending limits with no category");
     }
@@ -6133,7 +6133,7 @@ class FinanceDatabase extends _$FinanceDatabase {
       );
       await (delete(
         categoryBudgetLimits,
-      )..where((t) => t.categoryLimitPk.isIn(wanderingBudgetLimitsKeys))).go();
+      )..where((t) => wanderingBudgetLimitsKeys.isEmpty ? Constant(false) : t.categoryLimitPk.isIn(wanderingBudgetLimitsKeys))).go();
       print("Deleted wandering spending limits with no budget");
     }
 
@@ -6154,7 +6154,7 @@ class FinanceDatabase extends _$FinanceDatabase {
       );
       await (delete(
         categoryBudgetLimits,
-      )..where((t) => t.categoryLimitPk.isIn(duplicatedCategoryLimits))).go();
+      )..where((t) => duplicatedCategoryLimits.isEmpty ? Constant(false) : t.categoryLimitPk.isIn(duplicatedCategoryLimits))).go();
       print(
         "Deleted wandering spending limits that duplicate a budget AND category id",
       );
@@ -6422,9 +6422,7 @@ class FinanceDatabase extends _$FinanceDatabase {
       query = (selectOnly(transactions)
         ..addColumns([totalAmt])
         ..where(
-          (transactionPks.isEmpty
-                  ? Constant(false)
-                  : transactions.transactionPk.isIn(transactionPks)) &
+          (transactionPks.isEmpty ? Constant(false) : transactions.transactionPk.isIn(transactionPks)) &
               transactions.walletFk.equals(wallet.walletPk),
         ));
       mergedStreams.add(
@@ -6807,7 +6805,7 @@ class FinanceDatabase extends _$FinanceDatabase {
     Expression<bool> memberIncluded = memberTransactionFilters == null
         ? Constant(true)
         : (tbl.sharedKey.isNotNull() &
-                  (memberTransactionFilters.isEmpty
+                  (memberTransactionFilters == null || memberTransactionFilters.isEmpty
                       ? Constant(false)
                       : tbl.transactionOwnerEmail.isIn(
                           memberTransactionFilters,
@@ -7046,11 +7044,11 @@ class FinanceDatabase extends _$FinanceDatabase {
     return categoryFks == null && categoryFksExclude == null
         ? tbl.categoryFk.isNotNull()
         : categoryFks != null && categoryFksExclude == null
-        ? (categoryFks.isEmpty
+        ? (categoryFks == null || categoryFks.isEmpty
               ? Constant(false)
               : tbl.categoryFk.isIn(categoryFks))
         : categoryFks == null && categoryFksExclude != null
-        ? (categoryFksExclude.isEmpty
+        ? (categoryFksExclude == null || categoryFksExclude.isEmpty
               ? Constant(true)
               : tbl.categoryFk.isNotIn(categoryFksExclude))
         : ((categoryFks ?? []).isEmpty
@@ -7219,16 +7217,16 @@ class FinanceDatabase extends _$FinanceDatabase {
     List<String?>? budgetFks,
   ) {
     return budgetFks != null && budgetFks.contains(null) && budgetFks.length > 1
-        ? tbl.sharedReferenceBudgetPk.isIn(
+        ? (budgetFks.isEmpty ? Constant(false) : tbl.sharedReferenceBudgetPk.isIn(
                 budgetFks.map((value) => value ?? "0").toList(),
-              ) |
+              )) |
               tbl.sharedReferenceBudgetPk.isNull()
         : (budgetFks ?? []).contains(null)
         ? tbl.sharedReferenceBudgetPk.isNull()
         : (budgetFks != null && budgetFks.length > 0
-              ? tbl.sharedReferenceBudgetPk.isIn(
+              ? (budgetFks.isEmpty ? Constant(false) : tbl.sharedReferenceBudgetPk.isIn(
                   budgetFks.map((value) => value ?? "0").toList(),
-                )
+                ))
               : Constant(true));
   }
 
@@ -7250,16 +7248,16 @@ class FinanceDatabase extends _$FinanceDatabase {
     return objectiveFks != null &&
             objectiveFks.contains(null) &&
             objectiveFks.length > 1
-        ? tbl.objectiveFk.isIn(
+        ? (objectiveFks.isEmpty ? Constant(false) : tbl.objectiveFk.isIn(
                 objectiveFks.map((value) => value ?? "0").toList(),
-              ) |
+              )) |
               tbl.objectiveFk.isNull()
         : (objectiveFks ?? []).contains(null)
         ? tbl.objectiveFk.isNull()
         : (objectiveFks != null && objectiveFks.length > 0
-              ? tbl.objectiveFk.isIn(
+              ? (objectiveFks.isEmpty ? Constant(false) : tbl.objectiveFk.isIn(
                   objectiveFks.map((value) => value ?? "0").toList(),
-                )
+                ))
               : Constant(true));
   }
 
@@ -7280,16 +7278,16 @@ class FinanceDatabase extends _$FinanceDatabase {
     return objectiveLoanFks != null &&
             objectiveLoanFks.contains(null) &&
             objectiveLoanFks.length > 1
-        ? tbl.objectiveLoanFk.isIn(
+        ? (objectiveLoanFks.isEmpty ? Constant(false) : tbl.objectiveLoanFk.isIn(
                 objectiveLoanFks.map((value) => value ?? "0").toList(),
-              ) |
+              )) |
               isNotLoanTransaction
         : (objectiveLoanFks ?? []).contains(null)
         ? isNotLoanTransaction
         : (objectiveLoanFks != null && objectiveLoanFks.length > 0
-              ? tbl.objectiveLoanFk.isIn(
+              ? (objectiveLoanFks.isEmpty ? Constant(false) : tbl.objectiveLoanFk.isIn(
                   objectiveLoanFks.map((value) => value ?? "0").toList(),
-                )
+                ))
               : Constant(true));
   }
 
@@ -8385,7 +8383,7 @@ class FinanceDatabase extends _$FinanceDatabase {
                 forcedDateTimeRange: forcedDateTimeRange,
               ) &
               evaluateIfNull(
-                transactions.categoryFk.isIn(categoryFks),
+                categoryFks.isEmpty ? Constant(false) : transactions.categoryFk.isIn(categoryFks),
                 categoryFks.length <= 0 ? null : true,
                 true,
               ) &
@@ -8434,7 +8432,7 @@ class FinanceDatabase extends _$FinanceDatabase {
     if (transactionPks.isEmpty) return Future.value([]);
     return (select(
       transactions,
-    )..where((t) => t.transactionPk.isIn(transactionPks))).get();
+    )..where((t) => transactionPks.isEmpty ? Constant(false) : t.transactionPk.isIn(transactionPks))).get();
   }
 
   Future<List<Transaction>> getTransactionsSortedFromPk(
@@ -8442,7 +8440,7 @@ class FinanceDatabase extends _$FinanceDatabase {
   ) {
     if (transactionPks.isEmpty) return Future.value([]);
     return (select(transactions)
-          ..where((t) => t.transactionPk.isIn(transactionPks))
+          ..where((t) => transactionPks.isEmpty ? Constant(false) : t.transactionPk.isIn(transactionPks))
           ..orderBy([(t) => OrderingTerm.desc(t.dateCreated)]))
         .get();
   }
@@ -8510,7 +8508,7 @@ class FinanceDatabase extends _$FinanceDatabase {
       await batch((batch) {
         batch.deleteWhere(
           associatedTitles,
-          (t) => t.associatedTitlePk.isIn(wanderingTitles),
+          (t) => wanderingTitles.isEmpty ? Constant(false) : t.associatedTitlePk.isIn(wanderingTitles),
         );
       });
       print(
